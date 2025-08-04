@@ -14,110 +14,46 @@ export type Database = {
   }
   public: {
     Tables: {
-      cards: {
-        Row: {
-          attack: number | null
-          card_type: string
-          cost: number
-          created_at: string
-          defense: number | null
-          description: string | null
-          id: string
-          image_url: string | null
-          name: string
-          rarity: string
-        }
-        Insert: {
-          attack?: number | null
-          card_type?: string
-          cost?: number
-          created_at?: string
-          defense?: number | null
-          description?: string | null
-          id?: string
-          image_url?: string | null
-          name: string
-          rarity?: string
-        }
-        Update: {
-          attack?: number | null
-          card_type?: string
-          cost?: number
-          created_at?: string
-          defense?: number | null
-          description?: string | null
-          id?: string
-          image_url?: string | null
-          name?: string
-          rarity?: string
-        }
-        Relationships: []
-      }
-      deck_cards: {
+      player_decks: {
         Row: {
           card_id: string
-          deck_id: string
+          card_image: string
+          card_name: string
           id: string
-          quantity: number
+          is_legendary: boolean | null
+          player_side: string
+          room_id: string
+          selection_order: number
         }
         Insert: {
           card_id: string
-          deck_id: string
+          card_image: string
+          card_name: string
           id?: string
-          quantity?: number
+          is_legendary?: boolean | null
+          player_side: string
+          room_id: string
+          selection_order: number
         }
         Update: {
           card_id?: string
-          deck_id?: string
+          card_image?: string
+          card_name?: string
           id?: string
-          quantity?: number
+          is_legendary?: boolean | null
+          player_side?: string
+          room_id?: string
+          selection_order?: number
         }
         Relationships: [
           {
-            foreignKeyName: "deck_cards_card_id_fkey"
-            columns: ["card_id"]
+            foreignKeyName: "player_decks_room_id_fkey"
+            columns: ["room_id"]
             isOneToOne: false
-            referencedRelation: "cards"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "deck_cards_deck_id_fkey"
-            columns: ["deck_id"]
-            isOneToOne: false
-            referencedRelation: "decks"
+            referencedRelation: "rooms"
             referencedColumns: ["id"]
           },
         ]
-      }
-      decks: {
-        Row: {
-          created_at: string
-          description: string | null
-          id: string
-          is_public: boolean
-          name: string
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          description?: string | null
-          id?: string
-          is_public?: boolean
-          name: string
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          description?: string | null
-          id?: string
-          is_public?: boolean
-          name?: string
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
       }
       profiles: {
         Row: {
@@ -146,77 +82,82 @@ export type Database = {
         }
         Relationships: []
       }
-      tournament_participants: {
+      room_cards: {
         Row: {
-          deck_id: string
+          card_id: string
+          card_image: string
+          card_name: string
           id: string
-          joined_at: string
-          tournament_id: string
-          user_id: string
+          is_legendary: boolean | null
+          room_id: string
+          round_number: number
+          selected_by: string | null
+          side: string
         }
         Insert: {
-          deck_id: string
+          card_id: string
+          card_image: string
+          card_name: string
           id?: string
-          joined_at?: string
-          tournament_id: string
-          user_id: string
+          is_legendary?: boolean | null
+          room_id: string
+          round_number: number
+          selected_by?: string | null
+          side: string
         }
         Update: {
-          deck_id?: string
+          card_id?: string
+          card_image?: string
+          card_name?: string
           id?: string
-          joined_at?: string
-          tournament_id?: string
-          user_id?: string
+          is_legendary?: boolean | null
+          room_id?: string
+          round_number?: number
+          selected_by?: string | null
+          side?: string
         }
         Relationships: [
           {
-            foreignKeyName: "tournament_participants_deck_id_fkey"
-            columns: ["deck_id"]
+            foreignKeyName: "room_cards_room_id_fkey"
+            columns: ["room_id"]
             isOneToOne: false
-            referencedRelation: "decks"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "tournament_participants_tournament_id_fkey"
-            columns: ["tournament_id"]
-            isOneToOne: false
-            referencedRelation: "tournaments"
+            referencedRelation: "rooms"
             referencedColumns: ["id"]
           },
         ]
       }
-      tournaments: {
+      rooms: {
         Row: {
           created_at: string
-          created_by: string
-          description: string | null
-          end_date: string
+          creator_name: string
+          creator_ready: boolean | null
+          current_round: number | null
+          draft_type: string
           id: string
-          max_participants: number | null
-          name: string
-          start_date: string
+          joiner_name: string | null
+          joiner_ready: boolean | null
           status: string
         }
         Insert: {
           created_at?: string
-          created_by: string
-          description?: string | null
-          end_date: string
-          id?: string
-          max_participants?: number | null
-          name: string
-          start_date: string
+          creator_name: string
+          creator_ready?: boolean | null
+          current_round?: number | null
+          draft_type?: string
+          id: string
+          joiner_name?: string | null
+          joiner_ready?: boolean | null
           status?: string
         }
         Update: {
           created_at?: string
-          created_by?: string
-          description?: string | null
-          end_date?: string
+          creator_name?: string
+          creator_ready?: boolean | null
+          current_round?: number | null
+          draft_type?: string
           id?: string
-          max_participants?: number | null
-          name?: string
-          start_date?: string
+          joiner_name?: string | null
+          joiner_ready?: boolean | null
           status?: string
         }
         Relationships: []

@@ -50,6 +50,14 @@ All colors MUST be HSL.
     --chart-4: 244 89% 42%;
     --chart-5: 271 81% 56%;
     
+    /* Status indicators */
+    --success: 142 76% 36%;
+    --warning: 38 92% 50%;
+    --destructive: 0 84% 60%;
+    
+    /* Box text colors */
+    --box-text: 0 0% 0%; /* Black text for boxes */
+
     --radius: 0.75rem;
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5% 26%;

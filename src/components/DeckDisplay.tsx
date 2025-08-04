@@ -1,0 +1,85 @@
+interface Card {
+  card_id: string
+  card_name: string
+  card_image: string
+  is_legendary: boolean
+  selection_order: number
+}
+
+interface DeckDisplayProps {
+  cards: Card[]
+  playerName: string
+  isOwn: boolean
+}
+
+export function DeckDisplay({ cards, playerName, isOwn }: DeckDisplayProps) {
+  // Sort cards by selection order
+  const sortedCards = [...cards].sort((a, b) => a.selection_order - b.selection_order)
+  
+  // Separate legendary and normal cards
+  const legendaryCard = sortedCards.find(card => card.is_legendary)
+  const normalCards = sortedCards.filter(card => !card.is_legendary)
+
+  return (
+    <div className="space-y-4">
+      <h3 className="text-xl font-bold text-center text-primary">
+        {isOwn ? "Your Deck" : `${playerName}'s Deck`}
+      </h3>
+      
+      <div className="space-y-3">
+        {/* Legendary card row */}
+        <div className="flex justify-center">
+          <div className="w-16 h-20 relative">
+            {legendaryCard ? (
+              <div className="w-full h-full bg-white border-2 border-yellow-500 rounded overflow-hidden">
+                <img
+                  src={legendaryCard.card_image}
+                  alt={legendaryCard.card_name}
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    e.currentTarget.src = '/placeholder.svg'
+                  }}
+                />
+              </div>
+            ) : (
+              <div className="w-full h-full border-2 border-dashed border-muted rounded flex items-center justify-center">
+                <span className="text-xs text-muted-foreground">Legendary</span>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Normal cards - 3 rows of 4 */}
+        <div className="space-y-2">
+          {[0, 1, 2].map((row) => (
+            <div key={row} className="flex justify-center gap-1">
+              {[0, 1, 2, 3].map((col) => {
+                const cardIndex = row * 4 + col
+                const card = normalCards[cardIndex]
+                
+                return (
+                  <div key={col} className="w-12 h-16 relative">
+                    {card ? (
+                      <div className="w-full h-full bg-white border border-muted rounded overflow-hidden">
+                        <img
+                          src={card.card_image}
+                          alt={card.card_name}
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            e.currentTarget.src = '/placeholder.svg'
+                          }}
+                        />
+                      </div>
+                    ) : (
+                      <div className="w-full h-full border border-dashed border-muted rounded"></div>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}

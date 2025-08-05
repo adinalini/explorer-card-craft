@@ -657,6 +657,22 @@ const Room = () => {
     }
   }, [room?.round_start_time, room?.round_duration_seconds, userRole])
 
+  // Effect to reset selection state when round changes
+  useEffect(() => {
+    if (!room) return
+    
+    // Reset selection state for new rounds
+    console.log(`Round changed to ${room.current_round}, resetting selection state`)
+    setSelectedCard(null)
+    setIsSelectionLocked(false)
+    
+    // Clear any existing timer
+    if (selectionTimer) {
+      clearInterval(selectionTimer)
+      setSelectionTimer(null)
+    }
+  }, [room?.current_round])
+
   const startRoundTimer = () => {
     // This function is now replaced by the centralized timer
     console.log(`${userRole}: startRoundTimer called but using centralized timer instead`)
@@ -1011,11 +1027,11 @@ const Room = () => {
                           cardName={card.card_name}
                           cardImage={card.card_image}
                           isLegendary={card.is_legendary}
-                          isSelected={selectedCard === card.card_id || (isSelectionLocked && card.selected_by === 'creator')}
-                          onSelect={() => userRole === 'creator' ? handleCardSelect(card.card_id) : {}}
-                          disabled={isSelectionLocked || userRole !== 'creator'}
-                          isRevealing={isSelectionLocked}
-                          showUnselectedOverlay={!card.selected_by}
+                           isSelected={(userRole === 'creator' && selectedCard === card.card_id) || (isSelectionLocked && card.selected_by === 'creator')}
+                           onSelect={() => userRole === 'creator' ? handleCardSelect(card.card_id) : {}}
+                           disabled={isSelectionLocked || userRole !== 'creator'}
+                           isRevealing={isSelectionLocked}
+                           showUnselectedOverlay={isSelectionLocked && !card.selected_by}
                         />
                       ))}
                   </div>
@@ -1039,11 +1055,11 @@ const Room = () => {
                           cardName={card.card_name}
                           cardImage={card.card_image}
                           isLegendary={card.is_legendary}
-                          isSelected={selectedCard === card.card_id || (isSelectionLocked && card.selected_by === 'joiner')}
-                          onSelect={() => userRole === 'joiner' ? handleCardSelect(card.card_id) : {}}
-                          disabled={isSelectionLocked || userRole !== 'joiner'}
-                          isRevealing={isSelectionLocked}
-                          showUnselectedOverlay={!card.selected_by}
+                           isSelected={(userRole === 'joiner' && selectedCard === card.card_id) || (isSelectionLocked && card.selected_by === 'joiner')}
+                           onSelect={() => userRole === 'joiner' ? handleCardSelect(card.card_id) : {}}
+                           disabled={isSelectionLocked || userRole !== 'joiner'}
+                           isRevealing={isSelectionLocked}
+                           showUnselectedOverlay={isSelectionLocked && !card.selected_by}
                         />
                       ))}
                   </div>

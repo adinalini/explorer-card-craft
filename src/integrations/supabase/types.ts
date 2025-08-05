@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      game_sessions: {
+        Row: {
+          created_at: string | null
+          expires_at: string | null
+          id: string
+          last_activity: string | null
+          player_name: string | null
+          player_role: string
+          room_id: string
+          session_token: string
+        }
+        Insert: {
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string
+          last_activity?: string | null
+          player_name?: string | null
+          player_role: string
+          room_id: string
+          session_token: string
+        }
+        Update: {
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string
+          last_activity?: string | null
+          player_name?: string | null
+          player_role?: string
+          room_id?: string
+          session_token?: string
+        }
+        Relationships: []
+      }
       player_decks: {
         Row: {
           card_id: string
@@ -167,7 +200,18 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      cleanup_expired_sessions: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
+      validate_room_access: {
+        Args: { room_id_param: string; session_token_param: string }
+        Returns: {
+          can_interact: boolean
+          player_role: string
+          player_name: string
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never

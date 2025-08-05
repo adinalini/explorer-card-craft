@@ -24,22 +24,14 @@ const getUserSessionId = () => {
   return sessionId
 }
 
-const getUserRole = (room: Room, sessionId: string) => {
-  const creatorSessionId = localStorage.getItem(`room_${room.id}_creator`)
-  const joinerSessionId = localStorage.getItem(`room_${room.id}_joiner`)
-  
-  console.log('Determining user role:', { 
-    roomId: room.id, 
-    sessionId, 
-    creatorSessionId, 
-    joinerSessionId,
-    hasJoiner: !!room.joiner_name
-  })
-  
-  if (creatorSessionId === sessionId) return 'creator'
-  if (joinerSessionId === sessionId) return 'joiner'
-  return 'spectator'
-}
+  const getUserRole = (room: Room, sessionId: string) => {
+    const creatorSessionId = localStorage.getItem(`room_${room.id}_creator`)
+    const joinerSessionId = localStorage.getItem(`room_${room.id}_joiner`)
+    
+    if (creatorSessionId === sessionId) return 'creator'
+    if (joinerSessionId === sessionId) return 'joiner'
+    return 'spectator'
+  }
 
 interface Room {
   id: string
@@ -93,7 +85,6 @@ const Room = () => {
   const [backgroundAutoSelectTimeout, setBackgroundAutoSelectTimeout] = useState<NodeJS.Timeout | null>(null)
   const [isProcessingRound, setIsProcessingRound] = useState(false)
 
-  // Function to extend session expiry during gameplay
   const extendSession = async () => {
     const sessionId = sessionStorage.getItem('userSessionId')
     if (!sessionId) return
@@ -103,7 +94,6 @@ const Room = () => {
       await supabaseWithToken.rpc('extend_session_expiry', { 
         session_token_param: sessionId 
       })
-      console.log('Session extended successfully')
     } catch (error) {
       console.error('Failed to extend session:', error)
     }
@@ -117,26 +107,21 @@ const Room = () => {
   const handleTimeUp = async () => {
     if (isSelectionLocked || isProcessingRound) return
     
-    console.log('Timer up - entering reveal phase')
     setIsSelectionLocked(true)
     setShowReveal(true)
     
-    // Auto-select random card if user hasn't selected one (check both state and database)
     const currentRoundCards = roomCards.filter(card => 
       card.round_number === room?.current_round && card.side === userRole
     )
     const hasSelection = selectedCard || currentRoundCards.some(card => card.selected_by === userRole)
     
     if (!hasSelection && userRole !== 'spectator') {
-      console.log('Timer up: Auto-selecting card for', userRole)
       await autoSelectRandomCard()
     }
     
     if (userRole === 'creator' && !isProcessingRound) {
-      console.log('Creator: Will process round end in 3 seconds')
       setTimeout(() => {
         if (!isProcessingRound) {
-          console.log('Creator: Processing round end now...')
           processRoundEnd()
         }
       }, 3000)
@@ -156,7 +141,6 @@ const Room = () => {
         setTimeRemaining(remaining)
         
         if (remaining <= 0 && !isSelectionLocked) {
-          console.log(`Timer expired for round ${room.current_round}, calling handleTimeUp`)
           setIsSelectionLocked(true)
           handleTimeUp()
         }
@@ -178,39 +162,19 @@ const Room = () => {
     }
   }, [room?.status, room?.round_start_time, room?.current_round, isSelectionLocked])
 
-  // Reset selection state at start of each round
   useEffect(() => {
     if (room?.current_round && room?.status === 'drafting' && userRole !== 'spectator') {
-      console.log(`Starting round ${room.current_round} - resetting selection state for ${userRole}`)
       setSelectedCard(null)
       setIsSelectionLocked(false)
       setShowReveal(false)
       setIsProcessingRound(false)
       
-      // Clear any existing background auto-selection timeout
       if (backgroundAutoSelectTimeout) {
         clearTimeout(backgroundAutoSelectTimeout)
         setBackgroundAutoSelectTimeout(null)
       }
-      
-      // Start background auto-selection timer (75% of round duration)
-      const autoSelectDelay = ((room.round_duration_seconds || 15) * 1000) * 0.75
-      
-      const timeout = setTimeout(() => {
-        // Check if user already made a selection (both local state and database)
-        const currentRoundCards = roomCards.filter(card => 
-          card.round_number === room.current_round && card.side === userRole
-        )
-        const hasSelection = selectedCard || currentRoundCards.some(card => card.selected_by === userRole)
-        
-        if (!hasSelection && (userRole === 'creator' || userRole === 'joiner') && !isSelectionLocked) {
-          console.log(`Background auto-selection triggered for ${userRole}`)
-          autoSelectRandomCard()
-        }
-      }, autoSelectDelay)
-      setBackgroundAutoSelectTimeout(timeout)
     }
-  }, [room?.current_round, room?.status, userRole]) // Added userRole dependency
+  }, [room?.current_round, room?.status, userRole])
 
   useEffect(() => {
     if (!roomId) return
@@ -232,40 +196,22 @@ const Room = () => {
           filter: `id=eq.${roomId}`
         },
         (payload) => {
-          console.log('Room update received:', payload)
           if (payload.eventType === 'UPDATE') {
             const updatedRoom = payload.new as Room
-            console.log('Updated room data:', updatedRoom)
             setRoom(updatedRoom)
             
-            // Determine user role when room data changes
             const role = getUserRole(updatedRoom, userSessionId)
-            console.log('User role determined:', role)
             setUserRole(role)
             
-            // Start draft when both players are ready
-            console.log('Checking draft start conditions:', {
-              creator_ready: updatedRoom.creator_ready,
-              joiner_ready: updatedRoom.joiner_ready,
-              status: updatedRoom.status,
-              shouldStart: updatedRoom.creator_ready && updatedRoom.joiner_ready && updatedRoom.status === 'waiting'
-            })
-            
             if (updatedRoom.creator_ready && updatedRoom.joiner_ready && updatedRoom.status === 'waiting') {
-              console.log('Starting draft process...')
               setIsStartingDraft(true)
               
-              // Only let the creator start the draft to avoid race conditions
               if (role === 'creator') {
-                console.log('Creator will start draft in 5 seconds...')
                 setTimeout(() => {
-                  console.log('Timeout fired, calling startDraft now...')
                   startDraft(updatedRoom)
                   setIsStartingDraft(false)
                 }, 5000)
               } else {
-                console.log('Joiner waiting for draft to start...')
-                // For joiners, just set the flag and wait for the room status to change
                 setTimeout(() => {
                   setIsStartingDraft(false)
                 }, 5000)
@@ -413,23 +359,10 @@ const Room = () => {
     const updateField = userRole === 'creator' ? 'creator_ready' : 'joiner_ready'
     const currentValue = userRole === 'creator' ? room.creator_ready : room.joiner_ready
     
-    console.log('Attempting to update ready status:', { userRole, updateField, currentValue, userSessionId })
-    console.log('Debug userSessionId value:', userSessionId, typeof userSessionId)
-    
     try {
       // Create authenticated client to bypass RLS restrictions
       const supabaseWithToken = getSupabaseWithSession()
 
-      // Debug: Check all sessions for this room using authenticated client
-      const { data: allSessions } = await supabaseWithToken
-        .from('game_sessions')
-        .select('*')
-        .eq('room_id', roomId!)
-
-      console.log('All sessions for room:', allSessions)
-      console.log('Looking for session with:', { userSessionId, userRole, roomId })
-
-      // Check if the current user has a valid game session for this room and role
       const { data: existingSession, error: sessionError } = await supabaseWithToken
         .from('game_sessions')
         .select('*')
@@ -438,25 +371,9 @@ const Room = () => {
         .eq('player_role', userRole)
         .maybeSingle()
 
-      console.log('Session validation:', { 
-        existingSession: !!existingSession, 
-        userRole, 
-        userSessionId, 
-        sessionError,
-        roomId: roomId
-      })
-
       if (!existingSession) {
-        console.error('No valid session found for user:', { userRole, userSessionId, roomId })
         throw new Error(`No valid session found. Please refresh and try again.`)
       }
-
-      console.log('About to update room with:', { 
-        updateField, 
-        newValue: !currentValue, 
-        roomId,
-        sessionToken: userSessionId 
-      })
 
       const { data: updateData, error } = await supabaseWithToken
         .from('rooms')
@@ -464,15 +381,11 @@ const Room = () => {
         .eq('id', roomId!)
         .select()
 
-      console.log('Ready status update result:', { error, updateData })
-
       if (error) {
-        console.error('Database update error:', error)
         throw error
       }
       
       if (updateData && updateData.length === 0) {
-        console.error('No rows were updated - RLS may be blocking the update')
         throw new Error('Failed to update room - permission denied')
       }
       setIsReady(!currentValue)
@@ -489,18 +402,12 @@ const Room = () => {
   const startDraft = async (roomData?: Room) => {
     const currentRoom = roomData || room
     if (!currentRoom) {
-      console.error('Cannot start draft: no room data available')
       return
     }
 
     try {
-      console.log('Starting draft for room:', roomId, 'with session:', userSessionId)
-      
-      // Create a new supabase client instance with session token header
       const supabaseWithToken = getSupabaseWithSession()
       
-      console.log('Generating all cards for the entire draft...')
-      // Generate all cards first before starting the draft
       const { data: response, error: cardError } = await supabase.functions.invoke('generate-round-cards', {
         body: { 
           roomId,
@@ -510,14 +417,9 @@ const Room = () => {
       })
 
       if (cardError) {
-        console.error('Error generating all cards:', cardError)
         throw cardError
       }
-
-      console.log('All cards generated successfully:', response)
       
-      console.log('Updating room status to drafting and starting timer...')
-      // Update room status to drafting and start timer immediately
       const { data: updateData, error } = await supabaseWithToken
         .from('rooms')
         .update({ 
@@ -528,10 +430,7 @@ const Room = () => {
         .eq('id', roomId!)
         .select()
 
-      console.log('Room update result:', { updateData, error })
-
       if (error) {
-        console.error('Error updating room status:', error)
         toast({
           title: "Error",
           description: "Failed to start draft. Please refresh and try again.",
@@ -539,8 +438,6 @@ const Room = () => {
         })
         throw error
       }
-
-      console.log('Draft started successfully with all cards pre-generated!')
     } catch (error) {
       console.error('Error starting draft:', error)
       toast({
@@ -649,48 +546,21 @@ const Room = () => {
 
 
   const autoSelectRandomCard = async () => {
-    console.log('=== AUTO-SELECT DEBUG START ===')
-    console.log('Auto-select conditions:', {
-      hasRoom: !!room,
-      hasRoomId: !!roomId,
-      userRole,
-      selectedCard,
-      isSelectionLocked,
-      currentRound: room?.current_round
-    })
-    
-    if (!room || !roomId || userRole === 'spectator' || isSelectionLocked) {
-      console.log('Auto-select early return due to conditions')
+    if (!room || !roomId || userRole === 'spectator' || isSelectionLocked || selectedCard) {
       return
     }
 
-    // Get cards for current round and user's side only
     let currentRoundCards = roomCards.filter(card => 
       card.round_number === room.current_round && card.side === userRole
     )
     
-    // Check if user already made a selection this round
     const userSelectedCard = currentRoundCards.find(card => card.selected_by === userRole)
     if (userSelectedCard) {
-      console.log(`User ${userRole} already has selected card: ${userSelectedCard.card_name}`)
-      setSelectedCard(userSelectedCard.card_id) // Sync state
+      setSelectedCard(userSelectedCard.card_id)
       return
     }
 
-    // Also check if user has a selectedCard in local state
-    if (selectedCard) {
-      console.log(`User ${userRole} has selectedCard in state: ${selectedCard}`)
-      return
-    }
-    
-    console.log('Current round cards for', userRole, ':', currentRoundCards.length, 'cards')
-    console.log('All room cards:', roomCards.length, 'total cards')
-    console.log('Room cards for current round:', roomCards.filter(c => c.round_number === room.current_round).length)
-
-    // If no cards exist for current round, fetch directly from database
     if (currentRoundCards.length === 0) {
-      console.log(`No cards found in state for ${userRole} in round ${room.current_round}, fetching from database`)
-      
       try {
         const supabaseWithToken = getSupabaseWithSession()
         const { data: freshCards, error: fetchError } = await supabaseWithToken
@@ -701,10 +571,8 @@ const Room = () => {
           .eq('side', userRole)
         
         if (!fetchError && freshCards && freshCards.length > 0) {
-          console.log(`Found ${freshCards.length} fresh cards for ${userRole} from database`)
           currentRoundCards = freshCards
         } else {
-          console.log('No cards available for auto-selection in round', room.current_round)
           return
         }
       } catch (error) {
@@ -713,16 +581,12 @@ const Room = () => {
       }
     }
 
-
-    // Filter to unselected cards only from user's available cards
     const availableCards = currentRoundCards.filter(card => !card.selected_by)
     if (availableCards.length === 0) return
 
-    // Select a random card from available options
     const randomCard = availableCards[Math.floor(Math.random() * availableCards.length)]
     
     try {
-      // Use shared client to avoid multiple instances
       const supabaseWithToken = getSupabaseWithSession()
       
       await supabaseWithToken
@@ -733,105 +597,68 @@ const Room = () => {
         .eq('round_number', room.current_round)
       
       setSelectedCard(randomCard.card_id)
-      console.log(`Auto-selected random card: ${randomCard.card_name} for ${userRole}`)
-      console.log('=== AUTO-SELECT DEBUG END ===')
     } catch (error) {
       console.error('Error auto-selecting card:', error)
-      console.log('=== AUTO-SELECT DEBUG END (ERROR) ===')
     }
   }
 
   const processRoundEnd = async () => {
     if (!room || !roomId || userRole !== 'creator' || isProcessingRound) {
-      console.log('processRoundEnd early return:', { 
-        room: !!room, 
-        roomId, 
-        userRole, 
-        isProcessingRound 
-      })
       return
     }
 
     setIsProcessingRound(true)
-    console.log('processRoundEnd: Starting to process round end for round', room.current_round)
     
-    // Extend session before processing round to prevent expiry
-    await extendSession()
-    
-    try {
-      // Create authenticated client for round processing
-      const supabaseWithToken = getSupabaseWithSession()
-
-      const currentRound = room.current_round
+      await extendSession()
       
-      // Get current round cards with selections
-      const currentRoundCards = roomCards.filter(card => 
-        card.round_number === currentRound && card.selected_by
-      )
-
-      // Fetch current round cards to check selections
-      const { data: allCurrentRoundCards, error: fetchError } = await supabaseWithToken
-        .from('room_cards')
-        .select('*')
-        .eq('room_id', roomId)
-        .eq('round_number', currentRound)
-
-      if (fetchError) {
-        console.error('Error fetching current round cards:', fetchError)
-        return
-      }
-
-      if (!allCurrentRoundCards || allCurrentRoundCards.length === 0) {
-        console.log('No cards found for current round:', currentRound, '- generating and proceeding to next round')
-        // If no cards found, proceed to next round anyway
-      }
-
-      // Get only selected cards to add to deck - avoid duplicate processing
-      const selectedCards = allCurrentRoundCards ? allCurrentRoundCards.filter(card => card.selected_by) : []
-      
-      console.log('Selected cards for round', currentRound, ':', selectedCards.length > 0 ? selectedCards.map(c => ({
-        name: c.card_name, 
-        side: c.side, 
-        selected_by: c.selected_by
-      })) : 'No cards selected')
-
-      // Check for existing deck entries to prevent duplicates
-      const { data: existingDeckCards } = await supabaseWithToken
-        .from('player_decks')
-        .select('card_id, player_side')
-        .eq('room_id', roomId)
-        .eq('selection_order', currentRound)
-
-      const existingKeys = new Set(
-        existingDeckCards?.map(c => `${c.card_id}_${c.player_side}`) || []
-      )
-
-      // Add only new cards to deck
-      for (const card of selectedCards) {
-        const cardKey = `${card.card_id}_${card.selected_by}`
+      try {
+        const supabaseWithToken = getSupabaseWithSession()
+        const currentRound = room.current_round
         
-        if (!existingKeys.has(cardKey)) {
-          const { error: deckError } = await supabaseWithToken
-            .from('player_decks')
-            .insert({
-              room_id: roomId,
-              player_side: card.selected_by,
-              card_id: card.card_id,
-              card_name: card.card_name,
-              card_image: card.card_image,
-              is_legendary: card.is_legendary,
-              selection_order: currentRound
-            })
-          
-          if (deckError) {
-            console.error('Error adding card to deck:', deckError)
-          } else {
-            console.log('Added card to deck:', card.card_name, 'for', card.selected_by)
-          }
-        } else {
-          console.log('Card already in deck, skipping:', card.card_name)
+        const { data: allCurrentRoundCards, error: fetchError } = await supabaseWithToken
+          .from('room_cards')
+          .select('*')
+          .eq('room_id', roomId)
+          .eq('round_number', currentRound)
+
+        if (fetchError) {
+          console.error('Error fetching current round cards:', fetchError)
+          return
         }
-      }
+
+        const selectedCards = allCurrentRoundCards ? allCurrentRoundCards.filter(card => card.selected_by) : []
+
+        const { data: existingDeckCards } = await supabaseWithToken
+          .from('player_decks')
+          .select('card_id, player_side')
+          .eq('room_id', roomId)
+          .eq('selection_order', currentRound)
+
+        const existingKeys = new Set(
+          existingDeckCards?.map(c => `${c.card_id}_${c.player_side}`) || []
+        )
+
+        for (const card of selectedCards) {
+          const cardKey = `${card.card_id}_${card.selected_by}`
+          
+          if (!existingKeys.has(cardKey)) {
+            const { error: deckError } = await supabaseWithToken
+              .from('player_decks')
+              .insert({
+                room_id: roomId,
+                player_side: card.selected_by,
+                card_id: card.card_id,
+                card_name: card.card_name,
+                card_image: card.card_image,
+                is_legendary: card.is_legendary,
+                selection_order: currentRound
+              })
+            
+            if (deckError) {
+              console.error('Error adding card to deck:', deckError)
+            }
+          }
+        }
 
       // Check if draft is complete (13 rounds)
       if (currentRound >= 13) {
@@ -840,20 +667,15 @@ const Room = () => {
           .update({ status: 'completed' })
           .eq('id', roomId)
       } else {
-        // Move to next round and start timer immediately
         const nextRound = currentRound + 1
         const nextRoundStartTime = new Date().toISOString()
         await supabaseWithToken
           .from('rooms')
           .update({ 
             current_round: nextRound,
-            round_start_time: nextRoundStartTime // Set new timer for next round
+            round_start_time: nextRoundStartTime
           })
           .eq('id', roomId)
-        
-        console.log(`Round ${nextRound} started with timer at:`, nextRoundStartTime)
-        
-        // Cards are already generated, no need to generate per round
       }
     } catch (error) {
       console.error('Error processing round end:', error)
@@ -890,7 +712,6 @@ const Room = () => {
 
     // Update selected card immediately for instant UI feedback
     setSelectedCard(cardId)
-    console.log(`Card selected: ${cardId}, waiting for timer to add to deck`)
 
     // Extend session when user interacts with the game
     await extendSession()
@@ -923,8 +744,6 @@ const Room = () => {
         console.error('Error updating card selection:', error)
         return
       }
-
-      console.log('Card selected, waiting for timer to add to deck')
     } catch (error) {
       console.error('Error in handleCardSelect:', error)
     }

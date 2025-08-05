@@ -450,6 +450,23 @@ const Room = () => {
         }
       )
       
+      console.log('Generating all cards for the entire draft...')
+      // Generate all cards first before starting the draft
+      const { data: response, error: cardError } = await supabase.functions.invoke('generate-round-cards', {
+        body: { 
+          roomId,
+          round: 'all',
+          usedCardIds: []
+        }
+      })
+
+      if (cardError) {
+        console.error('Error generating all cards:', cardError)
+        throw cardError
+      }
+
+      console.log('All cards generated successfully:', response)
+      
       console.log('Updating room status to drafting and starting timer...')
       // Update room status to drafting and start timer immediately
       const { data: updateData, error } = await supabaseWithToken
@@ -474,10 +491,7 @@ const Room = () => {
         throw error
       }
 
-      console.log('Room status updated to drafting, generating cards...')
-      // Generate initial cards for round 1
-      await generateRoundCards(1, currentRoom)
-      console.log('Cards generated successfully!')
+      console.log('Draft started successfully with all cards pre-generated!')
     } catch (error) {
       console.error('Error starting draft:', error)
       toast({
@@ -668,31 +682,36 @@ const Room = () => {
 
       // Handle auto-selection for users who didn't select any card
       console.log('=== STARTING AUTO-SELECTION PROCESS ===')
-      console.log('Current round cards:', currentRoundCards)
-      console.log('Current round:', currentRound)
       
-      const creatorsCards = currentRoundCards.filter(card => {
-        console.log('Checking creator card:', card)
-        return card.side === 'creator'
-      })
-      const joinersCards = currentRoundCards.filter(card => {
-        console.log('Checking joiner card:', card)
-        return card.side === 'joiner'
-      })
+      // Fetch current round cards fresh from database to ensure we have all cards
+      const { data: allCurrentRoundCards, error: fetchError } = await supabaseWithToken
+        .from('room_cards')
+        .select('*')
+        .eq('room_id', roomId)
+        .eq('round_number', currentRound)
+
+      if (fetchError) {
+        console.error('Error fetching current round cards:', fetchError)
+        return
+      }
+
+      if (!allCurrentRoundCards || allCurrentRoundCards.length === 0) {
+        console.log('No cards found for current round:', currentRound)
+        return
+      }
+
+      console.log('All current round cards:', allCurrentRoundCards)
+      
+      const creatorsCards = allCurrentRoundCards.filter(card => card.side === 'creator')
+      const joinersCards = allCurrentRoundCards.filter(card => card.side === 'joiner')
       
       console.log('Filtered cards:')
       console.log('- Creator cards:', creatorsCards)
       console.log('- Joiner cards:', joinersCards)
       
       // Check if selections exist
-      const creatorSelected = currentRoundCards.find(card => {
-        console.log('Checking if creator selected:', card)
-        return card.selected_by === 'creator'
-      })
-      const joinerSelected = currentRoundCards.find(card => {
-        console.log('Checking if joiner selected:', card)
-        return card.selected_by === 'joiner'
-      })
+      const creatorSelected = allCurrentRoundCards.find(card => card.selected_by === 'creator')
+      const joinerSelected = allCurrentRoundCards.find(card => card.selected_by === 'joiner')
       
       console.log('Selection status:')
       console.log('- Creator selected card:', creatorSelected)
@@ -704,9 +723,7 @@ const Room = () => {
         joinerSelected: !!joinerSelected,
         creatorsCards: creatorsCards.length,
         joinersCards: joinersCards.length,
-        currentRoundCards: currentRoundCards.length,
-        allCardIds: currentRoundCards.map(c => c.card_id),
-        selectedCardIds: currentRoundCards.filter(c => c.selected_by).map(c => c.card_id)
+        allCurrentRoundCards: allCurrentRoundCards.length
       })
       
       // Auto-select random card for creator if they didn't select
@@ -718,9 +735,7 @@ const Room = () => {
         const { error: autoSelectError } = await supabaseWithToken
           .from('room_cards')
           .update({ selected_by: 'creator' })
-          .eq('room_id', roomId)
-          .eq('card_id', randomCard.card_id)
-          .eq('round_number', currentRound)
+          .eq('id', randomCard.id)
         
         if (autoSelectError) {
           console.error('=== ERROR AUTO-SELECTING FOR CREATOR ===')
@@ -743,9 +758,7 @@ const Room = () => {
         const { error: autoSelectError } = await supabaseWithToken
           .from('room_cards')
           .update({ selected_by: 'joiner' })
-          .eq('room_id', roomId)
-          .eq('card_id', randomCard.card_id)
-          .eq('round_number', currentRound)
+          .eq('id', randomCard.id)
         
         if (autoSelectError) {
           console.error('=== ERROR AUTO-SELECTING FOR JOINER ===')
@@ -764,16 +777,16 @@ const Room = () => {
       await new Promise(resolve => setTimeout(resolve, 1000))
       
       console.log('=== FETCHING UPDATED CARDS AFTER AUTO-SELECTION ===')
-      const { data: updatedCards, error: fetchError } = await supabaseWithToken
+      const { data: updatedCards, error: updateFetchError } = await supabaseWithToken
         .from('room_cards')
         .select('*')
         .eq('room_id', roomId)
         .eq('round_number', currentRound)
         .not('selected_by', 'is', null)
         
-      if (fetchError) {
+      if (updateFetchError) {
         console.error('=== ERROR FETCHING UPDATED CARDS ===')
-        console.error('Error fetching updated cards:', fetchError)
+        console.error('Error fetching updated cards:', updateFetchError)
         return
       }
       
@@ -839,8 +852,7 @@ const Room = () => {
         
         console.log(`Round ${nextRound} started with timer at:`, nextRoundStartTime)
         
-        // Generate cards for next round
-        await generateRoundCards(nextRound, room)
+        // Cards are already generated, no need to generate per round
       }
     } catch (error) {
       console.error('Error processing round end:', error)

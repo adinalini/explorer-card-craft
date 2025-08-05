@@ -489,10 +489,11 @@ Deno.serve(async (req) => {
     )
 
   } catch (error) {
-    console.error(`Round ${round} generate cards function error:`, error)
+    const errorRound = round || 'unknown'
+    console.error(`Round ${errorRound} generate cards function error:`, error)
     return new Response(
       JSON.stringify({ 
-        error: `Round ${round} failed: ${error?.message || 'Unknown error'}`,
+        error: `Round ${errorRound} failed: ${error?.message || 'Unknown error'}`,
         success: false 
       }),
       { 

@@ -30,6 +30,15 @@ const Index = () => {
     return result
   }
 
+  const getUserSessionId = () => {
+    let sessionId = sessionStorage.getItem('userSessionId')
+    if (!sessionId) {
+      sessionId = 'session_' + Math.random().toString(36).substr(2, 16) + Date.now().toString(36)
+      sessionStorage.setItem('userSessionId', sessionId)
+    }
+    return sessionId
+  }
+
   const handleCreateRoom = async () => {
     if (!creatorName.trim()) {
       toast({
@@ -56,7 +65,7 @@ const Index = () => {
       if (error) throw error
 
       // Set session flag to indicate this user created this room
-      const sessionId = sessionStorage.getItem('userSessionId') || 'temp-session-' + Date.now()
+      const sessionId = getUserSessionId()
       localStorage.setItem(`room_${newRoomId}_creator`, sessionId)
       setCreateDialogOpen(false)
       navigate(`/room/${newRoomId}`)
@@ -117,7 +126,7 @@ const Index = () => {
       if (updateError) throw updateError
 
       // Set session flag to indicate this user joined this room  
-      const sessionId = sessionStorage.getItem('userSessionId') || 'temp-session-' + Date.now()
+      const sessionId = getUserSessionId()
       localStorage.setItem(`room_${roomId.toUpperCase()}_joiner`, sessionId)
       setJoinDialogOpen(false)
       navigate(`/room/${roomId.toUpperCase()}`)

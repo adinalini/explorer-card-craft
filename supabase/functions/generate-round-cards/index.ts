@@ -206,6 +206,7 @@ Deno.serve(async (req) => {
     // Helper function to balance costs between two sides
     function balanceCosts(cards: Card[]): { creator: Card[], joiner: Card[] } {
       if (cards.length !== 4) {
+        console.error(`balanceCosts error: Expected exactly 4 cards but got ${cards.length}`)
         throw new Error('Expected exactly 4 cards to balance')
       }
       
@@ -236,6 +237,7 @@ Deno.serve(async (req) => {
         }
       }
       
+      console.log(`balanceCosts result: Creator gets ${bestDistribution.creator.length} cards, Joiner gets ${bestDistribution.joiner.length} cards`)
       return bestDistribution
     }
 
@@ -493,6 +495,7 @@ Deno.serve(async (req) => {
         if (roundCards.length >= 4) {
           if (structure.type === 'spell' || structure.type === 'range') {
             const balanced = balanceCosts(roundCards.slice(0, 4))
+            console.log(`Round ${roundNum} balanced - Creator: ${balanced.creator.length} cards, Joiner: ${balanced.joiner.length} cards`)
             randomizedRoundsCards.push({
               round: roundNum,
               creator: balanced.creator,
@@ -500,6 +503,7 @@ Deno.serve(async (req) => {
             })
           } else {
             const shuffled = [...roundCards.slice(0, 4)].sort(() => Math.random() - 0.5)
+            console.log(`Round ${roundNum} shuffled - Creator: 2 cards, Joiner: 2 cards`)
             randomizedRoundsCards.push({
               round: roundNum,
               creator: [shuffled[0], shuffled[1]],

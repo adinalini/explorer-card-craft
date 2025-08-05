@@ -35,18 +35,18 @@ export function DeckDisplay({ cards, playerName, isOwn }: DeckDisplayProps) {
             <h4 className="text-sm font-semibold text-muted-foreground mb-2">Deck List</h4>
             <div className="space-y-1 h-80 overflow-y-auto">
               {legendaryCard && (
-                <div className="text-xs text-yellow-600 font-medium border-l-2 border-yellow-500 pl-2">
+                <div className="text-sm text-yellow-600 font-medium border-l-2 border-yellow-500 pl-2 py-1">
                   {legendaryCard.card_name}
                 </div>
               )}
               {normalCards.map((card, index) => (
-                <div key={index} className="text-xs text-muted-foreground border-l-2 border-muted pl-2">
+                <div key={index} className="text-sm text-muted-foreground border-l-2 border-muted pl-2 py-1">
                   {card.card_name}
                 </div>
               ))}
               {/* Empty slots */}
               {Array.from({ length: 12 - normalCards.length }).map((_, index) => (
-                <div key={`empty-${index}`} className="text-xs text-muted/50 border-l-2 border-dashed border-muted/50 pl-2">
+                <div key={`empty-${index}`} className="text-sm text-muted/50 border-l-2 border-dashed border-muted/50 pl-2 py-1">
                   —
                 </div>
               ))}
@@ -60,18 +60,18 @@ export function DeckDisplay({ cards, playerName, isOwn }: DeckDisplayProps) {
             <h4 className="text-sm font-semibold text-muted-foreground mb-2">Deck List</h4>
             <div className="space-y-1 h-80 overflow-y-auto">
               {legendaryCard && (
-                <div className="text-xs text-yellow-600 font-medium border-l-2 border-yellow-500 pl-2">
+                <div className="text-sm text-yellow-600 font-medium border-l-2 border-yellow-500 pl-2 py-1">
                   {legendaryCard.card_name}
                 </div>
               )}
               {normalCards.map((card, index) => (
-                <div key={index} className="text-xs text-muted-foreground border-l-2 border-muted pl-2">
+                <div key={index} className="text-sm text-muted-foreground border-l-2 border-muted pl-2 py-1">
                   {card.card_name}
                 </div>
               ))}
               {/* Empty slots */}
               {Array.from({ length: 12 - normalCards.length }).map((_, index) => (
-                <div key={`empty-${index}`} className="text-xs text-muted/50 border-l-2 border-dashed border-muted/50 pl-2">
+                <div key={`empty-${index}`} className="text-sm text-muted/50 border-l-2 border-dashed border-muted/50 pl-2 py-1">
                   —
                 </div>
               ))}

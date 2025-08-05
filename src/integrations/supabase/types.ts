@@ -210,6 +210,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
+      extend_session_expiry: {
+        Args: { session_token_param: string }
+        Returns: undefined
+      }
       validate_room_access: {
         Args: { room_id_param: string; session_token_param: string }
         Returns: {

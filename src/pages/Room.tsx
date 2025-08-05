@@ -90,6 +90,22 @@ const Room = () => {
   const [userSessionId] = useState(getUserSessionId())
   const [userRole, setUserRole] = useState<'creator' | 'joiner' | 'spectator'>('spectator')
   const [isStartingDraft, setIsStartingDraft] = useState(false)
+
+  // Function to extend session expiry during gameplay
+  const extendSession = async () => {
+    const sessionId = sessionStorage.getItem('userSessionId')
+    if (!sessionId) return
+    
+    try {
+      const supabaseWithToken = getSupabaseWithSession()
+      await supabaseWithToken.rpc('extend_session_expiry', { 
+        session_token_param: sessionId 
+      })
+      console.log('Session extended successfully')
+    } catch (error) {
+      console.error('Failed to extend session:', error)
+    }
+  }
   const [timeRemaining, setTimeRemaining] = useState<number>(0)
   
   const timerIntervalRef = useRef<NodeJS.Timeout | null>(null)
@@ -619,6 +635,10 @@ const Room = () => {
     }
 
     console.log('processRoundEnd: Starting to process round end for round', room.current_round)
+    
+    // Extend session before processing round to prevent expiry
+    await extendSession()
+    
     try {
       // Create authenticated client for round processing
       const supabaseWithToken = getSupabaseWithSession()
@@ -898,6 +918,9 @@ const Room = () => {
 
     // Update selected card immediately for instant UI feedback
     setSelectedCard(cardId)
+
+    // Extend session when user interacts with the game
+    await extendSession()
 
     try {
       const selectedCardData = roomCards.find(card => card.card_id === cardId)

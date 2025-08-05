@@ -257,7 +257,7 @@ Deno.serve(async (req) => {
       { type: 'pool', description: 'Cost Pool (2,2,2,2,3,3,3,4,4)' },
       { type: 'pool', description: 'Cost Pool (2,2,2,2,3,3,3,4,4)' },
       { type: 'range', range: [5, 6], description: 'Range (5-6)' },
-      { type: 'range', range: [7, 10], description: 'Range (7-10)' }
+      { type: 'range', range: [6, 10], description: 'Range (6-10)' }
     ]
 
     for (let roundIndex = 0; roundIndex < 13; roundIndex++) {
@@ -388,6 +388,23 @@ Deno.serve(async (req) => {
         const j = Math.floor(Math.random() * (i + 1));
         [shuffledRoundStructures[i], shuffledRoundStructures[j]] = [shuffledRoundStructures[j], shuffledRoundStructures[i]]
       }
+      
+      // Assign costs to pool rounds
+      const costPool = [2, 2, 2, 2, 3, 3, 3, 4, 4]
+      const shuffledCostPool = [...costPool].sort(() => Math.random() - 0.5)
+      let poolCostIndex = 0
+      
+      // Update pool rounds with assigned costs
+      shuffledRoundStructures.forEach(structure => {
+        if (structure.type === 'pool') {
+          const assignedCost = shuffledCostPool[poolCostIndex]
+          structure.type = 'cost'
+          structure.cost = assignedCost
+          structure.description = `Cost ${assignedCost} (from pool)`
+          poolCostIndex++
+        }
+      })
+      
       console.log('Randomized round order:', shuffledRoundStructures.map(s => s.description))
       
       // Regenerate all rounds with randomized order and proper used card tracking
@@ -438,28 +455,10 @@ Deno.serve(async (req) => {
             globalUsedIds.add(selected.id)
           }
           
-        } else if (structure.type === 'pool') {
-          const costPool = [2, 2, 2, 2, 3, 3, 3, 4, 4]
-          const shuffledPool = [...costPool].sort(() => Math.random() - 0.5)
-          
-          for (let i = 0; i < 4; i++) {
-            const targetCost = shuffledPool[i]
-            const availableForCost = cardDatabase.filter(card => 
-              !card.isLegendary && 
-              card.cost === targetCost && !globalUsedIds.has(card.id)
-            )
-            
-            if (availableForCost.length > 0) {
-              const randomIndex = Math.floor(Math.random() * availableForCost.length)
-              const selected = availableForCost[randomIndex]
-              roundCards.push(selected)
-              globalUsedIds.add(selected.id)
-            }
-          }
-          
         } else if (structure.type === 'range') {
           const [minCost, maxCost] = structure.range!
           const availableInRange = cardDatabase.filter(card => 
+            !card.isLegendary && 
             card.cost && card.cost >= minCost && card.cost <= maxCost && 
             !globalUsedIds.has(card.id)
           )

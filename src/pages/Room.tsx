@@ -352,10 +352,13 @@ const Room = () => {
   }
 
   const startDraft = async () => {
-    if (!room) return
+    if (!room) {
+      console.error('Cannot start draft: no room data available')
+      return
+    }
 
     try {
-      console.log('Starting draft for room:', roomId)
+      console.log('Starting draft for room:', roomId, 'with session:', userSessionId)
       
       // Create a new supabase client instance with session token header
       const supabaseWithToken = createClient(
@@ -370,22 +373,37 @@ const Room = () => {
         }
       )
       
+      console.log('Updating room status to drafting...')
       // Update room status to drafting
-      const { error } = await supabaseWithToken
+      const { data: updateData, error } = await supabaseWithToken
         .from('rooms')
         .update({ status: 'drafting', current_round: 1 })
         .eq('id', roomId!)
+        .select()
+
+      console.log('Room update result:', { updateData, error })
 
       if (error) {
         console.error('Error updating room status:', error)
+        toast({
+          title: "Error",
+          description: "Failed to start draft. Please refresh and try again.",
+          variant: "destructive"
+        })
         throw error
       }
 
       console.log('Room status updated to drafting, generating cards...')
       // Generate initial cards for round 1
-      generateRoundCards(1)
+      await generateRoundCards(1)
+      console.log('Cards generated successfully!')
     } catch (error) {
       console.error('Error starting draft:', error)
+      toast({
+        title: "Error",
+        description: "Failed to start draft. Please refresh and try again.",
+        variant: "destructive"
+      })
     }
   }
 

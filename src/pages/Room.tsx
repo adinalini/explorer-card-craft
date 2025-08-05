@@ -276,6 +276,7 @@ const Room = () => {
     const currentValue = userRole === 'creator' ? room.creator_ready : room.joiner_ready
     
     console.log('Attempting to update ready status:', { userRole, updateField, currentValue, userSessionId })
+    console.log('Debug userSessionId value:', userSessionId, typeof userSessionId)
     
     try {
       // Create authenticated client to bypass RLS restrictions

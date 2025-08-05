@@ -270,6 +270,38 @@ const Room = () => {
     console.log('Attempting to update ready status:', { userRole, updateField, currentValue, userSessionId })
     
     try {
+      // First, ensure the user has a valid game session
+      const { data: existingSession } = await supabase
+        .from('game_sessions')
+        .select('*')
+        .eq('room_id', roomId!)
+        .eq('session_token', userSessionId)
+        .eq('player_role', userRole)
+        .single()
+
+      console.log('Existing session check:', { existingSession, userRole })
+
+      if (!existingSession) {
+        console.log('Creating missing game session for user:', { userRole, userSessionId })
+        
+        const playerName = userRole === 'creator' ? room.creator_name : room.joiner_name
+        const { error: sessionError } = await supabase
+          .from('game_sessions')
+          .insert({
+            room_id: roomId!,
+            session_token: userSessionId,
+            player_role: userRole,
+            player_name: playerName
+          })
+
+        if (sessionError) {
+          console.error('Failed to create game session:', sessionError)
+          throw sessionError
+        }
+        
+        console.log('Game session created successfully')
+      }
+
       // Create a new supabase client instance with session token header
       const supabaseWithToken = createClient(
         "https://ophgbcyhxvwljfztlvyu.supabase.co",

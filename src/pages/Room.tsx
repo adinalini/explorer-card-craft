@@ -757,9 +757,9 @@ const Room = () => {
         console.log('Joiner already selected or no cards available')
       }
 
-      // Wait a moment for auto-selections to complete, then fetch updated cards
+      // Wait longer for auto-selections to complete and database to propagate
       console.log('=== WAITING FOR AUTO-SELECTIONS TO COMPLETE ===')
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      await new Promise(resolve => setTimeout(resolve, 2000))
       
       console.log('=== FETCHING UPDATED CARDS AFTER AUTO-SELECTION ===')
       

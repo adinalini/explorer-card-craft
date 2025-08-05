@@ -563,10 +563,12 @@ const Room = () => {
     // Auto-select random card if user hasn't selected one
     await autoSelectRandomCard()
     
-    // Process selections and move to next round or end draft
-    setTimeout(() => {
-      processRoundEnd()
-    }, 3000) // Show selections for 3 seconds
+    // Only creator processes round end to avoid race conditions
+    if (userRole === 'creator') {
+      setTimeout(() => {
+        processRoundEnd()
+      }, 3000) // Show selections for 3 seconds
+    }
   }
 
   const autoSelectRandomCard = async () => {
@@ -600,9 +602,22 @@ const Room = () => {
   }
 
   const processRoundEnd = async () => {
-    if (!room || !roomId) return
+    if (!room || !roomId || userRole !== 'creator') return
 
     try {
+      // Create authenticated client for round processing
+      const supabaseWithToken = createClient(
+        "https://ophgbcyhxvwljfztlvyu.supabase.co",
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9waGdiY3loeHZ3bGpmenRsdnl1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQzMzU4NzYsImV4cCI6MjA2OTkxMTg3Nn0.iiiRP6WtGtwI_jJDnAJUqmEZcoNUbYT3HiBl3VuBnKs",
+        {
+          global: {
+            headers: {
+              'x-session-token': userSessionId
+            }
+          }
+        }
+      )
+
       const currentRound = room.current_round
       
       // Get current round cards with selections
@@ -612,7 +627,7 @@ const Room = () => {
 
       // Add selected cards to player decks
       for (const card of currentRoundCards) {
-        await supabase
+        await supabaseWithToken
           .from('player_decks')
           .insert({
             room_id: roomId,
@@ -627,19 +642,20 @@ const Room = () => {
 
       // Check if draft is complete (13 rounds)
       if (currentRound >= 13) {
-        await supabase
+        await supabaseWithToken
           .from('rooms')
           .update({ status: 'completed' })
           .eq('id', roomId)
       } else {
         // Move to next round
         const nextRound = currentRound + 1
-        await supabase
+        await supabaseWithToken
           .from('rooms')
           .update({ current_round: nextRound })
           .eq('id', roomId)
         
-        generateRoundCards(nextRound)
+        // Generate cards for next round
+        await generateRoundCards(nextRound, room)
       }
     } catch (error) {
       console.error('Error processing round end:', error)
@@ -870,6 +886,8 @@ const Room = () => {
                           isSelected={selectedCard === card.card_id || (isSelectionLocked && card.selected_by === 'creator')}
                           onSelect={() => userRole === 'creator' ? handleCardSelect(card.card_id) : {}}
                           disabled={isSelectionLocked || userRole !== 'creator'}
+                          isRevealing={isSelectionLocked}
+                          showUnselectedOverlay={isSelectionLocked}
                         />
                       ))}
                   </div>
@@ -896,6 +914,8 @@ const Room = () => {
                           isSelected={selectedCard === card.card_id || (isSelectionLocked && card.selected_by === 'joiner')}
                           onSelect={() => userRole === 'joiner' ? handleCardSelect(card.card_id) : {}}
                           disabled={isSelectionLocked || userRole !== 'joiner'}
+                          isRevealing={isSelectionLocked}
+                          showUnselectedOverlay={isSelectionLocked}
                         />
                       ))}
                   </div>

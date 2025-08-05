@@ -9,6 +9,8 @@ interface DraftCardProps {
   isSelected: boolean
   onSelect: () => void
   disabled?: boolean
+  isRevealing?: boolean
+  showUnselectedOverlay?: boolean
 }
 
 export function DraftCard({ 
@@ -18,7 +20,9 @@ export function DraftCard({
   isLegendary, 
   isSelected, 
   onSelect, 
-  disabled = false 
+  disabled = false,
+  isRevealing = false,
+  showUnselectedOverlay = false
 }: DraftCardProps) {
   return (
     <div
@@ -26,7 +30,8 @@ export function DraftCard({
         "relative cursor-pointer transition-all duration-300 rounded-lg overflow-hidden",
         "hover:scale-105 hover:shadow-lg",
         isSelected && "ring-4 ring-purple-500 ring-opacity-60 shadow-lg shadow-purple-500/50",
-        disabled && "opacity-50 cursor-not-allowed",
+        disabled && !isRevealing && "opacity-50 cursor-not-allowed",
+        isRevealing && !isSelected && "opacity-30",
         "bg-white border-2 border-muted"
       )}
       onClick={!disabled ? onSelect : undefined}
@@ -40,6 +45,11 @@ export function DraftCard({
         {isLegendary && (
           <div className="absolute top-2 right-2 bg-yellow-500 text-white px-2 py-1 rounded text-xs font-bold">
             LEGENDARY
+          </div>
+        )}
+        {showUnselectedOverlay && !isSelected && (
+          <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+            <div className="text-white text-6xl font-bold">✕</div>
           </div>
         )}
       </div>

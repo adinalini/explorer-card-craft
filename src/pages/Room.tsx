@@ -416,8 +416,21 @@ const Room = () => {
     if (!roomId || !currentRoom) return
 
     try {
+      // Create authenticated client for card generation
+      const supabaseWithToken = createClient(
+        "https://ophgbcyhxvwljfztlvyu.supabase.co",
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9waGdiY3loeHZ3bGpmenRsdnl1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQzMzU4NzYsImV4cCI6MjA2OTkxMTg3Nn0.iiiRP6WtGtwI_jJDnAJUqmEZcoNUbYT3HiBl3VuBnKs",
+        {
+          global: {
+            headers: {
+              'x-session-token': userSessionId
+            }
+          }
+        }
+      )
+      
       // Get used cards from previous rounds
-      const { data: usedCardsData } = await supabase
+      const { data: usedCardsData } = await supabaseWithToken
         .from('room_cards')
         .select('card_id')
         .eq('room_id', roomId)
@@ -467,7 +480,7 @@ const Room = () => {
           }))
         ]
 
-        const { error } = await supabase
+        const { error } = await supabaseWithToken
           .from('room_cards')
           .insert(roomCardsData)
 
@@ -507,7 +520,7 @@ const Room = () => {
           }))
         ]
 
-        const { error } = await supabase
+        const { error } = await supabaseWithToken
           .from('room_cards')
           .insert(roomCardsData)
 

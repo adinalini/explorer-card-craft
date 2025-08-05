@@ -27,6 +27,14 @@ const getUserRole = (room: Room, sessionId: string) => {
   const creatorSessionId = localStorage.getItem(`room_${room.id}_creator`)
   const joinerSessionId = localStorage.getItem(`room_${room.id}_joiner`)
   
+  console.log('Determining user role:', { 
+    roomId: room.id, 
+    sessionId, 
+    creatorSessionId, 
+    joinerSessionId,
+    hasJoiner: !!room.joiner_name
+  })
+  
   if (creatorSessionId === sessionId) return 'creator'
   if (joinerSessionId === sessionId) return 'joiner'
   return 'spectator'

@@ -67,6 +67,7 @@ const Index = () => {
       // Set session flag to indicate this user created this room
       const sessionId = getUserSessionId()
       localStorage.setItem(`room_${newRoomId}_creator`, sessionId)
+      console.log('Creator session set:', { roomId: newRoomId, sessionId })
       setCreateDialogOpen(false)
       navigate(`/room/${newRoomId}`)
     } catch (error) {
@@ -128,6 +129,7 @@ const Index = () => {
       // Set session flag to indicate this user joined this room  
       const sessionId = getUserSessionId()
       localStorage.setItem(`room_${roomId.toUpperCase()}_joiner`, sessionId)
+      console.log('Joiner session set:', { roomId: roomId.toUpperCase(), sessionId })
       setJoinDialogOpen(false)
       navigate(`/room/${roomId.toUpperCase()}`)
     } catch (error) {

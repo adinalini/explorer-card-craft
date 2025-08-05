@@ -55,6 +55,8 @@ const Index = () => {
 
       if (error) throw error
 
+      // Set session flag to indicate this user created this room
+      sessionStorage.setItem(`created_room_${newRoomId}`, 'true')
       setCreateDialogOpen(false)
       navigate(`/room/${newRoomId}`)
     } catch (error) {
@@ -113,6 +115,8 @@ const Index = () => {
 
       if (updateError) throw updateError
 
+      // Set session flag to indicate this user joined this room
+      sessionStorage.setItem(`joined_room_${roomId.toUpperCase()}`, 'true')
       setJoinDialogOpen(false)
       navigate(`/room/${roomId.toUpperCase()}`)
     } catch (error) {

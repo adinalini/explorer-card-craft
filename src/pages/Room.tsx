@@ -172,18 +172,25 @@ const Room = () => {
       if (error) throw error
       setRoom(data)
       
-      // Determine user role and set session storage for creator/joiner identification
+      // Determine user role based on current URL and who has access
       if (data) {
-        const role = getUserRole(data, userSessionId)
-        setUserRole(role)
+        // Check if user is coming from creating the room (from Index page)
+        const isCreator = sessionStorage.getItem(`created_room_${roomId}`) === 'true'
+        // Check if user is coming from joining the room (from Index page) 
+        const isJoiner = sessionStorage.getItem(`joined_room_${roomId}`) === 'true'
         
-        // Store session IDs for room participants
-        if (!localStorage.getItem(`room_${roomId}_creator`) && !data.joiner_name) {
-          localStorage.setItem(`room_${roomId}_creator`, userSessionId)
+        if (isCreator) {
           setUserRole('creator')
-        } else if (!localStorage.getItem(`room_${roomId}_joiner`) && data.joiner_name && role === 'spectator') {
-          localStorage.setItem(`room_${roomId}_joiner`, userSessionId)
+          // Clear the session flag
+          sessionStorage.removeItem(`created_room_${roomId}`)
+        } else if (isJoiner) {
           setUserRole('joiner')
+          // Clear the session flag
+          sessionStorage.removeItem(`joined_room_${roomId}`)
+        } else {
+          // If no clear role, determine based on existing data
+          const role = getUserRole(data, userSessionId)
+          setUserRole(role)
         }
       }
     } catch (error) {
@@ -545,7 +552,7 @@ const Room = () => {
     <div className="min-h-screen bg-white">
       {/* Header with gradient wave */}
       <div className="relative">
-        <div className="bg-gradient-to-r from-[hsl(var(--primary))] to-[hsl(var(--secondary))] py-6 px-4">
+        <div className="bg-gradient-to-r from-[hsl(var(--primary))] to-[hsl(var(--secondary))] py-3 px-4">
           <div className="flex items-center justify-between max-w-6xl mx-auto">
             <Button
               onClick={handleBackToHome}
@@ -557,13 +564,13 @@ const Room = () => {
               Back to Home
             </Button>
             <div className="text-center text-white">
-              <h1 className="text-3xl md:text-5xl font-bold mb-1">Project O Draft Battle</h1>
-              <p className="text-lg md:text-xl">Draft Type: {getDraftTypeDisplay(room.draft_type)}</p>
+              <h1 className="text-xl md:text-2xl font-bold mb-1">Project O Draft Battle</h1>
+              <p className="text-sm md:text-base">Draft Type: {getDraftTypeDisplay(room.draft_type)}</p>
             </div>
             <div className="w-24"></div> {/* Spacer for centering */}
           </div>
         </div>
-        <svg viewBox="0 0 1200 120" className="w-full h-auto">
+        <svg viewBox="0 0 1200 60" className="w-full h-auto">
           <defs>
             <linearGradient id="room-wave-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
               <stop offset="0%" stopColor="hsl(var(--primary))" />
@@ -571,7 +578,7 @@ const Room = () => {
             </linearGradient>
           </defs>
           <path 
-            d="M985.66,92.83C906.67,72,823.78,31,743.84,14.19c-82.26-17.34-168.06-16.33-250.45.39-57.84,11.73-114,31.07-172,41.86A600.21,600.21,0,0,1,0,27.35V120H1200V95.8C1132.19,118.92,1055.71,111.31,985.66,92.83Z"
+            d="M985.66,46.42C906.67,36,823.78,15.5,743.84,7.1c-82.26-8.67-168.06-8.16-250.45.19-57.84,5.86-114,15.54-172,20.93A600.21,600.21,0,0,1,0,13.68V60H1200V47.9C1132.19,59.46,1055.71,55.66,985.66,46.42Z"
             fill="url(#room-wave-gradient)"
           />
         </svg>

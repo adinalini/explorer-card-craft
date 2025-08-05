@@ -647,8 +647,49 @@ const Room = () => {
         card.round_number === currentRound && card.selected_by
       )
 
+      // Handle auto-selection for users who didn't select any card
+      const creatorsCards = currentRoundCards.filter(card => card.side === 'creator')
+      const joinersCards = currentRoundCards.filter(card => card.side === 'joiner')
+      
+      const creatorSelected = creatorsCards.find(card => card.selected_by === 'creator')
+      const joinerSelected = joinersCards.find(card => card.selected_by === 'joiner')
+      
+      // Auto-select random card for creator if they didn't select
+      if (!creatorSelected && creatorsCards.length > 0) {
+        const randomCard = creatorsCards[Math.floor(Math.random() * creatorsCards.length)]
+        await supabaseWithToken
+          .from('room_cards')
+          .update({ selected_by: 'creator' })
+          .eq('room_id', roomId)
+          .eq('card_id', randomCard.card_id)
+          .eq('round_number', currentRound)
+        
+        console.log('Auto-selected card for creator:', randomCard.card_name)
+      }
+      
+      // Auto-select random card for joiner if they didn't select
+      if (!joinerSelected && joinersCards.length > 0) {
+        const randomCard = joinersCards[Math.floor(Math.random() * joinersCards.length)]
+        await supabaseWithToken
+          .from('room_cards')
+          .update({ selected_by: 'joiner' })
+          .eq('room_id', roomId)
+          .eq('card_id', randomCard.card_id)
+          .eq('round_number', currentRound)
+        
+        console.log('Auto-selected card for joiner:', randomCard.card_name)
+      }
+
+      // Fetch updated cards after auto-selection
+      const { data: updatedCards } = await supabaseWithToken
+        .from('room_cards')
+        .select('*')
+        .eq('room_id', roomId)
+        .eq('round_number', currentRound)
+        .not('selected_by', 'is', null)
+
       // Add selected cards to player decks during reveal phase
-      for (const card of currentRoundCards) {
+      for (const card of updatedCards || []) {
         if (card.selected_by) {
           await supabaseWithToken
             .from('player_decks')
@@ -695,6 +736,39 @@ const Room = () => {
   const handleCardSelect = async (cardId: string) => {
     if (isSelectionLocked) return
 
+    // Clear previous selection for this user's side first
+    const userCards = roomCards.filter(card => 
+      card.round_number === room?.current_round && 
+      card.side === userRole
+    )
+    
+    // If user is trying to select a card they already selected, deselect it
+    if (selectedCard === cardId) {
+      setSelectedCard('')
+      
+      // Clear selection from database
+      const supabaseWithToken = createClient(
+        'https://ophgbcyhxvwljfztlvyu.supabase.co',
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9waGdiY3loeHZ3bGpmenRsdnl1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQzMzU4NzYsImV4cCI6MjA2OTkxMTg3Nn0.iiiRP6WtGtwI_jJDnAJUqmEZcoNUbYT3HiBl3VuBnKs',
+        {
+          global: {
+            headers: {
+              'x-session-token': userSessionId || ''
+            }
+          }
+        }
+      )
+      
+      await supabaseWithToken
+        .from('room_cards')
+        .update({ selected_by: null })
+        .eq('room_id', roomId)
+        .eq('card_id', cardId)
+        .eq('round_number', room?.current_round)
+      
+      return
+    }
+
     setSelectedCard(cardId)
 
     try {
@@ -714,7 +788,16 @@ const Room = () => {
         }
       )
 
-      // Only update selection in room_cards, don't add to deck yet
+      // Clear any previous selection for this user's side
+      await supabaseWithToken
+        .from('room_cards')
+        .update({ selected_by: null })
+        .eq('room_id', roomId)
+        .eq('side', userRole)
+        .eq('round_number', room?.current_round)
+        .not('selected_by', 'is', null)
+
+      // Set new selection
       const { error } = await supabaseWithToken
         .from('room_cards')
         .update({ selected_by: userRole })

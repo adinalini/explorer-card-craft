@@ -156,7 +156,7 @@ export const cardDatabase: Card[] = [
   { id: 'phantom_coachman', name: 'Phantom Coachman', image: '/src/assets/cards/phantom_coachman.png', isLegendary: false, cost: 10, isSpell: false },
   { id: 'queen_guinevere', name: 'Queen Guinevere', image: '/src/assets/cards/queen_guinevere.png', isLegendary: false, cost: 4, isSpell: false },
   { id: 'the_kraken', name: 'The Kraken', image: '/src/assets/cards/the_kraken.png', isLegendary: false, cost: 8, isSpell: false },
-  { id: 'three_not_so_little_pigs', name: 'Three Not So Little Pigs', image: '/src/assets/cards/three_not_so_little_pigs.png', isLegendary: false, cost: 7, isSpell: false },
+  { id: 'three_not_so_little_pigs', name: 'Three Not So Little Pigs', image: '/src/assets/cards/three_not_so_little_pigs.png', isLegendary: true, cost: 7, isSpell: false },
   { id: 'tin_woodman', name: 'Tin Woodman', image: '/src/assets/cards/tin_woodman.png', isLegendary: false, cost: 4, isSpell: false },
   { id: 'trojan_horse', name: 'Trojan Horse', image: '/src/assets/cards/trojan_horse.png', isLegendary: false, cost: 4, isSpell: false },
   { id: 'jack', name: 'Jack', image: '/src/assets/cards/jack.png', isLegendary: false, cost: 3, isSpell: false },

@@ -294,48 +294,31 @@ Deno.serve(async (req) => {
         }
         
       } else if (structure.type === 'cost') {
-        // Select 4 cards of specific cost
+        // Select 4 cards of specific cost (including spells, but not legendaries)
         const availableForCost = cardDatabase.filter(card => 
-          !card.isLegendary && !card.isSpell && 
+          !card.isLegendary && 
           card.cost === structure.cost && !usedIds.has(card.id)
         )
         
         console.log(`Round ${roundNum} (cost ${structure.cost}): Found ${availableForCost.length} available cards:`, 
-          availableForCost.map(c => c.name))
+          availableForCost.map(c => `${c.name}${c.isSpell ? ' (spell)' : ''}`))
         
-        if (availableForCost.length < 4) {
-          console.warn(`Not enough cards for round ${roundNum} cost ${structure.cost}. Available: ${availableForCost.length}`)
-          // If not enough non-spell cards, include spells
-          const availableWithSpells = cardDatabase.filter(card => 
-            !card.isLegendary && 
-            card.cost === structure.cost && !usedIds.has(card.id)
-          )
-          console.log(`Including spells: ${availableWithSpells.length} total cards available`)
-          
-          for (let i = 0; i < 4 && i < availableWithSpells.length; i++) {
-            const randomIndex = Math.floor(Math.random() * availableWithSpells.length)
-            const selected = availableWithSpells.splice(randomIndex, 1)[0]
-            roundCards.push(selected)
-            usedIds.add(selected.id)
-          }
-        } else {
-          for (let i = 0; i < 4 && i < availableForCost.length; i++) {
-            const randomIndex = Math.floor(Math.random() * availableForCost.length)
-            const selected = availableForCost.splice(randomIndex, 1)[0]
-            roundCards.push(selected)
-            usedIds.add(selected.id)
-          }
+        for (let i = 0; i < 4 && i < availableForCost.length; i++) {
+          const randomIndex = Math.floor(Math.random() * availableForCost.length)
+          const selected = availableForCost.splice(randomIndex, 1)[0]
+          roundCards.push(selected)
+          usedIds.add(selected.id)
         }
         
       } else if (structure.type === 'pool') {
-        // Select 4 cards from cost pool [2,2,2,2,3,3,3,4,4]
+        // Select 4 cards from cost pool [2,2,2,2,3,3,3,4,4] (including spells, but not legendaries)
         const costPool = [2, 2, 2, 2, 3, 3, 3, 4, 4]
         const shuffledPool = [...costPool].sort(() => Math.random() - 0.5)
         
         for (let i = 0; i < 4; i++) {
           const targetCost = shuffledPool[i]
           const availableForCost = cardDatabase.filter(card => 
-            !card.isLegendary && !card.isSpell && 
+            !card.isLegendary && 
             card.cost === targetCost && !usedIds.has(card.id)
           )
           
@@ -348,10 +331,10 @@ Deno.serve(async (req) => {
         }
         
       } else if (structure.type === 'range') {
-        // Select 4 cards from cost range
+        // Select 4 cards from cost range (including spells, but not legendaries)
         const [minCost, maxCost] = structure.range!
         const availableInRange = cardDatabase.filter(card => 
-          !card.isLegendary && !card.isSpell && 
+          !card.isLegendary && 
           card.cost && card.cost >= minCost && card.cost <= maxCost && 
           !usedIds.has(card.id)
         )

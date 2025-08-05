@@ -56,7 +56,8 @@ const Index = () => {
       if (error) throw error
 
       // Set session flag to indicate this user created this room
-      sessionStorage.setItem(`created_room_${newRoomId}`, 'true')
+      const sessionId = sessionStorage.getItem('userSessionId') || 'temp-session-' + Date.now()
+      localStorage.setItem(`room_${newRoomId}_creator`, sessionId)
       setCreateDialogOpen(false)
       navigate(`/room/${newRoomId}`)
     } catch (error) {
@@ -115,8 +116,9 @@ const Index = () => {
 
       if (updateError) throw updateError
 
-      // Set session flag to indicate this user joined this room
-      sessionStorage.setItem(`joined_room_${roomId.toUpperCase()}`, 'true')
+      // Set session flag to indicate this user joined this room  
+      const sessionId = sessionStorage.getItem('userSessionId') || 'temp-session-' + Date.now()
+      localStorage.setItem(`room_${roomId.toUpperCase()}_joiner`, sessionId)
       setJoinDialogOpen(false)
       navigate(`/room/${roomId.toUpperCase()}`)
     } catch (error) {
@@ -183,17 +185,17 @@ const Index = () => {
                   <div className="space-y-4">
                     <Label className="text-lg font-semibold text-primary">Draft Type:</Label>
                      <RadioGroup value={draftType} onValueChange={setDraftType} className="grid grid-cols-1 gap-3">
-                       <div className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-accent/20 hover:scale-105 transition-all">
+                       <label className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-accent/20 hover:scale-105 transition-all cursor-pointer">
                          <RadioGroupItem value="default" id="default" />
-                         <Label htmlFor="default" className="text-lg cursor-pointer text-primary font-semibold">Default</Label>
-                       </div>
+                         <span className="text-lg text-primary font-semibold">Default</span>
+                       </label>
                         <div className="flex items-center space-x-3 p-3 border rounded-lg opacity-50 cursor-not-allowed">
                           <RadioGroupItem value="triple" id="triple" disabled />
-                          <Label htmlFor="triple" className="text-lg cursor-not-allowed text-muted-foreground">Triple Draft (Not available)</Label>
+                          <span className="text-lg text-muted-foreground">Triple Draft (Not available)</span>
                         </div>
                         <div className="flex items-center space-x-3 p-3 border rounded-lg opacity-50 cursor-not-allowed">
                           <RadioGroupItem value="mega" id="mega" disabled />
-                          <Label htmlFor="mega" className="text-lg cursor-not-allowed text-muted-foreground">Mega Draft (Not available)</Label>
+                          <span className="text-lg text-muted-foreground">Mega Draft (Not available)</span>
                         </div>
                      </RadioGroup>
                   </div>

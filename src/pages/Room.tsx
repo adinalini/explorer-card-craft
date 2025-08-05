@@ -651,14 +651,17 @@ const Room = () => {
       const creatorsCards = currentRoundCards.filter(card => card.side === 'creator')
       const joinersCards = currentRoundCards.filter(card => card.side === 'joiner')
       
-      const creatorSelected = creatorsCards.find(card => card.selected_by)
-      const joinerSelected = joinersCards.find(card => card.selected_by)
+      // Check if selections exist
+      const creatorSelected = currentRoundCards.find(card => card.selected_by === 'creator')
+      const joinerSelected = currentRoundCards.find(card => card.selected_by === 'joiner')
       
       console.log('Auto-selection check:', {
+        round: currentRound,
         creatorSelected: !!creatorSelected,
         joinerSelected: !!joinerSelected,
         creatorsCards: creatorsCards.length,
-        joinersCards: joinersCards.length
+        joinersCards: joinersCards.length,
+        currentRoundCards: currentRoundCards.length
       })
       
       // Auto-select random card for creator if they didn't select
@@ -702,12 +705,19 @@ const Room = () => {
       // Wait a moment for auto-selections to complete, then fetch updated cards
       await new Promise(resolve => setTimeout(resolve, 500))
       
-      const { data: updatedCards } = await supabaseWithToken
+      const { data: updatedCards, error: fetchError } = await supabaseWithToken
         .from('room_cards')
         .select('*')
         .eq('room_id', roomId)
         .eq('round_number', currentRound)
         .not('selected_by', 'is', null)
+        
+      if (fetchError) {
+        console.error('Error fetching updated cards:', fetchError)
+        return
+      }
+      
+      console.log('Updated cards after auto-selection:', updatedCards?.length || 0)
 
       // Add selected cards to player decks during reveal phase
       for (const card of updatedCards || []) {

@@ -35,10 +35,38 @@ Deno.serve(async (req) => {
 
     const supabase = createClient(supabaseUrl, supabaseKey)
     
-    const { roomId, round, usedCardIds } = await req.json()
+    let requestBody
+    try {
+      requestBody = await req.json()
+    } catch (jsonError) {
+      console.error('Failed to parse request JSON:', jsonError)
+      return new Response(
+        JSON.stringify({ 
+          error: 'Invalid JSON in request body',
+          success: false 
+        }),
+        { 
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      )
+    }
     
-    if (!roomId || !round) {
-      throw new Error('Missing required parameters')
+    const { roomId, round, usedCardIds } = requestBody
+    console.log('Request parameters:', { roomId, round, usedCardIds: usedCardIds?.length || 0 })
+    
+    if (!roomId || (!round && round !== 'all')) {
+      console.error('Missing required parameters:', { roomId, round })
+      return new Response(
+        JSON.stringify({ 
+          error: 'Missing required parameters: roomId and round are required',
+          success: false 
+        }),
+        { 
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      )
     }
 
     console.log(`Generating cards for round ${round}`)

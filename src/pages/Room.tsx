@@ -647,19 +647,21 @@ const Room = () => {
         card.round_number === currentRound && card.selected_by
       )
 
-      // Add selected cards to player decks
+      // Add selected cards to player decks during reveal phase
       for (const card of currentRoundCards) {
-        await supabaseWithToken
-          .from('player_decks')
-          .insert({
-            room_id: roomId,
-            player_side: card.selected_by!,
-            card_id: card.card_id,
-            card_name: card.card_name,
-            card_image: card.card_image,
-            is_legendary: card.is_legendary,
-            selection_order: currentRound
-          })
+        if (card.selected_by) {
+          await supabaseWithToken
+            .from('player_decks')
+            .insert({
+              room_id: roomId,
+              player_side: card.selected_by,
+              card_id: card.card_id,
+              card_name: card.card_name,
+              card_image: card.card_image,
+              is_legendary: card.is_legendary,
+              selection_order: currentRound
+            })
+        }
       }
 
       // Check if draft is complete (13 rounds)
@@ -691,7 +693,7 @@ const Room = () => {
   }
 
   const handleCardSelect = async (cardId: string) => {
-    if (selectedCard || isSelectionLocked) return
+    if (isSelectionLocked) return
 
     setSelectedCard(cardId)
 
@@ -712,7 +714,7 @@ const Room = () => {
         }
       )
 
-      // Update room_cards to mark selection
+      // Only update selection in room_cards, don't add to deck yet
       const { error } = await supabaseWithToken
         .from('room_cards')
         .update({ selected_by: userRole })
@@ -725,25 +727,7 @@ const Room = () => {
         return
       }
 
-      // Add card to player deck using authenticated client
-      const { error: deckError } = await supabaseWithToken
-        .from('player_decks')
-        .insert({
-          room_id: roomId,
-          player_side: userRole,
-          card_id: selectedCardData.card_id,
-          card_name: selectedCardData.card_name,
-          card_image: selectedCardData.card_image,
-          is_legendary: selectedCardData.is_legendary,
-          selection_order: room?.current_round || 1
-        })
-
-      if (deckError) {
-        console.error('Error adding card to deck:', deckError)
-        return
-      }
-
-      console.log('Card selected, waiting for timer')
+      console.log('Card selected, waiting for timer to add to deck')
     } catch (error) {
       console.error('Error in handleCardSelect:', error)
     }

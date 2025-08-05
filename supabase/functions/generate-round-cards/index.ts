@@ -404,14 +404,41 @@ Deno.serve(async (req) => {
       }))
     ]
 
+    console.log(`Round ${round} enhanced logging - About to insert ${cardsToInsert.length} cards`)
+    console.log(`Round ${round} cards breakdown:`, {
+      creator: targetRound.creator.map(c => `${c.name} (${c.cost})`),
+      joiner: targetRound.joiner.map(c => `${c.name} (${c.cost})`)
+    })
+
+    // Check if cards for this round already exist
+    const { data: existingCards } = await supabase
+      .from('room_cards')
+      .select('*')
+      .eq('room_id', roomId)
+      .eq('round_number', round)
+
+    if (existingCards && existingCards.length > 0) {
+      console.log(`Round ${round} already has ${existingCards.length} cards, skipping insertion`)
+      return new Response(
+        JSON.stringify({ 
+          success: true, 
+          message: `Round ${round} cards already exist`,
+          existingCardsCount: existingCards.length 
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
     const { error } = await supabase
       .from('room_cards')
       .insert(cardsToInsert)
 
     if (error) {
-      console.error('Error inserting cards:', error)
+      console.error(`Round ${round} insertion error:`, error)
       throw error
     }
+
+    console.log(`Round ${round} cards inserted successfully`)
 
     return new Response(
       JSON.stringify({ 
@@ -423,9 +450,9 @@ Deno.serve(async (req) => {
     )
 
   } catch (error) {
-    console.error('Generate cards function error:', error)
+    console.error(`Round ${round} generate cards function error:`, error)
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: `Round ${round} failed: ${error.message}` }),
       { 
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }

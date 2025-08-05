@@ -187,14 +187,14 @@ const Index = () => {
                          <RadioGroupItem value="default" id="default" />
                          <Label htmlFor="default" className="text-lg cursor-pointer text-primary font-semibold">Default</Label>
                        </div>
-                       <div className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-accent/20 hover:scale-105 transition-all">
-                         <RadioGroupItem value="triple" id="triple" />
-                         <Label htmlFor="triple" className="text-lg cursor-pointer text-primary font-semibold">Triple Draft</Label>
-                       </div>
-                       <div className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-accent/20 hover:scale-105 transition-all">
-                         <RadioGroupItem value="mega" id="mega" />
-                         <Label htmlFor="mega" className="text-lg cursor-pointer text-primary font-semibold">Mega Draft</Label>
-                       </div>
+                        <div className="flex items-center space-x-3 p-3 border rounded-lg opacity-50 cursor-not-allowed">
+                          <RadioGroupItem value="triple" id="triple" disabled />
+                          <Label htmlFor="triple" className="text-lg cursor-not-allowed text-muted-foreground">Triple Draft (Not available)</Label>
+                        </div>
+                        <div className="flex items-center space-x-3 p-3 border rounded-lg opacity-50 cursor-not-allowed">
+                          <RadioGroupItem value="mega" id="mega" disabled />
+                          <Label htmlFor="mega" className="text-lg cursor-not-allowed text-muted-foreground">Mega Draft (Not available)</Label>
+                        </div>
                      </RadioGroup>
                   </div>
                   

@@ -580,17 +580,17 @@ const Room = () => {
 
       {/* Main Content */}
       <div className="container mx-auto px-4 py-8">
-        {!room.joiner_name ? (
-          // Waiting for player
-          <div className="text-center space-y-8">
-            <div className="text-2xl md:text-3xl text-primary font-semibold">
-              Waiting for a player to join the room
-            </div>
-            <div className="text-xl md:text-2xl text-muted-foreground">
-              Share this code: <span className="font-bold text-primary text-3xl tracking-wider">{room.id}</span>
-            </div>
+      {!room.joiner_name && userRole === 'creator' ? (
+        // Waiting for player (only show to creator)
+        <div className="text-center space-y-8">
+          <div className="text-2xl md:text-3xl text-primary font-semibold">
+            Waiting for a player to join the room
           </div>
-        ) : room.status === 'waiting' ? (
+          <div className="text-xl md:text-2xl text-muted-foreground">
+            Share this code: <span className="font-bold text-primary text-3xl tracking-wider">{room.id}</span>
+          </div>
+        </div>
+      ) : room.status === 'waiting' ? (
           // Both players joined, waiting for ready
           <div className="space-y-8">
             {/* Mobile-responsive layout */}

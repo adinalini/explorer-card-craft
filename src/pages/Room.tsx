@@ -651,36 +651,57 @@ const Room = () => {
       const creatorsCards = currentRoundCards.filter(card => card.side === 'creator')
       const joinersCards = currentRoundCards.filter(card => card.side === 'joiner')
       
-      const creatorSelected = creatorsCards.find(card => card.selected_by === 'creator')
-      const joinerSelected = joinersCards.find(card => card.selected_by === 'joiner')
+      const creatorSelected = creatorsCards.find(card => card.selected_by)
+      const joinerSelected = joinersCards.find(card => card.selected_by)
+      
+      console.log('Auto-selection check:', {
+        creatorSelected: !!creatorSelected,
+        joinerSelected: !!joinerSelected,
+        creatorsCards: creatorsCards.length,
+        joinersCards: joinersCards.length
+      })
       
       // Auto-select random card for creator if they didn't select
       if (!creatorSelected && creatorsCards.length > 0) {
         const randomCard = creatorsCards[Math.floor(Math.random() * creatorsCards.length)]
-        await supabaseWithToken
+        console.log('Auto-selecting for creator:', randomCard.card_name)
+        
+        const { error: autoSelectError } = await supabaseWithToken
           .from('room_cards')
           .update({ selected_by: 'creator' })
           .eq('room_id', roomId)
           .eq('card_id', randomCard.card_id)
           .eq('round_number', currentRound)
         
-        console.log('Auto-selected card for creator:', randomCard.card_name)
+        if (autoSelectError) {
+          console.error('Error auto-selecting for creator:', autoSelectError)
+        } else {
+          console.log('Auto-selected card for creator:', randomCard.card_name)
+        }
       }
       
-      // Auto-select random card for joiner if they didn't select
+      // Auto-select random card for joiner if they didn't select  
       if (!joinerSelected && joinersCards.length > 0) {
         const randomCard = joinersCards[Math.floor(Math.random() * joinersCards.length)]
-        await supabaseWithToken
+        console.log('Auto-selecting for joiner:', randomCard.card_name)
+        
+        const { error: autoSelectError } = await supabaseWithToken
           .from('room_cards')
           .update({ selected_by: 'joiner' })
           .eq('room_id', roomId)
           .eq('card_id', randomCard.card_id)
           .eq('round_number', currentRound)
         
-        console.log('Auto-selected card for joiner:', randomCard.card_name)
+        if (autoSelectError) {
+          console.error('Error auto-selecting for joiner:', autoSelectError)
+        } else {
+          console.log('Auto-selected card for joiner:', randomCard.card_name)
+        }
       }
 
-      // Fetch updated cards after auto-selection
+      // Wait a moment for auto-selections to complete, then fetch updated cards
+      await new Promise(resolve => setTimeout(resolve, 500))
+      
       const { data: updatedCards } = await supabaseWithToken
         .from('room_cards')
         .select('*')
@@ -769,6 +790,7 @@ const Room = () => {
       return
     }
 
+    // Update selected card immediately for instant UI feedback
     setSelectedCard(cardId)
 
     try {
@@ -1018,11 +1040,15 @@ const Room = () => {
                           cardName={card.card_name}
                           cardImage={card.card_image}
                           isLegendary={card.is_legendary}
-                            isSelected={selectedCard === card.card_id || card.selected_by === 'creator'}
-                            onSelect={() => userRole === 'creator' ? handleCardSelect(card.card_id) : {}}
-                            disabled={isSelectionLocked || userRole !== 'creator'}
-                            isRevealing={isSelectionLocked}
-                            showUnselectedOverlay={isSelectionLocked && !card.selected_by}
+                          isSelected={
+                            isSelectionLocked 
+                              ? card.selected_by === 'creator'
+                              : (userRole === 'creator' ? selectedCard === card.card_id : false)
+                          }
+                          onSelect={() => userRole === 'creator' ? handleCardSelect(card.card_id) : {}}
+                          disabled={isSelectionLocked || userRole !== 'creator'}
+                          isRevealing={isSelectionLocked}
+                          showUnselectedOverlay={isSelectionLocked && !card.selected_by}
                         />
                       ))}
                   </div>
@@ -1047,11 +1073,15 @@ const Room = () => {
                           cardName={card.card_name}
                           cardImage={card.card_image}
                           isLegendary={card.is_legendary}
-                            isSelected={selectedCard === card.card_id || card.selected_by === 'joiner'}
-                            onSelect={() => userRole === 'joiner' ? handleCardSelect(card.card_id) : {}}
-                            disabled={isSelectionLocked || userRole !== 'joiner'}
-                            isRevealing={isSelectionLocked}
-                            showUnselectedOverlay={isSelectionLocked && !card.selected_by}
+                          isSelected={
+                            isSelectionLocked 
+                              ? card.selected_by === 'joiner'
+                              : (userRole === 'joiner' ? selectedCard === card.card_id : false)
+                          }
+                          onSelect={() => userRole === 'joiner' ? handleCardSelect(card.card_id) : {}}
+                          disabled={isSelectionLocked || userRole !== 'joiner'}
+                          isRevealing={isSelectionLocked}
+                          showUnselectedOverlay={isSelectionLocked && !card.selected_by}
                         />
                       ))}
                   </div>

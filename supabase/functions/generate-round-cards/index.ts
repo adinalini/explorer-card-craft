@@ -4,6 +4,7 @@ const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-session-token',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Access-Control-Max-Age': '3600',
 }
 
 interface Card {
@@ -16,8 +17,12 @@ interface Card {
 }
 
 Deno.serve(async (req) => {
+  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders })
+    return new Response(null, { 
+      status: 200,
+      headers: corsHeaders 
+    })
   }
 
   try {
@@ -453,7 +458,10 @@ Deno.serve(async (req) => {
   } catch (error) {
     console.error(`Round ${round} generate cards function error:`, error)
     return new Response(
-      JSON.stringify({ error: `Round ${round} failed: ${error.message}` }),
+      JSON.stringify({ 
+        error: `Round ${round} failed: ${error?.message || 'Unknown error'}`,
+        success: false 
+      }),
       { 
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }

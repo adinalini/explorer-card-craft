@@ -74,7 +74,7 @@ Deno.serve(async (req) => {
       )
     }
 
-    console.log(`Generating cards for round ${round}`)
+    console.log(`Starting card generation for round ${round} in room ${roomId}`)
 
     // Complete card database with corrected costs
     const cardDatabase: Card[] = [

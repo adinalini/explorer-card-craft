@@ -493,7 +493,9 @@ const Room = () => {
     if (!roomId || !currentRoom) return
 
     try {
+      console.log(`=== ROUND ${round} CARD GENERATION START ===`)
       console.log(`Generating round ${round} cards for room ${roomId}`)
+      console.log('Room data:', currentRoom)
 
       // Determine round type (only for default draft type)
       if (currentRoom.draft_type === 'default') {
@@ -513,6 +515,16 @@ const Room = () => {
         const usedCardIds = usedCardsData?.map(card => card.card_id) || []
 
         // Call edge function to generate cards
+        console.log('Calling edge function with params:', {
+          roomId,
+          round,
+          usedCardIds: usedCardIds.length,
+          roundType: {
+            isLegendary: isLegendaryRound,
+            isSpell: isSpellRound
+          }
+        })
+        
         const { data, error } = await supabase.functions.invoke('generate-round-cards', {
           body: {
             roomId,
@@ -526,17 +538,24 @@ const Room = () => {
         })
 
         if (error) {
-          console.error('Edge function error:', error)
+          console.error('=== EDGE FUNCTION ERROR ===')
+          console.error('Error details:', error)
+          console.error('Error type:', typeof error)
+          console.error('Error keys:', Object.keys(error))
           throw error
         }
 
-        console.log('Cards generated successfully:', data)
+        console.log('=== CARDS GENERATED SUCCESSFULLY ===')
+        console.log('Response data:', data)
       }
 
       // Timer is already started when room status was set to drafting
-      console.log('Timer already started with room status update')
+      console.log('=== TIMER ALREADY STARTED ===')
     } catch (error) {
+      console.error('=== ROUND CARD GENERATION ERROR ===')
       console.error('Error generating round cards:', error)
+      console.error('Error type:', typeof error)
+      console.error('Error message:', error?.message)
       toast({
         title: "Error",
         description: "Failed to generate cards for this round.",
@@ -648,12 +667,36 @@ const Room = () => {
       )
 
       // Handle auto-selection for users who didn't select any card
-      const creatorsCards = currentRoundCards.filter(card => card.side === 'creator')
-      const joinersCards = currentRoundCards.filter(card => card.side === 'joiner')
+      console.log('=== STARTING AUTO-SELECTION PROCESS ===')
+      console.log('Current round cards:', currentRoundCards)
+      console.log('Current round:', currentRound)
+      
+      const creatorsCards = currentRoundCards.filter(card => {
+        console.log('Checking creator card:', card)
+        return card.side === 'creator'
+      })
+      const joinersCards = currentRoundCards.filter(card => {
+        console.log('Checking joiner card:', card)
+        return card.side === 'joiner'
+      })
+      
+      console.log('Filtered cards:')
+      console.log('- Creator cards:', creatorsCards)
+      console.log('- Joiner cards:', joinersCards)
       
       // Check if selections exist
-      const creatorSelected = currentRoundCards.find(card => card.selected_by === 'creator')
-      const joinerSelected = currentRoundCards.find(card => card.selected_by === 'joiner')
+      const creatorSelected = currentRoundCards.find(card => {
+        console.log('Checking if creator selected:', card)
+        return card.selected_by === 'creator'
+      })
+      const joinerSelected = currentRoundCards.find(card => {
+        console.log('Checking if joiner selected:', card)
+        return card.selected_by === 'joiner'
+      })
+      
+      console.log('Selection status:')
+      console.log('- Creator selected card:', creatorSelected)
+      console.log('- Joiner selected card:', joinerSelected)
       
       console.log('Auto-selection check:', {
         round: currentRound,
@@ -661,13 +704,16 @@ const Room = () => {
         joinerSelected: !!joinerSelected,
         creatorsCards: creatorsCards.length,
         joinersCards: joinersCards.length,
-        currentRoundCards: currentRoundCards.length
+        currentRoundCards: currentRoundCards.length,
+        allCardIds: currentRoundCards.map(c => c.card_id),
+        selectedCardIds: currentRoundCards.filter(c => c.selected_by).map(c => c.card_id)
       })
       
       // Auto-select random card for creator if they didn't select
       if (!creatorSelected && creatorsCards.length > 0) {
         const randomCard = creatorsCards[Math.floor(Math.random() * creatorsCards.length)]
-        console.log('Auto-selecting for creator:', randomCard.card_name)
+        console.log('=== AUTO-SELECTING FOR CREATOR ===')
+        console.log('Auto-selecting for creator:', randomCard)
         
         const { error: autoSelectError } = await supabaseWithToken
           .from('room_cards')
@@ -677,16 +723,22 @@ const Room = () => {
           .eq('round_number', currentRound)
         
         if (autoSelectError) {
+          console.error('=== ERROR AUTO-SELECTING FOR CREATOR ===')
           console.error('Error auto-selecting for creator:', autoSelectError)
         } else {
+          console.log('=== SUCCESS AUTO-SELECTING FOR CREATOR ===')
           console.log('Auto-selected card for creator:', randomCard.card_name)
         }
+      } else {
+        console.log('=== NO AUTO-SELECTION NEEDED FOR CREATOR ===')
+        console.log('Creator already selected or no cards available')
       }
       
       // Auto-select random card for joiner if they didn't select  
       if (!joinerSelected && joinersCards.length > 0) {
         const randomCard = joinersCards[Math.floor(Math.random() * joinersCards.length)]
-        console.log('Auto-selecting for joiner:', randomCard.card_name)
+        console.log('=== AUTO-SELECTING FOR JOINER ===')
+        console.log('Auto-selecting for joiner:', randomCard)
         
         const { error: autoSelectError } = await supabaseWithToken
           .from('room_cards')
@@ -696,15 +748,22 @@ const Room = () => {
           .eq('round_number', currentRound)
         
         if (autoSelectError) {
+          console.error('=== ERROR AUTO-SELECTING FOR JOINER ===')
           console.error('Error auto-selecting for joiner:', autoSelectError)
         } else {
+          console.log('=== SUCCESS AUTO-SELECTING FOR JOINER ===')
           console.log('Auto-selected card for joiner:', randomCard.card_name)
         }
+      } else {
+        console.log('=== NO AUTO-SELECTION NEEDED FOR JOINER ===')
+        console.log('Joiner already selected or no cards available')
       }
 
       // Wait a moment for auto-selections to complete, then fetch updated cards
-      await new Promise(resolve => setTimeout(resolve, 500))
+      console.log('=== WAITING FOR AUTO-SELECTIONS TO COMPLETE ===')
+      await new Promise(resolve => setTimeout(resolve, 1000))
       
+      console.log('=== FETCHING UPDATED CARDS AFTER AUTO-SELECTION ===')
       const { data: updatedCards, error: fetchError } = await supabaseWithToken
         .from('room_cards')
         .select('*')
@@ -713,16 +772,22 @@ const Room = () => {
         .not('selected_by', 'is', null)
         
       if (fetchError) {
+        console.error('=== ERROR FETCHING UPDATED CARDS ===')
         console.error('Error fetching updated cards:', fetchError)
         return
       }
       
-      console.log('Updated cards after auto-selection:', updatedCards?.length || 0)
+      console.log('=== UPDATED CARDS FETCHED ===')
+      console.log('Updated cards after auto-selection:', updatedCards)
 
       // Add selected cards to player decks during reveal phase
+      console.log('=== ADDING CARDS TO PLAYER DECKS ===')
       for (const card of updatedCards || []) {
         if (card.selected_by) {
-          await supabaseWithToken
+          console.log('=== ADDING CARD TO DECK ===')
+          console.log('Adding card to deck:', card.card_name, 'for', card.selected_by)
+          
+          const { error: deckError } = await supabaseWithToken
             .from('player_decks')
             .insert({
               room_id: roomId,
@@ -733,6 +798,24 @@ const Room = () => {
               is_legendary: card.is_legendary,
               selection_order: currentRound
             })
+          
+          if (deckError) {
+            console.error('=== ERROR ADDING CARD TO DECK ===')
+            console.error('Error adding card to deck:', deckError)
+            console.error('Card data:', card)
+            console.error('Insert data:', {
+              room_id: roomId,
+              player_side: card.selected_by,
+              card_id: card.card_id,
+              card_name: card.card_name,
+              card_image: card.card_image,
+              is_legendary: card.is_legendary,
+              selection_order: currentRound
+            })
+          } else {
+            console.log('=== SUCCESS ADDING CARD TO DECK ===')
+            console.log('Successfully added card to deck:', card.card_name)
+          }
         }
       }
 

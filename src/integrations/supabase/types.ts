@@ -169,6 +169,8 @@ export type Database = {
           id: string
           joiner_name: string | null
           joiner_ready: boolean | null
+          round_duration_seconds: number | null
+          round_start_time: string | null
           status: string
         }
         Insert: {
@@ -180,6 +182,8 @@ export type Database = {
           id: string
           joiner_name?: string | null
           joiner_ready?: boolean | null
+          round_duration_seconds?: number | null
+          round_start_time?: string | null
           status?: string
         }
         Update: {
@@ -191,6 +195,8 @@ export type Database = {
           id?: string
           joiner_name?: string | null
           joiner_ready?: boolean | null
+          round_duration_seconds?: number | null
+          round_start_time?: string | null
           status?: string
         }
         Relationships: []

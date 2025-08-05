@@ -50,6 +50,8 @@ interface Room {
   creator_ready: boolean
   joiner_ready: boolean
   current_round: number
+  round_start_time: string | null
+  round_duration_seconds: number
 }
 
 interface RoomCard {
@@ -167,19 +169,8 @@ const Room = () => {
           filter: `room_id=eq.${roomId}`
         },
         (payload) => {
-          console.log('Room cards update:', payload.eventType, 'for user role:', userRole)
+          console.log(`${userRole}: Room cards update:`, payload.eventType)
           fetchRoomCards()
-          
-          // Start timer when new cards are detected for current round
-          if (payload.eventType === 'INSERT') {
-            setTimeout(() => {
-              // Check if we have cards for current round and start timer if needed
-              if (room && !isSelectionLocked && timeLeft === 15) {
-                console.log('Starting timer for', userRole)
-                startRoundTimer()
-              }
-            }, 500)
-          }
         }
       )
       .subscribe()
@@ -540,8 +531,8 @@ const Room = () => {
         if (error) throw error
       }
 
-      // Start the 15-second timer
-      startRoundTimer()
+      // Start the centralized round timer
+      await startCentralizedRoundTimer()
     } catch (error) {
       console.error('Error generating round cards:', error)
       toast({
@@ -552,31 +543,102 @@ const Room = () => {
     }
   }
 
-  const startRoundTimer = () => {
-    // Clear any existing timer
-    if (selectionTimer) {
-      clearInterval(selectionTimer)
-    }
-    
-    setTimeLeft(15)
-    setIsSelectionLocked(false)
-    setSelectedCard(null)
+  const startCentralizedRoundTimer = async () => {
+    if (!roomId || userRole !== 'creator') return
 
-    const timer = setInterval(() => {
-      setTimeLeft((prev) => {
-        if (prev <= 1) {
+    try {
+      const supabaseWithToken = createClient(
+        "https://ophgbcyhxvwljfztlvyu.supabase.co",
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9waGdiY3loeHZ3bGpmenRsdnl1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQzMzU4NzYsImV4cCI6MjA2OTkxMTg3Nn0.iiiRP6WtGtwI_jJDnAJUqmEZcoNUbYT3HiBl3VuBnKs",
+        {
+          global: {
+            headers: {
+              'x-session-token': userSessionId
+            }
+          }
+        }
+      )
+
+      // Set round start time in database
+      await supabaseWithToken
+        .from('rooms')
+        .update({ 
+          round_start_time: new Date().toISOString() 
+        })
+        .eq('id', roomId)
+
+      console.log('Creator: Round timer started in database')
+    } catch (error) {
+      console.error('Error starting centralized timer:', error)
+    }
+  }
+
+  // Sync timer with database
+  useEffect(() => {
+    if (!room?.round_start_time || room.status !== 'drafting') {
+      console.log(`Timer sync check: ${userRole} - no round start time or not drafting`, {
+        round_start_time: room?.round_start_time,
+        status: room?.status,
+        userRole
+      })
+      return
+    }
+
+    const startTime = new Date(room.round_start_time).getTime()
+    const now = Date.now()
+    const elapsed = Math.floor((now - startTime) / 1000)
+    const remaining = Math.max(0, room.round_duration_seconds - elapsed)
+
+    console.log(`Timer sync: ${userRole} - elapsed: ${elapsed}s, remaining: ${remaining}s`, {
+      startTime: new Date(room.round_start_time).toISOString(),
+      now: new Date().toISOString(),
+      duration: room.round_duration_seconds
+    })
+
+    setTimeLeft(remaining)
+    setIsSelectionLocked(remaining === 0)
+
+    if (remaining > 0) {
+      // Clear any existing timer
+      if (selectionTimer) {
+        clearInterval(selectionTimer)
+      }
+
+      const timer = setInterval(() => {
+        const currentTime = Date.now()
+        const currentElapsed = Math.floor((currentTime - startTime) / 1000)
+        const currentRemaining = Math.max(0, room.round_duration_seconds - currentElapsed)
+
+        console.log(`Timer tick: ${userRole} - remaining: ${currentRemaining}s`)
+        setTimeLeft(currentRemaining)
+
+        if (currentRemaining <= 0) {
+          console.log(`Timer expired for ${userRole}, locking selections`)
           clearInterval(timer)
           lockSelections()
-          return 0
         }
-        return prev - 1
-      })
-    }, 1000)
-    
-    setSelectionTimer(timer)
+      }, 1000)
+
+      setSelectionTimer(timer)
+    } else if (!isSelectionLocked) {
+      console.log(`Timer already expired for ${userRole}, locking selections immediately`)
+      lockSelections()
+    }
+
+    return () => {
+      if (selectionTimer) {
+        clearInterval(selectionTimer)
+      }
+    }
+  }, [room?.round_start_time, room?.round_duration_seconds, userRole])
+
+  const startRoundTimer = () => {
+    // This function is now replaced by the centralized timer
+    console.log(`${userRole}: startRoundTimer called but using centralized timer instead`)
   }
 
   const lockSelections = async () => {
+    console.log(`${userRole}: Locking selections`)
     setIsSelectionLocked(true)
     
     // Auto-select random card if user hasn't selected one
@@ -584,9 +646,12 @@ const Room = () => {
     
     // Only creator processes round end to avoid race conditions
     if (userRole === 'creator') {
+      console.log('Creator: Will process round end in 3 seconds')
       setTimeout(() => {
         processRoundEnd()
       }, 3000) // Show selections for 3 seconds
+    } else {
+      console.log('Joiner: Waiting for creator to process round end')
     }
   }
 
@@ -683,7 +748,10 @@ const Room = () => {
         const nextRound = currentRound + 1
         await supabaseWithToken
           .from('rooms')
-          .update({ current_round: nextRound })
+          .update({ 
+            current_round: nextRound,
+            round_start_time: null // Reset timer for next round
+          })
           .eq('id', roomId)
         
         // Generate cards for next round

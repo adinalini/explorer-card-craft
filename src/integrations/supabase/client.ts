@@ -16,27 +16,21 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABL
   }
 });
 
-// Shared session-enabled client to avoid multiple instances
-let sessionClient: ReturnType<typeof createClient<Database>> | null = null;
-
 // Helper function to create a supabase client with session token headers
 export const getSupabaseWithSession = () => {
-  if (!sessionClient) {
-    const sessionToken = typeof window !== 'undefined' ? sessionStorage.getItem('userSessionId') || '' : '';
-    
-    sessionClient = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
-      auth: {
-        storage: localStorage,
-        persistSession: true,
-        autoRefreshToken: true,
-      },
-      global: {
-        headers: {
-          'x-session-token': sessionToken
-        }
-      }
-    });
-  }
+  // Always get fresh session token for each request
+  const sessionToken = typeof window !== 'undefined' ? sessionStorage.getItem('userSessionId') || '' : '';
   
-  return sessionClient;
+  return createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+    auth: {
+      storage: localStorage,
+      persistSession: true,
+      autoRefreshToken: true,
+    },
+    global: {
+      headers: {
+        'x-session-token': sessionToken
+      }
+    }
+  });
 };

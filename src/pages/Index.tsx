@@ -54,6 +54,7 @@ const Index = () => {
     const newRoomId = generateRoomId()
 
     try {
+      // First create the room
       const { error } = await supabase
         .from('rooms')
         .insert([{
@@ -65,8 +66,23 @@ const Index = () => {
 
       if (error) throw error
 
-      // Set session flag to indicate this user created this room
+      // Then create a game session for the creator
       const sessionId = getUserSessionId()
+      const { error: sessionError } = await supabase
+        .from('game_sessions')
+        .insert({
+          room_id: newRoomId,
+          session_token: sessionId,
+          player_role: 'creator',
+          player_name: creatorName.trim()
+        })
+
+      if (sessionError) {
+        console.error('Failed to create creator game session:', sessionError)
+        // Don't throw here, just log it
+      }
+
+      // Set session flag to indicate this user created this room
       localStorage.setItem(`room_${newRoomId}_creator`, sessionId)
       console.log('Creator session set:', { roomId: newRoomId, sessionId })
       setCreateDialogOpen(false)

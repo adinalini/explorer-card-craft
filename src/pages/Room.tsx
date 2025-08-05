@@ -90,6 +90,7 @@ const Room = () => {
   const [userSessionId] = useState(getUserSessionId())
   const [userRole, setUserRole] = useState<'creator' | 'joiner' | 'spectator'>('spectator')
   const [isStartingDraft, setIsStartingDraft] = useState(false)
+  const [backgroundAutoSelectTimeout, setBackgroundAutoSelectTimeout] = useState<NodeJS.Timeout | null>(null)
 
   // Function to extend session expiry during gameplay
   const extendSession = async () => {
@@ -175,8 +176,22 @@ const Room = () => {
       setSelectedCard(null)
       setIsSelectionLocked(false)
       setShowReveal(false)
+      
+      // Start background auto-selection timer (75% of round duration)
+      const autoSelectDelay = ((room.round_duration_seconds || 15) * 1000) * 0.75
+      if (backgroundAutoSelectTimeout) {
+        clearTimeout(backgroundAutoSelectTimeout)
+      }
+      
+      const timeout = setTimeout(() => {
+        if (!selectedCard && userRole !== 'spectator') {
+          console.log('Background auto-selection triggered')
+          autoSelectRandomCard()
+        }
+      }, autoSelectDelay)
+      setBackgroundAutoSelectTimeout(timeout)
     }
-  }, [room?.current_round])
+  }, [room?.current_round, userRole, selectedCard])
 
   useEffect(() => {
     if (!roomId) return
@@ -281,6 +296,9 @@ const Room = () => {
       supabase.removeChannel(roomChannel)
       supabase.removeChannel(cardsChannel)
       supabase.removeChannel(decksChannel)
+      if (backgroundAutoSelectTimeout) {
+        clearTimeout(backgroundAutoSelectTimeout)
+      }
     }
   }, [roomId, userSessionId])
 
@@ -747,11 +765,11 @@ const Room = () => {
         allCurrentRoundCards: allCurrentRoundCards.length
       })
       
-      // Auto-select random card for creator if they didn't select
+      // Auto-select only for users who STILL haven't selected after background auto-selection
       if (!creatorSelected && creatorsCards.length > 0) {
         const randomCard = creatorsCards[Math.floor(Math.random() * creatorsCards.length)]
-        console.log('=== AUTO-SELECTING FOR CREATOR ===')
-        console.log('Auto-selecting for creator:', randomCard)
+        console.log('=== FINAL AUTO-SELECTING FOR CREATOR ===')
+        console.log('Final auto-selecting for creator:', randomCard)
         
         const { error: autoSelectError } = await supabaseWithToken
           .from('room_cards')
@@ -759,22 +777,19 @@ const Room = () => {
           .eq('id', randomCard.id)
         
         if (autoSelectError) {
-          console.error('=== ERROR AUTO-SELECTING FOR CREATOR ===')
-          console.error('Error auto-selecting for creator:', autoSelectError)
+          console.error('=== ERROR FINAL AUTO-SELECTING FOR CREATOR ===')
+          console.error('Error final auto-selecting for creator:', autoSelectError)
         } else {
-          console.log('=== SUCCESS AUTO-SELECTING FOR CREATOR ===')
-          console.log('Auto-selected card for creator:', randomCard.card_name)
+          console.log('=== SUCCESS FINAL AUTO-SELECTING FOR CREATOR ===')
+          console.log('Final auto-selected card for creator:', randomCard.card_name)
         }
-      } else {
-        console.log('=== NO AUTO-SELECTION NEEDED FOR CREATOR ===')
-        console.log('Creator already selected or no cards available')
       }
       
-      // Auto-select random card for joiner if they didn't select  
+      // Auto-select for joiner only if they STILL haven't selected after background auto-selection
       if (!joinerSelected && joinersCards.length > 0) {
         const randomCard = joinersCards[Math.floor(Math.random() * joinersCards.length)]
-        console.log('=== AUTO-SELECTING FOR JOINER ===')
-        console.log('Auto-selecting for joiner:', randomCard)
+        console.log('=== FINAL AUTO-SELECTING FOR JOINER ===')
+        console.log('Final auto-selecting for joiner:', randomCard)
         
         const { error: autoSelectError } = await supabaseWithToken
           .from('room_cards')
@@ -782,20 +797,17 @@ const Room = () => {
           .eq('id', randomCard.id)
         
         if (autoSelectError) {
-          console.error('=== ERROR AUTO-SELECTING FOR JOINER ===')
-          console.error('Error auto-selecting for joiner:', autoSelectError)
+          console.error('=== ERROR FINAL AUTO-SELECTING FOR JOINER ===')
+          console.error('Error final auto-selecting for joiner:', autoSelectError)
         } else {
-          console.log('=== SUCCESS AUTO-SELECTING FOR JOINER ===')
-          console.log('Auto-selected card for joiner:', randomCard.card_name)
+          console.log('=== SUCCESS FINAL AUTO-SELECTING FOR JOINER ===')
+          console.log('Final auto-selected card for joiner:', randomCard.card_name)
         }
-      } else {
-        console.log('=== NO AUTO-SELECTION NEEDED FOR JOINER ===')
-        console.log('Joiner already selected or no cards available')
       }
 
-      // Wait longer for auto-selections to complete and database to propagate
-      console.log('=== WAITING FOR AUTO-SELECTIONS TO COMPLETE ===')
-      await new Promise(resolve => setTimeout(resolve, 2000))
+      // Reduced wait time since background auto-selection should have handled most cases
+      console.log('=== WAITING FOR FINAL AUTO-SELECTIONS TO COMPLETE ===')
+      await new Promise(resolve => setTimeout(resolve, 1000))
       
       console.log('=== FETCHING UPDATED CARDS AFTER AUTO-SELECTION ===')
       

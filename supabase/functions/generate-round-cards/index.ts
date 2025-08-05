@@ -373,7 +373,129 @@ Deno.serve(async (req) => {
 
     // If generating all rounds, insert all cards at once
     if (round === 'all') {
-      const allCardsToInsert = allRoundsCards.flatMap(({ round: roundNum, creator, joiner }) => [
+      // First, get all cards already used in this room to prevent duplicates
+      const { data: existingRoomCards } = await supabase
+        .from('room_cards')
+        .select('card_id')
+        .eq('room_id', roomId)
+      
+      const roomUsedIds = new Set(existingRoomCards?.map(c => c.card_id) || [])
+      console.log(`Room ${roomId} already has ${roomUsedIds.size} used cards`)
+      
+      // Randomize round order for this room
+      const shuffledRoundStructures = [...roundStructures]
+      for (let i = shuffledRoundStructures.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffledRoundStructures[i], shuffledRoundStructures[j]] = [shuffledRoundStructures[j], shuffledRoundStructures[i]]
+      }
+      console.log('Randomized round order:', shuffledRoundStructures.map(s => s.description))
+      
+      // Regenerate all rounds with randomized order and proper used card tracking
+      const randomizedRoundsCards: Array<{ round: number, creator: Card[], joiner: Card[] }> = []
+      const globalUsedIds = new Set([...excludeIds, ...roomUsedIds])
+
+      for (let roundIndex = 0; roundIndex < 13; roundIndex++) {
+        const roundNum = roundIndex + 1
+        const structure = shuffledRoundStructures[roundIndex]
+        const roundCards: Card[] = []
+
+        console.log(`Generating round ${roundNum}: ${structure.description}`)
+
+        if (structure.type === 'legendary') {
+          const availableLegendary = cardDatabase.filter(card => 
+            card.isLegendary && !globalUsedIds.has(card.id)
+          )
+          
+          for (let i = 0; i < 4 && i < availableLegendary.length; i++) {
+            const randomIndex = Math.floor(Math.random() * availableLegendary.length)
+            const selected = availableLegendary.splice(randomIndex, 1)[0]
+            roundCards.push(selected)
+            globalUsedIds.add(selected.id)
+          }
+          
+        } else if (structure.type === 'spell') {
+          const availableSpells = cardDatabase.filter(card => 
+            card.isSpell && !globalUsedIds.has(card.id)
+          )
+          
+          for (let i = 0; i < 4 && i < availableSpells.length; i++) {
+            const randomIndex = Math.floor(Math.random() * availableSpells.length)
+            const selected = availableSpells.splice(randomIndex, 1)[0]
+            roundCards.push(selected)
+            globalUsedIds.add(selected.id)
+          }
+          
+        } else if (structure.type === 'cost') {
+          const availableForCost = cardDatabase.filter(card => 
+            !card.isLegendary && 
+            card.cost === structure.cost && !globalUsedIds.has(card.id)
+          )
+          
+          for (let i = 0; i < 4 && i < availableForCost.length; i++) {
+            const randomIndex = Math.floor(Math.random() * availableForCost.length)
+            const selected = availableForCost.splice(randomIndex, 1)[0]
+            roundCards.push(selected)
+            globalUsedIds.add(selected.id)
+          }
+          
+        } else if (structure.type === 'pool') {
+          const costPool = [2, 2, 2, 2, 3, 3, 3, 4, 4]
+          const shuffledPool = [...costPool].sort(() => Math.random() - 0.5)
+          
+          for (let i = 0; i < 4; i++) {
+            const targetCost = shuffledPool[i]
+            const availableForCost = cardDatabase.filter(card => 
+              !card.isLegendary && 
+              card.cost === targetCost && !globalUsedIds.has(card.id)
+            )
+            
+            if (availableForCost.length > 0) {
+              const randomIndex = Math.floor(Math.random() * availableForCost.length)
+              const selected = availableForCost[randomIndex]
+              roundCards.push(selected)
+              globalUsedIds.add(selected.id)
+            }
+          }
+          
+        } else if (structure.type === 'range') {
+          const [minCost, maxCost] = structure.range!
+          const availableInRange = cardDatabase.filter(card => 
+            !card.isLegendary && 
+            card.cost && card.cost >= minCost && card.cost <= maxCost && 
+            !globalUsedIds.has(card.id)
+          )
+          
+          for (let i = 0; i < 4 && i < availableInRange.length; i++) {
+            const randomIndex = Math.floor(Math.random() * availableInRange.length)
+            const selected = availableInRange.splice(randomIndex, 1)[0]
+            roundCards.push(selected)
+            globalUsedIds.add(selected.id)
+          }
+        }
+
+        // Balance and distribute cards for this round
+        if (roundCards.length >= 4) {
+          if (structure.type === 'spell' || structure.type === 'range') {
+            const balanced = balanceCosts(roundCards.slice(0, 4))
+            randomizedRoundsCards.push({
+              round: roundNum,
+              creator: balanced.creator,
+              joiner: balanced.joiner
+            })
+          } else {
+            const shuffled = [...roundCards.slice(0, 4)].sort(() => Math.random() - 0.5)
+            randomizedRoundsCards.push({
+              round: roundNum,
+              creator: [shuffled[0], shuffled[1]],
+              joiner: [shuffled[2], shuffled[3]]
+            })
+          }
+        }
+        
+        console.log(`Round ${roundNum} cards:`, roundCards.slice(0, 4).map(c => `${c.name} (${c.cost})`))
+      }
+
+      const allCardsToInsert = randomizedRoundsCards.flatMap(({ round: roundNum, creator, joiner }) => [
         ...creator.map(card => ({
           room_id: roomId,
           round_number: roundNum,
@@ -405,12 +527,12 @@ Deno.serve(async (req) => {
         throw error
       }
 
-      console.log(`Successfully generated all ${allRoundsCards.length} rounds with ${allCardsToInsert.length} total cards`)
+      console.log(`Successfully generated all ${randomizedRoundsCards.length} rounds with ${allCardsToInsert.length} total cards`)
 
       return new Response(
         JSON.stringify({ 
           success: true, 
-          roundsGenerated: allRoundsCards.length,
+          roundsGenerated: randomizedRoundsCards.length,
           totalCards: allCardsToInsert.length
         }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

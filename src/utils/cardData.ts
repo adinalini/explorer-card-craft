@@ -344,8 +344,9 @@ export const generateDraftChoices = (usedCardIds: string[]): { cards: Card[], is
   
   if (allChoices.length === 0) return null
   
-  // Return the first available choice
-  const cards = allChoices[0]
+  // Return a random choice instead of always the first one
+  const randomIndex = Math.floor(Math.random() * allChoices.length)
+  const cards = allChoices[randomIndex]
   const isLegendary = cards.some(card => card.isLegendary)
   const isSpell = cards.some(card => card.isSpell)
   

@@ -424,26 +424,7 @@ const Room = () => {
     if (!roomId || !currentRoom) return
 
     try {
-      // Create authenticated client for card generation
-      const supabaseWithToken = createClient(
-        "https://ophgbcyhxvwljfztlvyu.supabase.co",
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9waGdiY3loeHZ3bGpmenRsdnl1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQzMzU4NzYsImV4cCI6MjA2OTkxMTg3Nn0.iiiRP6WtGtwI_jJDnAJUqmEZcoNUbYT3HiBl3VuBnKs",
-        {
-          global: {
-            headers: {
-              'x-session-token': userSessionId
-            }
-          }
-        }
-      )
-      
-      // Get used cards from previous rounds
-      const { data: usedCardsData } = await supabaseWithToken
-        .from('room_cards')
-        .select('card_id')
-        .eq('room_id', roomId)
-
-      const usedCards = new Set(usedCardsData?.map(card => card.card_id) || [])
+      console.log(`Generating round ${round} cards for room ${roomId}`)
 
       // Determine round type (only for default draft type)
       if (currentRoom.draft_type === 'default') {
@@ -454,98 +435,33 @@ const Room = () => {
         const isLegendaryRound = round === legendaryRound
         const isSpellRound = round === adjustedSpellRound
 
-        // Generate cards based on round type
-        const { generateDraftChoices } = await import('@/utils/cardData')
-        const usedCardIds = Array.from(usedCards)
-        const choices = generateDraftChoices(usedCardIds)
-        
-        if (!choices) return
-        
-        // For spell rounds, ensure balanced cost distribution
-        let creatorCards, joinerCards
-        if (isSpellRound) {
-          const sortedCards = choices.cards.sort((a, b) => (a.cost || 0) - (b.cost || 0))
-          // Give one high-cost and one low-cost to each player for balance
-          creatorCards = [sortedCards[0], sortedCards[3]] // lowest + highest
-          joinerCards = [sortedCards[1], sortedCards[2]] // middle two
-          console.log(`Spell round card distribution:`, {
-            creator: creatorCards.map(c => `${c.name} (${c.cost})`),
-            joiner: joinerCards.map(c => `${c.name} (${c.cost})`)
-          })
-        } else {
-          // Normal distribution for non-spell rounds
-          creatorCards = choices.cards.slice(0, 2)
-          joinerCards = choices.cards.slice(2, 4)
+        // Get used card IDs from all previous rounds
+        const { data: usedCardsData } = await supabase
+          .from('room_cards')
+          .select('card_id')
+          .eq('room_id', roomId)
+
+        const usedCardIds = usedCardsData?.map(card => card.card_id) || []
+
+        // Call edge function to generate cards
+        const { data, error } = await supabase.functions.invoke('generate-round-cards', {
+          body: {
+            roomId,
+            round,
+            usedCardIds,
+            roundType: {
+              isLegendary: isLegendaryRound,
+              isSpell: isSpellRound
+            }
+          }
+        })
+
+        if (error) {
+          console.error('Edge function error:', error)
+          throw error
         }
 
-        const roomCardsData = [
-          ...creatorCards.map((card) => ({
-            room_id: roomId,
-            round_number: round,
-            side: 'creator',
-            card_id: card.id,
-            card_name: card.name,
-            card_image: card.image,
-            is_legendary: card.isLegendary,
-            selected_by: null
-          })),
-          ...joinerCards.map((card) => ({
-            room_id: roomId,
-            round_number: round,
-            side: 'joiner',
-            card_id: card.id,
-            card_name: card.name,
-            card_image: card.image,
-            is_legendary: card.isLegendary,
-            selected_by: null
-          }))
-        ]
-
-        const { error } = await supabaseWithToken
-          .from('room_cards')
-          .insert(roomCardsData)
-
-        if (error) throw error
-      } else {
-        // For other draft types, use simple random selection for now
-        const { getRandomCards } = await import('@/utils/cardData')
-        const availableCards = (await import('@/utils/cardData')).cardDatabase.filter(
-          card => card.cost !== undefined && !usedCards.has(card.id)
-        )
-        
-        const cards = getRandomCards(4, Array.from(usedCards))
-        
-        const creatorCards = cards.slice(0, 2)
-        const joinerCards = cards.slice(2, 4)
-
-        const roomCardsData = [
-          ...creatorCards.map((card) => ({
-            room_id: roomId,
-            round_number: round,
-            side: 'creator',
-            card_id: card.id,
-            card_name: card.name,
-            card_image: card.image,
-            is_legendary: card.isLegendary || false,
-            selected_by: null
-          })),
-          ...joinerCards.map((card) => ({
-            room_id: roomId,
-            round_number: round,
-            side: 'joiner',
-            card_id: card.id,
-            card_name: card.name,
-            card_image: card.image,
-            is_legendary: card.isLegendary || false,
-            selected_by: null
-          }))
-        ]
-
-        const { error } = await supabaseWithToken
-          .from('room_cards')
-          .insert(roomCardsData)
-
-        if (error) throw error
+        console.log('Cards generated successfully:', data)
       }
 
       // Timer is already started when room status was set to drafting
@@ -821,6 +737,27 @@ const Room = () => {
         .eq('room_id', roomId)
         .eq('card_id', cardId)
         .eq('round_number', room.current_round)
+
+      // Add selected card to player's deck
+      const selectedCardData = roomCards.find(card => 
+        card.card_id === cardId && 
+        card.round_number === room.current_round &&
+        card.side === playerSide
+      )
+
+      if (selectedCardData) {
+        await supabase
+          .from('player_decks')
+          .insert({
+            room_id: roomId,
+            player_side: playerSide,
+            card_id: cardId,
+            card_name: selectedCardData.card_name,
+            card_image: selectedCardData.card_image,
+            is_legendary: selectedCardData.is_legendary,
+            selection_order: room.current_round
+          })
+      }
     } catch (error) {
       console.error('Error selecting card:', error)
     }
@@ -1031,7 +968,7 @@ const Room = () => {
                            onSelect={() => userRole === 'creator' ? handleCardSelect(card.card_id) : {}}
                            disabled={isSelectionLocked || userRole !== 'creator'}
                            isRevealing={isSelectionLocked}
-                           showUnselectedOverlay={isSelectionLocked && !card.selected_by}
+                           showUnselectedOverlay={false}
                         />
                       ))}
                   </div>
@@ -1059,7 +996,7 @@ const Room = () => {
                            onSelect={() => userRole === 'joiner' ? handleCardSelect(card.card_id) : {}}
                            disabled={isSelectionLocked || userRole !== 'joiner'}
                            isRevealing={isSelectionLocked}
-                           showUnselectedOverlay={isSelectionLocked && !card.selected_by}
+                           showUnselectedOverlay={false}
                         />
                       ))}
                   </div>

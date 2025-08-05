@@ -165,6 +165,25 @@ const Room = () => {
     }
   }, [roomId])
 
+  // Expire room after 30 minutes when draft is completed
+  useEffect(() => {
+    if (room?.status === 'completed') {
+      const expireTimer = setTimeout(async () => {
+        try {
+          await supabase.from('rooms').delete().eq('id', roomId)
+          await supabase.from('room_cards').delete().eq('room_id', roomId)
+          await supabase.from('player_decks').delete().eq('room_id', roomId)
+          await supabase.from('game_sessions').delete().eq('room_id', roomId)
+          navigate('/')
+        } catch (error) {
+          console.error('Error expiring room:', error)
+        }
+      }, 30 * 60 * 1000) // 30 minutes
+
+      return () => clearTimeout(expireTimer)
+    }
+  }, [room?.status, roomId, navigate])
+
   const fetchRoom = async () => {
     if (!roomId) return
 
@@ -178,26 +197,10 @@ const Room = () => {
       if (error) throw error
       setRoom(data)
       
-      // Determine user role based on current URL and who has access
+      // Determine user role based on session storage flags
       if (data) {
-        // Check if user is coming from creating the room (from Index page)
-        const isCreator = sessionStorage.getItem(`created_room_${roomId}`) === 'true'
-        // Check if user is coming from joining the room (from Index page) 
-        const isJoiner = sessionStorage.getItem(`joined_room_${roomId}`) === 'true'
-        
-        if (isCreator) {
-          setUserRole('creator')
-          // Clear the session flag
-          sessionStorage.removeItem(`created_room_${roomId}`)
-        } else if (isJoiner) {
-          setUserRole('joiner')
-          // Clear the session flag
-          sessionStorage.removeItem(`joined_room_${roomId}`)
-        } else {
-          // If no clear role, determine based on existing data
-          const role = getUserRole(data, userSessionId)
-          setUserRole(role)
-        }
+        const role = getUserRole(data, userSessionId)
+        setUserRole(role)
       }
     } catch (error) {
       console.error('Error fetching room:', error)

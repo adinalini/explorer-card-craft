@@ -175,8 +175,8 @@ const Room = () => {
 
   // Reset selection state at start of each round
   useEffect(() => {
-    if (room?.current_round && room?.status === 'drafting') {
-      console.log(`Starting round ${room.current_round} - resetting selection state`)
+    if (room?.current_round && room?.status === 'drafting' && userRole !== 'spectator') {
+      console.log(`Starting round ${room.current_round} - resetting selection state for ${userRole}`)
       setSelectedCard(null)
       setIsSelectionLocked(false)
       setShowReveal(false)
@@ -192,14 +192,14 @@ const Room = () => {
       const autoSelectDelay = ((room.round_duration_seconds || 15) * 1000) * 0.75
       
       const timeout = setTimeout(() => {
-        if (!selectedCard && userRole !== 'spectator' && !isSelectionLocked) {
-          console.log('Background auto-selection triggered')
+        if (!selectedCard && (userRole === 'creator' || userRole === 'joiner') && !isSelectionLocked) {
+          console.log(`Background auto-selection triggered for ${userRole}`)
           autoSelectRandomCard()
         }
       }, autoSelectDelay)
       setBackgroundAutoSelectTimeout(timeout)
     }
-  }, [room?.current_round, room?.status])
+  }, [room?.current_round, room?.status, userRole]) // Added userRole dependency
 
   useEffect(() => {
     if (!roomId) return

@@ -33,7 +33,7 @@ export function DeckDisplay({ cards, playerName, isOwn }: DeckDisplayProps) {
         {isOwn && (
           <div className="w-32 space-y-1">
             <h4 className="text-sm font-semibold text-muted-foreground mb-2">Deck List</h4>
-            <div className="space-y-1 h-80 overflow-y-auto">
+            <div className="space-y-1 h-96">
               {legendaryCard && (
                 <div className="text-sm text-yellow-600 font-medium border-l-2 border-yellow-500 pl-2 py-1">
                   {legendaryCard.card_name}
@@ -58,7 +58,7 @@ export function DeckDisplay({ cards, playerName, isOwn }: DeckDisplayProps) {
         {!isOwn && (
           <div className="w-32 space-y-1">
             <h4 className="text-sm font-semibold text-muted-foreground mb-2">Deck List</h4>
-            <div className="space-y-1 h-80 overflow-y-auto">
+            <div className="space-y-1 h-96">
               {legendaryCard && (
                 <div className="text-sm text-yellow-600 font-medium border-l-2 border-yellow-500 pl-2 py-1">
                   {legendaryCard.card_name}

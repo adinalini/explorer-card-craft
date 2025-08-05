@@ -132,6 +132,23 @@ const Index = () => {
         return
       }
 
+      // First create a game session for the joiner so they can update the room
+      const sessionId = getUserSessionId()
+      console.log('Creating game session for joiner:', { roomId: roomId.toUpperCase(), sessionId, joinerName: joinerName.trim() })
+      
+      const { error: sessionError } = await supabase
+        .from('game_sessions')
+        .insert({
+          room_id: roomId.toUpperCase(),
+          session_token: sessionId,
+          player_role: 'joiner',
+          player_name: joinerName.trim()
+        })
+
+      console.log('Game session creation result:', { sessionError })
+      
+      if (sessionError) throw sessionError
+
       console.log('Updating room with joiner:', { roomId: roomId.toUpperCase(), joinerName: joinerName.trim() })
       
       const { data: updateData, error: updateError } = await supabase
@@ -145,7 +162,6 @@ const Index = () => {
       if (updateError) throw updateError
 
       // Set session flag to indicate this user joined this room  
-      const sessionId = getUserSessionId()
       localStorage.setItem(`room_${roomId.toUpperCase()}_joiner`, sessionId)
       console.log('Joiner session set:', { roomId: roomId.toUpperCase(), sessionId })
       setJoinDialogOpen(false)

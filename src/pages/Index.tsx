@@ -8,6 +8,7 @@ import { Blob } from "@/components/ui/blob"
 import { WaveDivider } from "@/components/ui/wave-divider"
 import { useNavigate } from "react-router-dom"
 import { supabase } from "@/integrations/supabase/client"
+import { createClient } from '@supabase/supabase-js'
 import { toast } from "@/hooks/use-toast"
 
 const Index = () => {
@@ -151,7 +152,20 @@ const Index = () => {
 
       console.log('Updating room with joiner:', { roomId: roomId.toUpperCase(), joinerName: joinerName.trim() })
       
-      const { data: updateData, error: updateError } = await supabase
+      // Create a new supabase client instance with session token header
+      const supabaseWithToken = createClient(
+        "https://ophgbcyhxvwljfztlvyu.supabase.co",
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9waGdiY3loeHZ3bGpmenRsdnl1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQzMzU4NzYsImV4cCI6MjA2OTkxMTg3Nn0.iiiRP6WtGtwI_jJDnAJUqmEZcoNUbYT3HiBl3VuBnKs",
+        {
+          global: {
+            headers: {
+              'x-session-token': sessionId
+            }
+          }
+        }
+      )
+      
+      const { data: updateData, error: updateError } = await supabaseWithToken
         .from('rooms')
         .update({ joiner_name: joinerName.trim() })
         .eq('id', roomId.toUpperCase())

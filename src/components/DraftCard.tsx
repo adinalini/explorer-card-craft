@@ -47,8 +47,8 @@ export function DraftCard({
             LEGENDARY
           </div>
         )}
-        {showUnselectedOverlay && !isSelected && (
-          <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+        {showUnselectedOverlay && isRevealing && !isSelected && (
+          <div className="absolute inset-0 bg-black bg-opacity-60 flex items-center justify-center">
             <div className="text-white text-6xl font-bold">✕</div>
           </div>
         )}

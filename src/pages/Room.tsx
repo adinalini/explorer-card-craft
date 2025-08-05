@@ -167,13 +167,17 @@ const Room = () => {
           filter: `room_id=eq.${roomId}`
         },
         (payload) => {
+          console.log('Room cards update:', payload.eventType, 'for user role:', userRole)
           fetchRoomCards()
           
-          // Start timer for joiners when new cards are detected
-          if (payload.eventType === 'INSERT' && userRole === 'joiner') {
-            // Small delay to ensure cards are fetched first
+          // Start timer when new cards are detected for current round
+          if (payload.eventType === 'INSERT') {
             setTimeout(() => {
-              startRoundTimer()
+              // Check if we have cards for current round and start timer if needed
+              if (room && !isSelectionLocked && timeLeft === 15) {
+                console.log('Starting timer for', userRole)
+                startRoundTimer()
+              }
             }, 500)
           }
         }
@@ -602,7 +606,20 @@ const Room = () => {
     const randomCard = currentRoundCards[Math.floor(Math.random() * currentRoundCards.length)]
     
     try {
-      await supabase
+      // Create authenticated client for auto-selection
+      const supabaseWithToken = createClient(
+        "https://ophgbcyhxvwljfztlvyu.supabase.co",
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9waGdiY3loeHZ3bGpmenRsdnl1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQzMzU4NzYsImV4cCI6MjA2OTkxMTg3Nn0.iiiRP6WtGtwI_jJDnAJUqmEZcoNUbYT3HiBl3VuBnKs",
+        {
+          global: {
+            headers: {
+              'x-session-token': userSessionId
+            }
+          }
+        }
+      )
+      
+      await supabaseWithToken
         .from('room_cards')
         .update({ selected_by: userRole })
         .eq('room_id', roomId)
@@ -902,7 +919,7 @@ const Room = () => {
                           onSelect={() => userRole === 'creator' ? handleCardSelect(card.card_id) : {}}
                           disabled={isSelectionLocked || userRole !== 'creator'}
                           isRevealing={isSelectionLocked}
-                          showUnselectedOverlay={isSelectionLocked}
+                          showUnselectedOverlay={!card.selected_by}
                         />
                       ))}
                   </div>
@@ -930,7 +947,7 @@ const Room = () => {
                           onSelect={() => userRole === 'joiner' ? handleCardSelect(card.card_id) : {}}
                           disabled={isSelectionLocked || userRole !== 'joiner'}
                           isRevealing={isSelectionLocked}
-                          showUnselectedOverlay={isSelectionLocked}
+                          showUnselectedOverlay={!card.selected_by}
                         />
                       ))}
                   </div>

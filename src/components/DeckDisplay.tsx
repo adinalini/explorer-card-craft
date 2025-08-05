@@ -1,3 +1,5 @@
+import { CardImage } from "@/components/CardImage"
+
 interface Card {
   card_id: string
   card_name: string
@@ -32,13 +34,10 @@ export function DeckDisplay({ cards, playerName, isOwn }: DeckDisplayProps) {
           <div className="w-16 h-20 relative">
             {legendaryCard ? (
               <div className="w-full h-full bg-white border-2 border-yellow-500 rounded overflow-hidden">
-                <img
-                  src={legendaryCard.card_image}
-                  alt={legendaryCard.card_name}
+                <CardImage
+                  cardId={legendaryCard.card_id}
+                  cardName={legendaryCard.card_name}
                   className="w-full h-full object-cover"
-                  onError={(e) => {
-                    e.currentTarget.src = '/placeholder.svg'
-                  }}
                 />
               </div>
             ) : (
@@ -61,13 +60,10 @@ export function DeckDisplay({ cards, playerName, isOwn }: DeckDisplayProps) {
                   <div key={col} className="w-12 h-16 relative">
                     {card ? (
                       <div className="w-full h-full bg-white border border-muted rounded overflow-hidden">
-                        <img
-                          src={card.card_image}
-                          alt={card.card_name}
+                        <CardImage
+                          cardId={card.card_id}
+                          cardName={card.card_name}
                           className="w-full h-full object-cover"
-                          onError={(e) => {
-                            e.currentTarget.src = '/placeholder.svg'
-                          }}
                         />
                       </div>
                     ) : (

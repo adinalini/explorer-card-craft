@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils"
+import { CardImage } from "@/components/CardImage"
 
 interface DraftCardProps {
   cardId: string
@@ -31,14 +32,10 @@ export function DraftCard({
       onClick={!disabled ? onSelect : undefined}
     >
       <div className="aspect-[3/4] relative">
-        <img
-          src={cardImage}
-          alt={cardName}
+        <CardImage
+          cardId={cardId}
+          cardName={cardName}
           className="w-full h-full object-cover"
-          onError={(e) => {
-            // Fallback if image doesn't load
-            e.currentTarget.src = '/placeholder.svg'
-          }}
         />
         {isLegendary && (
           <div className="absolute top-2 right-2 bg-yellow-500 text-white px-2 py-1 rounded text-xs font-bold">

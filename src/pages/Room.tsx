@@ -86,6 +86,7 @@ const Room = () => {
   const [selectedCard, setSelectedCard] = useState<string | null>(null)
   const [timeLeft, setTimeLeft] = useState<number>(15)
   const [isSelectionLocked, setIsSelectionLocked] = useState(false)
+  const [selectionTimer, setSelectionTimer] = useState<NodeJS.Timeout | null>(null)
   const [userSessionId] = useState(getUserSessionId())
   const [userRole, setUserRole] = useState<'creator' | 'joiner' | 'spectator'>('spectator')
   const [isStartingDraft, setIsStartingDraft] = useState(false)
@@ -559,10 +560,43 @@ const Room = () => {
   const lockSelections = async () => {
     setIsSelectionLocked(true)
     
+    // Auto-select random card if user hasn't selected one
+    await autoSelectRandomCard()
+    
     // Process selections and move to next round or end draft
     setTimeout(() => {
       processRoundEnd()
     }, 3000) // Show selections for 3 seconds
+  }
+
+  const autoSelectRandomCard = async () => {
+    if (!room || !roomId || userRole === 'spectator' || selectedCard) return
+
+    // Check if current user already made a selection
+    const currentRoundCards = roomCards.filter(card => 
+      card.round_number === room.current_round && 
+      card.side === userRole &&
+      !card.selected_by
+    )
+
+    if (currentRoundCards.length === 0) return
+
+    // Select a random card from available options
+    const randomCard = currentRoundCards[Math.floor(Math.random() * currentRoundCards.length)]
+    
+    try {
+      await supabase
+        .from('room_cards')
+        .update({ selected_by: userRole })
+        .eq('room_id', roomId)
+        .eq('card_id', randomCard.card_id)
+        .eq('round_number', room.current_round)
+      
+      setSelectedCard(randomCard.card_id)
+      console.log(`Auto-selected random card: ${randomCard.card_name} for ${userRole}`)
+    } catch (error) {
+      console.error('Error auto-selecting card:', error)
+    }
   }
 
   const processRoundEnd = async () => {

@@ -762,12 +762,23 @@ const Room = () => {
       await new Promise(resolve => setTimeout(resolve, 1000))
       
       console.log('=== FETCHING UPDATED CARDS AFTER AUTO-SELECTION ===')
+      
+      // First, let's verify what cards exist for this round
+      const { data: allRoundCards, error: allCardsError } = await supabaseWithToken
+        .from('room_cards')
+        .select('*')
+        .eq('room_id', roomId)
+        .eq('round_number', currentRound)
+        
+      console.log('All cards for round:', allRoundCards)
+      
+      // Now fetch only the selected ones
       const { data: updatedCards, error: updateFetchError } = await supabaseWithToken
         .from('room_cards')
         .select('*')
         .eq('room_id', roomId)
         .eq('round_number', currentRound)
-        .not('selected_by', 'is', null)
+        .in('selected_by', ['creator', 'joiner'])
         
       if (updateFetchError) {
         console.error('=== ERROR FETCHING UPDATED CARDS ===')

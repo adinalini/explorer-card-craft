@@ -97,14 +97,9 @@ const Room = () => {
     fetchRoomCards()
     fetchPlayerDecks()
 
-    // Set up interval to refresh room data every 2 seconds to ensure sync
-    const refreshInterval = setInterval(() => {
-      fetchRoom()
-    }, 2000)
-
-    // Subscribe to room changes
+    // Subscribe to room changes with realtime
     const roomChannel = supabase
-      .channel('room-changes')
+      .channel(`room-${roomId}`)
       .on(
         'postgres_changes',
         {
@@ -114,9 +109,16 @@ const Room = () => {
           filter: `id=eq.${roomId}`
         },
         (payload) => {
+          console.log('Room update received:', payload)
           if (payload.eventType === 'UPDATE') {
             const updatedRoom = payload.new as Room
+            console.log('Updated room data:', updatedRoom)
             setRoom(updatedRoom)
+            
+            // Determine user role when room data changes
+            const role = getUserRole(updatedRoom, userSessionId)
+            console.log('User role determined:', role)
+            setUserRole(role)
             
             // Start draft when both players are ready
             if (updatedRoom.creator_ready && updatedRoom.joiner_ready && updatedRoom.status === 'waiting') {
@@ -133,7 +135,7 @@ const Room = () => {
 
     // Subscribe to room cards changes
     const cardsChannel = supabase
-      .channel('room-cards-changes')
+      .channel(`room-cards-${roomId}`)
       .on(
         'postgres_changes',
         {
@@ -150,7 +152,7 @@ const Room = () => {
 
     // Subscribe to player decks changes
     const decksChannel = supabase
-      .channel('player-decks-changes')
+      .channel(`player-decks-${roomId}`)
       .on(
         'postgres_changes',
         {
@@ -166,12 +168,11 @@ const Room = () => {
       .subscribe()
 
     return () => {
-      clearInterval(refreshInterval)
       supabase.removeChannel(roomChannel)
       supabase.removeChannel(cardsChannel)
       supabase.removeChannel(decksChannel)
     }
-  }, [roomId])
+  }, [roomId, userSessionId])
 
   // Expire room after 30 minutes when draft is completed
   useEffect(() => {

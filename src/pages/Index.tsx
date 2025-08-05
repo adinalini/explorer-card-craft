@@ -95,11 +95,15 @@ const Index = () => {
     setIsJoining(true)
 
     try {
+      console.log('Attempting to join room:', { roomId: roomId.toUpperCase(), joinerName: joinerName.trim() })
+      
       const { data: room, error: fetchError } = await supabase
         .from('rooms')
         .select('*')
         .eq('id', roomId.toUpperCase())
         .single()
+
+      console.log('Fetched room data:', { room, fetchError })
 
       if (fetchError || !room) {
         toast({

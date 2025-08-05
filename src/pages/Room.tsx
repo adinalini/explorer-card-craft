@@ -91,6 +91,7 @@ const Room = () => {
   const [userRole, setUserRole] = useState<'creator' | 'joiner' | 'spectator'>('spectator')
   const [isStartingDraft, setIsStartingDraft] = useState(false)
   const [backgroundAutoSelectTimeout, setBackgroundAutoSelectTimeout] = useState<NodeJS.Timeout | null>(null)
+  const [isProcessingRound, setIsProcessingRound] = useState(false)
 
   // Function to extend session expiry during gameplay
   const extendSession = async () => {
@@ -114,23 +115,25 @@ const Room = () => {
   const [showReveal, setShowReveal] = useState(false)
 
   const handleTimeUp = async () => {
-    if (!isSelectionLocked) {
-      console.log('Timer up - entering reveal phase')
-      setIsSelectionLocked(true)
-      setShowReveal(true)
-      
-      // Auto-select random card if user hasn't selected one
+    if (isSelectionLocked || isProcessingRound) return
+    
+    console.log('Timer up - entering reveal phase')
+    setIsSelectionLocked(true)
+    setShowReveal(true)
+    
+    // Auto-select random card if user hasn't selected one
+    if (!selectedCard && userRole !== 'spectator') {
       await autoSelectRandomCard()
-      
-      if (userRole === 'creator') {
-        console.log('Creator: Will process round end in 3 seconds')
-        setTimeout(() => {
+    }
+    
+    if (userRole === 'creator' && !isProcessingRound) {
+      console.log('Creator: Will process round end in 3 seconds')
+      setTimeout(() => {
+        if (!isProcessingRound) {
           console.log('Creator: Processing round end now...')
           processRoundEnd()
-        }, 3000) // Show selections for 3 seconds
-      } else {
-        console.log('Joiner: Waiting for creator to process round end')
-      }
+        }
+      }, 3000)
     }
   }
 
@@ -171,27 +174,31 @@ const Room = () => {
 
   // Reset selection state at start of each round
   useEffect(() => {
-    if (room?.current_round) {
+    if (room?.current_round && room?.status === 'drafting') {
       console.log(`Starting round ${room.current_round} - resetting selection state`)
       setSelectedCard(null)
       setIsSelectionLocked(false)
       setShowReveal(false)
+      setIsProcessingRound(false)
+      
+      // Clear any existing background auto-selection timeout
+      if (backgroundAutoSelectTimeout) {
+        clearTimeout(backgroundAutoSelectTimeout)
+        setBackgroundAutoSelectTimeout(null)
+      }
       
       // Start background auto-selection timer (75% of round duration)
       const autoSelectDelay = ((room.round_duration_seconds || 15) * 1000) * 0.75
-      if (backgroundAutoSelectTimeout) {
-        clearTimeout(backgroundAutoSelectTimeout)
-      }
       
       const timeout = setTimeout(() => {
-        if (!selectedCard && userRole !== 'spectator') {
+        if (!selectedCard && userRole !== 'spectator' && !isSelectionLocked) {
           console.log('Background auto-selection triggered')
           autoSelectRandomCard()
         }
       }, autoSelectDelay)
       setBackgroundAutoSelectTimeout(timeout)
     }
-  }, [room?.current_round, userRole, selectedCard])
+  }, [room?.current_round, room?.status])
 
   useEffect(() => {
     if (!roomId) return
@@ -630,7 +637,7 @@ const Room = () => {
 
 
   const autoSelectRandomCard = async () => {
-    if (!room || !roomId || userRole === 'spectator' || selectedCard) return
+    if (!room || !roomId || userRole === 'spectator' || selectedCard || isSelectionLocked) return
 
     // Check if current user already made a selection
     const currentRoundCards = roomCards.filter(card => 
@@ -645,7 +652,7 @@ const Room = () => {
     const randomCard = currentRoundCards[Math.floor(Math.random() * currentRoundCards.length)]
     
     try {
-      // Create authenticated client for auto-selection
+      // Use shared client to avoid multiple instances
       const supabaseWithToken = getSupabaseWithSession()
       
       await supabaseWithToken
@@ -663,11 +670,17 @@ const Room = () => {
   }
 
   const processRoundEnd = async () => {
-    if (!room || !roomId || userRole !== 'creator') {
-      console.log('processRoundEnd early return:', { room: !!room, roomId, userRole })
+    if (!room || !roomId || userRole !== 'creator' || isProcessingRound) {
+      console.log('processRoundEnd early return:', { 
+        room: !!room, 
+        roomId, 
+        userRole, 
+        isProcessingRound 
+      })
       return
     }
 
+    setIsProcessingRound(true)
     console.log('processRoundEnd: Starting to process round end for round', room.current_round)
     
     // Extend session before processing round to prevent expiry
@@ -772,6 +785,8 @@ const Room = () => {
       }
     } catch (error) {
       console.error('Error processing round end:', error)
+    } finally {
+      setIsProcessingRound(false)
     }
   }
 

@@ -639,17 +639,52 @@ const Room = () => {
   const autoSelectRandomCard = async () => {
     if (!room || !roomId || userRole === 'spectator' || selectedCard || isSelectionLocked) return
 
-    // Check if current user already made a selection
-    const currentRoundCards = roomCards.filter(card => 
-      card.round_number === room.current_round && 
-      card.side === userRole &&
-      !card.selected_by
+    // Get all cards for current round and user side
+    let currentRoundCards = roomCards.filter(card => 
+      card.round_number === room.current_round && card.side === userRole
     )
 
-    if (currentRoundCards.length === 0) return
+    // If no cards exist for current round, try to generate them first
+    if (currentRoundCards.length === 0) {
+      console.log(`No cards found for ${userRole} in round ${room.current_round}, attempting to generate`)
+      try {
+        const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-round-cards`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+          },
+          body: JSON.stringify({
+            roomId: roomId,
+            round: room.current_round.toString()
+          })
+        })
+        
+        if (response.ok) {
+          console.log(`Successfully generated cards for round ${room.current_round}`)
+          // Wait a moment for the cards to be inserted and trigger the subscription
+          await new Promise(resolve => setTimeout(resolve, 1000))
+          return // Let the subscription handle the update
+        }
+      } catch (error) {
+        console.error('Error generating missing cards:', error)
+      }
+      return
+    }
+
+    // Check if user already selected a card
+    const userSelectedCard = currentRoundCards.find(card => card.selected_by === userRole)
+    if (userSelectedCard) {
+      console.log(`User ${userRole} already has selected card: ${userSelectedCard.card_name}`)
+      return
+    }
+
+    // Filter to unselected cards only
+    const availableCards = currentRoundCards.filter(card => !card.selected_by)
+    if (availableCards.length === 0) return
 
     // Select a random card from available options
-    const randomCard = currentRoundCards[Math.floor(Math.random() * currentRoundCards.length)]
+    const randomCard = availableCards[Math.floor(Math.random() * availableCards.length)]
     
     try {
       // Use shared client to avoid multiple instances

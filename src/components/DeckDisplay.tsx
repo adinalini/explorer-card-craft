@@ -83,7 +83,7 @@ export function DeckDisplay({ cards, playerName, isOwn }: DeckDisplayProps) {
         <div className="space-y-3 flex-1">
           {/* Legendary card row */}
           <div className="flex justify-center">
-            <div className="w-16 h-20 relative">
+            <div className="w-20 h-28 relative">
               {legendaryCard ? (
                 <div className="w-full h-full bg-white border-2 border-yellow-500 rounded overflow-hidden">
                   <CardImage
@@ -109,7 +109,7 @@ export function DeckDisplay({ cards, playerName, isOwn }: DeckDisplayProps) {
                   const card = normalCards[cardIndex]
                   
                   return (
-                    <div key={col} className="w-12 h-16 relative">
+                    <div key={col} className="w-16 h-22 relative">
                       {card ? (
                         <div className="w-full h-full bg-white border border-muted rounded overflow-hidden">
                           <CardImage

@@ -300,11 +300,31 @@ Deno.serve(async (req) => {
           card.cost === structure.cost && !usedIds.has(card.id)
         )
         
-        for (let i = 0; i < 4 && i < availableForCost.length; i++) {
-          const randomIndex = Math.floor(Math.random() * availableForCost.length)
-          const selected = availableForCost.splice(randomIndex, 1)[0]
-          roundCards.push(selected)
-          usedIds.add(selected.id)
+        console.log(`Round ${roundNum} (cost ${structure.cost}): Found ${availableForCost.length} available cards:`, 
+          availableForCost.map(c => c.name))
+        
+        if (availableForCost.length < 4) {
+          console.warn(`Not enough cards for round ${roundNum} cost ${structure.cost}. Available: ${availableForCost.length}`)
+          // If not enough non-spell cards, include spells
+          const availableWithSpells = cardDatabase.filter(card => 
+            !card.isLegendary && 
+            card.cost === structure.cost && !usedIds.has(card.id)
+          )
+          console.log(`Including spells: ${availableWithSpells.length} total cards available`)
+          
+          for (let i = 0; i < 4 && i < availableWithSpells.length; i++) {
+            const randomIndex = Math.floor(Math.random() * availableWithSpells.length)
+            const selected = availableWithSpells.splice(randomIndex, 1)[0]
+            roundCards.push(selected)
+            usedIds.add(selected.id)
+          }
+        } else {
+          for (let i = 0; i < 4 && i < availableForCost.length; i++) {
+            const randomIndex = Math.floor(Math.random() * availableForCost.length)
+            const selected = availableForCost.splice(randomIndex, 1)[0]
+            roundCards.push(selected)
+            usedIds.add(selected.id)
+          }
         }
         
       } else if (structure.type === 'pool') {

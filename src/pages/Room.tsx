@@ -684,7 +684,7 @@ const Room = () => {
       console.log('=== STARTING AUTO-SELECTION PROCESS ===')
       
       // Fetch current round cards fresh from database to ensure we have all cards
-      const { data: allCurrentRoundCards, error: fetchError } = await supabaseWithToken
+      let { data: allCurrentRoundCards, error: fetchError } = await supabaseWithToken
         .from('room_cards')
         .select('*')
         .eq('room_id', roomId)
@@ -697,7 +697,42 @@ const Room = () => {
 
       if (!allCurrentRoundCards || allCurrentRoundCards.length === 0) {
         console.log('No cards found for current round:', currentRound)
-        return
+        console.log('Attempting to generate missing cards for round:', currentRound)
+        
+        // Try to generate cards for this round if they're missing
+        try {
+          const { data: generationResponse, error: generationError } = await supabase.functions.invoke('generate-round-cards', {
+            body: { 
+              roomId,
+              round: currentRound,
+              usedCardIds: [],
+              roundType: { isLegendary: false, isSpell: false }
+            }
+          })
+          
+          if (generationError) {
+            console.error('Error generating missing round cards:', generationError)
+          } else {
+            console.log('Successfully generated missing cards for round:', currentRound)
+            // Re-fetch the cards
+            const { data: refetchedCards } = await supabaseWithToken
+              .from('room_cards')
+              .select('*')
+              .eq('room_id', roomId)
+              .eq('round_number', currentRound)
+            
+            if (refetchedCards && refetchedCards.length > 0) {
+              // Update the allCurrentRoundCards variable and continue with auto-selection
+              allCurrentRoundCards = refetchedCards
+            } else {
+              console.error('Failed to generate cards for round:', currentRound)
+              return
+            }
+          }
+        } catch (error) {
+          console.error('Exception generating missing round cards:', error)
+          return
+        }
       }
 
       console.log('All current round cards:', allCurrentRoundCards)

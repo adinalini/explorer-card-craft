@@ -134,7 +134,7 @@ const Room = () => {
               setIsStartingDraft(true)
               
               // Only let the creator start the draft to avoid race conditions
-              if (userRole === 'creator') {
+              if (role === 'creator') {
                 console.log('Creator will start draft in 5 seconds...')
                 setTimeout(() => {
                   console.log('Timeout fired, calling startDraft now...')

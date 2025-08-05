@@ -270,6 +270,15 @@ const Room = () => {
     console.log('Attempting to update ready status:', { userRole, updateField, currentValue, userSessionId })
     
     try {
+      // Debug: Check all sessions for this room
+      const { data: allSessions } = await supabase
+        .from('game_sessions')
+        .select('*')
+        .eq('room_id', roomId!)
+
+      console.log('All sessions for room:', allSessions)
+      console.log('Looking for session with:', { userSessionId, userRole, roomId })
+
       // Check if the current user has a valid game session for this room and role
       const { data: existingSession, error: sessionError } = await supabase
         .from('game_sessions')

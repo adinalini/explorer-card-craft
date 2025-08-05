@@ -166,8 +166,16 @@ const Room = () => {
           table: 'room_cards',
           filter: `room_id=eq.${roomId}`
         },
-        () => {
+        (payload) => {
           fetchRoomCards()
+          
+          // Start timer for joiners when new cards are detected
+          if (payload.eventType === 'INSERT' && userRole === 'joiner') {
+            // Small delay to ensure cards are fetched first
+            setTimeout(() => {
+              startRoundTimer()
+            }, 500)
+          }
         }
       )
       .subscribe()
@@ -541,6 +549,11 @@ const Room = () => {
   }
 
   const startRoundTimer = () => {
+    // Clear any existing timer
+    if (selectionTimer) {
+      clearInterval(selectionTimer)
+    }
+    
     setTimeLeft(15)
     setIsSelectionLocked(false)
     setSelectedCard(null)
@@ -555,6 +568,8 @@ const Room = () => {
         return prev - 1
       })
     }, 1000)
+    
+    setSelectionTimer(timer)
   }
 
   const lockSelections = async () => {

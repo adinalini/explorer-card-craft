@@ -680,15 +680,24 @@ const Room = () => {
         
         if (response.ok) {
           console.log(`Successfully generated cards for round ${room.current_round}`)
-          // Wait a moment for the cards to be inserted and trigger the subscription
-          await new Promise(resolve => setTimeout(resolve, 1000))
-          console.log('Cards should be generated, continuing with auto-select')
-          // Get fresh cards after generation - use current state
-          currentRoundCards = roomCards.filter(card => 
-            card.round_number === room.current_round && card.side === userRole
-          )
-          if (currentRoundCards.length === 0) {
-            console.log('Still no cards after generation, giving up')
+          // Wait longer for the subscription to update the state
+          await new Promise(resolve => setTimeout(resolve, 2000))
+          console.log('Cards should be generated, fetching fresh data')
+          
+          // Fetch fresh cards directly from database
+          const supabaseWithToken = getSupabaseWithSession()
+          const { data: freshCards, error: fetchError } = await supabaseWithToken
+            .from('room_cards')
+            .select('*')
+            .eq('room_id', roomId)
+            .eq('round_number', room.current_round)
+            .eq('side', userRole)
+          
+          if (!fetchError && freshCards && freshCards.length > 0) {
+            console.log(`Found ${freshCards.length} fresh cards for ${userRole}`)
+            currentRoundCards = freshCards
+          } else {
+            console.log('Still no cards after fresh fetch, giving up')
             return
           }
         } else {

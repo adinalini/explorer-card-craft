@@ -644,65 +644,107 @@ const Room = () => {
   }
 
   const processRoundEnd = async () => {
-    if (!room || !roomId || userRole !== 'creator' || isProcessingRound) {
+    console.log('🔄 PROCESS ROUND END CALLED')
+    console.log('Room:', room?.id, 'Round:', room?.current_round, 'User Role:', userRole, 'Is Processing:', isProcessingRound)
+    
+    if (!room || !roomId || isProcessingRound) {
+      console.log('❌ Process round end blocked - missing data or already processing')
+      return
+    }
+
+    // CRITICAL FIX: Only the creator should process the round end
+    if (userRole !== 'creator') {
+      console.log('❌ Process round end blocked - user is not creator')
       return
     }
 
     setIsProcessingRound(true)
+    console.log('🟡 Setting isProcessingRound to true')
     
-      await extendSession()
+    await extendSession()
+    
+    try {
+      const supabaseWithToken = getSupabaseWithSession()
+      const currentRound = room.current_round
       
-      try {
-        const supabaseWithToken = getSupabaseWithSession()
-        const currentRound = room.current_round
+      // DEBUGGING FOR ROUND 6 SPECIFICALLY
+      if (currentRound === 6) {
+        console.log('🔍 ROUND 6 DEBUG - Processing round end')
+        console.log('🔍 ROUND 6 DEBUG - Room ID:', roomId)
+        console.log('🔍 ROUND 6 DEBUG - Current round:', currentRound)
+        console.log('🔍 ROUND 6 DEBUG - User role:', userRole)
+      }
+      
+      const { data: allCurrentRoundCards, error: fetchError } = await supabaseWithToken
+        .from('room_cards')
+        .select('*')
+        .eq('room_id', roomId)
+        .eq('round_number', currentRound)
+
+      if (fetchError) {
+        console.error('❌ Error fetching current round cards:', fetchError)
+        return
+      }
+
+      console.log(`📋 Found ${allCurrentRoundCards?.length || 0} cards for round ${currentRound}`)
+      
+      const selectedCards = allCurrentRoundCards ? allCurrentRoundCards.filter(card => card.selected_by) : []
+      console.log(`✅ Found ${selectedCards.length} selected cards:`, selectedCards.map(c => `${c.card_id} by ${c.selected_by}`))
+
+      // CRITICAL: Check if both players have made selections
+      const creatorSelected = selectedCards.find(card => card.selected_by === 'creator')
+      const joinerSelected = selectedCards.find(card => card.selected_by === 'joiner')
+      
+      if (currentRound === 6) {
+        console.log('🔍 ROUND 6 DEBUG - Creator selected:', creatorSelected?.card_id || 'NONE')
+        console.log('🔍 ROUND 6 DEBUG - Joiner selected:', joinerSelected?.card_id || 'NONE')
+      }
+
+      // Both players must have selected before proceeding
+      if (!creatorSelected || !joinerSelected) {
+        console.log(`⏳ Waiting for selections - Creator: ${creatorSelected ? '✅' : '❌'}, Joiner: ${joinerSelected ? '✅' : '❌'}`)
+        setIsProcessingRound(false)
+        return
+      }
+
+      const { data: existingDeckCards } = await supabaseWithToken
+        .from('player_decks')
+        .select('card_id, player_side')
+        .eq('room_id', roomId)
+        .eq('selection_order', currentRound)
+
+      const existingKeys = new Set(
+        existingDeckCards?.map(c => `${c.card_id}_${c.player_side}`) || []
+      )
+
+      console.log(`💾 Adding ${selectedCards.length} cards to player decks...`)
+      for (const card of selectedCards) {
+        const cardKey = `${card.card_id}_${card.selected_by}`
         
-        const { data: allCurrentRoundCards, error: fetchError } = await supabaseWithToken
-          .from('room_cards')
-          .select('*')
-          .eq('room_id', roomId)
-          .eq('round_number', currentRound)
-
-        if (fetchError) {
-          console.error('Error fetching current round cards:', fetchError)
-          return
-        }
-
-        const selectedCards = allCurrentRoundCards ? allCurrentRoundCards.filter(card => card.selected_by) : []
-
-        const { data: existingDeckCards } = await supabaseWithToken
-          .from('player_decks')
-          .select('card_id, player_side')
-          .eq('room_id', roomId)
-          .eq('selection_order', currentRound)
-
-        const existingKeys = new Set(
-          existingDeckCards?.map(c => `${c.card_id}_${c.player_side}`) || []
-        )
-
-        for (const card of selectedCards) {
-          const cardKey = `${card.card_id}_${card.selected_by}`
+        if (!existingKeys.has(cardKey)) {
+          const { error: deckError } = await supabaseWithToken
+            .from('player_decks')
+            .insert({
+              room_id: roomId,
+              player_side: card.selected_by,
+              card_id: card.card_id,
+              card_name: card.card_name,
+              card_image: card.card_image,
+              is_legendary: card.is_legendary,
+              selection_order: currentRound
+            })
           
-          if (!existingKeys.has(cardKey)) {
-            const { error: deckError } = await supabaseWithToken
-              .from('player_decks')
-              .insert({
-                room_id: roomId,
-                player_side: card.selected_by,
-                card_id: card.card_id,
-                card_name: card.card_name,
-                card_image: card.card_image,
-                is_legendary: card.is_legendary,
-                selection_order: currentRound
-              })
-            
-            if (deckError) {
-              console.error('Error adding card to deck:', deckError)
-            }
+          if (deckError) {
+            console.error('❌ Error adding card to deck:', deckError)
+          } else {
+            console.log(`✅ Added ${card.card_id} to ${card.selected_by} deck`)
           }
         }
+      }
 
       // Check if draft is complete (13 rounds)
       if (currentRound >= 13) {
+        console.log('🏁 Draft complete - setting status to completed')
         await supabaseWithToken
           .from('rooms')
           .update({ status: 'completed' })
@@ -710,17 +752,35 @@ const Room = () => {
       } else {
         const nextRound = currentRound + 1
         const nextRoundStartTime = new Date().toISOString()
-        await supabaseWithToken
+        
+        console.log(`⏭️ Advancing to round ${nextRound}`)
+        if (currentRound === 6) {
+          console.log('🔍 ROUND 6 DEBUG - Advancing from round 6 to round 7')
+          console.log('🔍 ROUND 6 DEBUG - Next round start time:', nextRoundStartTime)
+        }
+        
+        const { error: updateError } = await supabaseWithToken
           .from('rooms')
           .update({ 
             current_round: nextRound,
             round_start_time: nextRoundStartTime
           })
           .eq('id', roomId)
+          
+        if (updateError) {
+          console.error('❌ Error updating room for next round:', updateError)
+        } else {
+          console.log(`✅ Successfully advanced to round ${nextRound}`)
+        }
+
+        // Generate cards for the next round
+        console.log(`🎴 Generating cards for round ${nextRound}`)
+        await generateRoundCards(nextRound, { ...room, current_round: nextRound })
       }
     } catch (error) {
-      console.error('Error processing round end:', error)
+      console.error('❌ Error processing round end:', error)
     } finally {
+      console.log('🟢 Setting isProcessingRound to false')
       setIsProcessingRound(false)
     }
   }

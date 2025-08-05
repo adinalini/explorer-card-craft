@@ -94,22 +94,26 @@ const Room = () => {
   
   const timerIntervalRef = useRef<NodeJS.Timeout | null>(null)
 
+  const [showReveal, setShowReveal] = useState(false)
+
   const handleTimeUp = async () => {
-    console.log(`${userRole}: Time up, locking selections`)
-    setIsSelectionLocked(true)
-    
-    // Auto-select random card if user hasn't selected one
-    await autoSelectRandomCard()
-    
-    // Only creator processes round end to avoid race conditions
-    if (userRole === 'creator') {
-      console.log('Creator: Will process round end in 3 seconds')
-      setTimeout(() => {
-        console.log('Creator: Processing round end now...')
-        processRoundEnd()
-      }, 3000) // Show selections for 3 seconds
-    } else {
-      console.log('Joiner: Waiting for creator to process round end')
+    if (!isSelectionLocked) {
+      console.log('Timer up - entering reveal phase')
+      setIsSelectionLocked(true)
+      setShowReveal(true)
+      
+      // Auto-select random card if user hasn't selected one
+      await autoSelectRandomCard()
+      
+      if (userRole === 'creator') {
+        console.log('Creator: Will process round end in 3 seconds')
+        setTimeout(() => {
+          console.log('Creator: Processing round end now...')
+          processRoundEnd()
+        }, 3000) // Show selections for 3 seconds
+      } else {
+        console.log('Joiner: Waiting for creator to process round end')
+      }
     }
   }
 
@@ -154,6 +158,7 @@ const Room = () => {
       console.log(`Starting round ${room.current_round} - resetting selection state`)
       setSelectedCard(null)
       setIsSelectionLocked(false)
+      setShowReveal(false)
     }
   }, [room?.current_round])
 
@@ -686,55 +691,61 @@ const Room = () => {
   }
 
   const handleCardSelect = async (cardId: string) => {
-    if (!room || isSelectionLocked || !roomId || userRole === 'spectator') return
+    if (selectedCard || isSelectionLocked) return
 
-    const playerSide = userRole
-    
     setSelectedCard(cardId)
-    setIsSelectionLocked(true)
 
     try {
-      // Create authenticated client to bypass RLS restrictions
+      const selectedCardData = roomCards.find(card => card.card_id === cardId)
+      if (!selectedCardData) return
+
+      // Create authenticated client for card selection
       const supabaseWithToken = createClient(
-        "https://ophgbcyhxvwljfztlvyu.supabase.co",
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9waGdiY3loeHZ3bGpmenRsdnl1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQzMzU4NzYsImV4cCI6MjA2OTkxMTg3Nn0.iiiRP6WtGtwI_jJDnAJUqmEZcoNUbYT3HiBl3VuBnKs",
+        'https://ophgbcyhxvwljfztlvyu.supabase.co',
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9waGdiY3loeHZ3bGpmenRsdnl1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQzMzU4NzYsImV4cCI6MjA2OTkxMTg3Nn0.iiiRP6WtGtwI_jJDnAJUqmEZcoNUbYT3HiBl3VuBnKs',
         {
           global: {
             headers: {
-              'x-session-token': userSessionId
+              'x-session-token': userSessionId || ''
             }
           }
         }
       )
 
-      // Update the selected card in the database
-      await supabaseWithToken
+      // Update room_cards to mark selection
+      const { error } = await supabaseWithToken
         .from('room_cards')
-        .update({ selected_by: playerSide })
+        .update({ selected_by: userRole })
         .eq('room_id', roomId)
         .eq('card_id', cardId)
-        .eq('round_number', room.current_round)
+        .eq('round_number', room?.current_round)
 
-      // Get the selected card details and add to player deck
-      const selectedCardData = roomCards.find(card => card.card_id === cardId)
-      if (selectedCardData) {
-        await supabaseWithToken
-          .from('player_decks')
-          .insert({
-            room_id: roomId,
-            player_side: playerSide,
-            card_id: selectedCardData.card_id,
-            card_name: selectedCardData.card_name,
-            card_image: selectedCardData.card_image,
-            is_legendary: selectedCardData.is_legendary,
-            selection_order: room.current_round
-          })
+      if (error) {
+        console.error('Error updating card selection:', error)
+        return
       }
 
+      // Add card to player deck using authenticated client
+      const { error: deckError } = await supabaseWithToken
+        .from('player_decks')
+        .insert({
+          room_id: roomId,
+          player_side: userRole,
+          card_id: selectedCardData.card_id,
+          card_name: selectedCardData.card_name,
+          card_image: selectedCardData.card_image,
+          is_legendary: selectedCardData.is_legendary,
+          selection_order: room?.current_round || 1
+        })
+
+      if (deckError) {
+        console.error('Error adding card to deck:', deckError)
+        return
+      }
+
+      console.log('Card selected, waiting for timer')
     } catch (error) {
-      console.error('Error selecting card:', error)
-      setSelectedCard(null)
-      setIsSelectionLocked(false)
+      console.error('Error in handleCardSelect:', error)
     }
   }
 

@@ -639,13 +639,13 @@ const Room = () => {
   const autoSelectRandomCard = async () => {
     if (!room || !roomId || userRole === 'spectator' || selectedCard || isSelectionLocked) return
 
-    // Get all cards for current round and user side
-    let currentRoundCards = roomCards.filter(card => 
-      card.round_number === room.current_round && card.side === userRole
+    // Get ALL cards for current round (both sides) to check available cards
+    let allCurrentRoundCards = roomCards.filter(card => 
+      card.round_number === room.current_round
     )
 
     // If no cards exist for current round, try to generate them first
-    if (currentRoundCards.length === 0) {
+    if (allCurrentRoundCards.length === 0) {
       console.log(`No cards found for ${userRole} in round ${room.current_round}, attempting to generate`)
       try {
         const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-round-cards`, {
@@ -673,14 +673,14 @@ const Room = () => {
     }
 
     // Check if user already selected a card
-    const userSelectedCard = currentRoundCards.find(card => card.selected_by === userRole)
+    const userSelectedCard = allCurrentRoundCards.find(card => card.selected_by === userRole)
     if (userSelectedCard) {
       console.log(`User ${userRole} already has selected card: ${userSelectedCard.card_name}`)
       return
     }
 
-    // Filter to unselected cards only
-    const availableCards = currentRoundCards.filter(card => !card.selected_by)
+    // Filter to unselected cards only from ALL cards available
+    const availableCards = allCurrentRoundCards.filter(card => !card.selected_by)
     if (availableCards.length === 0) return
 
     // Select a random card from available options

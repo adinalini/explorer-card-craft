@@ -306,12 +306,33 @@ const Room = () => {
     if (!room) return
 
     try {
+      console.log('Starting draft for room:', roomId)
+      
+      // Create a new supabase client instance with session token header
+      const supabaseWithToken = createClient(
+        "https://ophgbcyhxvwljfztlvyu.supabase.co",
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9waGdiY3loeHZ3bGpmenRsdnl1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQzMzU4NzYsImV4cCI6MjA2OTkxMTg3Nn0.iiiRP6WtGtwI_jJDnAJUqmEZcoNUbYT3HiBl3VuBnKs",
+        {
+          global: {
+            headers: {
+              'x-session-token': userSessionId
+            }
+          }
+        }
+      )
+      
       // Update room status to drafting
-      await supabase
+      const { error } = await supabaseWithToken
         .from('rooms')
         .update({ status: 'drafting', current_round: 1 })
         .eq('id', roomId!)
 
+      if (error) {
+        console.error('Error updating room status:', error)
+        throw error
+      }
+
+      console.log('Room status updated to drafting, generating cards...')
       // Generate initial cards for round 1
       generateRoundCards(1)
     } catch (error) {

@@ -135,11 +135,14 @@ const Room = () => {
               
               // Only let the creator start the draft to avoid race conditions
               if (userRole === 'creator') {
+                console.log('Creator will start draft in 5 seconds...')
                 setTimeout(() => {
+                  console.log('Timeout fired, calling startDraft now...')
                   startDraft()
                   setIsStartingDraft(false)
                 }, 5000)
               } else {
+                console.log('Joiner waiting for draft to start...')
                 // For joiners, just set the flag and wait for the room status to change
                 setTimeout(() => {
                   setIsStartingDraft(false)

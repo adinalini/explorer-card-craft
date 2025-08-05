@@ -772,13 +772,21 @@ const Room = () => {
         
       console.log('All cards for round:', allRoundCards)
       
-      // Now fetch only the selected ones
+      // For debugging: check the selected_by values in the fresh data
+      console.log('Fresh card data after auto-selection:', allRoundCards?.map(card => ({
+        name: card.card_name,
+        side: card.side,
+        selected_by: card.selected_by,
+        id: card.id
+      })))
+      
+      // Now fetch only the selected ones - use not null instead of specific values
       const { data: updatedCards, error: updateFetchError } = await supabaseWithToken
         .from('room_cards')
         .select('*')
         .eq('room_id', roomId)
         .eq('round_number', currentRound)
-        .in('selected_by', ['creator', 'joiner'])
+        .not('selected_by', 'is', null)
         
       if (updateFetchError) {
         console.error('=== ERROR FETCHING UPDATED CARDS ===')

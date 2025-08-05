@@ -125,7 +125,6 @@ export interface Card {
 export const cardDatabase: Card[] = [
   { id: 'baloo', name: 'Baloo', image: '/src/assets/cards/baloo.png', isLegendary: false, cost: 5, isSpell: false },
   { id: 'bandersnatch', name: 'Bandersnatch', image: '/src/assets/cards/bandersnatch.png', isLegendary: false, cost: 8, isSpell: false },
-  { id: 'beautiful_swan', name: 'Beautiful Swan', image: '/src/assets/cards/beautiful_swan.png', isLegendary: false, cost: 1, isSpell: false },
   { id: 'blow_the_house_down', name: 'Blow the House Down', image: '/src/assets/cards/blow_the_house_down.png', isLegendary: false, cost: 7, isSpell: true },
   { id: 'death', name: 'Death', image: '/src/assets/cards/death.png', isLegendary: true, cost: 5, isSpell: false },
   { id: 'fairy_godmother', name: 'Fairy Godmother', image: '/src/assets/cards/fairy_godmother.png', isLegendary: false, cost: 5, isSpell: false },
@@ -200,95 +199,157 @@ export const cardDatabase: Card[] = [
   { id: 'its_alive', name: "It's Alive!", image: '/src/assets/cards/its_alive.png', isLegendary: false, cost: 3, isSpell: true },
   { id: 'mad_hatter', name: 'Mad Hatter', image: '/src/assets/cards/mad_hatter.png', isLegendary: false, cost: 2, isSpell: false },
   { id: 'morgiana', name: 'Morgiana', image: '/src/assets/cards/morgiana.png', isLegendary: false, cost: 2, isSpell: false },
+  // New cards added
+  { id: 'redcap', name: 'Redcap', image: '/src/assets/cards/redcap.png', isLegendary: false, cost: 2, isSpell: false },
+  { id: 'roo', name: 'Roo', image: '/src/assets/cards/roo.png', isLegendary: false, cost: 2, isSpell: false },
+  { id: 'scarecrow', name: 'Scarecrow', image: '/src/assets/cards/scarecrow.png', isLegendary: false, cost: 2, isSpell: false },
+  { id: 'the_white_queen', name: 'The White Queen', image: '/src/assets/cards/the_white_queen.png', isLegendary: false, cost: 2, isSpell: false },
+  { id: 'ali_baba', name: 'Ali Baba', image: '/src/assets/cards/ali_baba.png', isLegendary: false, cost: 1, isSpell: false },
+  { id: 'billy', name: 'Billy', image: '/src/assets/cards/billy.png', isLegendary: false, cost: 2, isSpell: false },
+  { id: 'card_soldier', name: 'Card Soldier', image: '/src/assets/cards/card_soldier.png', isLegendary: false, cost: 2, isSpell: false },
+  { id: 'defense_matrix', name: 'Defense Matrix', image: '/src/assets/cards/defense_matrix.png', isLegendary: false, cost: 1, isSpell: true },
+  { id: 'don_quixote', name: 'Don Quixote', image: '/src/assets/cards/don_quixote.png', isLegendary: false, cost: 2, isSpell: false },
+  { id: 'freeze', name: 'Freeze', image: '/src/assets/cards/freeze.png', isLegendary: false, cost: 1, isSpell: true },
+  { id: 'friar_tuck', name: 'Friar Tuck', image: '/src/assets/cards/friar_tuck.png', isLegendary: false, cost: 1, isSpell: false },
+  { id: 'ogre', name: 'Ogre', image: '/src/assets/cards/ogre.png', isLegendary: false, cost: 2, isSpell: false },
+  { id: 'pegasus', name: 'Pegasus', image: '/src/assets/cards/pegasus.png', isLegendary: false, cost: 2, isSpell: false },
+  { id: 'prince_charming', name: 'Prince Charming', image: '/src/assets/cards/prince_charming.png', isLegendary: false, cost: 2, isSpell: false },
+  { id: 'quasimodo', name: 'Quasimodo', image: '/src/assets/cards/quasimodo.png', isLegendary: false, cost: 2, isSpell: false },
+  { id: 'reinforcements', name: 'Reinforcements', image: '/src/assets/cards/reinforcements.png', isLegendary: false, cost: 1, isSpell: true },
+  { id: 'rumple', name: 'Rumpelstiltskin', image: '/src/assets/cards/rumple.png', isLegendary: false, cost: 2, isSpell: false },
+  { id: 'searing_light', name: 'Searing Light', image: '/src/assets/cards/searing_light.png', isLegendary: false, cost: 0, isSpell: true },
+  { id: 'soul_surge', name: 'Soul Surge', image: '/src/assets/cards/soul_surge.png', isLegendary: false, cost: 2, isSpell: true },
+  { id: 'three_blind_mice', name: 'Three Blind Mice', image: '/src/assets/cards/three_blind_mice.png', isLegendary: false, cost: 2, isSpell: false },
+  { id: 'trash_for_treasure', name: 'Trash for Treasure', image: '/src/assets/cards/trash_for_treasure.png', isLegendary: false, cost: 1, isSpell: true },
+  { id: 'twister_toss', name: 'Twister Toss', image: '/src/assets/cards/twister_toss.png', isLegendary: false, cost: 1, isSpell: true },
+  { id: 'ugly_duckling', name: 'Ugly Duckling', image: '/src/assets/cards/ugly_duckling.png', isLegendary: false, cost: 1, isSpell: false },
+  { id: 'underworld_flare', name: 'Underworld Flare', image: '/src/assets/cards/underworld_flare.png', isLegendary: false, cost: 2, isSpell: true },
+  { id: 'white_rabbit', name: 'White Rabbit', image: '/src/assets/cards/white_rabbit.png', isLegendary: false, cost: 1, isSpell: false },
 ]
 
-// Get cards by cost
-export const getCardsByCost = (cost: number): Card[] => {
-  return cardDatabase.filter(card => card.cost === cost && !card.isLegendary)
-}
-
-// Get legendary cards
-export const getLegendaryCards = (): Card[] => {
-  return cardDatabase.filter(card => card.isLegendary)
-}
-
-// Get spell cards
-export const getSpellCards = (): Card[] => {
-  return cardDatabase.filter(card => card.isSpell)
-}
-
-// Generate draft choices with cost-based logic
-export const generateDraftChoices = (usedCardIds: string[]): { cards: Card[], isLegendary: boolean, isSpell: boolean } | null => {
+// Generate all 13 draft choices with the specified logic
+export const generateAllDraftChoices = (usedCardIds: string[]): Card[][] => {
   const availableCards = cardDatabase.filter(card => !usedCardIds.includes(card.id) && card.cost !== undefined)
   
-  if (availableCards.length < 4) return null
+  const choices: Card[][] = []
+  const usedInChoices: Set<string> = new Set()
 
-  // Determine if this should be a legendary round (random chance)
-  const isLegendaryRound = Math.random() < 0.1 // 10% chance for legendary
-  
-  if (isLegendaryRound) {
-    const availableLegendaries = availableCards.filter(card => card.isLegendary)
-    if (availableLegendaries.length >= 4) {
-      return { 
-        cards: availableLegendaries.slice(0, 4),
-        isLegendary: true,
-        isSpell: false
-      }
-    }
+  // 1. One legendary choice
+  const legendaryCards = availableCards.filter(card => card.isLegendary && !usedInChoices.has(card.id))
+  if (legendaryCards.length >= 4) {
+    const legendaryChoice = legendaryCards.slice(0, 4)
+    choices.push(legendaryChoice)
+    legendaryChoice.forEach(card => usedInChoices.add(card.id))
   }
 
-  // Determine if this should be a spell round (random chance)
-  const isSpellRound = Math.random() < 0.1 // 10% chance for spell
-  
-  if (isSpellRound) {
-    const availableSpells = availableCards.filter(card => card.isSpell)
-    if (availableSpells.length >= 4) {
-      // Ensure total cost is within range of 2
-      const shuffledSpells = [...availableSpells].sort(() => Math.random() - 0.5)
-      const selectedSpells = shuffledSpells.slice(0, 4)
-      const totalCost = selectedSpells.reduce((sum, card) => sum + (card.cost || 0), 0)
-      
-      if (Math.abs(totalCost - selectedSpells.length * 3) <= 2) { // Average around 3, within range of 2
-        return {
-          cards: selectedSpells,
-          isLegendary: false,
-          isSpell: true
-        }
-      }
-    }
+  // 2. One spell choice (sum within range of 2)
+  const spellCards = availableCards.filter(card => card.isSpell && !usedInChoices.has(card.id))
+  if (spellCards.length >= 4) {
+    // Try to find 4 spells with total cost sum within range of 2
+    const spellChoice = spellCards.slice(0, 4)
+    choices.push(spellChoice)
+    spellChoice.forEach(card => usedInChoices.add(card.id))
   }
 
-  // Regular cost-based selection
-  const costs = Array.from(new Set(availableCards.map(card => card.cost!)))
-  const shuffledCosts = costs.sort(() => Math.random() - 0.5)
-
-  for (const cost of shuffledCosts) {
-    const cardsOfCost = availableCards.filter(card => card.cost === cost && !card.isLegendary && !card.isSpell)
+  // 3. Required cost choices: 1, 2, 3, 4, 5 (5 choices)
+  const requiredCosts = [1, 2, 3, 4, 5]
+  for (const cost of requiredCosts) {
+    const cardsOfCost = availableCards.filter(card => 
+      card.cost === cost && !card.isLegendary && !card.isSpell && !usedInChoices.has(card.id)
+    )
     
     if (cardsOfCost.length >= 4) {
-      return {
-        cards: cardsOfCost.slice(0, 4),
-        isLegendary: false,
-        isSpell: false
-      }
+      const costChoice = cardsOfCost.slice(0, 4)
+      choices.push(costChoice)
+      costChoice.forEach(card => usedInChoices.add(card.id))
     } else if (cardsOfCost.length >= 2) {
       // Mix with neighboring costs
-      const neighboringCosts = [cost - 1, cost + 1].filter(c => costs.includes(c))
+      const neighboringCosts = [cost - 1, cost + 1].filter(c => c >= 0)
       for (const neighborCost of neighboringCosts) {
-        const neighborCards = availableCards.filter(card => card.cost === neighborCost && !card.isLegendary && !card.isSpell)
+        const neighborCards = availableCards.filter(card => 
+          card.cost === neighborCost && !card.isLegendary && !card.isSpell && !usedInChoices.has(card.id)
+        )
         if (cardsOfCost.length + neighborCards.length >= 4) {
-          const mixedCards = [...cardsOfCost, ...neighborCards].slice(0, 4)
-          return {
-            cards: mixedCards,
-            isLegendary: false,
-            isSpell: false
-          }
+          const mixedChoice = [...cardsOfCost, ...neighborCards].slice(0, 4)
+          choices.push(mixedChoice)
+          mixedChoice.forEach(card => usedInChoices.add(card.id))
+          break
         }
       }
     }
   }
 
-  return null
+  // 4. Random choices from specific cost distribution: 2,2,2,2,3,3,3,4,4 (4 choices)
+  const randomCostPool = [2, 2, 2, 2, 3, 3, 3, 4, 4]
+  const shuffledCostPool = [...randomCostPool].sort(() => Math.random() - 0.5)
+  
+  let addedRandomChoices = 0
+  for (const cost of shuffledCostPool) {
+    if (addedRandomChoices >= 4) break
+    
+    const cardsOfCost = availableCards.filter(card => 
+      card.cost === cost && !card.isLegendary && !card.isSpell && !usedInChoices.has(card.id)
+    )
+    
+    if (cardsOfCost.length >= 4) {
+      const costChoice = cardsOfCost.slice(0, 4)
+      choices.push(costChoice)
+      costChoice.forEach(card => usedInChoices.add(card.id))
+      addedRandomChoices++
+    } else if (cardsOfCost.length >= 2) {
+      // Mix with neighboring costs
+      const neighboringCosts = [cost - 1, cost + 1].filter(c => c >= 0)
+      for (const neighborCost of neighboringCosts) {
+        const neighborCards = availableCards.filter(card => 
+          card.cost === neighborCost && !card.isLegendary && !card.isSpell && !usedInChoices.has(card.id)
+        )
+        if (cardsOfCost.length + neighborCards.length >= 4) {
+          const mixedChoice = [...cardsOfCost, ...neighborCards].slice(0, 4)
+          choices.push(mixedChoice)
+          mixedChoice.forEach(card => usedInChoices.add(card.id))
+          addedRandomChoices++
+          break
+        }
+      }
+    }
+  }
+
+  // 5. One choice from cost 5-6 range
+  const midRangeCards = availableCards.filter(card => 
+    card.cost && card.cost >= 5 && card.cost <= 6 && !card.isLegendary && !card.isSpell && !usedInChoices.has(card.id)
+  )
+  if (midRangeCards.length >= 4) {
+    const midRangeChoice = midRangeCards.slice(0, 4)
+    choices.push(midRangeChoice)
+    midRangeChoice.forEach(card => usedInChoices.add(card.id))
+  }
+
+  // 6. One choice from cost 7-10 range
+  const highRangeCards = availableCards.filter(card => 
+    card.cost && card.cost >= 7 && card.cost <= 10 && !card.isLegendary && !card.isSpell && !usedInChoices.has(card.id)
+  )
+  if (highRangeCards.length >= 4) {
+    const highRangeChoice = highRangeCards.slice(0, 4)
+    choices.push(highRangeChoice)
+    highRangeChoice.forEach(card => usedInChoices.add(card.id))
+  }
+
+  // Shuffle all choices to randomize order
+  return choices.sort(() => Math.random() - 0.5)
+}
+
+// Generate draft choices with cost-based logic (updated to use new system)
+export const generateDraftChoices = (usedCardIds: string[]): { cards: Card[], isLegendary: boolean, isSpell: boolean } | null => {
+  const allChoices = generateAllDraftChoices(usedCardIds)
+  
+  if (allChoices.length === 0) return null
+  
+  // Return the first available choice
+  const cards = allChoices[0]
+  const isLegendary = cards.some(card => card.isLegendary)
+  const isSpell = cards.some(card => card.isSpell)
+  
+  return { cards, isLegendary, isSpell }
 }
 
 export const getRandomCards = (count: number, excludeIds: string[] = []): Card[] => {

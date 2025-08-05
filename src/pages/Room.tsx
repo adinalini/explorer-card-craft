@@ -122,7 +122,15 @@ const Room = () => {
             setUserRole(role)
             
             // Start draft when both players are ready
+            console.log('Checking draft start conditions:', {
+              creator_ready: updatedRoom.creator_ready,
+              joiner_ready: updatedRoom.joiner_ready,
+              status: updatedRoom.status,
+              shouldStart: updatedRoom.creator_ready && updatedRoom.joiner_ready && updatedRoom.status === 'waiting'
+            })
+            
             if (updatedRoom.creator_ready && updatedRoom.joiner_ready && updatedRoom.status === 'waiting') {
+              console.log('Starting draft process...')
               setIsStartingDraft(true)
               setTimeout(() => {
                 startDraft()

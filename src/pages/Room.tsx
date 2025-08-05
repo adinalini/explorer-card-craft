@@ -685,6 +685,7 @@ const Room = () => {
     const playerSide = userRole
     
     setSelectedCard(cardId)
+    setIsSelectionLocked(true)
 
     try {
       // Update the selected card in the database
@@ -695,8 +696,26 @@ const Room = () => {
         .eq('card_id', cardId)
         .eq('round_number', room.current_round)
 
+      // Get the selected card details and add to player deck
+      const selectedCardData = roomCards.find(card => card.card_id === cardId)
+      if (selectedCardData) {
+        await supabase
+          .from('player_decks')
+          .insert({
+            room_id: roomId,
+            player_side: playerSide,
+            card_id: selectedCardData.card_id,
+            card_name: selectedCardData.card_name,
+            card_image: selectedCardData.card_image,
+            is_legendary: selectedCardData.is_legendary,
+            selection_order: room.current_round
+          })
+      }
+
     } catch (error) {
       console.error('Error selecting card:', error)
+      setSelectedCard(null)
+      setIsSelectionLocked(false)
     }
   }
 
@@ -901,11 +920,11 @@ const Room = () => {
                           cardName={card.card_name}
                           cardImage={card.card_image}
                           isLegendary={card.is_legendary}
-                           isSelected={(userRole === 'creator' && selectedCard === card.card_id) || (isSelectionLocked && card.selected_by === 'creator')}
-                           onSelect={() => userRole === 'creator' ? handleCardSelect(card.card_id) : {}}
-                           disabled={isSelectionLocked || userRole !== 'creator'}
-                           isRevealing={isSelectionLocked}
-                           showUnselectedOverlay={isSelectionLocked && card.selected_by !== 'creator'}
+                            isSelected={selectedCard === card.card_id || card.selected_by === 'creator'}
+                            onSelect={() => userRole === 'creator' ? handleCardSelect(card.card_id) : {}}
+                            disabled={isSelectionLocked || userRole !== 'creator'}
+                            isRevealing={isSelectionLocked}
+                            showUnselectedOverlay={isSelectionLocked && !card.selected_by}
                         />
                       ))}
                   </div>
@@ -929,11 +948,11 @@ const Room = () => {
                           cardName={card.card_name}
                           cardImage={card.card_image}
                           isLegendary={card.is_legendary}
-                           isSelected={(userRole === 'joiner' && selectedCard === card.card_id) || (isSelectionLocked && card.selected_by === 'joiner')}
-                           onSelect={() => userRole === 'joiner' ? handleCardSelect(card.card_id) : {}}
-                           disabled={isSelectionLocked || userRole !== 'joiner'}
-                           isRevealing={isSelectionLocked}
-                           showUnselectedOverlay={isSelectionLocked && card.selected_by !== 'joiner'}
+                            isSelected={selectedCard === card.card_id || card.selected_by === 'joiner'}
+                            onSelect={() => userRole === 'joiner' ? handleCardSelect(card.card_id) : {}}
+                            disabled={isSelectionLocked || userRole !== 'joiner'}
+                            isRevealing={isSelectionLocked}
+                            showUnselectedOverlay={isSelectionLocked && !card.selected_by}
                         />
                       ))}
                   </div>

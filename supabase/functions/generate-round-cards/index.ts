@@ -155,23 +155,23 @@ Deno.serve(async (req) => {
     const excludeIds = usedCardIds || []
 
     if (roundType?.isLegendary) {
-      // Legendary round - 2 legendary cards per side
+      // Legendary round - 1 legendary card per side
       const availableLegendary = cardDatabase.filter(card => 
         card.isLegendary && !excludeIds.includes(card.id)
       )
       
-      if (availableLegendary.length >= 4) {
+      if (availableLegendary.length >= 2) {
         const shuffled = [...availableLegendary].sort(() => Math.random() - 0.5)
-        creatorCards = shuffled.slice(0, 2)
-        joinerCards = shuffled.slice(2, 4)
+        creatorCards = [shuffled[0]]
+        joinerCards = [shuffled[1]]
       }
     } else if (roundType?.isSpell) {
-      // Spell round - balanced cost distribution with 2 cards per side
+      // Spell round - balanced cost distribution with 1 card per side
       const availableSpells = cardDatabase.filter(card => 
         card.isSpell && !excludeIds.includes(card.id)
       )
       
-      if (availableSpells.length >= 4) {
+      if (availableSpells.length >= 2) {
         const attempts = 100
         let bestCreatorCards: Card[] = []
         let bestJoinerCards: Card[] = []
@@ -179,23 +179,21 @@ Deno.serve(async (req) => {
 
         for (let attempt = 0; attempt < attempts; attempt++) {
           const shuffled = [...availableSpells].sort(() => Math.random() - 0.5)
-          const tempCreatorCards = shuffled.slice(0, 2)
-          const tempJoinerCards = shuffled.slice(2, 4)
+          const tempCreatorCard = shuffled[0]
+          const tempJoinerCard = shuffled[1]
           
-          const creatorSum = tempCreatorCards.reduce((sum, card) => sum + (card.cost || 0), 0)
-          const joinerSum = tempJoinerCards.reduce((sum, card) => sum + (card.cost || 0), 0)
-          const difference = Math.abs(creatorSum - joinerSum)
+          const difference = Math.abs((tempCreatorCard.cost || 0) - (tempJoinerCard.cost || 0))
           
           if (difference <= 2) {
-            creatorCards = tempCreatorCards
-            joinerCards = tempJoinerCards
+            creatorCards = [tempCreatorCard]
+            joinerCards = [tempJoinerCard]
             break
           }
           
           if (difference < minDifference) {
             minDifference = difference
-            bestCreatorCards = tempCreatorCards
-            bestJoinerCards = tempJoinerCards
+            bestCreatorCards = [tempCreatorCard]
+            bestJoinerCards = [tempJoinerCard]
           }
         }
         
@@ -206,38 +204,47 @@ Deno.serve(async (req) => {
         }
       }
     } else {
-      // Regular round - cost-based selection with 2 cards per side
-      const costRanges = [
-        [1, 2], [3, 4], [5, 6], [7, 8], [9, 10], [11, 12]
-      ]
+      // Regular round - specific cost selection with 1 card per side
+      // Cost progression: round 1=1cost, round 2=2cost, ..., round 12=12cost
+      const targetCost = round
       
-      const availableRanges = costRanges.filter(range => {
-        const cardsInRange = cardDatabase.filter(card => 
-          !card.isLegendary && 
-          !card.isSpell && 
-          !excludeIds.includes(card.id) &&
-          card.cost && card.cost >= range[0] && card.cost <= range[1]
-        )
-        return cardsInRange.length >= 4
-      })
+      const availableCards = cardDatabase.filter(card => 
+        !card.isLegendary && 
+        !card.isSpell && 
+        !excludeIds.includes(card.id) &&
+        card.cost === targetCost
+      )
       
-      if (availableRanges.length > 0) {
-        const selectedRange = availableRanges[Math.floor(Math.random() * availableRanges.length)]
-        const cardsInRange = cardDatabase.filter(card => 
-          !card.isLegendary && 
-          !card.isSpell && 
-          !excludeIds.includes(card.id) &&
-          card.cost && card.cost >= selectedRange[0] && card.cost <= selectedRange[1]
-        )
-        
-        const shuffled = [...cardsInRange].sort(() => Math.random() - 0.5)
-        creatorCards = shuffled.slice(0, 2)
-        joinerCards = shuffled.slice(2, 4)
+      if (availableCards.length >= 2) {
+        const shuffled = [...availableCards].sort(() => Math.random() - 0.5)
+        creatorCards = [shuffled[0]]
+        joinerCards = [shuffled[1]]
+      } else {
+        // Fallback to nearby costs if exact cost not available
+        const fallbackCosts = [targetCost - 1, targetCost + 1, targetCost - 2, targetCost + 2]
+        for (const fallbackCost of fallbackCosts) {
+          if (fallbackCost < 1 || fallbackCost > 12) continue
+          
+          const fallbackCards = cardDatabase.filter(card => 
+            !card.isLegendary && 
+            !card.isSpell && 
+            !excludeIds.includes(card.id) &&
+            card.cost === fallbackCost
+          )
+          
+          if (fallbackCards.length >= 2) {
+            const shuffled = [...fallbackCards].sort(() => Math.random() - 0.5)
+            creatorCards = [shuffled[0]]
+            joinerCards = [shuffled[1]]
+            break
+          }
+        }
       }
     }
 
     if (creatorCards.length === 0 || joinerCards.length === 0) {
-      throw new Error('Unable to generate sufficient cards for this round')
+      console.error('Failed to generate cards:', { round, roundType, excludeIds, availableCards: cardDatabase.length })
+      throw new Error(`Unable to generate sufficient cards for round ${round}. CreatorCards: ${creatorCards.length}, JoinerCards: ${joinerCards.length}`)
     }
 
     // Insert cards into database

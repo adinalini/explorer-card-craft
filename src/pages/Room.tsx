@@ -138,7 +138,7 @@ const Room = () => {
                 console.log('Creator will start draft in 5 seconds...')
                 setTimeout(() => {
                   console.log('Timeout fired, calling startDraft now...')
-                  startDraft()
+                  startDraft(updatedRoom)
                   setIsStartingDraft(false)
                 }, 5000)
               } else {
@@ -354,8 +354,9 @@ const Room = () => {
     }
   }
 
-  const startDraft = async () => {
-    if (!room) {
+  const startDraft = async (roomData?: Room) => {
+    const currentRoom = roomData || room
+    if (!currentRoom) {
       console.error('Cannot start draft: no room data available')
       return
     }
@@ -398,7 +399,7 @@ const Room = () => {
 
       console.log('Room status updated to drafting, generating cards...')
       // Generate initial cards for round 1
-      await generateRoundCards(1)
+      await generateRoundCards(1, currentRoom)
       console.log('Cards generated successfully!')
     } catch (error) {
       console.error('Error starting draft:', error)
@@ -410,8 +411,9 @@ const Room = () => {
     }
   }
 
-  const generateRoundCards = async (round: number) => {
-    if (!roomId || !room) return
+  const generateRoundCards = async (round: number, roomData?: Room) => {
+    const currentRoom = roomData || room
+    if (!roomId || !currentRoom) return
 
     try {
       // Get used cards from previous rounds
@@ -423,7 +425,7 @@ const Room = () => {
       const usedCards = new Set(usedCardsData?.map(card => card.card_id) || [])
 
       // Determine round type (only for default draft type)
-      if (room.draft_type === 'default') {
+      if (currentRoom.draft_type === 'default') {
         const legendaryRound = Math.floor(Math.random() * 13) + 1
         const spellRound = Math.floor(Math.random() * 12) + 1
         const adjustedSpellRound = spellRound >= legendaryRound ? spellRound + 1 : spellRound

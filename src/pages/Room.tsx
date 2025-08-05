@@ -9,11 +9,15 @@ import { DeckDisplay } from "@/components/DeckDisplay"
 import { getRandomCards, getCardById } from "@/utils/cardData"
 import { ArrowLeft } from "lucide-react"
 
-// Helper functions for session management
+// Helper functions for secure session management
+const generateSessionToken = () => {
+  return 'session_' + Math.random().toString(36).substr(2, 16) + Date.now().toString(36)
+}
+
 const getUserSessionId = () => {
   let sessionId = sessionStorage.getItem('userSessionId')
   if (!sessionId) {
-    sessionId = 'user_' + Math.random().toString(36).substr(2, 9)
+    sessionId = generateSessionToken()
     sessionStorage.setItem('userSessionId', sessionId)
   }
   return sessionId
@@ -75,6 +79,7 @@ const Room = () => {
   const [isSelectionLocked, setIsSelectionLocked] = useState(false)
   const [userSessionId] = useState(getUserSessionId())
   const [userRole, setUserRole] = useState<'creator' | 'joiner' | 'spectator'>('spectator')
+  const [isStartingDraft, setIsStartingDraft] = useState(false)
 
   useEffect(() => {
     if (!roomId) return
@@ -102,7 +107,11 @@ const Room = () => {
             
             // Start draft when both players are ready
             if (updatedRoom.creator_ready && updatedRoom.joiner_ready && updatedRoom.status === 'waiting') {
-              startDraft()
+              setIsStartingDraft(true)
+              setTimeout(() => {
+                startDraft()
+                setIsStartingDraft(false)
+              }, 5000)
             }
           }
         }
@@ -225,6 +234,9 @@ const Room = () => {
 
   const handleReady = async () => {
     if (!room || userRole === 'spectator') return
+    
+    // Prevent interaction once both are ready
+    if (room.creator_ready && room.joiner_ready) return
 
     const updateField = userRole === 'creator' ? 'creator_ready' : 'joiner_ready'
     const currentValue = userRole === 'creator' ? room.creator_ready : room.joiner_ready
@@ -531,15 +543,15 @@ const Room = () => {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Header with wave */}
-      <div className="bg-gradient-to-r from-purple-600 to-blue-600 relative">
-        <div className="py-6 px-4">
+      {/* Header with gradient wave */}
+      <div className="relative">
+        <div className="bg-gradient-to-r from-[hsl(var(--primary))] to-[hsl(var(--secondary))] py-6 px-4">
           <div className="flex items-center justify-between max-w-6xl mx-auto">
             <Button
               onClick={handleBackToHome}
               variant="outline"
               size="sm"
-              className="border-white text-white hover:bg-white hover:text-purple-600 hover:scale-105 transition-all bg-transparent"
+              className="border-white text-white hover:bg-white hover:text-[hsl(var(--primary))] hover:scale-105 transition-all bg-transparent"
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back to Home
@@ -553,14 +565,14 @@ const Room = () => {
         </div>
         <svg viewBox="0 0 1200 120" className="w-full h-auto">
           <defs>
-            <linearGradient id="wave-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="#9333ea" />
-              <stop offset="100%" stopColor="#2563eb" />
+            <linearGradient id="room-wave-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor="hsl(var(--primary))" />
+              <stop offset="100%" stopColor="hsl(var(--secondary))" />
             </linearGradient>
           </defs>
           <path 
-            d="M0,96L48,85.3C96,75,192,53,288,48C384,43,480,53,576,69.3C672,85,768,107,864,112C960,117,1056,107,1152,90.7C1248,75,1344,53,1392,42.7L1440,32L1440,0L1392,0C1344,0,1248,0,1152,0C1056,0,960,0,864,0C768,0,672,0,576,0C480,0,384,0,288,0C192,0,96,0,48,0L0,0Z" 
-            fill="url(#wave-gradient)"
+            d="M985.66,92.83C906.67,72,823.78,31,743.84,14.19c-82.26-17.34-168.06-16.33-250.45.39-57.84,11.73-114,31.07-172,41.86A600.21,600.21,0,0,1,0,27.35V120H1200V95.8C1132.19,118.92,1055.71,111.31,985.66,92.83Z"
+            fill="url(#room-wave-gradient)"
           />
         </svg>
       </div>
@@ -579,64 +591,67 @@ const Room = () => {
           </div>
         ) : room.status === 'waiting' ? (
           // Both players joined, waiting for ready
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 min-h-[60vh]">
-            {/* Creator Side */}
-            <div className="border-r-2 lg:border-r-2 lg:border-b-0 border-b-2 border-muted lg:pr-8 pb-8 lg:pb-0">
-              <div className="text-center space-y-6">
-                <h2 className="text-2xl font-bold text-black">{room.creator_name}</h2>
-                <div className="text-lg text-muted-foreground">Room Creator</div>
-                
-                <Button
-                  onClick={handleReady}
-                  variant={room.creator_ready ? "secondary" : "default"}
-                  size="lg"
-                  className="px-8 py-4 text-lg"
-                  disabled={userRole !== 'creator'}
-                >
-                  {room.creator_ready ? "Ready ✓" : "Ready?"}
-                </Button>
+          <div className="space-y-8">
+            {/* Mobile-responsive layout */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 min-h-[50vh]">
+              {/* Creator Side */}
+              <div className="flex flex-col items-center justify-center border-b-2 md:border-b-0 md:border-r-2 border-muted pb-8 md:pb-0 md:pr-8">
+                <div className="text-center space-y-6">
+                  <h2 className="text-2xl font-bold text-black">{room.creator_name}</h2>
+                  <div className="text-lg text-muted-foreground">Room Creator</div>
+                  
+                  <Button
+                    onClick={handleReady}
+                    variant={room.creator_ready ? "secondary" : "default"}
+                    size="lg"
+                    className="px-8 py-4 text-lg"
+                    disabled={userRole !== 'creator' || (room.creator_ready && room.joiner_ready)}
+                  >
+                    {room.creator_ready ? "Ready ✓" : "Ready?"}
+                  </Button>
+                </div>
               </div>
-            </div>
 
-            {/* Joiner Side */}
-            <div className="lg:pl-8 pt-8 lg:pt-0">
-              <div className="text-center space-y-6">
-                <h2 className="text-2xl font-bold text-black">{room.joiner_name}</h2>
-                <div className="text-lg text-muted-foreground">Joined Player</div>
-                
-                <Button
-                  onClick={handleReady}
-                  variant={room.joiner_ready ? "secondary" : "default"}
-                  size="lg"
-                  className="px-8 py-4 text-lg"
-                  disabled={userRole !== 'joiner'}
-                >
-                  {room.joiner_ready ? "Ready ✓" : "Ready?"}
-                </Button>
+              {/* Joiner Side */}
+              <div className="flex flex-col items-center justify-center pt-8 md:pt-0 md:pl-8">
+                <div className="text-center space-y-6">
+                  <h2 className="text-2xl font-bold text-black">{room.joiner_name}</h2>
+                  <div className="text-lg text-muted-foreground">Joined Player</div>
+                  
+                  <Button
+                    onClick={handleReady}
+                    variant={room.joiner_ready ? "secondary" : "default"}
+                    size="lg"
+                    className="px-8 py-4 text-lg"
+                    disabled={userRole !== 'joiner' || (room.creator_ready && room.joiner_ready)}
+                  >
+                    {room.joiner_ready ? "Ready ✓" : "Ready?"}
+                  </Button>
+                </div>
               </div>
             </div>
 
             {/* Ready Status */}
-            <div className="col-span-full text-center mt-12">
+            <div className="text-center">
               <div className="text-xl text-muted-foreground mb-4">
                 Waiting for both players to be ready...
               </div>
-              <div className="flex justify-center gap-8">
-                <div className="flex items-center gap-2">
+              <div className="flex flex-col sm:flex-row justify-center gap-4 sm:gap-8">
+                <div className="flex items-center justify-center gap-2">
                   <span className={`w-4 h-4 rounded-full ${room.creator_ready ? 'bg-green-500' : 'bg-gray-300'}`}></span>
                   <span className="text-black">{room.creator_name}</span>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center justify-center gap-2">
                   <span className={`w-4 h-4 rounded-full ${room.joiner_ready ? 'bg-green-500' : 'bg-gray-300'}`}></span>
                   <span className="text-black">{room.joiner_name}</span>
                 </div>
               </div>
               
-              {room.creator_ready && room.joiner_ready && (
+              {(room.creator_ready && room.joiner_ready) || isStartingDraft ? (
                 <div className="mt-8 text-2xl font-bold text-primary animate-pulse">
                   Starting Draft...
                 </div>
-              )}
+              ) : null}
             </div>
           </div>
         ) : room.status === 'drafting' ? (
@@ -659,33 +674,10 @@ const Room = () => {
               )}
             </div>
 
-            {/* Card Selection */}
-            <div className="grid grid-cols-1 gap-8">
-              {/* Player's cards */}
-              {userRole !== 'spectator' && (
-                <div className="space-y-4">
-                  <h3 className="text-xl font-semibold text-center text-black">
-                    {userRole === 'creator' ? room.creator_name : room.joiner_name}'s Cards
-                  </h3>
-                  <div className="grid grid-cols-2 gap-4">
-                    {currentRoundCards.map((card) => (
-                      <DraftCard
-                        key={card.id}
-                        cardId={card.card_id}
-                        cardName={card.card_name}
-                        cardImage={card.card_image}
-                        isLegendary={card.is_legendary}
-                        isSelected={selectedCard === card.card_id || (isSelectionLocked && card.selected_by === userRole)}
-                        onSelect={() => handleCardSelect(card.card_id)}
-                        disabled={isSelectionLocked}
-                      />
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Show all cards for spectators or opponent's cards */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Card Selection - Mobile responsive */}
+            <div className="space-y-8">
+              {/* Mobile: Stack vertically, Desktop: Side by side */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 {/* Creator's cards */}
                 <div className="space-y-4">
                   <h3 className="text-xl font-semibold text-center text-black">
@@ -704,9 +696,9 @@ const Room = () => {
                           cardName={card.card_name}
                           cardImage={card.card_image}
                           isLegendary={card.is_legendary}
-                          isSelected={isSelectionLocked && !!card.selected_by}
-                          onSelect={() => {}}
-                          disabled={true}
+                          isSelected={selectedCard === card.card_id || (isSelectionLocked && card.selected_by === 'creator')}
+                          onSelect={() => userRole === 'creator' ? handleCardSelect(card.card_id) : {}}
+                          disabled={isSelectionLocked || userRole !== 'creator'}
                         />
                       ))}
                   </div>
@@ -730,9 +722,9 @@ const Room = () => {
                           cardName={card.card_name}
                           cardImage={card.card_image}
                           isLegendary={card.is_legendary}
-                          isSelected={isSelectionLocked && !!card.selected_by}
-                          onSelect={() => {}}
-                          disabled={true}
+                          isSelected={selectedCard === card.card_id || (isSelectionLocked && card.selected_by === 'joiner')}
+                          onSelect={() => userRole === 'joiner' ? handleCardSelect(card.card_id) : {}}
+                          disabled={isSelectionLocked || userRole !== 'joiner'}
                         />
                       ))}
                   </div>
@@ -740,8 +732,8 @@ const Room = () => {
               </div>
             </div>
 
-            {/* Player Decks */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-12">
+            {/* Player Decks - Mobile responsive */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-12">
               <DeckDisplay
                 cards={creatorDeck.map(card => ({
                   card_id: card.card_id,
@@ -776,8 +768,8 @@ const Room = () => {
               <p className="text-xl text-black">Good luck, have fun!</p>
             </div>
 
-            {/* Final Decks */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Final Decks - Mobile responsive */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <DeckDisplay
                 cards={creatorDeck.map(card => ({
                   card_id: card.card_id,

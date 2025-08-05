@@ -153,8 +153,27 @@ const Index = () => {
                 </Button>
               </DialogTrigger>
               <DialogContent className="bg-white">
-                <DialogHeader>
-                  <DialogTitle className="text-2xl text-center text-primary">Create New Room</DialogTitle>
+                <div className="relative mb-4">
+                  <svg
+                    viewBox="0 0 1200 120"
+                    preserveAspectRatio="none"
+                    className="absolute top-0 left-0 w-full h-12"
+                  >
+                    <path
+                      d="M985.66,92.83C906.67,72,823.78,31,743.84,14.19c-82.26-17.34-168.06-16.33-250.45.39-57.84,11.73-114,31.07-172,41.86A600.21,600.21,0,0,1,0,27.35V120H1200V95.8C1132.19,118.92,1055.71,111.31,985.66,92.83Z"
+                      className="fill-gradient-to-r from-primary to-secondary"
+                      fill="url(#gradient-create)"
+                    />
+                    <defs>
+                      <linearGradient id="gradient-create" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" stopColor="hsl(var(--primary))" />
+                        <stop offset="100%" stopColor="hsl(var(--secondary))" />
+                      </linearGradient>
+                    </defs>
+                  </svg>
+                </div>
+                <DialogHeader className="relative z-10 pt-6">
+                  <DialogTitle className="text-2xl text-center text-white">Create New Room</DialogTitle>
                 </DialogHeader>
                 <div className="space-y-6 py-4">
                   <div className="space-y-4">
@@ -208,8 +227,27 @@ const Index = () => {
                 </Button>
               </DialogTrigger>
               <DialogContent className="bg-white">
-                <DialogHeader>
-                  <DialogTitle className="text-2xl text-center text-primary">Join Room</DialogTitle>
+                <div className="relative mb-4">
+                  <svg
+                    viewBox="0 0 1200 120"
+                    preserveAspectRatio="none"
+                    className="absolute top-0 left-0 w-full h-12"
+                  >
+                    <path
+                      d="M985.66,92.83C906.67,72,823.78,31,743.84,14.19c-82.26-17.34-168.06-16.33-250.45.39-57.84,11.73-114,31.07-172,41.86A600.21,600.21,0,0,1,0,27.35V120H1200V95.8C1132.19,118.92,1055.71,111.31,985.66,92.83Z"
+                      className="fill-gradient-to-r from-primary to-secondary"
+                      fill="url(#gradient-join)"
+                    />
+                    <defs>
+                      <linearGradient id="gradient-join" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" stopColor="hsl(var(--primary))" />
+                        <stop offset="100%" stopColor="hsl(var(--secondary))" />
+                      </linearGradient>
+                    </defs>
+                  </svg>
+                </div>
+                <DialogHeader className="relative z-10 pt-6">
+                  <DialogTitle className="text-2xl text-center text-white">Join Room</DialogTitle>
                 </DialogHeader>
                 <div className="space-y-6 py-4">
                   <div className="space-y-2">

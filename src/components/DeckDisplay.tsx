@@ -39,11 +39,11 @@ export function DeckDisplay({ cards, playerName, isOwn }: DeckDisplayProps) {
                   {legendaryCard.card_name}
                 </div>
               )}
-              {normalCards.map((card, index) => (
-                <div key={index} className="text-xs text-muted-foreground border-l-2 border-muted pl-2 py-1">
-                  {card.card_name}
-                </div>
-              ))}
+               {normalCards.map((card, index) => (
+                 <div key={index} className="text-[10px] text-muted-foreground border-l-2 border-muted pl-2 py-0.5 leading-tight">
+                   {card.card_name}
+                 </div>
+               ))}
               {/* Empty slots */}
               {Array.from({ length: 12 - normalCards.length }).map((_, index) => (
                 <div key={`empty-${index}`} className="text-sm text-muted/50 border-l-2 border-dashed border-muted/50 pl-2 py-1">
@@ -64,11 +64,11 @@ export function DeckDisplay({ cards, playerName, isOwn }: DeckDisplayProps) {
                   {legendaryCard.card_name}
                 </div>
               )}
-              {normalCards.map((card, index) => (
-                <div key={index} className="text-xs text-muted-foreground border-l-2 border-muted pl-2 py-1">
-                  {card.card_name}
-                </div>
-              ))}
+               {normalCards.map((card, index) => (
+                 <div key={index} className="text-[10px] text-muted-foreground border-l-2 border-muted pl-2 py-0.5 leading-tight">
+                   {card.card_name}
+                 </div>
+               ))}
               {/* Empty slots */}
               {Array.from({ length: 12 - normalCards.length }).map((_, index) => (
                 <div key={`empty-${index}`} className="text-sm text-muted/50 border-l-2 border-dashed border-muted/50 pl-2 py-1">

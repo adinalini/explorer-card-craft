@@ -648,7 +648,7 @@ const Room = () => {
       currentRound: room?.current_round
     })
     
-    if (!room || !roomId || userRole === 'spectator' || selectedCard || isSelectionLocked) {
+    if (!room || !roomId || userRole === 'spectator' || isSelectionLocked) {
       console.log('Auto-select early return due to conditions')
       return
     }
@@ -657,6 +657,14 @@ const Room = () => {
     let currentRoundCards = roomCards.filter(card => 
       card.round_number === room.current_round && card.side === userRole
     )
+    
+    // Check if user already made a selection this round
+    const userSelectedCard = currentRoundCards.find(card => card.selected_by === userRole)
+    if (userSelectedCard) {
+      console.log(`User ${userRole} already has selected card: ${userSelectedCard.card_name}`)
+      setSelectedCard(userSelectedCard.card_id) // Sync state
+      return
+    }
     
     console.log('Current round cards for', userRole, ':', currentRoundCards.length, 'cards')
     console.log('All room cards:', roomCards.length, 'total cards')
@@ -688,13 +696,6 @@ const Room = () => {
       }
     }
 
-    // Check if user already selected a card
-    const userSelectedCard = currentRoundCards.find(card => card.selected_by === userRole)
-    if (userSelectedCard) {
-      console.log(`User ${userRole} already has selected card: ${userSelectedCard.card_name}`)
-      setSelectedCard(userSelectedCard.card_id) // Make sure state is synced
-      return
-    }
 
     // Filter to unselected cards only from user's available cards
     const availableCards = currentRoundCards.filter(card => !card.selected_by)
@@ -1192,15 +1193,15 @@ const Room = () => {
           // Draft completed
           <div className="space-y-8">
             <div className="text-center">
-              <h2 className="text-3xl font-bold text-primary mb-4">
+              <h2 className="text-2xl lg:text-3xl font-bold text-primary mb-4">
                 Draft Complete!
               </h2>
-              <p className="text-xl text-black">Good luck, have fun!</p>
+              <p className="text-lg lg:text-xl text-black">Good luck, have fun!</p>
             </div>
 
-            {/* Final Decks - Enlarged for completed screen */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 scale-110 transform-gpu">
-              <div className="space-y-6">
+            {/* Final Decks - Responsive layout */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-8">
+              <div className="space-y-4 lg:space-y-6">
                 <DeckDisplay
                   cards={creatorDeck.map(card => ({
                     card_id: card.card_id,
@@ -1213,7 +1214,7 @@ const Room = () => {
                   isOwn={userRole === 'creator'}
                 />
               </div>
-              <div className="space-y-6">
+              <div className="space-y-4 lg:space-y-6">
                 <DeckDisplay
                   cards={joinerDeck.map(card => ({
                     card_id: card.card_id,

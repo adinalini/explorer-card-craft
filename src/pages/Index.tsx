@@ -160,17 +160,17 @@ const Index = () => {
                   <div className="space-y-4">
                     <Label className="text-lg font-semibold text-primary">Draft Type:</Label>
                     <RadioGroup value={draftType} onValueChange={setDraftType} className="grid grid-cols-1 gap-3">
-                      <div className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-accent/20 transition-colors">
+                      <div className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-accent/20 hover:scale-105 transition-all">
                         <RadioGroupItem value="default" id="default" />
-                        <Label htmlFor="default" className="text-lg cursor-pointer">Default</Label>
+                        <Label htmlFor="default" className="text-lg cursor-pointer text-primary font-semibold">Default</Label>
                       </div>
-                      <div className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-accent/20 transition-colors">
+                      <div className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-accent/20 hover:scale-105 transition-all">
                         <RadioGroupItem value="triple" id="triple" />
-                        <Label htmlFor="triple" className="text-lg cursor-pointer">Triple Draft</Label>
+                        <Label htmlFor="triple" className="text-lg cursor-pointer text-primary font-semibold">Triple Draft</Label>
                       </div>
-                      <div className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-accent/20 transition-colors">
+                      <div className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-accent/20 hover:scale-105 transition-all">
                         <RadioGroupItem value="mega" id="mega" />
-                        <Label htmlFor="mega" className="text-lg cursor-pointer">Mega Draft</Label>
+                        <Label htmlFor="mega" className="text-lg cursor-pointer text-primary font-semibold">Mega Draft</Label>
                       </div>
                     </RadioGroup>
                   </div>

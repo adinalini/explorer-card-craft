@@ -190,8 +190,8 @@ const Room = () => {
   const handleReady = async () => {
     if (!room) return
 
-    const isCreator = room.joiner_name !== null
-    const updateField = isCreator ? 'joiner_ready' : 'creator_ready'
+    const isCreator = room.joiner_name === null
+    const updateField = isCreator ? 'creator_ready' : 'joiner_ready'
     
     try {
       const { error } = await supabase
@@ -229,49 +229,113 @@ const Room = () => {
   }
 
   const generateRoundCards = async (round: number) => {
-    if (!roomId) return
+    if (!roomId || !room) return
 
     try {
-      // Get 4 random cards for this round
-      const cards = getRandomCards(4)
-      
-      // Assign 2 cards to creator side and 2 to joiner side
-      const creatorCards = cards.slice(0, 2)
-      const joinerCards = cards.slice(2, 4)
-
-      const roomCardsData = [
-        ...creatorCards.map((card, index) => ({
-          room_id: roomId,
-          round_number: round,
-          side: 'creator',
-          card_id: card.id,
-          card_name: card.name,
-          card_image: card.image,
-          is_legendary: card.isLegendary,
-          selected_by: null
-        })),
-        ...joinerCards.map((card, index) => ({
-          room_id: roomId,
-          round_number: round,
-          side: 'joiner',
-          card_id: card.id,
-          card_name: card.name,
-          card_image: card.image,
-          is_legendary: card.isLegendary,
-          selected_by: null
-        }))
-      ]
-
-      const { error } = await supabase
+      // Get used cards from previous rounds
+      const { data: usedCardsData } = await supabase
         .from('room_cards')
-        .insert(roomCardsData)
+        .select('card_id')
+        .eq('room_id', roomId)
 
-      if (error) throw error
+      const usedCards = new Set(usedCardsData?.map(card => card.card_id) || [])
+
+      // Determine round type (only for default draft type)
+      if (room.draft_type === 'default') {
+        const legendaryRound = Math.floor(Math.random() * 13) + 1
+        const spellRound = Math.floor(Math.random() * 12) + 1
+        const adjustedSpellRound = spellRound >= legendaryRound ? spellRound + 1 : spellRound
+
+        const isLegendaryRound = round === legendaryRound
+        const isSpellRound = round === adjustedSpellRound
+
+        // Generate cards based on round type
+        const { generateDraftChoices } = await import('@/utils/cardData')
+        const cards = generateDraftChoices(usedCards, round, isLegendaryRound, isSpellRound)
+        
+        // Assign 2 cards to creator side and 2 to joiner side
+        const creatorCards = cards.slice(0, 2)
+        const joinerCards = cards.slice(2, 4)
+
+        const roomCardsData = [
+          ...creatorCards.map((card) => ({
+            room_id: roomId,
+            round_number: round,
+            side: 'creator',
+            card_id: card.id,
+            card_name: card.name,
+            card_image: card.image,
+            is_legendary: card.isLegendary,
+            selected_by: null
+          })),
+          ...joinerCards.map((card) => ({
+            room_id: roomId,
+            round_number: round,
+            side: 'joiner',
+            card_id: card.id,
+            card_name: card.name,
+            card_image: card.image,
+            is_legendary: card.isLegendary,
+            selected_by: null
+          }))
+        ]
+
+        const { error } = await supabase
+          .from('room_cards')
+          .insert(roomCardsData)
+
+        if (error) throw error
+      } else {
+        // For other draft types, use simple random selection for now
+        const { getRandomCards } = await import('@/utils/cardData')
+        const availableCards = (await import('@/utils/cardData')).cardDatabase.filter(
+          card => card.cost !== undefined && !usedCards.has(card.id)
+        )
+        
+        const cards = getRandomCards(4, availableCards)
+        
+        const creatorCards = cards.slice(0, 2)
+        const joinerCards = cards.slice(2, 4)
+
+        const roomCardsData = [
+          ...creatorCards.map((card) => ({
+            room_id: roomId,
+            round_number: round,
+            side: 'creator',
+            card_id: card.id,
+            card_name: card.name,
+            card_image: card.image,
+            is_legendary: card.isLegendary || false,
+            selected_by: null
+          })),
+          ...joinerCards.map((card) => ({
+            room_id: roomId,
+            round_number: round,
+            side: 'joiner',
+            card_id: card.id,
+            card_name: card.name,
+            card_image: card.image,
+            is_legendary: card.isLegendary || false,
+            selected_by: null
+          }))
+        ]
+
+        const { error } = await supabase
+          .from('room_cards')
+          .insert(roomCardsData)
+
+        if (error) throw error
+      }
 
       // Start the 15-second timer
       startRoundTimer()
     } catch (error) {
       console.error('Error generating round cards:', error)
+      toast({
+        title: "Error",
+        description: "Failed to generate cards for this round.",
+        variant: "destructive"
+      })
     }
   }
 
@@ -439,7 +503,7 @@ const Room = () => {
               onClick={handleBackToHome}
               variant="outline"
               size="sm"
-              className="border-white text-white hover:bg-white hover:text-primary"
+              className="border-primary text-primary hover:bg-primary hover:text-white hover:scale-105 transition-all bg-white"
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back to Home

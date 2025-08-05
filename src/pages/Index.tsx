@@ -188,7 +188,8 @@ const Index = () => {
       
       if (updateError) throw updateError
 
-      // Set session flag to indicate this user joined this room  
+      // Update sessionStorage to match the database session and set localStorage flag
+      sessionStorage.setItem('userSessionId', sessionId)
       localStorage.setItem(`room_${roomId.toUpperCase()}_joiner`, sessionId)
       console.log('Joiner session set:', { roomId: roomId.toUpperCase(), sessionId })
       setJoinDialogOpen(false)

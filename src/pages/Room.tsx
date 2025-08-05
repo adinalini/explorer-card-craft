@@ -270,7 +270,7 @@ const Room = () => {
     console.log('Attempting to update ready status:', { userRole, updateField, currentValue, userSessionId })
     
     try {
-      // First, ensure the current user has a valid game session (only check for current user's role)
+      // Check if the current user has a valid game session for this room and role
       const { data: existingSession, error: sessionError } = await supabase
         .from('game_sessions')
         .select('*')
@@ -279,30 +279,17 @@ const Room = () => {
         .eq('player_role', userRole)
         .maybeSingle()
 
-      console.log('Existing session check:', { existingSession, userRole, userSessionId, sessionError })
+      console.log('Session validation:', { 
+        existingSession: !!existingSession, 
+        userRole, 
+        userSessionId, 
+        sessionError,
+        roomId: roomId
+      })
 
-      if (!existingSession && !sessionError) {
-        console.log('Creating missing game session for user:', { userRole, userSessionId })
-        
-        const playerName = userRole === 'creator' ? room.creator_name : room.joiner_name
-        const { error: insertError } = await supabase
-          .from('game_sessions')
-          .insert({
-            room_id: roomId!,
-            session_token: userSessionId,
-            player_role: userRole,
-            player_name: playerName
-          })
-
-        if (insertError) {
-          console.error('Failed to create game session:', insertError)
-          throw insertError
-        }
-        
-        console.log('Game session created successfully')
-      } else if (sessionError && sessionError.code !== 'PGRST116') {
-        // Only throw error if it's not the "not found" error
-        throw sessionError
+      if (!existingSession) {
+        console.error('No valid session found for user:', { userRole, userSessionId, roomId })
+        throw new Error(`No valid session found. Please refresh and try again.`)
       }
 
       // Create a new supabase client instance with session token header

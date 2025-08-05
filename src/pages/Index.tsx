@@ -66,8 +66,10 @@ const Index = () => {
 
       if (error) throw error
 
-      // Then create a game session for the creator
-      const sessionId = getUserSessionId()
+      // Then create a game session for the creator - create new session to avoid conflicts
+      const sessionId = 'session_' + Math.random().toString(36).substr(2, 16) + Date.now().toString(36)
+      console.log('Creating game session for creator:', { roomId: newRoomId, sessionId, creatorName: creatorName.trim() })
+      
       const { error: sessionError } = await supabase
         .from('game_sessions')
         .insert({
@@ -76,6 +78,11 @@ const Index = () => {
           player_role: 'creator',
           player_name: creatorName.trim()
         })
+      
+      console.log('Creator game session creation result:', { sessionError })
+      
+      // Update sessionStorage to match the database session
+      sessionStorage.setItem('userSessionId', sessionId)
 
       if (sessionError) {
         console.error('Failed to create creator game session:', sessionError)

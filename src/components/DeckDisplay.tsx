@@ -109,7 +109,7 @@ export function DeckDisplay({ cards, playerName, isOwn }: DeckDisplayProps) {
                   const card = normalCards[cardIndex]
                   
                   return (
-                    <div key={col} className="w-16 h-22 relative">
+                    <div key={col} className="w-16 h-20 relative">
                       {card ? (
                         <div className="w-full h-full bg-white border border-muted rounded overflow-hidden">
                           <CardImage

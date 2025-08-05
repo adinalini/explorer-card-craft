@@ -123,6 +123,7 @@ const Room = () => {
     
     // Auto-select random card if user hasn't selected one
     if (!selectedCard && userRole !== 'spectator') {
+      console.log('Timer up: Auto-selecting card for', userRole)
       await autoSelectRandomCard()
     }
     
@@ -745,18 +746,18 @@ const Room = () => {
       }
 
       if (!allCurrentRoundCards || allCurrentRoundCards.length === 0) {
-        console.log('No cards found for current round:', currentRound)
-        return
+        console.log('No cards found for current round:', currentRound, '- generating and proceeding to next round')
+        // If no cards found, proceed to next round anyway
       }
 
       // Get only selected cards to add to deck - avoid duplicate processing
-      const selectedCards = allCurrentRoundCards.filter(card => card.selected_by)
+      const selectedCards = allCurrentRoundCards ? allCurrentRoundCards.filter(card => card.selected_by) : []
       
-      console.log('Selected cards for round', currentRound, ':', selectedCards.map(c => ({
+      console.log('Selected cards for round', currentRound, ':', selectedCards.length > 0 ? selectedCards.map(c => ({
         name: c.card_name, 
         side: c.side, 
         selected_by: c.selected_by
-      })))
+      })) : 'No cards selected')
 
       // Check for existing deck entries to prevent duplicates
       const { data: existingDeckCards } = await supabaseWithToken

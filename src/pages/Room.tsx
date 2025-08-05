@@ -554,7 +554,7 @@ const Room = () => {
 
     // Double-check: if user has already selected manually, don't auto-select
     if (selectedCard) {
-      console.log('Auto-select skipped: User has manual selection')
+      console.log('🚫 Auto-select skipped: User has manual selection in state')
       return
     }
 
@@ -562,12 +562,32 @@ const Room = () => {
       card.round_number === room.current_round && card.side === userRole
     )
     
-    // Check database for existing selection
+    // Check database for existing selection - this is the KEY check to prevent auto-select conflict
     const userSelectedCard = currentRoundCards.find(card => card.selected_by === userRole)
     if (userSelectedCard) {
-      console.log('Auto-select skipped: Database shows manual selection')
+      console.log('🚫 Auto-select skipped: Database shows manual selection exists')
       setSelectedCard(userSelectedCard.card_id)
       return
+    }
+
+    // Also do a fresh database check to be absolutely sure
+    try {
+      const supabaseWithToken = getSupabaseWithSession()
+      const { data: freshCheck, error: checkError } = await supabaseWithToken
+        .from('room_cards')
+        .select('*')
+        .eq('room_id', roomId)
+        .eq('round_number', room.current_round)
+        .eq('side', userRole)
+        .eq('selected_by', userRole)
+      
+      if (!checkError && freshCheck && freshCheck.length > 0) {
+        console.log('🚫 Auto-select skipped: Fresh database check shows manual selection exists')
+        setSelectedCard(freshCheck[0].card_id)
+        return
+      }
+    } catch (error) {
+      console.error('Error in fresh database check:', error)
     }
 
     if (currentRoundCards.length === 0) {
@@ -585,7 +605,7 @@ const Room = () => {
           // Re-check for existing selection after fresh fetch
           const existingSelection = freshCards.find(card => card.selected_by === userRole)
           if (existingSelection) {
-            console.log('Auto-select skipped: Fresh fetch shows manual selection')
+            console.log('🚫 Auto-select skipped: Fresh fetch shows manual selection')
             setSelectedCard(existingSelection.card_id)
             return
           }
@@ -599,7 +619,10 @@ const Room = () => {
     }
 
     const availableCards = currentRoundCards.filter(card => !card.selected_by)
-    if (availableCards.length === 0) return
+    if (availableCards.length === 0) {
+      console.log('🚫 Auto-select skipped: No available cards (all selected)')
+      return
+    }
 
     const randomCard = availableCards[Math.floor(Math.random() * availableCards.length)]
     
@@ -614,7 +637,7 @@ const Room = () => {
         .eq('round_number', room.current_round)
       
       setSelectedCard(randomCard.card_id)
-      console.log('Auto-selected fallback card:', randomCard.card_name)
+      console.log('✅ Auto-selected fallback card:', randomCard.card_name)
     } catch (error) {
       console.error('Error auto-selecting card:', error)
     }

@@ -673,7 +673,17 @@ Deno.serve(async (req) => {
     )
 
   } catch (error) {
-    const errorRound = round || 'unknown'
+    // Ensure all variables are properly scoped
+    let errorRound = 'unknown'
+    try {
+      if (typeof round !== 'undefined') {
+        errorRound = round
+      }
+    } catch (scopeError) {
+      // Fallback if round is not in scope
+      errorRound = 'unknown'
+    }
+    
     console.error(`Round ${errorRound} generate cards function error:`, error)
     return new Response(
       JSON.stringify({ 

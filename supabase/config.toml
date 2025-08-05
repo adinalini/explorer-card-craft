@@ -1,1 +1,4 @@
 project_id = "ophgbcyhxvwljfztlvyu"
+
+[functions.generate-round-cards]
+verify_jwt = false

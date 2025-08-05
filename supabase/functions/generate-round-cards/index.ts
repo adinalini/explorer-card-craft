@@ -52,8 +52,13 @@ Deno.serve(async (req) => {
       )
     }
     
-    const { roomId, round, usedCardIds } = requestBody
-    console.log('Request parameters:', { roomId, round, usedCardIds: usedCardIds?.length || 0 })
+    const { roomId, round, usedCardIds, roundType } = requestBody
+    console.log('Request parameters:', { 
+      roomId, 
+      round, 
+      usedCardIds: usedCardIds?.length || 0,
+      roundType 
+    })
     
     if (!roomId || (!round && round !== 'all')) {
       console.error('Missing required parameters:', { roomId, round })

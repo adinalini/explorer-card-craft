@@ -29,8 +29,33 @@ export function DeckDisplay({ cards, playerName, isOwn }: DeckDisplayProps) {
       </h3>
       
       <div className="flex items-start gap-4">
-        {/* Deck List - Left side for creator, Right side for joiner */}
+        {/* Deck List - Left side for creator, Right side for opponent */}
         {isOwn && (
+          <div className="w-32 space-y-1">
+            <h4 className="text-sm font-semibold text-muted-foreground mb-2">Deck List</h4>
+            <div className="space-y-1 h-80 overflow-y-auto">
+              {legendaryCard && (
+                <div className="text-xs text-yellow-600 font-medium border-l-2 border-yellow-500 pl-2">
+                  {legendaryCard.card_name}
+                </div>
+              )}
+              {normalCards.map((card, index) => (
+                <div key={index} className="text-xs text-muted-foreground border-l-2 border-muted pl-2">
+                  {card.card_name}
+                </div>
+              ))}
+              {/* Empty slots */}
+              {Array.from({ length: 12 - normalCards.length }).map((_, index) => (
+                <div key={`empty-${index}`} className="text-xs text-muted/50 border-l-2 border-dashed border-muted/50 pl-2">
+                  —
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Deck List - Left side for opponent (when viewing opponent) */}
+        {!isOwn && (
           <div className="w-32 space-y-1">
             <h4 className="text-sm font-semibold text-muted-foreground mb-2">Deck List</h4>
             <div className="space-y-1 h-80 overflow-y-auto">
@@ -103,31 +128,6 @@ export function DeckDisplay({ cards, playerName, isOwn }: DeckDisplayProps) {
             ))}
           </div>
         </div>
-
-        {/* Deck List - Right side for joiner */}
-        {!isOwn && (
-          <div className="w-32 space-y-1">
-            <h4 className="text-sm font-semibold text-muted-foreground mb-2">Deck List</h4>
-            <div className="space-y-1 h-80 overflow-y-auto">
-              {legendaryCard && (
-                <div className="text-xs text-yellow-600 font-medium border-l-2 border-yellow-500 pl-2">
-                  {legendaryCard.card_name}
-                </div>
-              )}
-              {normalCards.map((card, index) => (
-                <div key={index} className="text-xs text-muted-foreground border-l-2 border-muted pl-2">
-                  {card.card_name}
-                </div>
-              ))}
-              {/* Empty slots */}
-              {Array.from({ length: 12 - normalCards.length }).map((_, index) => (
-                <div key={`empty-${index}`} className="text-xs text-muted/50 border-l-2 border-dashed border-muted/50 pl-2">
-                  —
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
       </div>
     </div>
   )

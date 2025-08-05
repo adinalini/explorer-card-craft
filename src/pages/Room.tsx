@@ -943,9 +943,10 @@ const Room = () => {
                         card.round_number === room.current_round && 
                         card.side === 'creator'
                       )
-                      .map((card) => (
+                      .sort((a, b) => a.card_id.localeCompare(b.card_id))
+                      .map((card, index) => (
                         <DraftCard
-                          key={card.id}
+                          key={`${card.id}-${index}`}
                           cardId={card.card_id}
                           cardName={card.card_name}
                           cardImage={card.card_image}
@@ -971,9 +972,10 @@ const Room = () => {
                         card.round_number === room.current_round && 
                         card.side === 'joiner'
                       )
-                      .map((card) => (
+                      .sort((a, b) => a.card_id.localeCompare(b.card_id))
+                      .map((card, index) => (
                         <DraftCard
-                          key={card.id}
+                          key={`${card.id}-${index}`}
                           cardId={card.card_id}
                           cardName={card.card_name}
                           cardImage={card.card_image}

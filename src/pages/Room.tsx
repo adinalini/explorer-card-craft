@@ -381,11 +381,15 @@ const Room = () => {
         }
       )
       
-      console.log('Updating room status to drafting...')
-      // Update room status to drafting
+      console.log('Updating room status to drafting and starting timer...')
+      // Update room status to drafting and start timer immediately
       const { data: updateData, error } = await supabaseWithToken
         .from('rooms')
-        .update({ status: 'drafting', current_round: 1 })
+        .update({ 
+          status: 'drafting', 
+          current_round: 1,
+          round_start_time: new Date().toISOString()
+        })
         .eq('id', roomId!)
         .select()
 
@@ -544,8 +548,8 @@ const Room = () => {
         if (error) throw error
       }
 
-      // Start the centralized round timer
-      await startCentralizedRoundTimer()
+      // Timer is already started when room status was set to drafting
+      console.log('Timer already started with room status update')
     } catch (error) {
       console.error('Error generating round cards:', error)
       toast({

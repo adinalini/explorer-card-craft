@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { useParams, useNavigate } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import { WaveDivider } from "@/components/ui/wave-divider"
@@ -86,12 +86,74 @@ const Room = () => {
   const [roomCards, setRoomCards] = useState<RoomCard[]>([])
   const [playerDecks, setPlayerDecks] = useState<PlayerCard[]>([])
   const [selectedCard, setSelectedCard] = useState<string | null>(null)
-  const [timeLeft, setTimeLeft] = useState<number>(15)
   const [isSelectionLocked, setIsSelectionLocked] = useState(false)
-  const [selectionTimer, setSelectionTimer] = useState<NodeJS.Timeout | null>(null)
   const [userSessionId] = useState(getUserSessionId())
   const [userRole, setUserRole] = useState<'creator' | 'joiner' | 'spectator'>('spectator')
   const [isStartingDraft, setIsStartingDraft] = useState(false)
+  const [timeRemaining, setTimeRemaining] = useState<number>(0)
+  
+  const timerIntervalRef = useRef<NodeJS.Timeout | null>(null)
+
+  const handleTimeUp = async () => {
+    console.log(`${userRole}: Time up, locking selections`)
+    setIsSelectionLocked(true)
+    
+    // Auto-select random card if user hasn't selected one
+    await autoSelectRandomCard()
+    
+    // Only creator processes round end to avoid race conditions
+    if (userRole === 'creator') {
+      console.log('Creator: Will process round end in 3 seconds')
+      setTimeout(() => {
+        processRoundEnd()
+      }, 3000) // Show selections for 3 seconds
+    } else {
+      console.log('Joiner: Waiting for creator to process round end')
+    }
+  }
+
+  // Centralized timer effect
+  useEffect(() => {
+    if (room?.status === 'drafting' && room.round_start_time) {
+      const updateTimer = () => {
+        const now = new Date()
+        const roundStart = new Date(room.round_start_time!)
+        const elapsed = (now.getTime() - roundStart.getTime()) / 1000
+        const roundDuration = room.round_duration_seconds || 15
+        const remaining = Math.max(0, roundDuration - elapsed)
+        
+        setTimeRemaining(remaining)
+        
+        if (remaining <= 0 && !isSelectionLocked) {
+          setIsSelectionLocked(true)
+          handleTimeUp()
+        }
+      }
+
+      // Update immediately
+      updateTimer()
+      
+      // Set up interval
+      if (timerIntervalRef.current) clearInterval(timerIntervalRef.current)
+      timerIntervalRef.current = setInterval(updateTimer, 100) // Update every 100ms for smooth countdown
+
+      return () => {
+        if (timerIntervalRef.current) {
+          clearInterval(timerIntervalRef.current)
+          timerIntervalRef.current = null
+        }
+      }
+    }
+  }, [room?.status, room?.round_start_time, room?.current_round, isSelectionLocked])
+
+  // Reset selection state at start of each round
+  useEffect(() => {
+    if (room?.current_round) {
+      console.log(`Starting round ${room.current_round} - resetting selection state`)
+      setSelectedCard(null)
+      setIsSelectionLocked(false)
+    }
+  }, [room?.current_round])
 
   useEffect(() => {
     if (!roomId) return
@@ -506,111 +568,6 @@ const Room = () => {
     }
   }
 
-  // Sync timer with database
-  useEffect(() => {
-    console.log(`Timer sync attempt: ${userRole}`, {
-      hasRoom: !!room,
-      round_start_time: room?.round_start_time,
-      status: room?.status,
-      userRole,
-      current_round: room?.current_round
-    })
-    
-    if (!room?.round_start_time || room.status !== 'drafting') {
-      console.log(`Timer sync blocked: ${userRole} - no round start time or not drafting`, {
-        round_start_time: room?.round_start_time,
-        status: room?.status,
-        userRole
-      })
-      return
-    }
-
-    const startTime = new Date(room.round_start_time).getTime()
-    const now = Date.now()
-    const elapsed = Math.floor((now - startTime) / 1000)
-    const remaining = Math.max(0, room.round_duration_seconds - elapsed)
-
-    console.log(`Timer sync SUCCESS: ${userRole} - elapsed: ${elapsed}s, remaining: ${remaining}s`, {
-      startTime: new Date(room.round_start_time).toISOString(),
-      now: new Date().toISOString(),
-      duration: room.round_duration_seconds
-    })
-
-    setTimeLeft(remaining)
-    setIsSelectionLocked(remaining === 0)
-
-    if (remaining > 0) {
-      // Clear any existing timer
-      if (selectionTimer) {
-        clearInterval(selectionTimer)
-      }
-
-      const timer = setInterval(() => {
-        const currentTime = Date.now()
-        const currentElapsed = Math.floor((currentTime - startTime) / 1000)
-        const currentRemaining = Math.max(0, room.round_duration_seconds - currentElapsed)
-
-        console.log(`Timer tick: ${userRole} - remaining: ${currentRemaining}s`)
-        setTimeLeft(currentRemaining)
-
-        if (currentRemaining <= 0) {
-          console.log(`Timer expired for ${userRole}, locking selections`)
-          clearInterval(timer)
-          lockSelections()
-        }
-      }, 1000)
-
-      setSelectionTimer(timer)
-    } else if (!isSelectionLocked) {
-      console.log(`Timer already expired for ${userRole}, locking selections immediately`)
-      lockSelections()
-    }
-
-    return () => {
-      if (selectionTimer) {
-        clearInterval(selectionTimer)
-      }
-    }
-  }, [room?.round_start_time, room?.round_duration_seconds, userRole])
-
-  // Effect to reset selection state when round changes
-  useEffect(() => {
-    if (!room) return
-    
-    // Reset selection state for new rounds
-    console.log(`Round changed to ${room.current_round}, resetting selection state`)
-    setSelectedCard(null)
-    setIsSelectionLocked(false)
-    
-    // Clear any existing timer
-    if (selectionTimer) {
-      clearInterval(selectionTimer)
-      setSelectionTimer(null)
-    }
-  }, [room?.current_round])
-
-  const startRoundTimer = () => {
-    // This function is now replaced by the centralized timer
-    console.log(`${userRole}: startRoundTimer called but using centralized timer instead`)
-  }
-
-  const lockSelections = async () => {
-    console.log(`${userRole}: Locking selections`)
-    setIsSelectionLocked(true)
-    
-    // Auto-select random card if user hasn't selected one
-    await autoSelectRandomCard()
-    
-    // Only creator processes round end to avoid race conditions
-    if (userRole === 'creator') {
-      console.log('Creator: Will process round end in 3 seconds')
-      setTimeout(() => {
-        processRoundEnd()
-      }, 3000) // Show selections for 3 seconds
-    } else {
-      console.log('Joiner: Waiting for creator to process round end')
-    }
-  }
 
   const autoSelectRandomCard = async () => {
     if (!room || !roomId || userRole === 'spectator' || selectedCard) return
@@ -738,26 +695,6 @@ const Room = () => {
         .eq('card_id', cardId)
         .eq('round_number', room.current_round)
 
-      // Add selected card to player's deck
-      const selectedCardData = roomCards.find(card => 
-        card.card_id === cardId && 
-        card.round_number === room.current_round &&
-        card.side === playerSide
-      )
-
-      if (selectedCardData) {
-        await supabase
-          .from('player_decks')
-          .insert({
-            room_id: roomId,
-            player_side: playerSide,
-            card_id: cardId,
-            card_name: selectedCardData.card_name,
-            card_image: selectedCardData.card_image,
-            is_legendary: selectedCardData.is_legendary,
-            selection_order: room.current_round
-          })
-      }
     } catch (error) {
       console.error('Error selecting card:', error)
     }
@@ -934,7 +871,7 @@ const Room = () => {
                 <div className="space-y-2">
                   <p className="text-lg text-black">Choose your card!</p>
                   <div className="text-2xl font-bold text-primary">
-                    {timeLeft}s remaining
+                    {Math.ceil(timeRemaining)}s remaining
                   </div>
                 </div>
               ) : (
@@ -968,7 +905,7 @@ const Room = () => {
                            onSelect={() => userRole === 'creator' ? handleCardSelect(card.card_id) : {}}
                            disabled={isSelectionLocked || userRole !== 'creator'}
                            isRevealing={isSelectionLocked}
-                           showUnselectedOverlay={false}
+                           showUnselectedOverlay={isSelectionLocked && card.selected_by !== 'creator'}
                         />
                       ))}
                   </div>
@@ -996,7 +933,7 @@ const Room = () => {
                            onSelect={() => userRole === 'joiner' ? handleCardSelect(card.card_id) : {}}
                            disabled={isSelectionLocked || userRole !== 'joiner'}
                            isRevealing={isSelectionLocked}
-                           showUnselectedOverlay={false}
+                           showUnselectedOverlay={isSelectionLocked && card.selected_by !== 'joiner'}
                         />
                       ))}
                   </div>

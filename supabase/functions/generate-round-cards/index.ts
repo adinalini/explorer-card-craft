@@ -166,12 +166,12 @@ Deno.serve(async (req) => {
         joinerCards = shuffled.slice(2, 4)
       }
     } else if (roundType?.isSpell) {
-      // Spell round - balanced cost distribution
+      // Spell round - balanced cost distribution with 2 cards per side
       const availableSpells = cardDatabase.filter(card => 
         card.isSpell && !excludeIds.includes(card.id)
       )
       
-      if (availableSpells.length >= 8) {
+      if (availableSpells.length >= 4) {
         const attempts = 100
         let bestCreatorCards: Card[] = []
         let bestJoinerCards: Card[] = []
@@ -179,8 +179,8 @@ Deno.serve(async (req) => {
 
         for (let attempt = 0; attempt < attempts; attempt++) {
           const shuffled = [...availableSpells].sort(() => Math.random() - 0.5)
-          const tempCreatorCards = shuffled.slice(0, 4)
-          const tempJoinerCards = shuffled.slice(4, 8)
+          const tempCreatorCards = shuffled.slice(0, 2)
+          const tempJoinerCards = shuffled.slice(2, 4)
           
           const creatorSum = tempCreatorCards.reduce((sum, card) => sum + (card.cost || 0), 0)
           const joinerSum = tempJoinerCards.reduce((sum, card) => sum + (card.cost || 0), 0)
@@ -206,7 +206,7 @@ Deno.serve(async (req) => {
         }
       }
     } else {
-      // Regular round - cost-based selection (1-6, 7-12, etc.)
+      // Regular round - cost-based selection with 2 cards per side
       const costRanges = [
         [1, 2], [3, 4], [5, 6], [7, 8], [9, 10], [11, 12]
       ]
@@ -218,7 +218,7 @@ Deno.serve(async (req) => {
           !excludeIds.includes(card.id) &&
           card.cost && card.cost >= range[0] && card.cost <= range[1]
         )
-        return cardsInRange.length >= 8
+        return cardsInRange.length >= 4
       })
       
       if (availableRanges.length > 0) {
@@ -231,8 +231,8 @@ Deno.serve(async (req) => {
         )
         
         const shuffled = [...cardsInRange].sort(() => Math.random() - 0.5)
-        creatorCards = shuffled.slice(0, 4)
-        joinerCards = shuffled.slice(4, 8)
+        creatorCards = shuffled.slice(0, 2)
+        joinerCards = shuffled.slice(2, 4)
       }
     }
 

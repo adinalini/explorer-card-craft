@@ -137,18 +137,31 @@ const Index = () => {
       const sessionId = getUserSessionId()
       console.log('Creating game session for joiner:', { roomId: roomId.toUpperCase(), sessionId, joinerName: joinerName.trim() })
       
-      const { error: sessionError } = await supabase
-        .from('game_sessions')
-        .insert({
-          room_id: roomId.toUpperCase(),
-          session_token: sessionId,
-          player_role: 'joiner',
-          player_name: joinerName.trim()
-        })
+      try {
+        const { error: sessionError } = await supabase
+          .from('game_sessions')
+          .insert({
+            room_id: roomId.toUpperCase(),
+            session_token: sessionId,
+            player_role: 'joiner',
+            player_name: joinerName.trim()
+          })
 
-      console.log('Game session creation result:', { sessionError })
-      
-      if (sessionError) throw sessionError
+        console.log('Game session creation result:', { sessionError })
+        
+        if (sessionError) {
+          console.error('Failed to create game session:', sessionError)
+          throw sessionError
+        }
+      } catch (sessionCreateError) {
+        console.error('Error creating game session:', sessionCreateError)
+        toast({
+          title: "Error",
+          description: "Failed to create game session. Please try again.",
+          variant: "destructive"
+        })
+        return
+      }
 
       console.log('Updating room with joiner:', { roomId: roomId.toUpperCase(), joinerName: joinerName.trim() })
       

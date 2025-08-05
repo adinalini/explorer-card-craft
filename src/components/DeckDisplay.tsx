@@ -100,12 +100,12 @@ export function DeckDisplay({ cards, playerName, isOwn }: DeckDisplayProps) {
             </div>
           </div>
 
-          {/* Normal cards - 4 rows of 3 */}
+          {/* Normal cards - 3 rows of 4 */}
           <div className="space-y-2">
-            {[0, 1, 2, 3].map((row) => (
+            {[0, 1, 2].map((row) => (
               <div key={row} className="flex justify-center gap-1">
-                {[0, 1, 2].map((col) => {
-                  const cardIndex = row * 3 + col
+                {[0, 1, 2, 3].map((col) => {
+                  const cardIndex = row * 4 + col
                   const card = normalCards[cardIndex]
                   
                   return (

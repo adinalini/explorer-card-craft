@@ -638,15 +638,32 @@ const Room = () => {
 
 
   const autoSelectRandomCard = async () => {
-    if (!room || !roomId || userRole === 'spectator' || selectedCard || isSelectionLocked) return
+    console.log('=== AUTO-SELECT DEBUG START ===')
+    console.log('Auto-select conditions:', {
+      hasRoom: !!room,
+      hasRoomId: !!roomId,
+      userRole,
+      selectedCard,
+      isSelectionLocked,
+      currentRound: room?.current_round
+    })
+    
+    if (!room || !roomId || userRole === 'spectator' || selectedCard || isSelectionLocked) {
+      console.log('Auto-select early return due to conditions')
+      return
+    }
 
-    // Get ALL cards for current round (both sides) to check available cards
-    let allCurrentRoundCards = roomCards.filter(card => 
-      card.round_number === room.current_round
+    // Get cards for current round and user's side only
+    let currentRoundCards = roomCards.filter(card => 
+      card.round_number === room.current_round && card.side === userRole
     )
+    
+    console.log('Current round cards for', userRole, ':', currentRoundCards.length, 'cards')
+    console.log('All room cards:', roomCards.length, 'total cards')
+    console.log('Room cards for current round:', roomCards.filter(c => c.round_number === room.current_round).length)
 
     // If no cards exist for current round, try to generate them first
-    if (allCurrentRoundCards.length === 0) {
+    if (currentRoundCards.length === 0) {
       console.log(`No cards found for ${userRole} in round ${room.current_round}, attempting to generate`)
       try {
         const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-round-cards`, {
@@ -665,7 +682,18 @@ const Room = () => {
           console.log(`Successfully generated cards for round ${room.current_round}`)
           // Wait a moment for the cards to be inserted and trigger the subscription
           await new Promise(resolve => setTimeout(resolve, 1000))
-          return // Let the subscription handle the update
+          console.log('Cards should be generated, continuing with auto-select')
+          // Get fresh cards after generation - use current state
+          currentRoundCards = roomCards.filter(card => 
+            card.round_number === room.current_round && card.side === userRole
+          )
+          if (currentRoundCards.length === 0) {
+            console.log('Still no cards after generation, giving up')
+            return
+          }
+        } else {
+          console.log('Failed to generate cards, response not ok')
+          return
         }
       } catch (error) {
         console.error('Error generating missing cards:', error)
@@ -674,14 +702,15 @@ const Room = () => {
     }
 
     // Check if user already selected a card
-    const userSelectedCard = allCurrentRoundCards.find(card => card.selected_by === userRole)
+    const userSelectedCard = currentRoundCards.find(card => card.selected_by === userRole)
     if (userSelectedCard) {
       console.log(`User ${userRole} already has selected card: ${userSelectedCard.card_name}`)
+      setSelectedCard(userSelectedCard.card_id) // Make sure state is synced
       return
     }
 
-    // Filter to unselected cards only from ALL cards available
-    const availableCards = allCurrentRoundCards.filter(card => !card.selected_by)
+    // Filter to unselected cards only from user's available cards
+    const availableCards = currentRoundCards.filter(card => !card.selected_by)
     if (availableCards.length === 0) return
 
     // Select a random card from available options
@@ -700,8 +729,10 @@ const Room = () => {
       
       setSelectedCard(randomCard.card_id)
       console.log(`Auto-selected random card: ${randomCard.card_name} for ${userRole}`)
+      console.log('=== AUTO-SELECT DEBUG END ===')
     } catch (error) {
       console.error('Error auto-selecting card:', error)
+      console.log('=== AUTO-SELECT DEBUG END (ERROR) ===')
     }
   }
 

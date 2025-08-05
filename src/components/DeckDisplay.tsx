@@ -40,7 +40,7 @@ export function DeckDisplay({ cards, playerName, isOwn }: DeckDisplayProps) {
                 </div>
               )}
               {normalCards.map((card, index) => (
-                <div key={index} className="text-sm text-muted-foreground border-l-2 border-muted pl-2 py-1">
+                <div key={index} className="text-xs text-muted-foreground border-l-2 border-muted pl-2 py-1">
                   {card.card_name}
                 </div>
               ))}
@@ -65,7 +65,7 @@ export function DeckDisplay({ cards, playerName, isOwn }: DeckDisplayProps) {
                 </div>
               )}
               {normalCards.map((card, index) => (
-                <div key={index} className="text-sm text-muted-foreground border-l-2 border-muted pl-2 py-1">
+                <div key={index} className="text-xs text-muted-foreground border-l-2 border-muted pl-2 py-1">
                   {card.card_name}
                 </div>
               ))}

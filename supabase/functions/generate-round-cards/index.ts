@@ -262,7 +262,7 @@ Deno.serve(async (req) => {
       { type: 'range', range: [6, 10], description: 'Range (6-10)' }
     ]
 
-    for (let roundIndex = 0; roundIndex < 13; roundIndex++) {
+    for (let roundIndex = 0; roundIndex < roundStructures.length; roundIndex++) {
       const roundNum = roundIndex + 1
       const structure = roundStructures[roundIndex]
       const roundCards: Card[] = []

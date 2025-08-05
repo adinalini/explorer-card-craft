@@ -662,52 +662,30 @@ const Room = () => {
     console.log('All room cards:', roomCards.length, 'total cards')
     console.log('Room cards for current round:', roomCards.filter(c => c.round_number === room.current_round).length)
 
-    // If no cards exist for current round, try to generate them first
+    // If no cards exist for current round, fetch directly from database
     if (currentRoundCards.length === 0) {
-      console.log(`No cards found for ${userRole} in round ${room.current_round}, attempting to generate`)
+      console.log(`No cards found in state for ${userRole} in round ${room.current_round}, fetching from database`)
+      
       try {
-        const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-round-cards`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
-          },
-          body: JSON.stringify({
-            roomId: roomId,
-            round: room.current_round.toString()
-          })
-        })
+        const supabaseWithToken = getSupabaseWithSession()
+        const { data: freshCards, error: fetchError } = await supabaseWithToken
+          .from('room_cards')
+          .select('*')
+          .eq('room_id', roomId)
+          .eq('round_number', room.current_round)
+          .eq('side', userRole)
         
-        if (response.ok) {
-          console.log(`Successfully generated cards for round ${room.current_round}`)
-          // Wait longer for the subscription to update the state
-          await new Promise(resolve => setTimeout(resolve, 2000))
-          console.log('Cards should be generated, fetching fresh data')
-          
-          // Fetch fresh cards directly from database
-          const supabaseWithToken = getSupabaseWithSession()
-          const { data: freshCards, error: fetchError } = await supabaseWithToken
-            .from('room_cards')
-            .select('*')
-            .eq('room_id', roomId)
-            .eq('round_number', room.current_round)
-            .eq('side', userRole)
-          
-          if (!fetchError && freshCards && freshCards.length > 0) {
-            console.log(`Found ${freshCards.length} fresh cards for ${userRole}`)
-            currentRoundCards = freshCards
-          } else {
-            console.log('Still no cards after fresh fetch, giving up')
-            return
-          }
+        if (!fetchError && freshCards && freshCards.length > 0) {
+          console.log(`Found ${freshCards.length} fresh cards for ${userRole} from database`)
+          currentRoundCards = freshCards
         } else {
-          console.log('Failed to generate cards, response not ok')
+          console.log('No cards available for auto-selection in round', room.current_round)
           return
         }
       } catch (error) {
-        console.error('Error generating missing cards:', error)
+        console.error('Error fetching cards for auto-selection:', error)
+        return
       }
-      return
     }
 
     // Check if user already selected a card

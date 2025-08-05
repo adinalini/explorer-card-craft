@@ -341,6 +341,27 @@ Deno.serve(async (req) => {
           !usedIds.has(card.id)
         )
         
+        console.log(`Round ${roundNum} (range ${minCost}-${maxCost}): Found ${availableInRange.length} available cards:`, 
+          availableInRange.map(c => `${c.name}${c.isSpell ? ' (spell)' : ''}`))
+        
+        // If we don't have enough cards, add fallback cards from the range that appeared before but weren't selected
+        if (availableInRange.length < 4) {
+          console.log(`Only found ${availableInRange.length} cards in range ${minCost}-${maxCost}, filling with any available cards`)
+          
+          // Get all cards in range regardless of usage (fallback)
+          const allCardsInRange = cardDatabase.filter(card => 
+            !card.isLegendary && 
+            card.cost && card.cost >= minCost && card.cost <= maxCost
+          )
+          
+          // Add cards from the range that we haven't added yet
+          for (const card of allCardsInRange) {
+            if (roundCards.length < 4 && !roundCards.find(c => c.id === card.id)) {
+              availableInRange.push(card)
+            }
+          }
+        }
+        
         for (let i = 0; i < 4 && i < availableInRange.length; i++) {
           const randomIndex = Math.floor(Math.random() * availableInRange.length)
           const selected = availableInRange.splice(randomIndex, 1)[0]

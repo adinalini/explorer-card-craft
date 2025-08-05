@@ -9,6 +9,25 @@ import { DeckDisplay } from "@/components/DeckDisplay"
 import { getRandomCards, getCardById } from "@/utils/cardData"
 import { ArrowLeft } from "lucide-react"
 
+// Helper functions for session management
+const getUserSessionId = () => {
+  let sessionId = sessionStorage.getItem('userSessionId')
+  if (!sessionId) {
+    sessionId = 'user_' + Math.random().toString(36).substr(2, 9)
+    sessionStorage.setItem('userSessionId', sessionId)
+  }
+  return sessionId
+}
+
+const getUserRole = (room: Room, sessionId: string) => {
+  const creatorSessionId = localStorage.getItem(`room_${room.id}_creator`)
+  const joinerSessionId = localStorage.getItem(`room_${room.id}_joiner`)
+  
+  if (creatorSessionId === sessionId) return 'creator'
+  if (joinerSessionId === sessionId) return 'joiner'
+  return 'spectator'
+}
+
 interface Room {
   id: string
   draft_type: string
@@ -54,6 +73,8 @@ const Room = () => {
   const [selectedCard, setSelectedCard] = useState<string | null>(null)
   const [timeLeft, setTimeLeft] = useState<number>(15)
   const [isSelectionLocked, setIsSelectionLocked] = useState(false)
+  const [userSessionId] = useState(getUserSessionId())
+  const [userRole, setUserRole] = useState<'creator' | 'joiner' | 'spectator'>('spectator')
 
   useEffect(() => {
     if (!roomId) return
@@ -141,6 +162,21 @@ const Room = () => {
 
       if (error) throw error
       setRoom(data)
+      
+      // Determine user role and set session storage for creator/joiner identification
+      if (data) {
+        const role = getUserRole(data, userSessionId)
+        setUserRole(role)
+        
+        // Store session IDs for room participants
+        if (!localStorage.getItem(`room_${roomId}_creator`) && !data.joiner_name) {
+          localStorage.setItem(`room_${roomId}_creator`, userSessionId)
+          setUserRole('creator')
+        } else if (!localStorage.getItem(`room_${roomId}_joiner`) && data.joiner_name && role === 'spectator') {
+          localStorage.setItem(`room_${roomId}_joiner`, userSessionId)
+          setUserRole('joiner')
+        }
+      }
     } catch (error) {
       console.error('Error fetching room:', error)
       toast({
@@ -188,19 +224,19 @@ const Room = () => {
   }
 
   const handleReady = async () => {
-    if (!room) return
+    if (!room || userRole === 'spectator') return
 
-    const isCreator = room.joiner_name === null
-    const updateField = isCreator ? 'creator_ready' : 'joiner_ready'
+    const updateField = userRole === 'creator' ? 'creator_ready' : 'joiner_ready'
+    const currentValue = userRole === 'creator' ? room.creator_ready : room.joiner_ready
     
     try {
       const { error } = await supabase
         .from('rooms')
-        .update({ [updateField]: !isReady })
+        .update({ [updateField]: !currentValue })
         .eq('id', roomId!)
 
       if (error) throw error
-      setIsReady(!isReady)
+      setIsReady(!currentValue)
     } catch (error) {
       console.error('Error updating ready status:', error)
       toast({
@@ -416,10 +452,9 @@ const Room = () => {
   }
 
   const handleCardSelect = async (cardId: string) => {
-    if (!room || isSelectionLocked || !roomId) return
+    if (!room || isSelectionLocked || !roomId || userRole === 'spectator') return
 
-    const isCreator = room.joiner_name === null
-    const playerSide = isCreator ? 'creator' : 'joiner'
+    const playerSide = userRole
     
     setSelectedCard(cardId)
 
@@ -488,10 +523,8 @@ const Room = () => {
     }
   }
 
-  const isCreator = room?.joiner_name === null
-  const playerSide = isCreator ? 'creator' : 'joiner'
   const currentRoundCards = roomCards.filter(card => 
-    card.round_number === room?.current_round && card.side === playerSide
+    card.round_number === room?.current_round && card.side === userRole
   )
   const creatorDeck = playerDecks.filter(card => card.player_side === 'creator')
   const joinerDeck = playerDecks.filter(card => card.player_side === 'joiner')
@@ -499,14 +532,14 @@ const Room = () => {
   return (
     <div className="min-h-screen bg-white">
       {/* Header with wave */}
-      <div className="bg-gradient-to-r from-[hsl(var(--background-start))] to-[hsl(var(--background-end))] relative">
+      <div className="bg-gradient-to-r from-purple-600 to-blue-600 relative">
         <div className="py-6 px-4">
           <div className="flex items-center justify-between max-w-6xl mx-auto">
             <Button
               onClick={handleBackToHome}
               variant="outline"
               size="sm"
-              className="border-primary text-primary hover:bg-primary hover:text-white hover:scale-105 transition-all bg-white"
+              className="border-white text-white hover:bg-white hover:text-purple-600 hover:scale-105 transition-all bg-transparent"
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back to Home
@@ -518,7 +551,18 @@ const Room = () => {
             <div className="w-24"></div> {/* Spacer for centering */}
           </div>
         </div>
-        <WaveDivider inverted />
+        <svg viewBox="0 0 1200 120" className="w-full h-auto">
+          <defs>
+            <linearGradient id="wave-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor="#9333ea" />
+              <stop offset="100%" stopColor="#2563eb" />
+            </linearGradient>
+          </defs>
+          <path 
+            d="M0,96L48,85.3C96,75,192,53,288,48C384,43,480,53,576,69.3C672,85,768,107,864,112C960,117,1056,107,1152,90.7C1248,75,1344,53,1392,42.7L1440,32L1440,0L1392,0C1344,0,1248,0,1152,0C1056,0,960,0,864,0C768,0,672,0,576,0C480,0,384,0,288,0C192,0,96,0,48,0L0,0Z" 
+            fill="url(#wave-gradient)"
+          />
+        </svg>
       </div>
 
       {/* Main Content */}
@@ -537,7 +581,7 @@ const Room = () => {
           // Both players joined, waiting for ready
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 min-h-[60vh]">
             {/* Creator Side */}
-            <div className="border-r-2 border-muted pr-8">
+            <div className="border-r-2 lg:border-r-2 lg:border-b-0 border-b-2 border-muted lg:pr-8 pb-8 lg:pb-0">
               <div className="text-center space-y-6">
                 <h2 className="text-2xl font-bold text-black">{room.creator_name}</h2>
                 <div className="text-lg text-muted-foreground">Room Creator</div>
@@ -547,7 +591,7 @@ const Room = () => {
                   variant={room.creator_ready ? "secondary" : "default"}
                   size="lg"
                   className="px-8 py-4 text-lg"
-                  disabled={isCreator && isReady}
+                  disabled={userRole !== 'creator'}
                 >
                   {room.creator_ready ? "Ready ✓" : "Ready?"}
                 </Button>
@@ -555,7 +599,7 @@ const Room = () => {
             </div>
 
             {/* Joiner Side */}
-            <div className="pl-8">
+            <div className="lg:pl-8 pt-8 lg:pt-0">
               <div className="text-center space-y-6">
                 <h2 className="text-2xl font-bold text-black">{room.joiner_name}</h2>
                 <div className="text-lg text-muted-foreground">Joined Player</div>
@@ -565,7 +609,7 @@ const Room = () => {
                   variant={room.joiner_ready ? "secondary" : "default"}
                   size="lg"
                   className="px-8 py-4 text-lg"
-                  disabled={!isCreator && isReady}
+                  disabled={userRole !== 'joiner'}
                 >
                   {room.joiner_ready ? "Ready ✓" : "Ready?"}
                 </Button>
@@ -616,51 +660,82 @@ const Room = () => {
             </div>
 
             {/* Card Selection */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+            <div className="grid grid-cols-1 gap-8">
               {/* Player's cards */}
-              <div className="space-y-4">
-                <h3 className="text-xl font-semibold text-center text-black">
-                  {isCreator ? room.creator_name : room.joiner_name}'s Cards
-                </h3>
-                <div className="grid grid-cols-2 gap-4">
-                  {currentRoundCards.map((card) => (
-                    <DraftCard
-                      key={card.id}
-                      cardId={card.card_id}
-                      cardName={card.card_name}
-                      cardImage={card.card_image}
-                      isLegendary={card.is_legendary}
-                      isSelected={selectedCard === card.card_id || (isSelectionLocked && card.selected_by === playerSide)}
-                      onSelect={() => handleCardSelect(card.card_id)}
-                      disabled={isSelectionLocked}
-                    />
-                  ))}
-                </div>
-              </div>
-
-              {/* Opponent's cards (shown only after selection is locked) */}
-              <div className="space-y-4">
-                <h3 className="text-xl font-semibold text-center text-black">
-                  {isCreator ? room.joiner_name : room.creator_name}'s Cards
-                </h3>
-                <div className="grid grid-cols-2 gap-4">
-                  {roomCards
-                    .filter(card => 
-                      card.round_number === room.current_round && 
-                      card.side !== playerSide
-                    )
-                    .map((card) => (
+              {userRole !== 'spectator' && (
+                <div className="space-y-4">
+                  <h3 className="text-xl font-semibold text-center text-black">
+                    {userRole === 'creator' ? room.creator_name : room.joiner_name}'s Cards
+                  </h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    {currentRoundCards.map((card) => (
                       <DraftCard
                         key={card.id}
                         cardId={card.card_id}
                         cardName={card.card_name}
                         cardImage={card.card_image}
                         isLegendary={card.is_legendary}
-                        isSelected={isSelectionLocked && !!card.selected_by}
-                        onSelect={() => {}}
-                        disabled={true}
+                        isSelected={selectedCard === card.card_id || (isSelectionLocked && card.selected_by === userRole)}
+                        onSelect={() => handleCardSelect(card.card_id)}
+                        disabled={isSelectionLocked}
                       />
                     ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Show all cards for spectators or opponent's cards */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {/* Creator's cards */}
+                <div className="space-y-4">
+                  <h3 className="text-xl font-semibold text-center text-black">
+                    {room.creator_name}'s Cards
+                  </h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    {roomCards
+                      .filter(card => 
+                        card.round_number === room.current_round && 
+                        card.side === 'creator'
+                      )
+                      .map((card) => (
+                        <DraftCard
+                          key={card.id}
+                          cardId={card.card_id}
+                          cardName={card.card_name}
+                          cardImage={card.card_image}
+                          isLegendary={card.is_legendary}
+                          isSelected={isSelectionLocked && !!card.selected_by}
+                          onSelect={() => {}}
+                          disabled={true}
+                        />
+                      ))}
+                  </div>
+                </div>
+
+                {/* Joiner's cards */}
+                <div className="space-y-4">
+                  <h3 className="text-xl font-semibold text-center text-black">
+                    {room.joiner_name}'s Cards
+                  </h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    {roomCards
+                      .filter(card => 
+                        card.round_number === room.current_round && 
+                        card.side === 'joiner'
+                      )
+                      .map((card) => (
+                        <DraftCard
+                          key={card.id}
+                          cardId={card.card_id}
+                          cardName={card.card_name}
+                          cardImage={card.card_image}
+                          isLegendary={card.is_legendary}
+                          isSelected={isSelectionLocked && !!card.selected_by}
+                          onSelect={() => {}}
+                          disabled={true}
+                        />
+                      ))}
+                  </div>
                 </div>
               </div>
             </div>
@@ -676,7 +751,7 @@ const Room = () => {
                   selection_order: card.selection_order
                 }))}
                 playerName={room.creator_name}
-                isOwn={isCreator}
+                isOwn={userRole === 'creator'}
               />
               <DeckDisplay
                 cards={joinerDeck.map(card => ({
@@ -687,7 +762,7 @@ const Room = () => {
                   selection_order: card.selection_order
                 }))}
                 playerName={room.joiner_name}
-                isOwn={!isCreator}
+                isOwn={userRole === 'joiner'}
               />
             </div>
           </div>
@@ -712,7 +787,7 @@ const Room = () => {
                   selection_order: card.selection_order
                 }))}
                 playerName={room.creator_name}
-                isOwn={isCreator}
+                isOwn={userRole === 'creator'}
               />
               <DeckDisplay
                 cards={joinerDeck.map(card => ({
@@ -723,7 +798,7 @@ const Room = () => {
                   selection_order: card.selection_order
                 }))}
                 playerName={room.joiner_name}
-                isOwn={!isCreator}
+                isOwn={userRole === 'joiner'}
               />
             </div>
           </div>

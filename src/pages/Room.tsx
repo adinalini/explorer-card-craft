@@ -457,9 +457,22 @@ const Room = () => {
         
         if (!choices) return
         
-        // Assign 2 cards to creator side and 2 to joiner side
-        const creatorCards = choices.cards.slice(0, 2)
-        const joinerCards = choices.cards.slice(2, 4)
+        // For spell rounds, ensure balanced cost distribution
+        let creatorCards, joinerCards
+        if (isSpellRound) {
+          const sortedCards = choices.cards.sort((a, b) => (a.cost || 0) - (b.cost || 0))
+          // Give one high-cost and one low-cost to each player for balance
+          creatorCards = [sortedCards[0], sortedCards[3]] // lowest + highest
+          joinerCards = [sortedCards[1], sortedCards[2]] // middle two
+          console.log(`Spell round card distribution:`, {
+            creator: creatorCards.map(c => `${c.name} (${c.cost})`),
+            joiner: joinerCards.map(c => `${c.name} (${c.cost})`)
+          })
+        } else {
+          // Normal distribution for non-spell rounds
+          creatorCards = choices.cards.slice(0, 2)
+          joinerCards = choices.cards.slice(2, 4)
+        }
 
         const roomCardsData = [
           ...creatorCards.map((card) => ({
@@ -575,8 +588,16 @@ const Room = () => {
 
   // Sync timer with database
   useEffect(() => {
+    console.log(`Timer sync attempt: ${userRole}`, {
+      hasRoom: !!room,
+      round_start_time: room?.round_start_time,
+      status: room?.status,
+      userRole,
+      current_round: room?.current_round
+    })
+    
     if (!room?.round_start_time || room.status !== 'drafting') {
-      console.log(`Timer sync check: ${userRole} - no round start time or not drafting`, {
+      console.log(`Timer sync blocked: ${userRole} - no round start time or not drafting`, {
         round_start_time: room?.round_start_time,
         status: room?.status,
         userRole
@@ -589,7 +610,7 @@ const Room = () => {
     const elapsed = Math.floor((now - startTime) / 1000)
     const remaining = Math.max(0, room.round_duration_seconds - elapsed)
 
-    console.log(`Timer sync: ${userRole} - elapsed: ${elapsed}s, remaining: ${remaining}s`, {
+    console.log(`Timer sync SUCCESS: ${userRole} - elapsed: ${elapsed}s, remaining: ${remaining}s`, {
       startTime: new Date(room.round_start_time).toISOString(),
       now: new Date().toISOString(),
       duration: room.round_duration_seconds

@@ -158,7 +158,7 @@ const Room = () => {
       
       // Set up interval
       if (timerIntervalRef.current) clearInterval(timerIntervalRef.current)
-      timerIntervalRef.current = setInterval(updateTimer, 100) // Update every 100ms for smooth countdown
+      timerIntervalRef.current = setInterval(updateTimer, 1000) // Update every second
 
       return () => {
         if (timerIntervalRef.current) {
@@ -684,11 +684,8 @@ const Room = () => {
         card.round_number === currentRound && card.selected_by
       )
 
-      // Handle auto-selection for users who didn't select any card
-      console.log('=== STARTING AUTO-SELECTION PROCESS ===')
-      
-      // Fetch current round cards fresh from database to ensure we have all cards
-      let { data: allCurrentRoundCards, error: fetchError } = await supabaseWithToken
+      // Fetch current round cards to check selections
+      const { data: allCurrentRoundCards, error: fetchError } = await supabaseWithToken
         .from('room_cards')
         .select('*')
         .eq('room_id', roomId)
@@ -701,164 +698,34 @@ const Room = () => {
 
       if (!allCurrentRoundCards || allCurrentRoundCards.length === 0) {
         console.log('No cards found for current round:', currentRound)
-        console.log('Attempting to generate missing cards for round:', currentRound)
-        
-        // Try to generate cards for this round if they're missing
-        try {
-          const { data: generationResponse, error: generationError } = await supabase.functions.invoke('generate-round-cards', {
-            body: { 
-              roomId,
-              round: currentRound,
-              usedCardIds: [],
-              roundType: { isLegendary: false, isSpell: false }
-            }
-          })
-          
-          if (generationError) {
-            console.error('Error generating missing round cards:', generationError)
-          } else {
-            console.log('Successfully generated missing cards for round:', currentRound)
-            // Re-fetch the cards
-            const { data: refetchedCards } = await supabaseWithToken
-              .from('room_cards')
-              .select('*')
-              .eq('room_id', roomId)
-              .eq('round_number', currentRound)
-            
-            if (refetchedCards && refetchedCards.length > 0) {
-              // Update the allCurrentRoundCards variable and continue with auto-selection
-              allCurrentRoundCards = refetchedCards
-            } else {
-              console.error('Failed to generate cards for round:', currentRound)
-              return
-            }
-          }
-        } catch (error) {
-          console.error('Exception generating missing round cards:', error)
-          return
-        }
-      }
-
-      console.log('All current round cards:', allCurrentRoundCards)
-      
-      const creatorsCards = allCurrentRoundCards.filter(card => card.side === 'creator')
-      const joinersCards = allCurrentRoundCards.filter(card => card.side === 'joiner')
-      
-      console.log('Filtered cards:')
-      console.log('- Creator cards:', creatorsCards)
-      console.log('- Joiner cards:', joinersCards)
-      
-      // Check if selections exist
-      const creatorSelected = allCurrentRoundCards.find(card => card.selected_by === 'creator')
-      const joinerSelected = allCurrentRoundCards.find(card => card.selected_by === 'joiner')
-      
-      console.log('Selection status:')
-      console.log('- Creator selected card:', creatorSelected)
-      console.log('- Joiner selected card:', joinerSelected)
-      
-      console.log('Auto-selection check:', {
-        round: currentRound,
-        creatorSelected: !!creatorSelected,
-        joinerSelected: !!joinerSelected,
-        creatorsCards: creatorsCards.length,
-        joinersCards: joinersCards.length,
-        allCurrentRoundCards: allCurrentRoundCards.length
-      })
-      
-      // Auto-select only for users who STILL haven't selected after background auto-selection
-      if (!creatorSelected && creatorsCards.length > 0) {
-        const randomCard = creatorsCards[Math.floor(Math.random() * creatorsCards.length)]
-        console.log('=== FINAL AUTO-SELECTING FOR CREATOR ===')
-        console.log('Final auto-selecting for creator:', randomCard)
-        
-        const { error: autoSelectError } = await supabaseWithToken
-          .from('room_cards')
-          .update({ selected_by: 'creator' })
-          .eq('id', randomCard.id)
-        
-        if (autoSelectError) {
-          console.error('=== ERROR FINAL AUTO-SELECTING FOR CREATOR ===')
-          console.error('Error final auto-selecting for creator:', autoSelectError)
-        } else {
-          console.log('=== SUCCESS FINAL AUTO-SELECTING FOR CREATOR ===')
-          console.log('Final auto-selected card for creator:', randomCard.card_name)
-        }
-      }
-      
-      // Auto-select for joiner only if they STILL haven't selected after background auto-selection
-      if (!joinerSelected && joinersCards.length > 0) {
-        const randomCard = joinersCards[Math.floor(Math.random() * joinersCards.length)]
-        console.log('=== FINAL AUTO-SELECTING FOR JOINER ===')
-        console.log('Final auto-selecting for joiner:', randomCard)
-        
-        const { error: autoSelectError } = await supabaseWithToken
-          .from('room_cards')
-          .update({ selected_by: 'joiner' })
-          .eq('id', randomCard.id)
-        
-        if (autoSelectError) {
-          console.error('=== ERROR FINAL AUTO-SELECTING FOR JOINER ===')
-          console.error('Error final auto-selecting for joiner:', autoSelectError)
-        } else {
-          console.log('=== SUCCESS FINAL AUTO-SELECTING FOR JOINER ===')
-          console.log('Final auto-selected card for joiner:', randomCard.card_name)
-        }
-      }
-
-      // Reduced wait time since background auto-selection should have handled most cases
-      console.log('=== WAITING FOR FINAL AUTO-SELECTIONS TO COMPLETE ===')
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      
-      console.log('=== FETCHING UPDATED CARDS AFTER AUTO-SELECTION ===')
-      
-      // First, let's verify what cards exist for this round
-      const { data: allRoundCards, error: allCardsError } = await supabaseWithToken
-        .from('room_cards')
-        .select('*')
-        .eq('room_id', roomId)
-        .eq('round_number', currentRound)
-        
-      console.log('All cards for round:', allRoundCards)
-      
-      // For debugging: check the selected_by values in the fresh data
-      console.log('Fresh card data after auto-selection:', allRoundCards?.map(card => ({
-        name: card.card_name,
-        side: card.side,
-        selected_by: card.selected_by,
-        id: card.id
-      })))
-      
-      // Now fetch only the selected ones - use not null instead of specific values
-      const { data: updatedCards, error: updateFetchError } = await supabaseWithToken
-        .from('room_cards')
-        .select('*')
-        .eq('room_id', roomId)
-        .eq('round_number', currentRound)
-        .not('selected_by', 'is', null)
-        
-      if (updateFetchError) {
-        console.error('=== ERROR FETCHING UPDATED CARDS ===')
-        console.error('Error fetching updated cards:', updateFetchError)
         return
       }
-      
-      console.log('=== UPDATED CARDS FETCHED ===')
-      console.log('Updated cards after auto-selection:', updatedCards)
 
-      console.log('=== ADDING CARDS TO PLAYER DECKS ===')
+      // Get only selected cards to add to deck - avoid duplicate processing
+      const selectedCards = allCurrentRoundCards.filter(card => card.selected_by)
       
-      // Debug: Check session token before adding cards
-      const currentSessionId = sessionStorage.getItem('userSessionId')
-      console.log('Current session ID for deck insertion:', currentSessionId)
-      
-      for (const card of updatedCards || []) {
-        if (card.selected_by) {
-          console.log('=== ADDING CARD TO DECK ===')
-          console.log('Adding card to deck:', card.card_name, 'for', card.selected_by)
-          
-          // Create fresh client with session token for each card insertion
-          const supabaseWithToken = getSupabaseWithSession()
-          
+      console.log('Selected cards for round', currentRound, ':', selectedCards.map(c => ({
+        name: c.card_name, 
+        side: c.side, 
+        selected_by: c.selected_by
+      })))
+
+      // Check for existing deck entries to prevent duplicates
+      const { data: existingDeckCards } = await supabaseWithToken
+        .from('player_decks')
+        .select('card_id, player_side')
+        .eq('room_id', roomId)
+        .eq('selection_order', currentRound)
+
+      const existingKeys = new Set(
+        existingDeckCards?.map(c => `${c.card_id}_${c.player_side}`) || []
+      )
+
+      // Add only new cards to deck
+      for (const card of selectedCards) {
+        const cardKey = `${card.card_id}_${card.selected_by}`
+        
+        if (!existingKeys.has(cardKey)) {
           const { error: deckError } = await supabaseWithToken
             .from('player_decks')
             .insert({
@@ -872,22 +739,12 @@ const Room = () => {
             })
           
           if (deckError) {
-            console.error('=== ERROR ADDING CARD TO DECK ===')
             console.error('Error adding card to deck:', deckError)
-            console.error('Card data:', card)
-            console.error('Insert data:', {
-              room_id: roomId,
-              player_side: card.selected_by,
-              card_id: card.card_id,
-              card_name: card.card_name,
-              card_image: card.card_image,
-              is_legendary: card.is_legendary,
-              selection_order: currentRound
-            })
           } else {
-            console.log('=== SUCCESS ADDING CARD TO DECK ===')
-            console.log('Successfully added card to deck:', card.card_name)
+            console.log('Added card to deck:', card.card_name, 'for', card.selected_by)
           }
+        } else {
+          console.log('Card already in deck, skipping:', card.card_name)
         }
       }
 
@@ -1272,30 +1129,34 @@ const Room = () => {
               <p className="text-xl text-black">Good luck, have fun!</p>
             </div>
 
-            {/* Final Decks - Mobile responsive */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <DeckDisplay
-                cards={creatorDeck.map(card => ({
-                  card_id: card.card_id,
-                  card_name: card.card_name,
-                  card_image: card.card_image,
-                  is_legendary: card.is_legendary,
-                  selection_order: card.selection_order
-                }))}
-                playerName={room.creator_name}
-                isOwn={userRole === 'creator'}
-              />
-              <DeckDisplay
-                cards={joinerDeck.map(card => ({
-                  card_id: card.card_id,
-                  card_name: card.card_name,
-                  card_image: card.card_image,
-                  is_legendary: card.is_legendary,
-                  selection_order: card.selection_order
-                }))}
-                playerName={room.joiner_name}
-                isOwn={userRole === 'joiner'}
-              />
+            {/* Final Decks - Enlarged for completed screen */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 scale-110 transform-gpu">
+              <div className="space-y-6">
+                <DeckDisplay
+                  cards={creatorDeck.map(card => ({
+                    card_id: card.card_id,
+                    card_name: card.card_name,
+                    card_image: card.card_image,
+                    is_legendary: card.is_legendary,
+                    selection_order: card.selection_order
+                  }))}
+                  playerName={room.creator_name}
+                  isOwn={userRole === 'creator'}
+                />
+              </div>
+              <div className="space-y-6">
+                <DeckDisplay
+                  cards={joinerDeck.map(card => ({
+                    card_id: card.card_id,
+                    card_name: card.card_name,
+                    card_image: card.card_image,
+                    is_legendary: card.is_legendary,
+                    selection_order: card.selection_order
+                  }))}
+                  playerName={room.joiner_name}
+                  isOwn={userRole === 'joiner'}
+                />
+              </div>
             </div>
           </div>
         ) : null}

@@ -105,6 +105,7 @@ const Room = () => {
     if (userRole === 'creator') {
       console.log('Creator: Will process round end in 3 seconds')
       setTimeout(() => {
+        console.log('Creator: Processing round end now...')
         processRoundEnd()
       }, 3000) // Show selections for 3 seconds
     } else {
@@ -125,6 +126,7 @@ const Room = () => {
         setTimeRemaining(remaining)
         
         if (remaining <= 0 && !isSelectionLocked) {
+          console.log(`Timer expired for round ${room.current_round}, calling handleTimeUp`)
           setIsSelectionLocked(true)
           handleTimeUp()
         }
@@ -613,8 +615,12 @@ const Room = () => {
   }
 
   const processRoundEnd = async () => {
-    if (!room || !roomId || userRole !== 'creator') return
+    if (!room || !roomId || userRole !== 'creator') {
+      console.log('processRoundEnd early return:', { room: !!room, roomId, userRole })
+      return
+    }
 
+    console.log('processRoundEnd: Starting to process round end for round', room.current_round)
     try {
       // Create authenticated client for round processing
       const supabaseWithToken = createClient(

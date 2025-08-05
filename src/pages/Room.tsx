@@ -270,8 +270,21 @@ const Room = () => {
     console.log('Attempting to update ready status:', { userRole, updateField, currentValue, userSessionId })
     
     try {
-      // Debug: Check all sessions for this room
-      const { data: allSessions } = await supabase
+      // Create authenticated client to bypass RLS restrictions
+      const supabaseWithToken = createClient(
+        "https://ophgbcyhxvwljfztlvyu.supabase.co",
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9waGdiY3loeHZ3bGpmenRsdnl1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQzMzU4NzYsImV4cCI6MjA2OTkxMTg3Nn0.iiiRP6WtGtwI_jJDnAJUqmEZcoNUbYT3HiBl3VuBnKs",
+        {
+          global: {
+            headers: {
+              'x-session-token': userSessionId
+            }
+          }
+        }
+      )
+
+      // Debug: Check all sessions for this room using authenticated client
+      const { data: allSessions } = await supabaseWithToken
         .from('game_sessions')
         .select('*')
         .eq('room_id', roomId!)
@@ -280,7 +293,7 @@ const Room = () => {
       console.log('Looking for session with:', { userSessionId, userRole, roomId })
 
       // Check if the current user has a valid game session for this room and role
-      const { data: existingSession, error: sessionError } = await supabase
+      const { data: existingSession, error: sessionError } = await supabaseWithToken
         .from('game_sessions')
         .select('*')
         .eq('room_id', roomId!)
@@ -300,19 +313,6 @@ const Room = () => {
         console.error('No valid session found for user:', { userRole, userSessionId, roomId })
         throw new Error(`No valid session found. Please refresh and try again.`)
       }
-
-      // Create a new supabase client instance with session token header
-      const supabaseWithToken = createClient(
-        "https://ophgbcyhxvwljfztlvyu.supabase.co",
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9waGdiY3loeHZ3bGpmenRsdnl1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQzMzU4NzYsImV4cCI6MjA2OTkxMTg3Nn0.iiiRP6WtGtwI_jJDnAJUqmEZcoNUbYT3HiBl3VuBnKs",
-        {
-          global: {
-            headers: {
-              'x-session-token': userSessionId
-            }
-          }
-        }
-      )
 
       const { error } = await supabaseWithToken
         .from('rooms')

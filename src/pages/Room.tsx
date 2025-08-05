@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react"
 import { useParams, useNavigate } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import { WaveDivider } from "@/components/ui/wave-divider"
-import { supabase } from "@/integrations/supabase/client"
+import { supabase, getSupabaseWithSession } from "@/integrations/supabase/client"
 import { createClient } from '@supabase/supabase-js'
 import { toast } from "@/hooks/use-toast"
 import { DraftCard } from "@/components/DraftCard"
@@ -365,17 +365,7 @@ const Room = () => {
     
     try {
       // Create authenticated client to bypass RLS restrictions
-      const supabaseWithToken = createClient(
-        "https://ophgbcyhxvwljfztlvyu.supabase.co",
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9waGdiY3loeHZ3bGpmenRsdnl1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQzMzU4NzYsImV4cCI6MjA2OTkxMTg3Nn0.iiiRP6WtGtwI_jJDnAJUqmEZcoNUbYT3HiBl3VuBnKs",
-        {
-          global: {
-            headers: {
-              'x-session-token': userSessionId
-            }
-          }
-        }
-      )
+      const supabaseWithToken = getSupabaseWithSession()
 
       // Debug: Check all sessions for this room using authenticated client
       const { data: allSessions } = await supabaseWithToken
@@ -438,17 +428,7 @@ const Room = () => {
       console.log('Starting draft for room:', roomId, 'with session:', userSessionId)
       
       // Create a new supabase client instance with session token header
-      const supabaseWithToken = createClient(
-        "https://ophgbcyhxvwljfztlvyu.supabase.co",
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9waGdiY3loeHZ3bGpmenRsdnl1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQzMzU4NzYsImV4cCI6MjA2OTkxMTg3Nn0.iiiRP6WtGtwI_jJDnAJUqmEZcoNUbYT3HiBl3VuBnKs",
-        {
-          global: {
-            headers: {
-              'x-session-token': userSessionId
-            }
-          }
-        }
-      )
+      const supabaseWithToken = getSupabaseWithSession()
       
       console.log('Generating all cards for the entire draft...')
       // Generate all cards first before starting the draft
@@ -582,17 +562,7 @@ const Room = () => {
     if (!roomId || userRole !== 'creator') return
 
     try {
-      const supabaseWithToken = createClient(
-        "https://ophgbcyhxvwljfztlvyu.supabase.co",
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9waGdiY3loeHZ3bGpmenRsdnl1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQzMzU4NzYsImV4cCI6MjA2OTkxMTg3Nn0.iiiRP6WtGtwI_jJDnAJUqmEZcoNUbYT3HiBl3VuBnKs",
-        {
-          global: {
-            headers: {
-              'x-session-token': userSessionId
-            }
-          }
-        }
-      )
+      const supabaseWithToken = getSupabaseWithSession()
 
       // Set round start time in database
       await supabaseWithToken
@@ -626,17 +596,7 @@ const Room = () => {
     
     try {
       // Create authenticated client for auto-selection
-      const supabaseWithToken = createClient(
-        "https://ophgbcyhxvwljfztlvyu.supabase.co",
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9waGdiY3loeHZ3bGpmenRsdnl1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQzMzU4NzYsImV4cCI6MjA2OTkxMTg3Nn0.iiiRP6WtGtwI_jJDnAJUqmEZcoNUbYT3HiBl3VuBnKs",
-        {
-          global: {
-            headers: {
-              'x-session-token': userSessionId
-            }
-          }
-        }
-      )
+      const supabaseWithToken = getSupabaseWithSession()
       
       await supabaseWithToken
         .from('room_cards')
@@ -661,17 +621,7 @@ const Room = () => {
     console.log('processRoundEnd: Starting to process round end for round', room.current_round)
     try {
       // Create authenticated client for round processing
-      const supabaseWithToken = createClient(
-        "https://ophgbcyhxvwljfztlvyu.supabase.co",
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9waGdiY3loeHZ3bGpmenRsdnl1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQzMzU4NzYsImV4cCI6MjA2OTkxMTg3Nn0.iiiRP6WtGtwI_jJDnAJUqmEZcoNUbYT3HiBl3VuBnKs",
-        {
-          global: {
-            headers: {
-              'x-session-token': userSessionId
-            }
-          }
-        }
-      )
+      const supabaseWithToken = getSupabaseWithSession()
 
       const currentRound = room.current_round
       
@@ -908,17 +858,7 @@ const Room = () => {
       setSelectedCard('')
       
       // Clear selection from database
-      const supabaseWithToken = createClient(
-        'https://ophgbcyhxvwljfztlvyu.supabase.co',
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9waGdiY3loeHZ3bGpmenRsdnl1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQzMzU4NzYsImV4cCI6MjA2OTkxMTg3Nn0.iiiRP6WtGtwI_jJDnAJUqmEZcoNUbYT3HiBl3VuBnKs',
-        {
-          global: {
-            headers: {
-              'x-session-token': userSessionId || ''
-            }
-          }
-        }
-      )
+      const supabaseWithToken = getSupabaseWithSession()
       
       await supabaseWithToken
         .from('room_cards')
@@ -938,17 +878,7 @@ const Room = () => {
       if (!selectedCardData) return
 
       // Create authenticated client for card selection
-      const supabaseWithToken = createClient(
-        'https://ophgbcyhxvwljfztlvyu.supabase.co',
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9waGdiY3loeHZ3bGpmenRsdnl1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQzMzU4NzYsImV4cCI6MjA2OTkxMTg3Nn0.iiiRP6WtGtwI_jJDnAJUqmEZcoNUbYT3HiBl3VuBnKs',
-        {
-          global: {
-            headers: {
-              'x-session-token': userSessionId || ''
-            }
-          }
-        }
-      )
+      const supabaseWithToken = getSupabaseWithSession()
 
       // Clear any previous selection for this user's side
       await supabaseWithToken

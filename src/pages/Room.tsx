@@ -665,6 +665,12 @@ const Room = () => {
       setSelectedCard(userSelectedCard.card_id) // Sync state
       return
     }
+
+    // Also check if user has a selectedCard in local state
+    if (selectedCard) {
+      console.log(`User ${userRole} has selectedCard in state: ${selectedCard}`)
+      return
+    }
     
     console.log('Current round cards for', userRole, ':', currentRoundCards.length, 'cards')
     console.log('All room cards:', roomCards.length, 'total cards')

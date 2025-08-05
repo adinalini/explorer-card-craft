@@ -89,6 +89,11 @@ const Room = () => {
     fetchRoomCards()
     fetchPlayerDecks()
 
+    // Set up interval to refresh room data every 2 seconds to ensure sync
+    const refreshInterval = setInterval(() => {
+      fetchRoom()
+    }, 2000)
+
     // Subscribe to room changes
     const roomChannel = supabase
       .channel('room-changes')
@@ -153,6 +158,7 @@ const Room = () => {
       .subscribe()
 
     return () => {
+      clearInterval(refreshInterval)
       supabase.removeChannel(roomChannel)
       supabase.removeChannel(cardsChannel)
       supabase.removeChannel(decksChannel)
@@ -570,18 +576,6 @@ const Room = () => {
             <div className="w-24"></div> {/* Spacer for centering */}
           </div>
         </div>
-        <svg viewBox="0 0 1200 60" className="w-full h-auto">
-          <defs>
-            <linearGradient id="room-wave-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="hsl(var(--primary))" />
-              <stop offset="100%" stopColor="hsl(var(--secondary))" />
-            </linearGradient>
-          </defs>
-          <path 
-            d="M985.66,46.42C906.67,36,823.78,15.5,743.84,7.1c-82.26-8.67-168.06-8.16-250.45.19-57.84,5.86-114,15.54-172,20.93A600.21,600.21,0,0,1,0,13.68V60H1200V47.9C1132.19,59.46,1055.71,55.66,985.66,46.42Z"
-            fill="url(#room-wave-gradient)"
-          />
-        </svg>
       </div>
 
       {/* Main Content */}

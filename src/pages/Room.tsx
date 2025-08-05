@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import { WaveDivider } from "@/components/ui/wave-divider"
 import { supabase } from "@/integrations/supabase/client"
+import { createClient } from '@supabase/supabase-js'
 import { toast } from "@/hooks/use-toast"
 import { DraftCard } from "@/components/DraftCard"
 import { DeckDisplay } from "@/components/DeckDisplay"
@@ -266,11 +267,28 @@ const Room = () => {
     const updateField = userRole === 'creator' ? 'creator_ready' : 'joiner_ready'
     const currentValue = userRole === 'creator' ? room.creator_ready : room.joiner_ready
     
+    console.log('Attempting to update ready status:', { userRole, updateField, currentValue, userSessionId })
+    
     try {
-      const { error } = await supabase
+      // Create a new supabase client instance with session token header
+      const supabaseWithToken = createClient(
+        "https://ophgbcyhxvwljfztlvyu.supabase.co",
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9waGdiY3loeHZ3bGpmenRsdnl1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQzMzU4NzYsImV4cCI6MjA2OTkxMTg3Nn0.iiiRP6WtGtwI_jJDnAJUqmEZcoNUbYT3HiBl3VuBnKs",
+        {
+          global: {
+            headers: {
+              'x-session-token': userSessionId
+            }
+          }
+        }
+      )
+
+      const { error } = await supabaseWithToken
         .from('rooms')
         .update({ [updateField]: !currentValue })
         .eq('id', roomId!)
+
+      console.log('Ready status update result:', { error })
 
       if (error) throw error
       setIsReady(!currentValue)

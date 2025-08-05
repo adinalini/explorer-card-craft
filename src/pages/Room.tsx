@@ -769,15 +769,18 @@ const Room = () => {
           .update({ status: 'completed' })
           .eq('id', roomId)
       } else {
-        // Move to next round
+        // Move to next round and start timer immediately
         const nextRound = currentRound + 1
+        const nextRoundStartTime = new Date().toISOString()
         await supabaseWithToken
           .from('rooms')
           .update({ 
             current_round: nextRound,
-            round_start_time: null // Reset timer for next round
+            round_start_time: nextRoundStartTime // Set new timer for next round
           })
           .eq('id', roomId)
+        
+        console.log(`Round ${nextRound} started with timer at:`, nextRoundStartTime)
         
         // Generate cards for next round
         await generateRoundCards(nextRound, room)

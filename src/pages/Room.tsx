@@ -132,10 +132,19 @@ const Room = () => {
             if (updatedRoom.creator_ready && updatedRoom.joiner_ready && updatedRoom.status === 'waiting') {
               console.log('Starting draft process...')
               setIsStartingDraft(true)
-              setTimeout(() => {
-                startDraft()
-                setIsStartingDraft(false)
-              }, 5000)
+              
+              // Only let the creator start the draft to avoid race conditions
+              if (userRole === 'creator') {
+                setTimeout(() => {
+                  startDraft()
+                  setIsStartingDraft(false)
+                }, 5000)
+              } else {
+                // For joiners, just set the flag and wait for the room status to change
+                setTimeout(() => {
+                  setIsStartingDraft(false)
+                }, 5000)
+              }
             }
           }
         }

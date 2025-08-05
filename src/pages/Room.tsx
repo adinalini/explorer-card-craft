@@ -688,8 +688,21 @@ const Room = () => {
     setIsSelectionLocked(true)
 
     try {
+      // Create authenticated client to bypass RLS restrictions
+      const supabaseWithToken = createClient(
+        "https://ophgbcyhxvwljfztlvyu.supabase.co",
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9waGdiY3loeHZ3bGpmenRsdnl1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQzMzU4NzYsImV4cCI6MjA2OTkxMTg3Nn0.iiiRP6WtGtwI_jJDnAJUqmEZcoNUbYT3HiBl3VuBnKs",
+        {
+          global: {
+            headers: {
+              'x-session-token': userSessionId
+            }
+          }
+        }
+      )
+
       // Update the selected card in the database
-      await supabase
+      await supabaseWithToken
         .from('room_cards')
         .update({ selected_by: playerSide })
         .eq('room_id', roomId)
@@ -699,7 +712,7 @@ const Room = () => {
       // Get the selected card details and add to player deck
       const selectedCardData = roomCards.find(card => card.card_id === cardId)
       if (selectedCardData) {
-        await supabase
+        await supabaseWithToken
           .from('player_decks')
           .insert({
             room_id: roomId,

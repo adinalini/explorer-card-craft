@@ -251,11 +251,14 @@ const Room = () => {
 
         // Generate cards based on round type
         const { generateDraftChoices } = await import('@/utils/cardData')
-        const cards = generateDraftChoices(usedCards, round, isLegendaryRound, isSpellRound)
+        const usedCardIds = Array.from(usedCards)
+        const choices = generateDraftChoices(usedCardIds)
+        
+        if (!choices) return
         
         // Assign 2 cards to creator side and 2 to joiner side
-        const creatorCards = cards.slice(0, 2)
-        const joinerCards = cards.slice(2, 4)
+        const creatorCards = choices.cards.slice(0, 2)
+        const joinerCards = choices.cards.slice(2, 4)
 
         const roomCardsData = [
           ...creatorCards.map((card) => ({
@@ -292,7 +295,7 @@ const Room = () => {
           card => card.cost !== undefined && !usedCards.has(card.id)
         )
         
-        const cards = getRandomCards(4, availableCards)
+        const cards = getRandomCards(4, Array.from(usedCards))
         
         const creatorCards = cards.slice(0, 2)
         const joinerCards = cards.slice(2, 4)

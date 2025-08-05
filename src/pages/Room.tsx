@@ -121,8 +121,13 @@ const Room = () => {
     setIsSelectionLocked(true)
     setShowReveal(true)
     
-    // Auto-select random card if user hasn't selected one
-    if (!selectedCard && userRole !== 'spectator') {
+    // Auto-select random card if user hasn't selected one (check both state and database)
+    const currentRoundCards = roomCards.filter(card => 
+      card.round_number === room?.current_round && card.side === userRole
+    )
+    const hasSelection = selectedCard || currentRoundCards.some(card => card.selected_by === userRole)
+    
+    if (!hasSelection && userRole !== 'spectator') {
       console.log('Timer up: Auto-selecting card for', userRole)
       await autoSelectRandomCard()
     }
@@ -192,7 +197,13 @@ const Room = () => {
       const autoSelectDelay = ((room.round_duration_seconds || 15) * 1000) * 0.75
       
       const timeout = setTimeout(() => {
-        if (!selectedCard && (userRole === 'creator' || userRole === 'joiner') && !isSelectionLocked) {
+        // Check if user already made a selection (both local state and database)
+        const currentRoundCards = roomCards.filter(card => 
+          card.round_number === room.current_round && card.side === userRole
+        )
+        const hasSelection = selectedCard || currentRoundCards.some(card => card.selected_by === userRole)
+        
+        if (!hasSelection && (userRole === 'creator' || userRole === 'joiner') && !isSelectionLocked) {
           console.log(`Background auto-selection triggered for ${userRole}`)
           autoSelectRandomCard()
         }
@@ -879,6 +890,7 @@ const Room = () => {
 
     // Update selected card immediately for instant UI feedback
     setSelectedCard(cardId)
+    console.log(`Card selected: ${cardId}, waiting for timer to add to deck`)
 
     // Extend session when user interacts with the game
     await extendSession()

@@ -186,7 +186,7 @@ Deno.serve(async (req) => {
       
       // Cost 7 cards
       { id: "moriarty", name: "Moriarty", image: "moriarty.png", cost: 7 },
-      { id: "three_not_so_little_pigs", name: "Three Not So Little Pigs", image: "three_not_so_little_pigs.png", cost: 7 },
+      { id: "three_not_so_little_pigs", name: "Three Not So Little Pigs", image: "three_not_so_little_pigs.png", cost: 7, isLegendary: true },
       { id: "blow_the_house_down", name: "Blow the House Down", image: "blow_the_house_down.png", cost: 7, isSpell: true },
       { id: "king_arthur", name: "King Arthur", image: "king_arthur.png", cost: 7, isLegendary: true },
       { id: "legion_of_the_dead", name: "Legion of the Dead", image: "legion_of_the_dead.png", cost: 7, isLegendary: true },
@@ -437,11 +437,29 @@ Deno.serve(async (req) => {
             card.isSpell && !globalUsedIds.has(card.id)
           )
           
-          for (let i = 0; i < 4 && i < availableSpells.length; i++) {
-            const randomIndex = Math.floor(Math.random() * availableSpells.length)
-            const selected = availableSpells.splice(randomIndex, 1)[0]
-            roundCards.push(selected)
-            globalUsedIds.add(selected.id)
+          console.log(`Round ${roundNum} (spell choice): Found ${availableSpells.length} available spells:`, 
+            availableSpells.map(c => `${c.name} (${c.cost})`))
+          
+          if (availableSpells.length >= 4) {
+            // Sort spells by cost and try to pick a balanced set
+            const sortedSpells = [...availableSpells].sort((a, b) => (a.cost || 0) - (b.cost || 0))
+            
+            // Try to pick spells that can be balanced (total costs close to equal)
+            // Pick 4 spells with attempt at cost balancing
+            for (let i = 0; i < 4 && i < sortedSpells.length; i++) {
+              const randomIndex = Math.floor(Math.random() * sortedSpells.length)
+              const selected = sortedSpells.splice(randomIndex, 1)[0]
+              roundCards.push(selected)
+              globalUsedIds.add(selected.id)
+            }
+          } else {
+            // Fallback: just pick what's available
+            for (let i = 0; i < 4 && i < availableSpells.length; i++) {
+              const randomIndex = Math.floor(Math.random() * availableSpells.length)
+              const selected = availableSpells.splice(randomIndex, 1)[0]
+              roundCards.push(selected)
+              globalUsedIds.add(selected.id)
+            }
           }
           
         } else if (structure.type === 'cost') {

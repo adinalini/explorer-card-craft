@@ -147,7 +147,7 @@ Deno.serve(async (req) => {
       // Cost 4 cards
       { id: "beast", name: "Beast", image: "beast.png", cost: 4 },
       { id: "cheshire", name: "Cheshire", image: "cheshire.png", cost: 4 },
-      { id: "dracula", name: "Dracula", image: "dracula.png", cost: 4 },
+      { id: "dracula", name: "Dracula", image: "dracula.png", cost: 4, isLegendary: true },
       { id: "glinda", name: "Glinda", image: "glinda.png", cost: 4 },
       { id: "goldilocks", name: "Goldilocks", image: "goldilocks.png", cost: 4 },
       { id: "imhotep", name: "Imhotep", image: "imhotep.png", cost: 4 },

@@ -143,7 +143,7 @@ export const cardDatabase: Card[] = [
   { id: 'cheshire', name: 'Cheshire Cat', image: '/src/assets/cards/cheshire.png', isLegendary: false, cost: 4, isSpell: false },
   { id: 'dark_omen', name: 'Dark Omen', image: '/src/assets/cards/dark_omen.png', isLegendary: false, cost: 4, isSpell: true },
   { id: 'dorothy', name: 'Dorothy', image: '/src/assets/cards/dorothy.png', isLegendary: true, cost: 5, isSpell: false },
-  { id: 'dracula', name: 'Dracula', image: '/src/assets/cards/dracula.png', isLegendary: false, cost: 4, isSpell: false },
+  { id: 'dracula', name: 'Dracula', image: '/src/assets/cards/dracula.png', isLegendary: true, cost: 4, isSpell: false },
   { id: 'galahad', name: 'Sir Galahad', image: '/src/assets/cards/galahad.png', isLegendary: false, cost: 5, isSpell: false },
   { id: 'giant', name: 'Giant', image: '/src/assets/cards/giant.png', isLegendary: false, cost: 6, isSpell: false },
   { id: 'glinda', name: 'Glinda', image: '/src/assets/cards/glinda.png', isLegendary: false, cost: 4, isSpell: false },

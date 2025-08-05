@@ -797,12 +797,19 @@ const Room = () => {
       console.log('=== UPDATED CARDS FETCHED ===')
       console.log('Updated cards after auto-selection:', updatedCards)
 
-      // Add selected cards to player decks during reveal phase
       console.log('=== ADDING CARDS TO PLAYER DECKS ===')
+      
+      // Debug: Check session token before adding cards
+      const currentSessionId = sessionStorage.getItem('userSessionId')
+      console.log('Current session ID for deck insertion:', currentSessionId)
+      
       for (const card of updatedCards || []) {
         if (card.selected_by) {
           console.log('=== ADDING CARD TO DECK ===')
           console.log('Adding card to deck:', card.card_name, 'for', card.selected_by)
+          
+          // Create fresh client with session token for each card insertion
+          const supabaseWithToken = getSupabaseWithSession()
           
           const { error: deckError } = await supabaseWithToken
             .from('player_decks')

@@ -414,14 +414,30 @@ const Room = () => {
         throw new Error(`No valid session found. Please refresh and try again.`)
       }
 
-      const { error } = await supabaseWithToken
+      console.log('About to update room with:', { 
+        updateField, 
+        newValue: !currentValue, 
+        roomId,
+        sessionToken: userSessionId 
+      })
+
+      const { data: updateData, error } = await supabaseWithToken
         .from('rooms')
         .update({ [updateField]: !currentValue })
         .eq('id', roomId!)
+        .select()
 
-      console.log('Ready status update result:', { error })
+      console.log('Ready status update result:', { error, updateData })
 
-      if (error) throw error
+      if (error) {
+        console.error('Database update error:', error)
+        throw error
+      }
+      
+      if (updateData && updateData.length === 0) {
+        console.error('No rows were updated - RLS may be blocking the update')
+        throw new Error('Failed to update room - permission denied')
+      }
       setIsReady(!currentValue)
     } catch (error) {
       console.error('Error updating ready status:', error)

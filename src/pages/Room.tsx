@@ -703,10 +703,21 @@ const Room = () => {
   }
 
   const handleCardSelect = async (cardId: string) => {
-    if (isSelectionLocked || userRole === 'spectator') return
+    console.log('=== CARD SELECT CLICKED ===')
+    console.log('Card ID:', cardId)
+    console.log('User Role:', userRole)
+    console.log('Is Selection Locked:', isSelectionLocked)
+    console.log('Current Selected Card:', selectedCard)
+    console.log('Current Round:', room?.current_round)
+    
+    if (isSelectionLocked || userRole === 'spectator') {
+      console.log('Selection blocked - locked or spectator')
+      return
+    }
 
     // If user is trying to select a card they already selected, deselect it
     if (selectedCard === cardId) {
+      console.log('Deselecting current card')
       setSelectedCard(null)
       
       // Clear selection from database
@@ -719,9 +730,11 @@ const Room = () => {
         .eq('card_id', cardId)
         .eq('round_number', room?.current_round)
       
+      console.log('Card deselected from database')
       return
     }
 
+    console.log('Setting new selection')
     // Update selected card immediately for instant UI feedback
     setSelectedCard(cardId)
 
@@ -730,12 +743,18 @@ const Room = () => {
 
     try {
       const selectedCardData = roomCards.find(card => card.card_id === cardId)
-      if (!selectedCardData) return
+      if (!selectedCardData) {
+        console.log('Card data not found')
+        return
+      }
+
+      console.log('Selected card data:', selectedCardData)
 
       // Create authenticated client for card selection
       const supabaseWithToken = getSupabaseWithSession()
 
       // Clear any previous selection for this user's side
+      console.log('Clearing previous selections for side:', userRole)
       await supabaseWithToken
         .from('room_cards')
         .update({ selected_by: null })
@@ -745,6 +764,7 @@ const Room = () => {
         .not('selected_by', 'is', null)
 
       // Set new selection
+      console.log('Setting new selection in database')
       const { error } = await supabaseWithToken
         .from('room_cards')
         .update({ selected_by: userRole })
@@ -758,7 +778,7 @@ const Room = () => {
         return
       }
 
-      console.log('Manual selection confirmed:', cardId)
+      console.log('✅ Manual selection confirmed:', cardId)
     } catch (error) {
       console.error('Error in handleCardSelect:', error)
       setSelectedCard(null) // Reset on error

@@ -715,22 +715,10 @@ const Room = () => {
       return
     }
 
-    // If user is trying to select a card they already selected, deselect it
+    // In drafting, clicking the same card should NOT deselect it - it should keep it selected
+    // Only allow changing selection to a different card
     if (selectedCard === cardId) {
-      console.log('Deselecting current card')
-      setSelectedCard(null)
-      
-      // Clear selection from database
-      const supabaseWithToken = getSupabaseWithSession()
-      
-      await supabaseWithToken
-        .from('room_cards')
-        .update({ selected_by: null })
-        .eq('room_id', roomId)
-        .eq('card_id', cardId)
-        .eq('round_number', room?.current_round)
-      
-      console.log('Card deselected from database')
+      console.log('Same card clicked - keeping selection (no deselect in drafting)')
       return
     }
 

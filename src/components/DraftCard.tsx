@@ -29,6 +29,9 @@ export function DraftCard({
       className={cn(
         "relative cursor-pointer transition-all duration-300 rounded-lg overflow-hidden",
         "hover:scale-105 hover:shadow-lg",
+        // Show selection highlight during drafting (before reveal)
+        isSelected && !isRevealing && "ring-4 ring-blue-500 ring-opacity-60 shadow-lg shadow-blue-500/50",
+        // Show selection highlight during reveal phase
         isSelected && isRevealing && "ring-4 ring-purple-500 ring-opacity-60 shadow-lg shadow-purple-500/50",
         disabled && !isRevealing && "opacity-50 cursor-not-allowed",
         isRevealing && !isSelected && "opacity-30",

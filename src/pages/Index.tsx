@@ -133,8 +133,8 @@ const Index = () => {
         return
       }
 
-      // First create a game session for the joiner so they can update the room
-      const sessionId = getUserSessionId()
+      // Generate a unique session token for this room join
+      const sessionId = 'session_' + Math.random().toString(36).substr(2, 16) + Date.now().toString(36)
       console.log('Creating game session for joiner:', { roomId: roomId.toUpperCase(), sessionId, joinerName: joinerName.trim() })
       
       try {

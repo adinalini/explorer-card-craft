@@ -110,12 +110,14 @@ const Room = () => {
     setIsSelectionLocked(true)
     setShowReveal(true)
     
+    // Check if user has made a manual selection
     const currentRoundCards = roomCards.filter(card => 
       card.round_number === room?.current_round && card.side === userRole
     )
-    const hasSelection = selectedCard || currentRoundCards.some(card => card.selected_by === userRole)
+    const hasManualSelection = selectedCard || currentRoundCards.some(card => card.selected_by === userRole)
     
-    if (!hasSelection && userRole !== 'spectator') {
+    // Only auto-select if no manual selection exists
+    if (!hasManualSelection && userRole !== 'spectator') {
       await autoSelectRandomCard()
     }
     
@@ -546,7 +548,13 @@ const Room = () => {
 
 
   const autoSelectRandomCard = async () => {
-    if (!room || !roomId || userRole === 'spectator' || isSelectionLocked || selectedCard) {
+    if (!room || !roomId || userRole === 'spectator') {
+      return
+    }
+
+    // Double-check: if user has already selected manually, don't auto-select
+    if (selectedCard) {
+      console.log('Auto-select skipped: User has manual selection')
       return
     }
 
@@ -554,8 +562,10 @@ const Room = () => {
       card.round_number === room.current_round && card.side === userRole
     )
     
+    // Check database for existing selection
     const userSelectedCard = currentRoundCards.find(card => card.selected_by === userRole)
     if (userSelectedCard) {
+      console.log('Auto-select skipped: Database shows manual selection')
       setSelectedCard(userSelectedCard.card_id)
       return
     }
@@ -572,6 +582,13 @@ const Room = () => {
         
         if (!fetchError && freshCards && freshCards.length > 0) {
           currentRoundCards = freshCards
+          // Re-check for existing selection after fresh fetch
+          const existingSelection = freshCards.find(card => card.selected_by === userRole)
+          if (existingSelection) {
+            console.log('Auto-select skipped: Fresh fetch shows manual selection')
+            setSelectedCard(existingSelection.card_id)
+            return
+          }
         } else {
           return
         }
@@ -597,6 +614,7 @@ const Room = () => {
         .eq('round_number', room.current_round)
       
       setSelectedCard(randomCard.card_id)
+      console.log('Auto-selected fallback card:', randomCard.card_name)
     } catch (error) {
       console.error('Error auto-selecting card:', error)
     }
@@ -685,17 +703,11 @@ const Room = () => {
   }
 
   const handleCardSelect = async (cardId: string) => {
-    if (isSelectionLocked) return
+    if (isSelectionLocked || userRole === 'spectator') return
 
-    // Clear previous selection for this user's side first
-    const userCards = roomCards.filter(card => 
-      card.round_number === room?.current_round && 
-      card.side === userRole
-    )
-    
     // If user is trying to select a card they already selected, deselect it
     if (selectedCard === cardId) {
-      setSelectedCard('')
+      setSelectedCard(null)
       
       // Clear selection from database
       const supabaseWithToken = getSupabaseWithSession()
@@ -742,10 +754,14 @@ const Room = () => {
 
       if (error) {
         console.error('Error updating card selection:', error)
+        setSelectedCard(null) // Reset on error
         return
       }
+
+      console.log('Manual selection confirmed:', cardId)
     } catch (error) {
       console.error('Error in handleCardSelect:', error)
+      setSelectedCard(null) // Reset on error
     }
   }
 

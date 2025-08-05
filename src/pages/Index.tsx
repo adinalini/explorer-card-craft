@@ -112,18 +112,32 @@ const Index = () => {
 
       if (room.joiner_name) {
         toast({
-          title: "Room Full",
+          title: "Draft has already begun",
           description: "This room already has two players.",
           variant: "destructive"
         })
         return
       }
 
-      const { error: updateError } = await supabase
+      if (room.status === 'active' || room.status === 'completed') {
+        toast({
+          title: "Draft has already begun",
+          description: "This room's draft is already in progress.",
+          variant: "destructive"
+        })
+        return
+      }
+
+      console.log('Updating room with joiner:', { roomId: roomId.toUpperCase(), joinerName: joinerName.trim() })
+      
+      const { data: updateData, error: updateError } = await supabase
         .from('rooms')
         .update({ joiner_name: joinerName.trim() })
         .eq('id', roomId.toUpperCase())
+        .select()
 
+      console.log('Database update result:', { updateData, updateError })
+      
       if (updateError) throw updateError
 
       // Set session flag to indicate this user joined this room  

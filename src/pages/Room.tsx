@@ -450,81 +450,7 @@ const Room = () => {
     }
   }
 
-  const generateRoundCards = async (round: number, roomData?: Room) => {
-    const currentRoom = roomData || room
-    if (!roomId || !currentRoom) return
-
-    try {
-      console.log(`=== ROUND ${round} CARD GENERATION START ===`)
-      console.log(`Generating round ${round} cards for room ${roomId}`)
-      console.log('Room data:', currentRoom)
-
-      // Determine round type (only for default draft type)
-      if (currentRoom.draft_type === 'default') {
-        const legendaryRound = Math.floor(Math.random() * 13) + 1
-        const spellRound = Math.floor(Math.random() * 12) + 1
-        const adjustedSpellRound = spellRound >= legendaryRound ? spellRound + 1 : spellRound
-
-        const isLegendaryRound = round === legendaryRound
-        const isSpellRound = round === adjustedSpellRound
-
-        // Get used card IDs from all previous rounds
-        const { data: usedCardsData } = await supabase
-          .from('room_cards')
-          .select('card_id')
-          .eq('room_id', roomId)
-
-        const usedCardIds = usedCardsData?.map(card => card.card_id) || []
-
-        // Call edge function to generate cards
-        console.log('Calling edge function with params:', {
-          roomId,
-          round,
-          usedCardIds: usedCardIds.length,
-          roundType: {
-            isLegendary: isLegendaryRound,
-            isSpell: isSpellRound
-          }
-        })
-        
-        const { data, error } = await supabase.functions.invoke('generate-round-cards', {
-          body: {
-            roomId,
-            round,
-            usedCardIds,
-            roundType: {
-              isLegendary: isLegendaryRound,
-              isSpell: isSpellRound
-            }
-          }
-        })
-
-        if (error) {
-          console.error('=== EDGE FUNCTION ERROR ===')
-          console.error('Error details:', error)
-          console.error('Error type:', typeof error)
-          console.error('Error keys:', Object.keys(error))
-          throw error
-        }
-
-        console.log('=== CARDS GENERATED SUCCESSFULLY ===')
-        console.log('Response data:', data)
-      }
-
-      // Timer is already started when room status was set to drafting
-      console.log('=== TIMER ALREADY STARTED ===')
-    } catch (error) {
-      console.error('=== ROUND CARD GENERATION ERROR ===')
-      console.error('Error generating round cards:', error)
-      console.error('Error type:', typeof error)
-      console.error('Error message:', error?.message)
-      toast({
-        title: "Error",
-        description: "Failed to generate cards for this round.",
-        variant: "destructive"
-      })
-    }
-  }
+  // Removed redundant generateRoundCards function - all cards are generated at draft start
 
   const startCentralizedRoundTimer = async () => {
     if (!roomId || userRole !== 'creator') return
@@ -773,9 +699,7 @@ const Room = () => {
           console.log(`✅ Successfully advanced to round ${nextRound}`)
         }
 
-        // Generate cards for the next round
-        console.log(`🎴 Generating cards for round ${nextRound}`)
-        await generateRoundCards(nextRound, { ...room, current_round: nextRound })
+        // Cards were already generated at the start - no need to generate more
       }
     } catch (error) {
       console.error('❌ Error processing round end:', error)
@@ -1156,6 +1080,7 @@ const Room = () => {
                   }))}
                   playerName={room.creator_name}
                   isOwn={userRole === 'creator'}
+                  isDraftComplete={true}
                 />
               </div>
               <div className="space-y-4 lg:space-y-6">
@@ -1169,6 +1094,7 @@ const Room = () => {
                   }))}
                   playerName={room.joiner_name}
                   isOwn={userRole === 'joiner'}
+                  isDraftComplete={true}
                 />
               </div>
             </div>

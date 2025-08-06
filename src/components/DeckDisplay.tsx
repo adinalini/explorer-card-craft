@@ -12,9 +12,10 @@ interface DeckDisplayProps {
   cards: Card[]
   playerName: string
   isOwn: boolean
+  isDraftComplete?: boolean
 }
 
-export function DeckDisplay({ cards, playerName, isOwn }: DeckDisplayProps) {
+export function DeckDisplay({ cards, playerName, isOwn, isDraftComplete = false }: DeckDisplayProps) {
   // Sort cards by selection order
   const sortedCards = [...cards].sort((a, b) => a.selection_order - b.selection_order)
   
@@ -31,50 +32,50 @@ export function DeckDisplay({ cards, playerName, isOwn }: DeckDisplayProps) {
       <div className="flex items-start gap-4">
         {/* Deck List - Left side for creator, Right side for opponent */}
         {isOwn && (
-          <div className="w-32 space-y-1">
-            <h4 className="text-sm font-semibold text-muted-foreground mb-2">Deck List</h4>
-            <div className="space-y-0.5 h-[calc(7rem+24rem)] max-h-[31rem]">
+          <div className={`space-y-1 ${isDraftComplete ? 'w-40' : 'w-32'}`}>
+            <h4 className={`font-semibold text-muted-foreground mb-2 ${isDraftComplete ? 'text-base' : 'text-sm'}`}>Deck List</h4>
+            <div className={`space-y-0.5 ${isDraftComplete ? 'h-[calc(8.4rem+28.8rem)] max-h-[37.2rem]' : 'h-[calc(7rem+24rem)] max-h-[31rem]'}`}>
               {legendaryCard && (
-                <div className="text-[10px] text-yellow-600 font-medium border-l-2 border-yellow-500 pl-2 py-0.5 leading-tight">
+                <div className={`text-yellow-600 font-medium border-l-2 border-yellow-500 pl-2 py-0.5 leading-tight ${isDraftComplete ? 'text-xs' : 'text-[10px]'}`}>
                   {legendaryCard.card_name}
                 </div>
               )}
-               {normalCards.map((card, index) => (
-                 <div key={index} className="text-[10px] text-muted-foreground border-l-2 border-muted pl-2 py-0.5 leading-tight">
-                   {card.card_name}
-                 </div>
-               ))}
-               {/* Empty slots */}
-               {Array.from({ length: 12 - normalCards.length }).map((_, index) => (
-                 <div key={`empty-${index}`} className="text-[10px] text-muted/50 border-l-2 border-dashed border-muted/50 pl-2 py-0.5 leading-tight">
-                   —
-                 </div>
-               ))}
+                 {normalCards.map((card, index) => (
+                  <div key={index} className={`text-muted-foreground border-l-2 border-muted pl-2 py-0.5 leading-tight ${isDraftComplete ? 'text-xs' : 'text-[10px]'}`}>
+                    {card.card_name}
+                  </div>
+                ))}
+                {/* Empty slots */}
+                {Array.from({ length: 12 - normalCards.length }).map((_, index) => (
+                  <div key={`empty-${index}`} className={`text-muted/50 border-l-2 border-dashed border-muted/50 pl-2 py-0.5 leading-tight ${isDraftComplete ? 'text-xs' : 'text-[10px]'}`}>
+                    —
+                  </div>
+                ))}
             </div>
           </div>
         )}
 
         {/* Deck List - Left side for opponent (when viewing opponent) */}
         {!isOwn && (
-          <div className="w-32 space-y-1">
-            <h4 className="text-sm font-semibold text-muted-foreground mb-2">Deck List</h4>
-            <div className="space-y-0.5 h-[calc(7rem+24rem)] max-h-[31rem]">
+          <div className={`space-y-1 ${isDraftComplete ? 'w-40' : 'w-32'}`}>
+            <h4 className={`font-semibold text-muted-foreground mb-2 ${isDraftComplete ? 'text-base' : 'text-sm'}`}>Deck List</h4>
+            <div className={`space-y-0.5 ${isDraftComplete ? 'h-[calc(8.4rem+28.8rem)] max-h-[37.2rem]' : 'h-[calc(7rem+24rem)] max-h-[31rem]'}`}>
               {legendaryCard && (
-                <div className="text-[10px] text-yellow-600 font-medium border-l-2 border-yellow-500 pl-2 py-0.5 leading-tight">
+                <div className={`text-yellow-600 font-medium border-l-2 border-yellow-500 pl-2 py-0.5 leading-tight ${isDraftComplete ? 'text-xs' : 'text-[10px]'}`}>
                   {legendaryCard.card_name}
                 </div>
               )}
                {normalCards.map((card, index) => (
-                 <div key={index} className="text-[10px] text-muted-foreground border-l-2 border-muted pl-2 py-0.5 leading-tight">
-                   {card.card_name}
-                 </div>
-               ))}
-               {/* Empty slots */}
-               {Array.from({ length: 12 - normalCards.length }).map((_, index) => (
-                 <div key={`empty-${index}`} className="text-[10px] text-muted/50 border-l-2 border-dashed border-muted/50 pl-2 py-0.5 leading-tight">
-                   —
-                 </div>
-               ))}
+                  <div key={index} className={`text-muted-foreground border-l-2 border-muted pl-2 py-0.5 leading-tight ${isDraftComplete ? 'text-xs' : 'text-[10px]'}`}>
+                    {card.card_name}
+                  </div>
+                ))}
+                {/* Empty slots */}
+                {Array.from({ length: 12 - normalCards.length }).map((_, index) => (
+                  <div key={`empty-${index}`} className={`text-muted/50 border-l-2 border-dashed border-muted/50 pl-2 py-0.5 leading-tight ${isDraftComplete ? 'text-xs' : 'text-[10px]'}`}>
+                    —
+                  </div>
+                ))}
             </div>
           </div>
         )}
@@ -83,7 +84,7 @@ export function DeckDisplay({ cards, playerName, isOwn }: DeckDisplayProps) {
         <div className="space-y-3 flex-1">
           {/* Legendary card row */}
           <div className="flex justify-center">
-            <div className="w-20 h-28 relative">
+            <div className={`relative ${isDraftComplete ? 'w-24 h-[8.4rem]' : 'w-20 h-28'}`}>
               {legendaryCard ? (
                 <div className="w-full h-full bg-white border-2 border-yellow-500 rounded overflow-hidden">
                   <CardImage
@@ -94,7 +95,7 @@ export function DeckDisplay({ cards, playerName, isOwn }: DeckDisplayProps) {
                 </div>
               ) : (
                 <div className="w-full h-full border-2 border-dashed border-muted rounded flex items-center justify-center">
-                  <span className="text-xs text-muted-foreground">Legendary</span>
+                  <span className={`text-muted-foreground ${isDraftComplete ? 'text-sm' : 'text-xs'}`}>Legendary</span>
                 </div>
               )}
             </div>
@@ -109,7 +110,7 @@ export function DeckDisplay({ cards, playerName, isOwn }: DeckDisplayProps) {
                   const card = normalCards[cardIndex]
                   
                   return (
-                    <div key={col} className="w-16 h-20 relative">
+                    <div key={col} className={`relative ${isDraftComplete ? 'w-[4.8rem] h-24' : 'w-16 h-20'}`}>
                       {card ? (
                         <div className="w-full h-full bg-white border border-muted rounded overflow-hidden">
                           <CardImage

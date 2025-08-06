@@ -518,16 +518,11 @@ const Room = () => {
       console.error('Error generating round cards:', error)
       console.error('Error type:', typeof error)
       console.error('Error message:', error?.message)
-      
-      // Only show error toast for legitimate card generation failures
-      // Skip showing error for rounds 6-10 range expansion as that's expected behavior
-      if (!(round >= 6 && round <= 10)) {
-        toast({
-          title: "Error",
-          description: "Failed to generate cards for this round.",
-          variant: "destructive"
-        })
-      }
+      toast({
+        title: "Error",
+        description: "Failed to generate cards for this round.",
+        variant: "destructive"
+      })
     }
   }
 

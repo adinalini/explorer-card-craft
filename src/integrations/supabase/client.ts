@@ -18,23 +18,30 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABL
 
 // Cached client instance with session headers
 let supabaseWithSessionClient: ReturnType<typeof createClient<Database>> | null = null;
+let currentSessionToken = '';
 
 // Helper function to create a supabase client with session token headers
 export const getSupabaseWithSession = () => {
   // Get current session token
   const sessionToken = typeof window !== 'undefined' ? sessionStorage.getItem('userSessionId') || '' : '';
   
-  // Always create fresh client to avoid multiple instance warnings
-  return createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
-    auth: {
-      storage: localStorage,
-      persistSession: false, // Disable session persistence to avoid conflicts
-      autoRefreshToken: false, // Disable auto refresh to avoid conflicts
-    },
-    global: {
-      headers: {
-        'x-session-token': sessionToken
+  // Only create new client if session token changed or no client exists
+  if (!supabaseWithSessionClient || currentSessionToken !== sessionToken) {
+    currentSessionToken = sessionToken;
+    
+    supabaseWithSessionClient = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+      auth: {
+        storage: localStorage,
+        persistSession: false, // Disable session persistence to avoid conflicts
+        autoRefreshToken: false, // Disable auto refresh to avoid conflicts
+      },
+      global: {
+        headers: {
+          'x-session-token': sessionToken
+        }
       }
-    }
-  });
+    });
+  }
+  
+  return supabaseWithSessionClient;
 };

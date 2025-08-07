@@ -425,7 +425,6 @@ const Room = () => {
       }
       setIsReady(!currentValue)
     } catch (error) {
-      console.error('Error updating ready status:', error)
       toast({
         title: "Error",
         description: "Failed to update ready status.",
@@ -475,7 +474,6 @@ const Room = () => {
         throw error
       }
     } catch (error) {
-      console.error('Error starting draft:', error)
       toast({
         title: "Error",
         description: "Failed to start draft. Please refresh and try again.",
@@ -500,9 +498,8 @@ const Room = () => {
         })
         .eq('id', roomId)
 
-      console.log('Creator: Round timer started in database')
     } catch (error) {
-      console.error('Error starting centralized timer:', error)
+      // Silent error for timer sync
     }
   }
 
@@ -514,19 +511,16 @@ const Room = () => {
 
     // CRITICAL FIX: Check if user has already selected manually first
     if (selectedCard) {
-      console.log('🚫 Auto-select skipped: User has manual selection in state')
+      if (room.draft_type === 'triple') {
+        console.log('🔹 TRIPLE: Auto-select skipped - User has manual selection in state')
+      }
       return
     }
 
     let currentRoundCards: RoomCard[] = []
-    let queryConditions: any = {
-      room_id: roomId,
-      round_number: room.current_round
-    }
 
     // Handle different draft types for auto-selection
     if (room.draft_type === 'default') {
-      queryConditions.side = userRole
       currentRoundCards = roomCards.filter(card => 
         card.round_number === room.current_round && card.side === userRole
       )
@@ -537,7 +531,6 @@ const Room = () => {
       )
     } else if (room.draft_type === 'mega') {
       // For mega draft, all cards are in round 1
-      queryConditions.round_number = 1
       currentRoundCards = roomCards.filter(card => 
         card.round_number === 1
       )
@@ -546,7 +539,9 @@ const Room = () => {
     // CRITICAL: Real-time check for manual selection
     const userSelectedCard = currentRoundCards.find(card => card.selected_by === userRole)
     if (userSelectedCard) {
-      console.log('🚫 Auto-select skipped: Database shows manual selection exists')
+      if (room.draft_type === 'triple') {
+        console.log('🔹 TRIPLE: Auto-select skipped - Database shows manual selection exists')
+      }
       setSelectedCard(userSelectedCard.card_id)
       return
     }
@@ -577,12 +572,13 @@ const Room = () => {
       }
       
       if (freshCheck && freshCheck.length > 0) {
-        console.log('🚫 Auto-select skipped: Fresh database check shows manual selection exists')
+        if (room.draft_type === 'triple') {
+          console.log('🔹 TRIPLE: Auto-select skipped - Fresh database check shows manual selection exists')
+        }
         setSelectedCard(freshCheck[0].card_id)
         return
       }
     } catch (error) {
-      console.error('Error in fresh database check:', error)
       // If we can't check, don't auto-select to be safe
       return
     }
@@ -896,22 +892,27 @@ const Room = () => {
   }
 
   const handleCardSelect = async (cardId: string) => {
-    console.log('=== CARD SELECT CLICKED ===')
-    console.log('Card ID:', cardId)
-    console.log('User Role:', userRole)
-    console.log('Is Selection Locked:', isSelectionLocked)
-    console.log('Current Selected Card:', selectedCard)
-    console.log('Current Round:', room?.current_round)
+    if (room?.draft_type === 'triple') {
+      console.log('🔷 TRIPLE: CARD SELECT CLICKED')
+      console.log(`🔷 TRIPLE: Card ID: ${cardId}`)
+      console.log(`🔷 TRIPLE: User Role: ${userRole}`)
+      console.log(`🔷 TRIPLE: Is Selection Locked: ${isSelectionLocked}`)
+      console.log(`🔷 TRIPLE: Current Selected Card: ${selectedCard}`)
+      console.log(`🔷 TRIPLE: Current Round: ${room.current_round}`)
+      console.log(`🔷 TRIPLE: Is My Turn: ${isMyTurn}`)
+    }
     
     if (isSelectionLocked || userRole === 'spectator' || isProcessingSelection) {
-      console.log('Selection blocked - locked, spectator, or processing')
+      if (room?.draft_type === 'triple') {
+        console.log('🔷 TRIPLE: Selection blocked - locked, spectator, or processing')
+      }
       return
     }
 
     // CRITICAL: For triple draft, check if it's the user's turn
     if (room?.draft_type === 'triple') {
       if (!isMyTurn) {
-        console.log('Selection blocked - not user\'s turn in triple draft')
+        console.log('🔷 TRIPLE: Selection blocked - not user\'s turn in triple draft')
         return
       }
     }
@@ -927,7 +928,9 @@ const Room = () => {
       const remaining = roundDuration - elapsed
 
       if (remaining <= 0) {
-        console.log('Selection blocked - time has expired')
+        if (room?.draft_type === 'triple') {
+          console.log('🔷 TRIPLE: Selection blocked - time has expired')
+        }
         return
       }
     }
@@ -935,18 +938,21 @@ const Room = () => {
     // For mega draft, immediately lock and reveal on selection
     if (room?.draft_type === 'mega') {
       if (selectedCard === cardId) {
-        console.log('Same card clicked in mega draft - ignoring')
         return
       }
     } else {
       // For default and triple draft, clicking the same card should NOT deselect it
       if (selectedCard === cardId) {
-        console.log('Same card clicked - keeping selection (no deselect in drafting)')
+        if (room?.draft_type === 'triple') {
+          console.log('🔷 TRIPLE: Same card clicked - keeping selection')
+        }
         return
       }
     }
 
-    console.log('Setting new selection')
+    if (room?.draft_type === 'triple') {
+      console.log('🔷 TRIPLE: Setting new selection')
+    }
     // Set processing flag to prevent race conditions with timer
     setIsProcessingSelection(true)
     
@@ -1036,7 +1042,9 @@ const Room = () => {
         }
       }
     } catch (error) {
-      console.error('Error in handleCardSelect:', error)
+      if (room?.draft_type === 'triple') {
+        console.log('🔷 TRIPLE: Error in handleCardSelect:', error)
+      }
       setSelectedCard(null) // Reset on error
     } finally {
       // Always clear the processing flag
@@ -1048,17 +1056,6 @@ const Room = () => {
     if (!roomId) return
 
     try {
-      // Log the room data before deletion
-      const roomData = {
-        room_id: roomId,
-        cards_presented: roomCards,
-        player_choices: playerDecks,
-        completed_at: new Date().toISOString()
-      }
-      
-      console.log('Room data logged:', roomData)
-      // In a real app, you'd send this to a logging service
-
       // Delete room and associated data
       await supabase.from('player_decks').delete().eq('room_id', roomId)
       await supabase.from('room_cards').delete().eq('room_id', roomId)
@@ -1066,7 +1063,6 @@ const Room = () => {
 
       navigate('/')
     } catch (error) {
-      console.error('Error deleting room:', error)
       navigate('/')
     }
   }

@@ -177,8 +177,11 @@ const Room = () => {
       return
     }
     
-    setIsSelectionLocked(true)
-    setShowReveal(true)
+    // CRITICAL FIX: Only lock for non-triple drafts
+    if (room?.draft_type !== 'triple') {
+      setIsSelectionLocked(true)
+      setShowReveal(true)
+    }
     
     // Add 0.5s delay to prevent double selection for default/mega draft types
     setTimeout(() => {
@@ -362,7 +365,8 @@ const Room = () => {
                 console.log('🔷 TRIPLE: Unlocking for phase 2')
                 setIsSelectionLocked(false)
                 setShowReveal(false)
-                setSelectedCard(null) // Clear selected card for new phase
+                // CRITICAL FIX: Don't clear selectedCard when moving to phase 2!
+                // Phase 1 selection should remain visible
                 
                 // Fetch fresh card data to ensure we have updated state
                 setTimeout(() => {
@@ -1506,12 +1510,12 @@ const Room = () => {
       if (room?.draft_type === 'triple') {
         console.log('🔷 TRIPLE: Card selected, processing phase')
         
-        // Check phase completion and handle accordingly
-        if (userRole === 'creator') {
-          setTimeout(() => {
-            handleTriplePhaseEnd()
-          }, 100)
-        }
+        // CRITICAL FIX: Both players should be able to trigger phase end check
+        // No matter who selected, we need to check if phase is complete
+        setTimeout(() => {
+          console.log('🔷 TRIPLE: Triggering phase end check after manual selection')
+          handleTriplePhaseEnd()
+        }, 100)
       } else if (room?.draft_type === 'mega') {
         // For mega draft, immediately lock and start reveal phase
         setIsSelectionLocked(true)

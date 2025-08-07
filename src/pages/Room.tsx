@@ -134,9 +134,17 @@ const Room = () => {
     
     if (room?.draft_type === 'triple') {
       // Triple draft auto-selection for phase timeout
-      console.log('🔷 TRIPLE: Phase timeout - checking if auto-select needed')
-      console.log('🔷 TRIPLE: Triple phase:', room?.triple_draft_phase)
-      console.log('🔷 TRIPLE: Is my turn:', isMyTurn)
+      console.log('🔷 TRIPLE TIMEOUT: ================== TIMEOUT TRIGGERED ==================')
+      console.log('🔷 TRIPLE TIMEOUT: Timestamp:', new Date().toISOString())
+      console.log('🔷 TRIPLE TIMEOUT: Phase timeout - checking if auto-select needed')
+      console.log('🔷 TRIPLE TIMEOUT: 📊 Current state:')
+      console.log('🔷 TRIPLE TIMEOUT:   - Triple phase:', room?.triple_draft_phase)
+      console.log('🔷 TRIPLE TIMEOUT:   - Is my turn:', isMyTurn)
+      console.log('🔷 TRIPLE TIMEOUT:   - User role:', userRole)
+      console.log('🔷 TRIPLE TIMEOUT:   - First pick player:', room.triple_draft_first_pick)
+      console.log('🔷 TRIPLE TIMEOUT:   - Current round:', room.current_round)
+      console.log('🔷 TRIPLE TIMEOUT:   - Round start time:', room.round_start_time)
+      console.log('🔷 TRIPLE TIMEOUT:   - Selection locked:', isSelectionLocked)
       
       // Get current phase and check if selections are actually needed
       const currentPhase = room.triple_draft_phase || 1
@@ -145,34 +153,77 @@ const Room = () => {
       )
       const selectedCards = currentRoundCards.filter(card => card.selected_by)
       
-      console.log('🔷 TRIPLE: Current phase:', currentPhase)
-      console.log('🔷 TRIPLE: Selected cards count:', selectedCards.length)
-      console.log('🔷 TRIPLE: Should have selections for phase:', currentPhase)
+      console.log('🔷 TRIPLE TIMEOUT: 📋 Card state:')
+      console.log('🔷 TRIPLE TIMEOUT:   - Current phase:', currentPhase)
+      console.log('🔷 TRIPLE TIMEOUT:   - Selected cards count:', selectedCards.length)
+      console.log('🔷 TRIPLE TIMEOUT:   - Expected selections for phase:', currentPhase)
+      console.log('🔷 TRIPLE TIMEOUT:   - Total round cards:', currentRoundCards.length)
+      selectedCards.forEach((card, i) => {
+        console.log(`🔷 TRIPLE TIMEOUT:     ${i+1}. ${card.card_id} (${card.card_name}) by ${card.selected_by}`)
+      })
       
       // Phase-specific auto-selection logic
       if (currentPhase === 1) {
-        // Phase 1: First player should auto-select if no cards selected yet
+        console.log('🔷 TRIPLE TIMEOUT: 🎯 PHASE 1 ANALYSIS:')
+        console.log('🔷 TRIPLE TIMEOUT:   - Need first player to select if no cards selected')
+        console.log('🔷 TRIPLE TIMEOUT:   - Is my turn:', isMyTurn)
+        console.log('🔷 TRIPLE TIMEOUT:   - Cards selected:', selectedCards.length)
+        console.log('🔷 TRIPLE TIMEOUT:   - Should auto-select:', isMyTurn && selectedCards.length === 0)
+        
         if (isMyTurn && selectedCards.length === 0) {
-          console.log('🔷 TRIPLE: Phase 1 - Auto-selecting for first pick player')
+          console.log('🔷 TRIPLE TIMEOUT: ✅ PHASE 1 - Auto-selecting for first pick player')
           await autoSelectRandomCard()
+          console.log('🔷 TRIPLE TIMEOUT: ✅ PHASE 1 - Auto-select completed, checking phase end...')
+        } else {
+          console.log('🔷 TRIPLE TIMEOUT: ⏭️ PHASE 1 - No auto-select needed')
+          if (!isMyTurn) {
+            console.log('🔷 TRIPLE TIMEOUT:   - Reason: Not my turn')
+          }
+          if (selectedCards.length > 0) {
+            console.log('🔷 TRIPLE TIMEOUT:   - Reason: Cards already selected')
+          }
         }
         
-        // CRITICAL FIX: Always trigger phase end check after auto-select or timeout
+        // Always trigger phase end check after timeout
+        console.log('🔷 TRIPLE TIMEOUT: 🔄 Scheduling phase end check in 500ms...')
         setTimeout(() => {
+          console.log('🔷 TRIPLE TIMEOUT: 🔄 Phase end check triggered (Phase 1)')
           handleTriplePhaseEnd()
         }, 500)
       } else if (currentPhase === 2) {
-        // Phase 2: Second player should auto-select if exactly 1 card selected
+        console.log('🔷 TRIPLE TIMEOUT: 🎯 PHASE 2 ANALYSIS:')
         const mySelection = selectedCards.find(card => card.selected_by === userRole)
+        console.log('🔷 TRIPLE TIMEOUT:   - My selection:', mySelection ? `${mySelection.card_id}` : 'none')
+        console.log('🔷 TRIPLE TIMEOUT:   - Is my turn:', isMyTurn)
+        console.log('🔷 TRIPLE TIMEOUT:   - Cards selected:', selectedCards.length)
+        console.log('🔷 TRIPLE TIMEOUT:   - Need exactly 1 card selected and none by me')
+        console.log('🔷 TRIPLE TIMEOUT:   - Should auto-select:', isMyTurn && selectedCards.length === 1 && !mySelection)
+        
         if (isMyTurn && selectedCards.length === 1 && !mySelection) {
-          console.log('🔷 TRIPLE: Phase 2 - Auto-selecting for second pick player')
+          console.log('🔷 TRIPLE TIMEOUT: ✅ PHASE 2 - Auto-selecting for second pick player')
           await autoSelectRandomCard()
+          console.log('🔷 TRIPLE TIMEOUT: ✅ PHASE 2 - Auto-select completed, checking phase end...')
+        } else {
+          console.log('🔷 TRIPLE TIMEOUT: ⏭️ PHASE 2 - No auto-select needed')
+          if (!isMyTurn) {
+            console.log('🔷 TRIPLE TIMEOUT:   - Reason: Not my turn')
+          }
+          if (selectedCards.length !== 1) {
+            console.log('🔷 TRIPLE TIMEOUT:   - Reason: Expected 1 card selected, have', selectedCards.length)
+          }
+          if (mySelection) {
+            console.log('🔷 TRIPLE TIMEOUT:   - Reason: I already selected a card')
+          }
         }
         
-        // CRITICAL FIX: Always trigger phase end check after auto-select or timeout
+        // Always trigger phase end check after timeout
+        console.log('🔷 TRIPLE TIMEOUT: 🔄 Scheduling phase end check in 500ms...')
         setTimeout(() => {
+          console.log('🔷 TRIPLE TIMEOUT: 🔄 Phase end check triggered (Phase 2)')
           handleTriplePhaseEnd()
         }, 500)
+      } else {
+        console.log('🔷 TRIPLE TIMEOUT: ❌ Unknown phase:', currentPhase)
       }
       return
     }
@@ -976,30 +1027,110 @@ const Room = () => {
 
   const performAutoSelect = async (card: RoomCard) => {
     try {
+      console.log('🔄 AUTO-SELECT: Starting auto-select process')
+      console.log('🔄 AUTO-SELECT: Card:', card.card_id, card.card_name)
+      console.log('🔄 AUTO-SELECT: User Role:', userRole)
+      console.log('🔄 AUTO-SELECT: Current Round:', room?.current_round)
+      console.log('🔄 AUTO-SELECT: Draft Type:', room?.draft_type)
+      console.log('🔄 AUTO-SELECT: Triple Phase:', room?.triple_draft_phase)
+      
       const supabaseWithToken = getSupabaseWithSession()
       
-      await supabaseWithToken
+      // Update the card selection in database
+      const updateQuery = {
+        room_id: roomId,
+        card_id: card.card_id,
+        round_number: room?.draft_type === 'mega' ? 1 : room?.current_round
+      }
+      
+      console.log('🔄 AUTO-SELECT: Database update query:', updateQuery)
+      
+      const { data: updateResult, error: updateError } = await supabaseWithToken
         .from('room_cards')
         .update({ selected_by: userRole })
         .eq('room_id', roomId)
         .eq('card_id', card.card_id)
         .eq('round_number', room?.draft_type === 'mega' ? 1 : room?.current_round)
+        .select()
+        
+      console.log('🔄 AUTO-SELECT: Database update result:', updateResult)
+      if (updateError) {
+        console.error('🔄 AUTO-SELECT: Database update error:', updateError)
+        return
+      }
         
       // For triple draft, also check the side
       if (room?.draft_type === 'triple') {
-        await supabaseWithToken
+        console.log('🔄 AUTO-SELECT: Triple draft - updating side=both')
+        const { data: sideUpdateResult, error: sideUpdateError } = await supabaseWithToken
           .from('room_cards')
           .update({ selected_by: userRole })
           .eq('room_id', roomId)
           .eq('card_id', card.card_id)
           .eq('round_number', room?.current_round)
           .eq('side', 'both')
+          .select()
+          
+        console.log('🔄 AUTO-SELECT: Side update result:', sideUpdateResult)
+        if (sideUpdateError) {
+          console.error('🔄 AUTO-SELECT: Side update error:', sideUpdateError)
+        }
       }
       
+      // Verify the selection was actually set
+      console.log('🔄 AUTO-SELECT: Verifying selection...')
+      const { data: verifyResult } = await supabaseWithToken
+        .from('room_cards')
+        .select('*')
+        .eq('room_id', roomId)
+        .eq('card_id', card.card_id)
+        .eq('round_number', room?.current_round)
+      
+      console.log('🔄 AUTO-SELECT: Verification result:', verifyResult)
+      
+      // Get all current selections for this round
+      const { data: allSelections } = await supabaseWithToken
+        .from('room_cards')
+        .select('card_id, selected_by')
+        .eq('room_id', roomId)
+        .eq('round_number', room?.current_round)
+        .not('selected_by', 'is', null)
+      
+      console.log('🔄 AUTO-SELECT: All current selections:', allSelections)
+      
       setSelectedCard(card.card_id)
-      console.log('✅ Auto-selected fallback card:', card.card_name)
+      console.log('✅ AUTO-SELECT: Process completed successfully')
+      console.log('✅ AUTO-SELECT: Selected card:', card.card_name)
+      console.log('✅ AUTO-SELECT: Total selections now:', allSelections?.length || 0)
+      
+      // For triple draft, add additional logging about phase state
+      if (room?.draft_type === 'triple') {
+        console.log('🔷 AUTO-SELECT: Triple draft post-selection state:')
+        console.log('🔷 AUTO-SELECT: Phase:', room.triple_draft_phase)
+        console.log('🔷 AUTO-SELECT: Is My Turn:', isMyTurn)
+        console.log('🔷 AUTO-SELECT: First Pick Player:', room.triple_draft_first_pick)
+        console.log('🔷 AUTO-SELECT: Selection Locked:', isSelectionLocked)
+        
+        // Fetch fresh room data to see if anything changed
+        setTimeout(async () => {
+          console.log('🔄 AUTO-SELECT: Fetching fresh room data for verification...')
+          const { data: freshRoom } = await supabaseWithToken
+            .from('rooms')
+            .select('*')
+            .eq('id', roomId)
+            .single()
+          
+          console.log('🔄 AUTO-SELECT: Fresh room data:', {
+            current_round: freshRoom?.current_round,
+            triple_draft_phase: freshRoom?.triple_draft_phase,
+            round_start_time: freshRoom?.round_start_time,
+            status: freshRoom?.status
+          })
+        }, 100)
+      }
+      
     } catch (error) {
-      console.error('Error auto-selecting card:', error)
+      console.error('❌ AUTO-SELECT: Critical error during auto-select:', error)
     }
   }
 
@@ -1226,24 +1357,27 @@ const Room = () => {
   }
 
   const handleTriplePhaseEnd = async () => {
-    console.log('🔷 TRIPLE PHASE END: Function called')
+    console.log('🔷 TRIPLE PHASE END: ================== FUNCTION START ==================')
     console.log('🔷 TRIPLE PHASE END: Room:', room?.id)
     console.log('🔷 TRIPLE PHASE END: User role:', userRole)
+    console.log('🔷 TRIPLE PHASE END: Timestamp:', new Date().toISOString())
     
     if (!room || !roomId) {
-      console.log('🔷 TRIPLE PHASE END: Blocked - missing room data')
+      console.log('🔷 TRIPLE PHASE END: ❌ Blocked - missing room data')
       return
     }
     
     // CRITICAL FIX: Both players can trigger phase transitions, but use a lock to prevent duplicates
     if (isProcessingRound) {
-      console.log('🔷 TRIPLE PHASE END: Already processing, skipping')
+      console.log('🔷 TRIPLE PHASE END: ⏳ Already processing, skipping (lock active)')
       return
     }
     
+    console.log('🔷 TRIPLE PHASE END: 🔒 Setting processing lock')
     setIsProcessingRound(true)
     
     // Add a small delay to ensure card updates have been processed
+    console.log('🔷 TRIPLE PHASE END: ⏳ Waiting 200ms for card updates...')
     await new Promise(resolve => setTimeout(resolve, 200))
     
     try {
@@ -1251,28 +1385,52 @@ const Room = () => {
       const currentRound = room.current_round
       const currentPhase = room.triple_draft_phase || 1
       
-      console.log('🔷 TRIPLE PHASE END: Current round:', currentRound)
-      console.log('🔷 TRIPLE PHASE END: Current phase:', currentPhase)
+      console.log('🔷 TRIPLE PHASE END: 📊 Current state:')
+      console.log('🔷 TRIPLE PHASE END:   - Round:', currentRound)
+      console.log('🔷 TRIPLE PHASE END:   - Phase:', currentPhase)
+      console.log('🔷 TRIPLE PHASE END:   - First Pick:', room.triple_draft_first_pick)
+      console.log('🔷 TRIPLE PHASE END:   - Selection Locked:', isSelectionLocked)
+      console.log('🔷 TRIPLE PHASE END:   - Is My Turn:', isMyTurn)
       
       // Get current round cards with fresh data
-      const { data: roundCards } = await supabaseWithToken
+      console.log('🔷 TRIPLE PHASE END: 🔍 Fetching fresh card data...')
+      const { data: roundCards, error: cardsError } = await supabaseWithToken
         .from('room_cards')
         .select('*')
         .eq('room_id', roomId)
         .eq('round_number', currentRound)
       
+      if (cardsError) {
+        console.error('🔷 TRIPLE PHASE END: ❌ Error fetching cards:', cardsError)
+        return
+      }
+      
       const selectedCards = roundCards?.filter(card => card.selected_by) || []
       
-      console.log('🔷 TRIPLE PHASE END: Total round cards:', roundCards?.length || 0)
-      console.log('🔷 TRIPLE PHASE END: Selected cards:', selectedCards.length)
-      console.log('🔷 TRIPLE PHASE END: Selected cards details:', selectedCards.map(c => `${c.card_id} by ${c.selected_by}`))
+      console.log('🔷 TRIPLE PHASE END: 📋 Card analysis:')
+      console.log('🔷 TRIPLE PHASE END:   - Total round cards:', roundCards?.length || 0)
+      console.log('🔷 TRIPLE PHASE END:   - Selected cards:', selectedCards.length)
+      console.log('🔷 TRIPLE PHASE END:   - Expected selections for phase', currentPhase + ':', currentPhase)
+      console.log('🔷 TRIPLE PHASE END: 📋 Selected cards details:')
+      selectedCards.forEach((card, index) => {
+        console.log(`🔷 TRIPLE PHASE END:   ${index + 1}. ${card.card_id} (${card.card_name}) by ${card.selected_by}`)
+      })
+      
+      // Log phase transition eligibility
+      const phase1Ready = currentPhase === 1 && selectedCards.length >= 1
+      const phase2Ready = currentPhase === 2 && selectedCards.length >= 2
+      
+      console.log('🔷 TRIPLE PHASE END: 🎯 Phase transition eligibility:')
+      console.log('🔷 TRIPLE PHASE END:   - Phase 1 → 2 ready:', phase1Ready)
+      console.log('🔷 TRIPLE PHASE END:   - Phase 2 → next round ready:', phase2Ready)
       
       if (currentPhase === 1 && selectedCards.length >= 1) {
-        console.log('🔷 TRIPLE: Phase 1 complete - transitioning to phase 2')
+        console.log('🔷 TRIPLE PHASE END: ✅ PHASE 1 → 2 TRANSITION TRIGGERED')
+        console.log('🔷 TRIPLE PHASE END: 🎯 Phase 1 complete - transitioning to phase 2')
         
         // Add phase 1 selected card to player deck immediately
         const phase1Card = selectedCards[0]
-        console.log('🔷 TRIPLE: Adding phase 1 card to deck:', phase1Card.card_id, 'by', phase1Card.selected_by)
+        console.log('🔷 TRIPLE PHASE END: 📦 Adding phase 1 card to deck:', phase1Card.card_id, 'by', phase1Card.selected_by)
         
         try {
           // Check if card already exists in deck to prevent duplicates
@@ -1303,16 +1461,36 @@ const Room = () => {
         }
         
         // Move to phase 2 with fresh timer
-        console.log('🔷 TRIPLE: Updating room to phase 2')
-        await supabaseWithToken
+        console.log('🔷 TRIPLE PHASE END: 🔄 Updating room to phase 2...')
+        const newRoundStartTime = new Date().toISOString()
+        console.log('🔷 TRIPLE PHASE END: 🕐 New round start time:', newRoundStartTime)
+        
+        const { data: phaseUpdateResult, error: phaseUpdateError } = await supabaseWithToken
           .from('rooms')
           .update({ 
             triple_draft_phase: 2,
-            round_start_time: new Date().toISOString()
+            round_start_time: newRoundStartTime
           })
           .eq('id', roomId)
+          .select()
         
-        console.log('🔷 TRIPLE: Successfully moved to phase 2')
+        if (phaseUpdateError) {
+          console.error('🔷 TRIPLE PHASE END: ❌ Error updating to phase 2:', phaseUpdateError)
+          return
+        }
+        
+        console.log('🔷 TRIPLE PHASE END: ✅ Successfully moved to phase 2')
+        console.log('🔷 TRIPLE PHASE END: 📊 Phase update result:', phaseUpdateResult)
+        
+        // Verify the phase change took effect
+        const { data: verifyRoom } = await supabaseWithToken
+          .from('rooms')
+          .select('triple_draft_phase, round_start_time')
+          .eq('id', roomId)
+          .single()
+        
+        console.log('🔷 TRIPLE PHASE END: 🔍 Verification - Room phase is now:', verifyRoom?.triple_draft_phase)
+        console.log('🔷 TRIPLE PHASE END: 🔍 Verification - Round start time:', verifyRoom?.round_start_time)
       } else if (currentPhase === 2 && selectedCards.length >= 2) {
         console.log('🔷 TRIPLE: Phase 2 complete - moving to next round')
         
@@ -1372,8 +1550,35 @@ const Room = () => {
             .eq('id', roomId)
         }
       } else {
-        console.log('🔷 TRIPLE PHASE END: Conditions not met for phase transition')
-        console.log('🔷 TRIPLE PHASE END: Phase:', currentPhase, 'Selected:', selectedCards.length)
+        console.log('🔷 TRIPLE PHASE END: ❌ CONDITIONS NOT MET FOR PHASE TRANSITION')
+        console.log('🔷 TRIPLE PHASE END: 📊 Current state analysis:')
+        console.log('🔷 TRIPLE PHASE END:   - Phase:', currentPhase)
+        console.log('🔷 TRIPLE PHASE END:   - Selected cards:', selectedCards.length)
+        console.log('🔷 TRIPLE PHASE END:   - Required for Phase 1→2:', currentPhase === 1 ? '1 card' : 'N/A')
+        console.log('🔷 TRIPLE PHASE END:   - Required for Phase 2→Next:', currentPhase === 2 ? '2 cards' : 'N/A')
+        console.log('🔷 TRIPLE PHASE END: 🔍 Detailed analysis:')
+        
+        if (currentPhase === 1) {
+          console.log('🔷 TRIPLE PHASE END:   - In Phase 1, need 1+ selections, have:', selectedCards.length)
+          console.log('🔷 TRIPLE PHASE END:   - Phase 1 condition met:', selectedCards.length >= 1)
+        } else if (currentPhase === 2) {
+          console.log('🔷 TRIPLE PHASE END:   - In Phase 2, need 2+ selections, have:', selectedCards.length)
+          console.log('🔷 TRIPLE PHASE END:   - Phase 2 condition met:', selectedCards.length >= 2)
+          
+          // Analyze the selections more deeply
+          const uniqueSelectors = [...new Set(selectedCards.map(c => c.selected_by))]
+          console.log('🔷 TRIPLE PHASE END:   - Unique selectors:', uniqueSelectors.length, '(', uniqueSelectors.join(', '), ')')
+          console.log('🔷 TRIPLE PHASE END:   - Expected: 2 different players should have selected')
+          
+          if (selectedCards.length >= 2 && uniqueSelectors.length < 2) {
+            console.log('🔷 TRIPLE PHASE END: 🚨 CRITICAL ISSUE: Multiple cards selected by same player!')
+            selectedCards.forEach((card, i) => {
+              console.log(`🔷 TRIPLE PHASE END:     ${i+1}. ${card.card_id} by ${card.selected_by}`)
+            })
+          }
+        }
+        
+        console.log('🔷 TRIPLE PHASE END: 🔄 Will retry phase check on next timer or selection...')
       }
     } catch (error) {
       console.error('🔷 TRIPLE: Error in phase end:', error)

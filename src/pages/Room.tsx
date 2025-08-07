@@ -332,26 +332,25 @@ const Room = () => {
             const role = getUserRole(updatedRoom, userSessionId)
             setUserRole(role)
             
-            if (updatedRoom.creator_ready && updatedRoom.joiner_ready && updatedRoom.status === 'waiting') {
+            // CRITICAL FIX: Only trigger draft start for rooms in 'waiting' status AND not already starting
+            if (updatedRoom.creator_ready && updatedRoom.joiner_ready && updatedRoom.status === 'waiting' && !isStartingDraft) {
               console.log('🚀 ROOM UPDATE: Both players ready, starting draft countdown')
               
-              // Only start draft once - check if already starting
-              if (!isStartingDraft) {
-                setIsStartingDraft(true)
-                
-                if (role === 'creator') {
-                  console.log('🚀 ROOM UPDATE: Creator will start draft in 5 seconds')
-                  setTimeout(() => {
-                    console.log('🚀 ROOM UPDATE: Creator starting draft now')
-                    startDraft(updatedRoom)
-                    setIsStartingDraft(false)
-                  }, 5000)
-                } else {
-                  console.log('🚀 ROOM UPDATE: Joiner waiting for draft start')
-                  setTimeout(() => {
-                    setIsStartingDraft(false)
-                  }, 5000)
-                }
+              // Set flag immediately to prevent any race conditions
+              setIsStartingDraft(true)
+              
+              if (role === 'creator') {
+                console.log('🚀 ROOM UPDATE: Creator will start draft in 5 seconds')
+                setTimeout(() => {
+                  console.log('🚀 ROOM UPDATE: Creator starting draft now')
+                  startDraft(updatedRoom)
+                  setIsStartingDraft(false)
+                }, 5000)
+              } else {
+                console.log('🚀 ROOM UPDATE: Joiner waiting for draft start')
+                setTimeout(() => {
+                  setIsStartingDraft(false)
+                }, 5000)
               }
             }
           }

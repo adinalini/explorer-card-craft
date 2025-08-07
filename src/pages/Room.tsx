@@ -681,9 +681,13 @@ const Room = () => {
           console.log(`🔷 TRIPLE: Starting with first pick: ${firstPick}`)
         }
       }
+      
+      // SUCCESS: Draft start completed without room update errors
+      console.log('🚀 START DRAFT: Function completed successfully')
 
     } catch (error) {
       console.error('🚨 START DRAFT: Complete failure:', error)
+      console.error('🚨 START DRAFT: Error stack:', error.stack)
       toast({
         title: "Error",
         description: "Failed to start draft. Please refresh and try again.",

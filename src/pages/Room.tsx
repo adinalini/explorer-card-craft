@@ -725,6 +725,20 @@ const Room = () => {
       return
     }
 
+    // Additional check: verify time hasn't expired even if isSelectionLocked hasn't been updated yet
+    if (room?.status === 'drafting' && room.round_start_time) {
+      const now = new Date()
+      const roundStart = new Date(room.round_start_time)
+      const elapsed = (now.getTime() - roundStart.getTime()) / 1000
+      const roundDuration = room.round_duration_seconds || 15
+      const remaining = roundDuration - elapsed
+
+      if (remaining <= 0) {
+        console.log('Selection blocked - time has expired')
+        return
+      }
+    }
+
     // In drafting, clicking the same card should NOT deselect it - it should keep it selected
     // Only allow changing selection to a different card
     if (selectedCard === cardId) {

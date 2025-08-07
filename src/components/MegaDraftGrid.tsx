@@ -28,7 +28,7 @@ export function MegaDraftGrid({
           onSelect={() => onCardSelect(card.card_id)}
           disabled={!isMyTurn || !!card.selected_by}
           isRevealing={!!card.selected_by} // Show reveal state if already selected
-          showUnselectedOverlay={false} // Don't show overlay since selection is immediate
+          showUnselectedOverlay={!isMyTurn && !card.selected_by} // Show overlay when not user's turn
         />
       ))}
     </div>

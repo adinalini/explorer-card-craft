@@ -66,6 +66,11 @@ export const generateMegaDraftCards = (usedCardIds: string[]): Card[] => {
     selectedCards.push(...selected)
   }
 
+  // CRITICAL FIX: Ensure exactly 36 cards
+  if (selectedCards.length > 36) {
+    selectedCards.splice(36)
+  }
+
   // Sort cards by cost then name, but keep legendaries at the end
   const nonLegendaryCards = selectedCards.filter(card => !card.isLegendary)
   const legendaries = selectedCards.filter(card => card.isLegendary)

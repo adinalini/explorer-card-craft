@@ -123,32 +123,32 @@ const Room = () => {
     setIsSelectionLocked(true)
     setShowReveal(true)
     
-    // Add 0.5s delay to prevent double selection in default draft
-    if (room?.draft_type === 'default') {
-      setTimeout(() => {
-        // Check if user has made a manual selection after delay
-        const currentRoundCards = roomCards.filter(card => 
+    // Add 0.5s delay to prevent double selection for ALL draft types
+    setTimeout(() => {
+      // Check if user has made a manual selection after delay
+      let currentRoundCards: RoomCard[] = []
+      
+      if (room?.draft_type === 'default') {
+        currentRoundCards = roomCards.filter(card => 
           card.round_number === room?.current_round && card.side === userRole
         )
-        const hasManualSelection = selectedCard || currentRoundCards.some(card => card.selected_by === userRole)
-        
-        // Only auto-select if no manual selection exists
-        if (!hasManualSelection && userRole !== 'spectator') {
-          autoSelectRandomCard()
-        }
-      }, 500)
-    } else {
-      // For triple and mega draft, no delay needed
-      const currentRoundCards = roomCards.filter(card => 
-        card.round_number === (room?.draft_type === 'mega' ? 1 : room?.current_round)
-      )
+      } else if (room?.draft_type === 'triple') {
+        currentRoundCards = roomCards.filter(card => 
+          card.round_number === room?.current_round
+        )
+      } else if (room?.draft_type === 'mega') {
+        currentRoundCards = roomCards.filter(card => 
+          card.round_number === 1
+        )
+      }
+      
       const hasManualSelection = selectedCard || currentRoundCards.some(card => card.selected_by === userRole)
       
       // Only auto-select if no manual selection exists
       if (!hasManualSelection && userRole !== 'spectator') {
-        await autoSelectRandomCard()
+        autoSelectRandomCard()
       }
-    }
+    }, 500)
     
     if (userRole === 'creator' && !isProcessingRound) {
       setTimeout(() => {
@@ -1375,13 +1375,10 @@ const Room = () => {
                         <div className="text-lg font-semibold text-black">
                           {room.creator_name} {room.first_pick_player === 'creator' ? '(First Pick)' : ''}
                         </div>
-                        <div className="text-sm text-muted-foreground mt-1">
-                          {userRole === 'creator' ? (isMyTurn ? 'Your turn' : 'Opponent\'s turn') : (isMyTurn ? 'Opponent\'s turn' : 'Your turn')}
-                        </div>
                       </div>
                       
-                      {/* Turn Arrow */}
-                      <div className="flex items-center justify-center w-12">
+                      {/* Turn Arrow with Whose Turn Display */}
+                      <div className="flex flex-col items-center justify-center w-12">
                         {isMyTurn && userRole === 'creator' ? (
                           <div className="text-6xl text-primary animate-pulse">←</div>
                         ) : isMyTurn && userRole === 'joiner' ? (
@@ -1391,14 +1388,14 @@ const Room = () => {
                         ) : (
                           <div className="text-6xl text-primary animate-pulse">←</div>
                         )}
+                        <div className="text-sm text-primary font-medium mt-1">
+                          {isMyTurn ? 'Your turn' : 'Opponent\'s turn'}
+                        </div>
                       </div>
                       
                       <div className="text-center flex-1">
                         <div className="text-lg font-semibold text-black">
                           {room.joiner_name} {room.first_pick_player === 'joiner' ? '(First Pick)' : ''}
-                        </div>
-                        <div className="text-sm text-muted-foreground mt-1">
-                          {userRole === 'joiner' ? (isMyTurn ? 'Your turn' : 'Opponent\'s turn') : (isMyTurn ? 'Opponent\'s turn' : 'Your turn')}
                         </div>
                       </div>
                     </div>
@@ -1441,13 +1438,10 @@ const Room = () => {
                         <div className="text-lg font-semibold text-black">
                           {room.creator_name} {room.first_pick_player === 'creator' ? '(First Pick)' : ''}
                         </div>
-                        <div className="text-sm text-muted-foreground mt-1">
-                          {userRole === 'creator' ? (isMyTurn ? 'Your turn' : 'Opponent\'s turn') : (isMyTurn ? 'Opponent\'s turn' : 'Your turn')}
-                        </div>
                       </div>
                       
-                      {/* Turn Arrow */}
-                      <div className="flex items-center justify-center w-12">
+                      {/* Turn Arrow with Whose Turn Display */}
+                      <div className="flex flex-col items-center justify-center w-12">
                         {isMyTurn && userRole === 'creator' ? (
                           <div className="text-6xl text-primary animate-pulse">←</div>
                         ) : isMyTurn && userRole === 'joiner' ? (
@@ -1457,14 +1451,14 @@ const Room = () => {
                         ) : (
                           <div className="text-6xl text-primary animate-pulse">←</div>
                         )}
+                        <div className="text-sm text-primary font-medium mt-1">
+                          {isMyTurn ? 'Your turn' : 'Opponent\'s turn'}
+                        </div>
                       </div>
                       
                       <div className="text-center flex-1">
                         <div className="text-lg font-semibold text-black">
                           {room.joiner_name} {room.first_pick_player === 'joiner' ? '(First Pick)' : ''}
-                        </div>
-                        <div className="text-sm text-muted-foreground mt-1">
-                          {userRole === 'joiner' ? (isMyTurn ? 'Your turn' : 'Opponent\'s turn') : (isMyTurn ? 'Opponent\'s turn' : 'Your turn')}
                         </div>
                       </div>
                     </div>

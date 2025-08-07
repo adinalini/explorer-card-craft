@@ -151,7 +151,8 @@ const Room = () => {
       }
     }, 500)
     
-    if (userRole === 'creator' && !isProcessingRound) {
+    // For triple/mega draft, processRoundEnd is handled by card selection, not timer
+    if (userRole === 'creator' && !isProcessingRound && room?.draft_type === 'default') {
       setTimeout(() => {
         if (!isProcessingRound) {
           processRoundEnd()
@@ -670,8 +671,8 @@ const Room = () => {
     console.log('🔄 PROCESS ROUND END CALLED')
     console.log('Room:', room?.id, 'Round:', room?.current_round, 'User Role:', userRole, 'Is Processing:', isProcessingRound)
     
-    if (!room || !roomId || isProcessingRound) {
-      console.log('❌ Process round end blocked - missing data or already processing')
+    if (!room || !roomId) {
+      console.log('❌ Process round end blocked - missing data')
       return
     }
 

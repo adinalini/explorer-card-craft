@@ -168,10 +168,10 @@ const RandomDeck = () => {
       </div>
 
       {/* White background for the rest - flex-1 to take remaining space with overflow */}
-      <div className="bg-white flex-1 flex flex-col p-4 pt-8 overflow-auto">
-        <div className="max-w-4xl mx-auto w-full flex-1 flex flex-col min-h-0">
+      <div className="bg-white flex-1 flex flex-col pt-8 overflow-auto">
+        <div className="max-w-4xl mx-auto w-full h-full flex flex-col px-4">
           {/* Deck Display - takes available space */}
-          <div className="flex-1 flex justify-center mb-4 overflow-auto">
+          <div className="flex-1 flex justify-center items-start min-h-0">
             <div className="w-full max-w-2xl">
               {randomDeck.length > 0 ? (
                 <DeckDisplay

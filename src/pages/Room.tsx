@@ -332,8 +332,8 @@ const Room = () => {
             const role = getUserRole(updatedRoom, userSessionId)
             setUserRole(role)
             
-            // CRITICAL FIX: Only trigger draft start for rooms in 'waiting' status AND not already starting
-            if (updatedRoom.creator_ready && updatedRoom.joiner_ready && updatedRoom.status === 'waiting' && !isStartingDraft) {
+            // CRITICAL FIX: Only trigger draft start for rooms in 'waiting' status, never if already drafting or starting
+            if (updatedRoom.creator_ready && updatedRoom.joiner_ready && updatedRoom.status === 'waiting' && !isStartingDraft && room?.status !== 'drafting') {
               console.log('🚀 ROOM UPDATE: Both players ready, starting draft countdown')
               
               // Set flag immediately to prevent any race conditions

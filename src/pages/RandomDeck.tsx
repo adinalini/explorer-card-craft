@@ -23,17 +23,19 @@ const RandomDeck = () => {
     
     try {
       const deck: RandomCard[] = []
+      const usedCardIds: string[] = []
       let selectionOrder = 1
 
       // Generate cards for all 13 rounds
       for (let round = 1; round <= 13; round++) {
-        // Get 2 random cards for this round (creator and joiner pools)
-        const roundCards = getRandomCards(2, [])
+        // Get 2 random cards for this round (creator and joiner pools) excluding already used cards
+        const roundCards = getRandomCards(2, usedCardIds)
         
         if (roundCards.length > 0) {
           // Randomly pick one of the two cards
           const selectedCard = roundCards[Math.floor(Math.random() * roundCards.length)]
           
+          // Add the selected card to the deck
           deck.push({
             card_id: selectedCard.id,
             card_name: selectedCard.name,
@@ -41,6 +43,27 @@ const RandomDeck = () => {
             is_legendary: selectedCard.isLegendary,
             selection_order: selectionOrder++
           })
+          
+          // Mark both cards as used to prevent duplicates
+          roundCards.forEach(card => {
+            if (!usedCardIds.includes(card.id)) {
+              usedCardIds.push(card.id)
+            }
+          })
+        } else {
+          // Fallback: if no cards available, pick any unused card
+          const fallbackCards = getRandomCards(1, usedCardIds)
+          if (fallbackCards.length > 0) {
+            const selectedCard = fallbackCards[0]
+            deck.push({
+              card_id: selectedCard.id,
+              card_name: selectedCard.name,
+              card_image: selectedCard.image,
+              is_legendary: selectedCard.isLegendary,
+              selection_order: selectionOrder++
+            })
+            usedCardIds.push(selectedCard.id)
+          }
         }
       }
 

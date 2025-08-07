@@ -50,10 +50,11 @@ export function TripleDraftCards({
             isDisabled = !isMyTurn || isCardSelected
             showOverlay = !isMyTurn
           } else if (currentPhase === 1 && isSelectionLocked) {
-            // Phase 1 end: Cards should appear clear and unselectable
-            // Only show tick for my selection
+            // Phase 1 end: Show tick for player who selected, cross for others
             if (isMySelection) {
               showSelectedTick = true
+            } else if (isCardSelected) {
+              showSelectedCross = true
             }
             isDisabled = true
           } else if (currentPhase === 2 && !isSelectionLocked) {
@@ -66,10 +67,11 @@ export function TripleDraftCards({
               showOverlay = !isMyTurn
             }
           } else if (currentPhase === 2 && isSelectionLocked) {
-            // Phase 2 end: Cards should appear clear and unselectable
-            // Only show tick for my selection
+            // Phase 2 end: Show tick for player who selected, cross for others
             if (isMySelection) {
               showSelectedTick = true
+            } else if (isCardSelected) {
+              showSelectedCross = true
             }
             isDisabled = true
           }

@@ -1716,16 +1716,20 @@ const Room = () => {
 
       console.log('✅ Manual selection confirmed:', cardId)
       
-      // For triple draft, handle phase progression
+      // For triple draft, handle phase progression with reveal
       if (room?.draft_type === 'triple') {
-        console.log('🔷 TRIPLE: Card selected, processing phase')
+        console.log('🔷 TRIPLE: Card selected, starting reveal phase')
         
-        // CRITICAL FIX: Both players should be able to trigger phase end check
-        // No matter who selected, we need to check if phase is complete
+        // Show reveal phase for 2 seconds before phase end check
+        setIsSelectionLocked(true)
+        setShowReveal(true)
+        
         setTimeout(() => {
-          console.log('🔷 TRIPLE: Triggering phase end check after manual selection')
+          console.log('🔷 TRIPLE: Ending reveal phase and checking phase end')
+          setShowReveal(false)
+          setIsRevealing(false)
           handleTriplePhaseEnd()
-        }, 100)
+        }, 2000)
       } else if (room?.draft_type === 'mega') {
         // For mega draft, immediately lock and start reveal phase
         setIsSelectionLocked(true)

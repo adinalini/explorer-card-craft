@@ -318,20 +318,24 @@ const Room = () => {
             
             if (updatedRoom.creator_ready && updatedRoom.joiner_ready && updatedRoom.status === 'waiting') {
               console.log('🚀 ROOM UPDATE: Both players ready, starting draft countdown')
-              setIsStartingDraft(true)
               
-              if (role === 'creator') {
-                console.log('🚀 ROOM UPDATE: Creator will start draft in 5 seconds')
-                setTimeout(() => {
-                  console.log('🚀 ROOM UPDATE: Creator starting draft now')
-                  startDraft(updatedRoom)
-                  setIsStartingDraft(false)
-                }, 5000)
-              } else {
-                console.log('🚀 ROOM UPDATE: Joiner waiting for draft start')
-                setTimeout(() => {
-                  setIsStartingDraft(false)
-                }, 5000)
+              // Only start draft once - check if already starting
+              if (!isStartingDraft) {
+                setIsStartingDraft(true)
+                
+                if (role === 'creator') {
+                  console.log('🚀 ROOM UPDATE: Creator will start draft in 5 seconds')
+                  setTimeout(() => {
+                    console.log('🚀 ROOM UPDATE: Creator starting draft now')
+                    startDraft(updatedRoom)
+                    setIsStartingDraft(false)
+                  }, 5000)
+                } else {
+                  console.log('🚀 ROOM UPDATE: Joiner waiting for draft start')
+                  setTimeout(() => {
+                    setIsStartingDraft(false)
+                  }, 5000)
+                }
               }
             }
           }
@@ -627,24 +631,6 @@ const Room = () => {
 
   // Removed redundant generateRoundCards function - all cards are generated at draft start
 
-  const startCentralizedRoundTimer = async () => {
-    if (!roomId || userRole !== 'creator') return
-
-    try {
-      const supabaseWithToken = getSupabaseWithSession()
-
-      // Set round start time in database
-      await supabaseWithToken
-        .from('rooms')
-        .update({ 
-          round_start_time: new Date().toISOString() 
-        })
-        .eq('id', roomId)
-
-    } catch (error) {
-      // Silent error for timer sync
-    }
-  }
 
 
   const autoSelectRandomCard = async () => {
@@ -1092,6 +1078,9 @@ const Room = () => {
       return
     }
     
+    // Add a small delay to ensure card updates have been processed
+    await new Promise(resolve => setTimeout(resolve, 200))
+    
     try {
       const supabaseWithToken = getSupabaseWithSession()
       const currentRound = room.current_round
@@ -1100,7 +1089,7 @@ const Room = () => {
       console.log('🔷 TRIPLE PHASE END: Current round:', currentRound)
       console.log('🔷 TRIPLE PHASE END: Current phase:', currentPhase)
       
-      // Get current round cards
+      // Get current round cards with fresh data
       const { data: roundCards } = await supabaseWithToken
         .from('room_cards')
         .select('*')
@@ -1140,7 +1129,13 @@ const Room = () => {
       } else if (currentPhase === 2 && selectedCards.length >= 2) {
         // Process full round end
         console.log('🔷 TRIPLE PHASE END: Phase 2 complete with 2+ selections, calling processRoundEnd')
-        processRoundEnd()
+        setIsSelectionLocked(true)
+        setShowReveal(true)
+        
+        // Small delay to show completion, then process round end
+        setTimeout(() => {
+          processRoundEnd()
+        }, 1000)
       } else {
         console.log('🔷 TRIPLE PHASE END: Conditions not met for phase transition')
         console.log('🔷 TRIPLE PHASE END: Phase:', currentPhase, 'Selected:', selectedCards.length)
@@ -1352,7 +1347,6 @@ const Room = () => {
   const isMyTurn = (() => {
     if (!room || room.status !== 'drafting') return false
     if (room.draft_type !== 'triple') return true
-    if (isRevealing || isSelectionLocked) return false // No turns during reveal phase
     
     const currentPhase = room.triple_draft_phase || 1
     const firstPick = room.triple_draft_first_pick || 'creator'
@@ -1361,12 +1355,12 @@ const Room = () => {
     const selectedCards = roundCards.filter(card => card.selected_by)
     
     if (currentPhase === 1) {
-      // Phase 1: First pick player's turn
-      return userRole === firstPick && selectedCards.length === 0
+      // Phase 1: First pick player's turn (only if no selection yet)
+      return userRole === firstPick && selectedCards.length === 0 && !isSelectionLocked
     } else if (currentPhase === 2) {
-      // Phase 2: Second pick player's turn
+      // Phase 2: Second pick player's turn (only if exactly 1 selection exists)
       const secondPick = firstPick === 'creator' ? 'joiner' : 'creator'
-      return userRole === secondPick && selectedCards.length === 1
+      return userRole === secondPick && selectedCards.length === 1 && !isSelectionLocked
     }
     
     return false

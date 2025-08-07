@@ -16,6 +16,172 @@ interface Card {
   isSpell?: boolean
 }
 
+// Triple Draft Card Generation Logic
+const generateTripleDraftChoices = (usedCardIds: string[], cardDatabase: Card[]): Card[][] => {
+  const availableCards = cardDatabase.filter(card => !usedCardIds.includes(card.id) && card.cost !== undefined)
+  
+  const choices: Card[][] = []
+  const usedInChoices: Set<string> = new Set()
+
+  // 1. Guaranteed cost rounds - 1,2,3,4,5 (5 rounds)
+  const guaranteedCosts = [1, 2, 3, 4, 5]
+  for (const cost of guaranteedCosts) {
+    const cardsOfCost = availableCards.filter(card => 
+      card.cost === cost && !card.isLegendary && !card.isSpell && !usedInChoices.has(card.id)
+    )
+    
+    if (cardsOfCost.length >= 3) {
+      const shuffled = [...cardsOfCost].sort(() => Math.random() - 0.5)
+      const costChoice = shuffled.slice(0, 3)
+      choices.push(costChoice)
+      costChoice.forEach(card => usedInChoices.add(card.id))
+    }
+  }
+
+  // 2. 1 Guaranteed legendary choice round
+  const legendaryCards = availableCards.filter(card => card.isLegendary && !usedInChoices.has(card.id))
+  if (legendaryCards.length >= 3) {
+    const shuffled = [...legendaryCards].sort(() => Math.random() - 0.5)
+    const legendaryChoice = shuffled.slice(0, 3)
+    choices.push(legendaryChoice)
+    legendaryChoice.forEach(card => usedInChoices.add(card.id))
+  }
+
+  // 3. 3 rounds where cards are in cost range (1-3)
+  for (let i = 0; i < 3; i++) {
+    const lowCostCards = availableCards.filter(card => 
+      card.cost && card.cost >= 1 && card.cost <= 3 && !card.isLegendary && !card.isSpell && !usedInChoices.has(card.id)
+    )
+    
+    if (lowCostCards.length >= 3) {
+      const shuffled = [...lowCostCards].sort(() => Math.random() - 0.5)
+      const lowCostChoice = shuffled.slice(0, 3)
+      choices.push(lowCostChoice)
+      lowCostChoice.forEach(card => usedInChoices.add(card.id))
+    }
+  }
+
+  // 4. 2 rounds where cards are in cost range (4-6)
+  for (let i = 0; i < 2; i++) {
+    const midCostCards = availableCards.filter(card => 
+      card.cost && card.cost >= 4 && card.cost <= 6 && !card.isLegendary && !card.isSpell && !usedInChoices.has(card.id)
+    )
+    
+    if (midCostCards.length >= 3) {
+      const shuffled = [...midCostCards].sort(() => Math.random() - 0.5)
+      const midCostChoice = shuffled.slice(0, 3)
+      choices.push(midCostChoice)
+      midCostChoice.forEach(card => usedInChoices.add(card.id))
+    }
+  }
+
+  // 5. 1 round where cards are in cost range (7-10)
+  const highCostCards = availableCards.filter(card => 
+    card.cost && card.cost >= 7 && card.cost <= 10 && !card.isLegendary && !card.isSpell && !usedInChoices.has(card.id)
+  )
+  
+  if (highCostCards.length >= 3) {
+    const shuffled = [...highCostCards].sort(() => Math.random() - 0.5)
+    const highCostChoice = shuffled.slice(0, 3)
+    choices.push(highCostChoice)
+    highCostChoice.forEach(card => usedInChoices.add(card.id))
+  }
+
+  // 6. 1 guaranteed spell round- 3 random spells selected
+  const spellCards = availableCards.filter(card => card.isSpell && !usedInChoices.has(card.id))
+  if (spellCards.length >= 3) {
+    const shuffled = [...spellCards].sort(() => Math.random() - 0.5)
+    const spellChoice = shuffled.slice(0, 3)
+    choices.push(spellChoice)
+    spellChoice.forEach(card => usedInChoices.add(card.id))
+  }
+
+  // Shuffle all choices to randomize order
+  return choices.sort(() => Math.random() - 0.5)
+}
+
+// Mega Draft Card Generation Logic  
+const generateMegaDraftCards = (usedCardIds: string[], cardDatabase: Card[]): Card[] => {
+  const availableCards = cardDatabase.filter(card => !usedCardIds.includes(card.id) && card.cost !== undefined)
+  
+  const selectedCards: Card[] = []
+  const usedInSelection: Set<string> = new Set()
+
+  // 1. Include 2 from the following costs: 1,2,3,4,5,6 (12 cards total)
+  const guaranteedCosts = [1, 2, 3, 4, 5, 6]
+  for (const cost of guaranteedCosts) {
+    const cardsOfCost = availableCards.filter(card => 
+      card.cost === cost && !card.isLegendary && !card.isSpell && !usedInSelection.has(card.id)
+    )
+    
+    if (cardsOfCost.length >= 2) {
+      const shuffled = [...cardsOfCost].sort(() => Math.random() - 0.5)
+      const selected = shuffled.slice(0, 2)
+      selectedCards.push(...selected)
+      selected.forEach(card => usedInSelection.add(card.id))
+    }
+  }
+
+  // 2. Include 2 from the range (7-10) (2 cards total)
+  const highCostCards = availableCards.filter(card => 
+    card.cost && card.cost >= 7 && card.cost <= 10 && !card.isLegendary && !card.isSpell && !usedInSelection.has(card.id)
+  )
+  
+  if (highCostCards.length >= 2) {
+    const shuffled = [...highCostCards].sort(() => Math.random() - 0.5)
+    const selected = shuffled.slice(0, 2)
+    selectedCards.push(...selected)
+    selected.forEach(card => usedInSelection.add(card.id))
+  }
+
+  // 3. Include 3 random legendaries (3 cards total)
+  const legendaryCards = availableCards.filter(card => card.isLegendary && !usedInSelection.has(card.id))
+  
+  if (legendaryCards.length >= 3) {
+    const shuffled = [...legendaryCards].sort(() => Math.random() - 0.5)
+    const selected = shuffled.slice(0, 3)
+    selectedCards.push(...selected)
+    selected.forEach(card => usedInSelection.add(card.id))
+  }
+
+  // 4. Add 2 random spells (2 cards total)
+  const spellCards = availableCards.filter(card => card.isSpell && !usedInSelection.has(card.id))
+  
+  if (spellCards.length >= 2) {
+    const shuffled = [...spellCards].sort(() => Math.random() - 0.5)
+    const selected = shuffled.slice(0, 2)
+    selectedCards.push(...selected)
+    selected.forEach(card => usedInSelection.add(card.id))
+  }
+
+  // 5. Fill the remaining 17 choices with random cards from the entire pool left barring legendary
+  const remainingCards = availableCards.filter(card => 
+    !card.isLegendary && !usedInSelection.has(card.id)
+  )
+  
+  const needed = 36 - selectedCards.length
+  if (remainingCards.length >= needed) {
+    const shuffled = [...remainingCards].sort(() => Math.random() - 0.5)
+    const selected = shuffled.slice(0, needed)
+    selectedCards.push(...selected)
+  }
+
+  // Sort cards by cost then name, but keep legendaries at the end
+  const nonLegendaryCards = selectedCards.filter(card => !card.isLegendary)
+  const legendaries = selectedCards.filter(card => card.isLegendary)
+  
+  // Sort non-legendary cards by cost then name
+  nonLegendaryCards.sort((a, b) => {
+    if (a.cost !== b.cost) {
+      return (a.cost || 0) - (b.cost || 0)
+    }
+    return a.name.localeCompare(b.name)
+  })
+  
+  // Return array with non-legendaries first (33 cards) then legendaries (3 cards) at the end
+  return [...nonLegendaryCards, ...legendaries]
+}
+
 Deno.serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -52,12 +218,13 @@ Deno.serve(async (req) => {
       )
     }
     
-    const { roomId, round, usedCardIds, roundType } = requestBody
+    const { roomId, round, usedCardIds, roundType, draftType } = requestBody
     console.log('Request parameters:', { 
       roomId, 
       round, 
       usedCardIds: usedCardIds?.length || 0,
-      roundType 
+      roundType,
+      draftType 
     })
     
     if (!roomId || (!round && round !== 'all')) {
@@ -394,7 +561,113 @@ Deno.serve(async (req) => {
       console.log(`Round ${roundNum} cards:`, roundCards.slice(0, 4).map(c => `${c.name} (${c.cost})`))
     }
 
-    // If generating all rounds, insert all cards at once
+    // Handle different draft types
+    if (draftType === 'triple') {
+      // Generate all 13 triple draft choices
+      const tripleChoices = generateTripleDraftChoices(excludeIds, cardDatabase)
+      
+      // Shuffle the choices to randomize round order
+      const shuffledChoices = [...tripleChoices].sort(() => Math.random() - 0.5)
+      
+      const tripleCardsToInsert = []
+      
+      for (let roundNum = 1; roundNum <= 13; roundNum++) {
+        const choiceIndex = (roundNum - 1) % shuffledChoices.length
+        const choice = shuffledChoices[choiceIndex]
+        
+        if (choice && choice.length >= 3) {
+          for (const card of choice) {
+            tripleCardsToInsert.push({
+              room_id: roomId,
+              round_number: roundNum,
+              side: 'shared', // Triple draft uses shared cards
+              card_id: card.id,
+              card_name: card.name,
+              card_image: card.image,
+              is_legendary: card.isLegendary || false,
+              selected_by: null
+            })
+          }
+        }
+      }
+      
+      const { error } = await supabase
+        .from('room_cards')
+        .insert(tripleCardsToInsert)
+
+      if (error) {
+        console.error('Error inserting triple draft cards:', error)
+        throw error
+      }
+
+      return new Response(
+        JSON.stringify({ 
+          success: true, 
+          draftType: 'triple',
+          totalCards: tripleCardsToInsert.length
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+    
+    if (draftType === 'mega') {
+      // Generate 36 cards for mega draft
+      const megaCards = generateMegaDraftCards(excludeIds, cardDatabase)
+      
+      const megaCardsToInsert = megaCards.map((card, index) => ({
+        room_id: roomId,
+        round_number: 1, // All cards are in round 1 for mega draft
+        side: 'shared', // Mega draft uses shared cards
+        card_id: card.id,
+        card_name: card.name,
+        card_image: card.image,
+        is_legendary: card.isLegendary || false,
+        selected_by: null,
+        position: index // Track position in the 6x6 grid
+      }))
+      
+      const { error } = await supabase
+        .from('room_cards')
+        .insert(megaCardsToInsert)
+
+      if (error) {
+        console.error('Error inserting mega draft cards:', error)
+        throw error
+      }
+
+      // Also need to set up turn sequence for mega draft
+      const firstPick = Math.random() < 0.5 ? 'creator' : 'joiner'
+      const turnSequence = [firstPick]
+      
+      // Generate the 1,2,2,2,2,2,2,2,2,2,2,2,1 pattern
+      const otherPlayer = firstPick === 'creator' ? 'joiner' : 'creator'
+      for (let i = 0; i < 12; i++) {
+        turnSequence.push(otherPlayer, otherPlayer)
+      }
+      turnSequence.push(otherPlayer) // Final turn for the other player
+      
+      // Update room with mega draft info
+      await supabase
+        .from('rooms')
+        .update({ 
+          current_turn_player: firstPick,
+          mega_draft_cards: JSON.stringify(turnSequence)
+        })
+        .eq('id', roomId)
+
+      return new Response(
+        JSON.stringify({ 
+          success: true, 
+          draftType: 'mega',
+          totalCards: megaCardsToInsert.length,
+          firstPick,
+          turnSequence
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    // If generating all rounds for default draft, insert all cards at once
     if (round === 'all') {
       // First, get all cards already used in this room to prevent duplicates
       const { data: existingRoomCards } = await supabase

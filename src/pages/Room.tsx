@@ -8,6 +8,10 @@ import { toast } from "@/hooks/use-toast"
 import { DraftCard } from "@/components/DraftCard"
 import { DeckDisplay } from "@/components/DeckDisplay"
 import { getRandomCards, getCardById } from "@/utils/cardData"
+import { generateTripleDraftChoice } from "@/utils/tripleDraftCards"
+import { generateMegaDraftCards } from "@/utils/megaDraftCards"
+import { TripleDraftCards } from "@/components/TripleDraftCards"
+import { MegaDraftGrid } from "@/components/MegaDraftGrid"
 import { ArrowLeft } from "lucide-react"
 
 // Helper functions for secure session management
@@ -44,6 +48,8 @@ interface Room {
   current_round: number
   round_start_time: string | null
   round_duration_seconds: number
+  current_turn_player?: string | null
+  mega_draft_cards?: string[]
 }
 
 interface RoomCard {
@@ -85,6 +91,9 @@ const Room = () => {
   const [backgroundAutoSelectTimeout, setBackgroundAutoSelectTimeout] = useState<NodeJS.Timeout | null>(null)
   const [isProcessingRound, setIsProcessingRound] = useState(false)
   const [isProcessingSelection, setIsProcessingSelection] = useState<boolean>(false)
+  const [megaDraftCards, setMegaDraftCards] = useState<any[]>([])
+  const [megaDraftTurnSequence, setMegaDraftTurnSequence] = useState<string[]>([])
+  const [currentTurnIndex, setCurrentTurnIndex] = useState(0)
 
   const extendSession = async () => {
     const sessionId = sessionStorage.getItem('userSessionId')
@@ -415,7 +424,8 @@ const Room = () => {
         body: { 
           roomId,
           round: 'all',
-          usedCardIds: []
+          usedCardIds: [],
+          draftType: currentRoom.draft_type
         }
       })
 

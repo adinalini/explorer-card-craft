@@ -1070,19 +1070,19 @@ Deno.serve(async (req) => {
     })
 
     // Check if cards for this round already exist
-    const { data: existingCards } = await supabase
+    const { data: existingRoundCards } = await supabase
       .from('room_cards')
       .select('*')
       .eq('room_id', roomId)
       .eq('round_number', round)
 
-    if (existingCards && existingCards.length > 0) {
-      console.log(`Round ${round} already has ${existingCards.length} cards, skipping insertion`)
+    if (existingRoundCards && existingRoundCards.length > 0) {
+      console.log(`Round ${round} already has ${existingRoundCards.length} cards, skipping insertion`)
       return new Response(
         JSON.stringify({ 
           success: true, 
           message: `Round ${round} cards already exist`,
-          existingCardsCount: existingCards.length 
+          existingCardsCount: existingRoundCards.length 
         }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )

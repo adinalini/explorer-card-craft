@@ -53,6 +53,8 @@ interface Room {
   first_pick_player?: string | null
   mega_draft_turn_count?: number
   current_phase?: string
+  triple_draft_phase?: 1 | 2 | null
+  triple_draft_first_pick?: string | null
 }
 
 interface RoomCard {
@@ -119,13 +121,21 @@ const Room = () => {
   const [showReveal, setShowReveal] = useState(false)
 
   const handleTimeUp = async () => {
-    // Triple draft has no timer pressure - skip auto-selection
+    if (isSelectionLocked || isProcessingRound || isProcessingSelection) return
+    
     if (room?.draft_type === 'triple') {
-      console.log('🔷 TRIPLE: Timer disabled - no auto-selection')
+      // Triple draft auto-selection for phase timeout
+      console.log('🔷 TRIPLE: Phase timeout - auto-selecting')
+      await autoSelectRandomCard()
+      
+      // Move to next phase or process round end
+      if (userRole === 'creator') {
+        setTimeout(() => {
+          handleTriplePhaseEnd()
+        }, 500)
+      }
       return
     }
-    
-    if (isSelectionLocked || isProcessingRound || isProcessingSelection) return
     
     setIsSelectionLocked(true)
     setShowReveal(true)
@@ -165,15 +175,17 @@ const Room = () => {
 
   // Centralized timer effect
   useEffect(() => {
-    // Triple draft has no timer - players can take their time
-    if (room?.status === 'drafting' && room.round_start_time && room.draft_type !== 'triple') {
+    if (room?.status === 'drafting' && room.round_start_time) {
       const updateTimer = () => {
         const now = new Date()
         const roundStart = new Date(room.round_start_time!)
         const elapsed = (now.getTime() - roundStart.getTime()) / 1000
-        // Get duration based on draft type
+        
+        // Get duration based on draft type and phase
         let roundDuration = room.round_duration_seconds || 15
         if (room.draft_type === 'mega') roundDuration = 10
+        if (room.draft_type === 'triple') roundDuration = 8 // 8 seconds per phase
+        
         const remaining = Math.max(0, roundDuration - elapsed)
         
         setTimeRemaining(remaining)
@@ -197,15 +209,8 @@ const Room = () => {
           timerIntervalRef.current = null
         }
       }
-    } else if (room?.draft_type === 'triple') {
-      // For triple draft, clear any existing timer and set no time pressure
-      if (timerIntervalRef.current) {
-        clearInterval(timerIntervalRef.current)
-        timerIntervalRef.current = null
-      }
-      setTimeRemaining(999) // Show unlimited time for triple draft
     }
-  }, [room?.status, room?.round_start_time, room?.current_round, room?.draft_type, isSelectionLocked])
+  }, [room?.status, room?.round_start_time, room?.current_round, room?.draft_type, room?.triple_draft_phase, isSelectionLocked])
 
   useEffect(() => {
     if (room?.current_round && room?.status === 'drafting' && userRole !== 'spectator') {
@@ -465,15 +470,25 @@ const Room = () => {
         throw cardError
       }
       
-      const { data: updateData, error } = await supabaseWithToken
-        .from('rooms')
-        .update({ 
+        const updateData = {
           status: 'drafting', 
           current_round: 1,
           round_start_time: new Date().toISOString()
-        })
-        .eq('id', roomId!)
-        .select()
+        } as any
+
+        // For triple draft, initialize phase and first pick
+        if (currentRoom.draft_type === 'triple') {
+          const firstPick = Math.random() < 0.5 ? 'creator' : 'joiner'
+          updateData.triple_draft_phase = 1
+          updateData.triple_draft_first_pick = firstPick
+          console.log(`🔷 TRIPLE: Starting with first pick: ${firstPick}`)
+        }
+
+        const { data: roomUpdateData, error } = await supabaseWithToken
+          .from('rooms')
+          .update(updateData)
+          .eq('id', roomId!)
+          .select()
 
       if (error) {
         toast({
@@ -813,15 +828,14 @@ const Room = () => {
           }
         }
       } else if (room.draft_type === 'triple') {
-        // TRIPLE DRAFT: Show reveal phase, then advance to next round
+        // TRIPLE DRAFT: Only process full round end (both phases complete)
+        console.log('🔷 TRIPLE: Processing complete round end (both phases done)')
+        
+        // Show reveal phase for 2 seconds
         setIsSelectionLocked(true)
         setShowReveal(true)
         
-        console.log('🔷 TRIPLE: Starting reveal phase for 2 seconds')
-        
         setTimeout(async () => {
-          console.log('🔷 TRIPLE: Reveal phase complete, advancing to next round')
-          
           if (currentRound >= 13) {
             // Draft is complete
             console.log('🔷 TRIPLE: Draft complete!')
@@ -830,17 +844,20 @@ const Room = () => {
               .update({ status: 'completed' })
               .eq('id', roomId)
           } else {
-            // Advance to next round
+            // Advance to next round with alternating first pick
             const nextRound = currentRound + 1
             const nextRoundStartTime = new Date().toISOString()
+            const nextFirstPick = room.triple_draft_first_pick === 'creator' ? 'joiner' : 'creator'
             
-            console.log(`🔷 TRIPLE: Advancing from round ${currentRound} to ${nextRound}`)
+            console.log(`🔷 TRIPLE: Advancing to round ${nextRound}, first pick: ${nextFirstPick}`)
             
             const { error: updateError } = await supabaseWithToken
               .from('rooms')
               .update({ 
                 current_round: nextRound,
-                round_start_time: nextRoundStartTime
+                round_start_time: nextRoundStartTime,
+                triple_draft_phase: 1,
+                triple_draft_first_pick: nextFirstPick
               })
               .eq('id', roomId)
             
@@ -851,12 +868,12 @@ const Room = () => {
             }
           }
           
-          // Reset UI state after round advancement
+          // Reset UI state
           setIsSelectionLocked(false)
           setShowReveal(false)
           setIsRevealing(false)
           setSelectedCard(null)
-        }, 2000) // 2 second reveal phase
+        }, 2000)
       } else {
         // Default draft: round-based progression
         const totalRounds = 13;
@@ -893,6 +910,52 @@ const Room = () => {
     } finally {
       console.log('🟢 Setting isProcessingRound to false')
       setIsProcessingRound(false)
+    }
+  }
+
+  const handleTriplePhaseEnd = async () => {
+    if (!room || !roomId || userRole !== 'creator') return
+    
+    try {
+      const supabaseWithToken = getSupabaseWithSession()
+      const currentRound = room.current_round
+      const currentPhase = room.triple_draft_phase || 1
+      
+      // Get current round cards
+      const { data: roundCards } = await supabaseWithToken
+        .from('room_cards')
+        .select('*')
+        .eq('room_id', roomId)
+        .eq('round_number', currentRound)
+      
+      const selectedCards = roundCards?.filter(card => card.selected_by) || []
+      
+      if (currentPhase === 1 && selectedCards.length >= 1) {
+        // Move to phase 2
+        console.log('🔷 TRIPLE: Moving to phase 2')
+        setIsSelectionLocked(true)
+        setShowReveal(true)
+        
+        // Show phase 1 end (2 seconds)
+        setTimeout(async () => {
+          await supabaseWithToken
+            .from('rooms')
+            .update({ 
+              triple_draft_phase: 2,
+              round_start_time: new Date().toISOString()
+            })
+            .eq('id', roomId)
+          
+          setIsSelectionLocked(false)
+          setShowReveal(false)
+          setSelectedCard(null)
+        }, 2000)
+      } else if (currentPhase === 2 && selectedCards.length >= 2) {
+        // Process full round end
+        processRoundEnd()
+      }
+    } catch (error) {
+      console.error('🔷 TRIPLE: Error in phase end:', error)
     }
   }
 
@@ -1020,35 +1083,16 @@ const Room = () => {
 
       console.log('✅ Manual selection confirmed:', cardId)
       
-      // For triple draft, handle turn progression
+      // For triple draft, handle phase progression
       if (room?.draft_type === 'triple') {
-        console.log('🔷 TRIPLE: Card selected, showing 2-second highlight')
+        console.log('🔷 TRIPLE: Card selected, processing phase')
         
-        // Show selection highlight for 2 seconds
-        setTimeout(async () => {
-          console.log('🔷 TRIPLE: Highlight phase complete, checking for round end')
-          
-          // Check if both players have selected
-          const { data: freshCards } = await supabaseWithToken
-            .from('room_cards')
-            .select('*')
-            .eq('room_id', roomId)
-            .eq('round_number', room.current_round)
-          
-          const selectedCards = freshCards?.filter(card => card.selected_by) || []
-          console.log(`🔷 TRIPLE: Found ${selectedCards.length} selected cards`)
-          
-          // If both have selected and I'm the creator, process round end
-          if (selectedCards.length >= 2 && userRole === 'creator' && !isProcessingRound) {
-            console.log('🔷 TRIPLE: Both players selected, creator processing round end')
-            // Add a small delay to prevent race conditions
-            setTimeout(() => {
-              if (!isProcessingRound) {
-                processRoundEnd()
-              }
-            }, 100)
-          }
-        }, 2000) // 2 second delay to show selection
+        // Check phase completion and handle accordingly
+        if (userRole === 'creator') {
+          setTimeout(() => {
+            handleTriplePhaseEnd()
+          }, 100)
+        }
       } else if (room?.draft_type === 'mega') {
         // For mega draft, immediately lock and start reveal phase
         setIsSelectionLocked(true)
@@ -1117,46 +1161,43 @@ const Room = () => {
   const isMyTurn = (() => {
     if (!room || room.status !== 'drafting') return false
     if (room.draft_type !== 'triple') return true
-    if (isRevealing) return false // No turns during reveal phase
+    if (isRevealing || isSelectionLocked) return false // No turns during reveal phase
+    
+    const currentPhase = room.triple_draft_phase || 1
+    const firstPick = room.triple_draft_first_pick || 'creator'
     
     const roundCards = roomCards.filter(card => card.round_number === room.current_round)
     const selectedCards = roundCards.filter(card => card.selected_by)
     
-    // If no selections yet, creator goes first
-    if (selectedCards.length === 0) {
-      return userRole === 'creator'
+    if (currentPhase === 1) {
+      // Phase 1: First pick player's turn
+      return userRole === firstPick && selectedCards.length === 0
+    } else if (currentPhase === 2) {
+      // Phase 2: Second pick player's turn
+      const secondPick = firstPick === 'creator' ? 'joiner' : 'creator'
+      return userRole === secondPick && selectedCards.length === 1
     }
     
-    // If one selection made, the other player goes
-    if (selectedCards.length === 1) {
-      const whoSelected = selectedCards[0].selected_by
-      return userRole !== whoSelected
-    }
-    
-    // If both selected, nobody's turn (waiting for next round)
     return false
   })()
 
   // Get whose turn it is for triple draft display
   const currentTurnPlayer = (() => {
     if (!room || room.status !== 'drafting' || room.draft_type !== 'triple') return null
-    if (isRevealing) return null
+    if (isRevealing || isSelectionLocked) return null
+    
+    const currentPhase = room.triple_draft_phase || 1
+    const firstPick = room.triple_draft_first_pick || 'creator'
     
     const roundCards = roomCards.filter(card => card.round_number === room.current_round)
     const selectedCards = roundCards.filter(card => card.selected_by)
     
-    // If no selections yet, creator goes first
-    if (selectedCards.length === 0) {
-      return 'creator'
+    if (currentPhase === 1 && selectedCards.length === 0) {
+      return firstPick
+    } else if (currentPhase === 2 && selectedCards.length === 1) {
+      return firstPick === 'creator' ? 'joiner' : 'creator'
     }
     
-    // If one selection made, the other player goes
-    if (selectedCards.length === 1) {
-      const whoSelected = selectedCards[0].selected_by
-      return whoSelected === 'creator' ? 'joiner' : 'creator'
-    }
-    
-    // If both selected, nobody's turn
     return null
   })()
 
@@ -1382,7 +1423,7 @@ const Room = () => {
                     <div className="flex items-center justify-center gap-4 max-w-2xl mx-auto">
                       <div className="text-center flex-1">
                         <div className="text-lg font-semibold text-black">
-                          {room.creator_name} {room.first_pick_player === 'creator' ? '(First Pick)' : ''}
+                          {room.creator_name} {room.triple_draft_first_pick === 'creator' ? '(First Pick)' : ''}
                         </div>
                       </div>
                       
@@ -1404,7 +1445,7 @@ const Room = () => {
                       
                       <div className="text-center flex-1">
                         <div className="text-lg font-semibold text-black">
-                          {room.joiner_name} {room.first_pick_player === 'joiner' ? '(First Pick)' : ''}
+                          {room.joiner_name} {room.triple_draft_first_pick === 'joiner' ? '(First Pick)' : ''}
                         </div>
                       </div>
                     </div>
@@ -1427,6 +1468,8 @@ const Room = () => {
                   isSelectionLocked={isSelectionLocked}
                   isMyTurn={isMyTurn}
                   onCardSelect={handleCardSelect}
+                  currentPhase={room.triple_draft_phase || 1}
+                  firstPickPlayer={room.triple_draft_first_pick || 'creator'}
                 />
               </div>
             ) : (

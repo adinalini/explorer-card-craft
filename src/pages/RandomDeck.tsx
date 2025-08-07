@@ -23,33 +23,54 @@ const RandomDeck = () => {
     console.log('Starting random deck generation using backend rules...')
     
     try {
-      // Implement the same round structures as the backend
+      // Use the exact same round structures as the backend
       const roundStructures = [
-        { type: 'legendary', count: 2 },    // Round 1: 2 legendary cards
-        { type: 'spell', count: 2 },        // Round 2: 2 spell cards
-        { type: 'cost', min: 1, max: 3, count: 2 },     // Round 3: 2 low cost cards
-        { type: 'cost', min: 4, max: 5, count: 2 },     // Round 4: 2 mid cost cards
-        { type: 'cost', min: 6, max: 10, count: 2 },    // Round 5: 2 high cost cards
-        { type: 'pool', count: 2 },         // Round 6-13: 2 random cards each
-        { type: 'pool', count: 2 },
-        { type: 'pool', count: 2 },
-        { type: 'pool', count: 2 },
-        { type: 'pool', count: 2 },
-        { type: 'pool', count: 2 },
-        { type: 'pool', count: 2 },
-        { type: 'pool', count: 2 }
+        { type: 'cost', cost: 2, description: 'Cost 2' },
+        { type: 'legendary', description: 'Legendary Choice' },
+        { type: 'spell', description: 'Spell Choice' },
+        { type: 'cost', cost: 1, description: 'Cost 1' },
+        { type: 'cost', cost: 3, description: 'Cost 3' },
+        { type: 'cost', cost: 4, description: 'Cost 4' },
+        { type: 'cost', cost: 5, description: 'Cost 5' },
+        { type: 'pool', description: 'Cost Pool (2,2,2,2,3,3,3,4,4)' },
+        { type: 'pool', description: 'Cost Pool (2,2,2,2,3,3,3,4,4)' },
+        { type: 'pool', description: 'Cost Pool (2,2,2,2,3,3,3,4,4)' },
+        { type: 'pool', description: 'Cost Pool (2,2,2,2,3,3,3,4,4)' },
+        { type: 'range', range: [5, 6], description: 'Range (5-6)' },
+        { type: 'range', range: [6, 10], description: 'Range (6-10)' }
       ]
+
+      // Randomize the order just like the backend does for 'all' rounds
+      const shuffledRoundStructures = [...roundStructures]
+      for (let i = shuffledRoundStructures.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffledRoundStructures[i], shuffledRoundStructures[j]] = [shuffledRoundStructures[j], shuffledRoundStructures[i]]
+      }
+
+      // Assign costs to pool rounds like the backend
+      const costPool = [2, 2, 2, 2, 3, 3, 3, 4, 4]
+      const shuffledCostPool = [...costPool].sort(() => Math.random() - 0.5)
+      let poolCostIndex = 0
+
+      // Update pool rounds with assigned costs
+      shuffledRoundStructures.forEach(structure => {
+        if (structure.type === 'pool') {
+          structure.type = 'cost'
+          structure.cost = shuffledCostPool[poolCostIndex]
+          poolCostIndex++
+        }
+      })
 
       const usedCardIds: string[] = []
       const deck: RandomCard[] = []
 
-      // Generate cards for each round using the same logic as backend
+      // Generate cards for each round using the shuffled structure like backend
       for (let round = 1; round <= 13; round++) {
-        const structure = roundStructures[round - 1]
+        const structure = shuffledRoundStructures[round - 1]
         let roundCards: any[] = []
 
         if (structure.type === 'legendary') {
-          // Get legendary cards
+          // Get legendary cards (not legendaries are excluded from other types)
           const allCards = getRandomCards(1000, usedCardIds)
           roundCards = allCards.filter(card => card.isLegendary).slice(0, 4)
         } else if (structure.type === 'spell') {
@@ -57,21 +78,32 @@ const RandomDeck = () => {
           const allCards = getRandomCards(1000, usedCardIds)
           roundCards = allCards.filter(card => card.isSpell).slice(0, 4)
         } else if (structure.type === 'cost') {
-          // Get cards within cost range
+          // Get cards of exact cost (excluding legendaries like backend)
           const allCards = getRandomCards(1000, usedCardIds)
           roundCards = allCards.filter(card => 
-            card.cost >= structure.min && card.cost <= structure.max
+            !card.isLegendary && card.cost === structure.cost
           ).slice(0, 4)
-        } else if (structure.type === 'pool') {
-          // Get random cards
-          roundCards = getRandomCards(4, usedCardIds)
+        } else if (structure.type === 'range') {
+          // Get cards within cost range (excluding legendaries)
+          const allCards = getRandomCards(1000, usedCardIds)
+          const [minCost, maxCost] = structure.range
+          roundCards = allCards.filter(card => 
+            !card.isLegendary && card.cost >= minCost && card.cost <= maxCost
+          ).slice(0, 4)
         }
 
-        // If we don't have enough cards, fill with any available cards as fallback
+        // If we don't have enough cards, use fallback like backend (cost 3-5 range)
         if (roundCards.length < 4) {
-          const additionalCards = getRandomCards(4 - roundCards.length, 
-            [...usedCardIds, ...roundCards.map(c => c.id)])
-          roundCards = [...roundCards, ...additionalCards]
+          const allCards = getRandomCards(1000, [...usedCardIds, ...roundCards.map(c => c.id)])
+          const fallbackCards = allCards.filter(card => 
+            !card.isLegendary && card.cost >= 3 && card.cost <= 5
+          )
+          
+          while (roundCards.length < 4 && fallbackCards.length > 0) {
+            const randomIndex = Math.floor(Math.random() * fallbackCards.length)
+            const selected = fallbackCards.splice(randomIndex, 1)[0]
+            roundCards.push(selected)
+          }
         }
 
         // Randomly select 1 card from the 4 generated for this round

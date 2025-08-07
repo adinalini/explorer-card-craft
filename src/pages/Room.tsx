@@ -84,6 +84,7 @@ const Room = () => {
   const [isStartingDraft, setIsStartingDraft] = useState(false)
   const [backgroundAutoSelectTimeout, setBackgroundAutoSelectTimeout] = useState<NodeJS.Timeout | null>(null)
   const [isProcessingRound, setIsProcessingRound] = useState(false)
+  const [isProcessingSelection, setIsProcessingSelection] = useState<boolean>(false)
 
   const extendSession = async () => {
     const sessionId = sessionStorage.getItem('userSessionId')
@@ -105,7 +106,7 @@ const Room = () => {
   const [showReveal, setShowReveal] = useState(false)
 
   const handleTimeUp = async () => {
-    if (isSelectionLocked || isProcessingRound) return
+    if (isSelectionLocked || isProcessingRound || isProcessingSelection) return
     
     setIsSelectionLocked(true)
     setShowReveal(true)
@@ -747,6 +748,9 @@ const Room = () => {
     }
 
     console.log('Setting new selection')
+    // Set processing flag to prevent race conditions with timer
+    setIsProcessingSelection(true)
+    
     // Update selected card immediately for instant UI feedback
     setSelectedCard(cardId)
 
@@ -794,6 +798,9 @@ const Room = () => {
     } catch (error) {
       console.error('Error in handleCardSelect:', error)
       setSelectedCard(null) // Reset on error
+    } finally {
+      // Always clear the processing flag
+      setIsProcessingSelection(false)
     }
   }
 

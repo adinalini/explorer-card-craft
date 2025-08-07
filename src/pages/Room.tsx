@@ -126,10 +126,18 @@ const Room = () => {
     
     if (room?.draft_type === 'triple') {
       // Triple draft auto-selection for phase timeout
-      console.log('🔷 TRIPLE: Phase timeout - auto-selecting for current turn player')
+      console.log('🔷 TRIPLE: Phase timeout - checking if auto-select needed')
       
-      // Only auto-select if it's actually my turn
-      if (isMyTurn) {
+      // Get current phase and check if selections are actually needed
+      const currentPhase = room.triple_draft_phase || 1
+      const currentRoundCards = roomCards.filter(card => 
+        card.round_number === room.current_round
+      )
+      const selectedCards = currentRoundCards.filter(card => card.selected_by)
+      
+      // Only auto-select if it's my turn AND selection is actually needed
+      if (isMyTurn && selectedCards.length < currentPhase) {
+        console.log('🔷 TRIPLE: Auto-selecting for current turn player')
         await autoSelectRandomCard()
         
         // Move to next phase or process round end
@@ -138,6 +146,8 @@ const Room = () => {
             handleTriplePhaseEnd()
           }, 500)
         }
+      } else {
+        console.log('🔷 TRIPLE: No auto-select needed - selections complete or not my turn')
       }
       return
     }
@@ -189,13 +199,25 @@ const Room = () => {
         // Get duration based on draft type and phase
         let roundDuration = room.round_duration_seconds || 15
         if (room.draft_type === 'mega') roundDuration = 10
-        if (room.draft_type === 'triple') roundDuration = 8 // 8 seconds per phase
+        if (room.draft_type === 'triple') {
+          // For triple draft: 8 seconds per phase, so 16 seconds total per round
+          // But timer runs continuously - no reset between phases
+          roundDuration = 16
+        }
         
         const remaining = Math.max(0, roundDuration - elapsed)
-        
         setTimeRemaining(remaining)
         
-        if (remaining <= 0 && !isSelectionLocked) {
+        // For triple draft, check if phase timeout (8 seconds)
+        if (room.draft_type === 'triple') {
+          const phaseTimeRemaining = Math.max(0, 8 - (elapsed % 8))
+          setTimeRemaining(phaseTimeRemaining)
+          
+          if (phaseTimeRemaining <= 0 && !isSelectionLocked) {
+            setIsSelectionLocked(true)
+            handleTimeUp()
+          }
+        } else if (remaining <= 0 && !isSelectionLocked) {
           setIsSelectionLocked(true)
           handleTimeUp()
         }
@@ -215,7 +237,7 @@ const Room = () => {
         }
       }
     }
-  }, [room?.status, room?.round_start_time, room?.current_round, room?.draft_type, room?.triple_draft_phase, isSelectionLocked])
+  }, [room?.status, room?.current_round, room?.draft_type, isSelectionLocked]) // Removed round_start_time and triple_draft_phase
 
   useEffect(() => {
     if (room?.current_round && room?.status === 'drafting' && userRole !== 'spectator') {
@@ -1057,8 +1079,8 @@ const Room = () => {
           await supabaseWithToken
             .from('rooms')
             .update({ 
-              triple_draft_phase: 2,
-              round_start_time: new Date().toISOString()
+              triple_draft_phase: 2
+              // Don't update round_start_time to avoid timer reset
             })
             .eq('id', roomId)
           

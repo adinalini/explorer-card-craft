@@ -343,6 +343,7 @@ const Room = () => {
               
               console.log('🔷 TRIPLE: Phase transition detected', 
                 room.triple_draft_phase, '→', updatedRoom.triple_draft_phase)
+              console.log('🔷 TRIPLE: Selection currently locked:', isSelectionLocked)
               
               // Moving from phase 1 to phase 2: unlock selections and clear selected card
               if (room.triple_draft_phase === 1 && updatedRoom.triple_draft_phase === 2) {
@@ -371,16 +372,14 @@ const Room = () => {
               }
             }
             
-            // CRITICAL FIX: Also handle round_start_time changes (indicates fresh timer for phase 2)
+            // CRITICAL FIX: Fallback - handle ANY phase 2 state with locked selection
             else if (updatedRoom.draft_type === 'triple' && 
                      updatedRoom.status === 'drafting' &&
-                     room &&
-                     updatedRoom.round_start_time !== room.round_start_time &&
-                     updatedRoom.triple_draft_phase === 2) {
-              console.log('🔷 TRIPLE: Timer reset detected for phase 2')
+                     updatedRoom.triple_draft_phase === 2 &&
+                     isSelectionLocked) {
+              console.log('🔷 TRIPLE: Found phase 2 with locked selection - force unlocking')
               console.log('🔷 TRIPLE: User role:', role)
-              console.log('🔷 TRIPLE: Is selection locked:', isSelectionLocked)
-              console.log('🔷 TRIPLE: Unlocking for phase 2 timer reset')
+              console.log('🔷 TRIPLE: Timer reset detected:', room && updatedRoom.round_start_time !== room.round_start_time)
               setIsSelectionLocked(false)
               setShowReveal(false)
               setSelectedCard(null)
@@ -388,10 +387,10 @@ const Room = () => {
               // Fetch fresh card data
               setTimeout(() => {
                 fetchRoomCards()
-              }, 100)
-            }
-            
-            // CRITICAL FIX: Only trigger draft start if:
+               }, 100)
+             }
+             
+             // CRITICAL FIX: Only trigger draft start if:
             // 1. Room is in 'waiting' status
             // 2. Both players are ready  
             // 3. Draft is not already starting (multiple flags check)

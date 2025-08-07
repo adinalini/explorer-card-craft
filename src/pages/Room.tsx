@@ -337,16 +337,28 @@ const Room = () => {
             
             // CRITICAL FIX: Handle triple draft phase transitions
             if (updatedRoom.draft_type === 'triple' && 
-                updatedRoom.status === 'drafting' && 
-                room &&
-                updatedRoom.triple_draft_phase !== room.triple_draft_phase) {
+                updatedRoom.status === 'drafting') {
               
-              console.log('🔷 TRIPLE: Phase transition detected', 
-                room.triple_draft_phase, '→', updatedRoom.triple_draft_phase)
+              console.log('🔷 TRIPLE: Checking room state for phase transitions')
+              console.log('🔷 TRIPLE: Current phase:', updatedRoom.triple_draft_phase)
               console.log('🔷 TRIPLE: Selection currently locked:', isSelectionLocked)
+              console.log('🔷 TRIPLE: Previous room phase:', room?.triple_draft_phase)
               
-              // Moving from phase 1 to phase 2: unlock selections and clear selected card
-              if (room.triple_draft_phase === 1 && updatedRoom.triple_draft_phase === 2) {
+              // Phase change detection OR phase 2 with locked selection (force unlock)
+              const isPhaseTransition = room && updatedRoom.triple_draft_phase !== room.triple_draft_phase
+              const isPhase2Locked = updatedRoom.triple_draft_phase === 2 && isSelectionLocked
+              
+              if (isPhaseTransition) {
+                console.log('🔷 TRIPLE: Phase transition detected', 
+                  room.triple_draft_phase, '→', updatedRoom.triple_draft_phase)
+              }
+              
+              if (isPhase2Locked) {
+                console.log('🔷 TRIPLE: Phase 2 detected with locked selection - forcing unlock')
+              }
+              
+              // Phase 1 → 2: unlock selections and clear selected card
+              if ((isPhaseTransition && updatedRoom.triple_draft_phase === 2) || isPhase2Locked) {
                 console.log('🔷 TRIPLE: Unlocking for phase 2')
                 setIsSelectionLocked(false)
                 setShowReveal(false)
@@ -358,7 +370,7 @@ const Room = () => {
                 }, 100)
               }
               // Moving to next round: unlock and reset
-              else if (updatedRoom.current_round !== room.current_round) {
+              else if (isPhaseTransition && updatedRoom.current_round !== room.current_round) {
                 console.log('🔷 TRIPLE: New round detected, unlocking')
                 setIsSelectionLocked(false)
                 setShowReveal(false)
@@ -371,24 +383,6 @@ const Room = () => {
                 }, 100)
               }
             }
-            
-            // CRITICAL FIX: Fallback - handle ANY phase 2 state with locked selection
-            else if (updatedRoom.draft_type === 'triple' && 
-                     updatedRoom.status === 'drafting' &&
-                     updatedRoom.triple_draft_phase === 2 &&
-                     isSelectionLocked) {
-              console.log('🔷 TRIPLE: Found phase 2 with locked selection - force unlocking')
-              console.log('🔷 TRIPLE: User role:', role)
-              console.log('🔷 TRIPLE: Timer reset detected:', room && updatedRoom.round_start_time !== room.round_start_time)
-              setIsSelectionLocked(false)
-              setShowReveal(false)
-              setSelectedCard(null)
-              
-              // Fetch fresh card data
-              setTimeout(() => {
-                fetchRoomCards()
-               }, 100)
-             }
              
              // CRITICAL FIX: Only trigger draft start if:
             // 1. Room is in 'waiting' status

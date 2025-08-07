@@ -446,11 +446,31 @@ Deno.serve(async (req) => {
             card.isLegendary && !globalUsedIds.has(card.id)
           )
           
+          console.log(`Round ${roundNum} (legendary choice): Found ${availableLegendary.length} available legendary cards:`, 
+            availableLegendary.map(c => c.name))
+          
           for (let i = 0; i < 4 && i < availableLegendary.length; i++) {
             const randomIndex = Math.floor(Math.random() * availableLegendary.length)
             const selected = availableLegendary.splice(randomIndex, 1)[0]
             roundCards.push(selected)
             globalUsedIds.add(selected.id)
+          }
+          
+          // If we couldn't get 4 legendary cards, fill with cards from cost 3-5 range
+          if (roundCards.length < 4) {
+            console.log(`Only found ${roundCards.length} legendary cards, filling with cost 3-5 range cards`)
+            const fallbackCards = cardDatabase.filter(card => 
+              !card.isLegendary && 
+              card.cost && card.cost >= 3 && card.cost <= 5 && 
+              !globalUsedIds.has(card.id)
+            )
+            
+            while (roundCards.length < 4 && fallbackCards.length > 0) {
+              const randomIndex = Math.floor(Math.random() * fallbackCards.length)
+              const selected = fallbackCards.splice(randomIndex, 1)[0]
+              roundCards.push(selected)
+              globalUsedIds.add(selected.id)
+            }
           }
           
         } else if (structure.type === 'spell') {
@@ -483,17 +503,54 @@ Deno.serve(async (req) => {
             }
           }
           
+          // If we couldn't get 4 cards from spells, fill with cards from cost 3-5 range
+          if (roundCards.length < 4) {
+            console.log(`Only found ${roundCards.length} spell cards, filling with cost 3-5 range cards`)
+            const fallbackCards = cardDatabase.filter(card => 
+              !card.isLegendary && 
+              card.cost && card.cost >= 3 && card.cost <= 5 && 
+              !globalUsedIds.has(card.id)
+            )
+            
+            while (roundCards.length < 4 && fallbackCards.length > 0) {
+              const randomIndex = Math.floor(Math.random() * fallbackCards.length)
+              const selected = fallbackCards.splice(randomIndex, 1)[0]
+              roundCards.push(selected)
+              globalUsedIds.add(selected.id)
+            }
+          }
+          
         } else if (structure.type === 'cost') {
           const availableForCost = cardDatabase.filter(card => 
             !card.isLegendary && 
             card.cost === structure.cost && !globalUsedIds.has(card.id)
           )
           
+          console.log(`Round ${roundNum} (cost ${structure.cost}): Found ${availableForCost.length} available cards:`, 
+            availableForCost.map(c => `${c.name}${c.isSpell ? ' (spell)' : ''}`))
+          
           for (let i = 0; i < 4 && i < availableForCost.length; i++) {
             const randomIndex = Math.floor(Math.random() * availableForCost.length)
             const selected = availableForCost.splice(randomIndex, 1)[0]
             roundCards.push(selected)
             globalUsedIds.add(selected.id)
+          }
+          
+          // If we couldn't get 4 cards for this cost, fill with cards from cost 3-5 range
+          if (roundCards.length < 4) {
+            console.log(`Only found ${roundCards.length} cards for cost ${structure.cost}, filling with cost 3-5 range cards`)
+            const fallbackCards = cardDatabase.filter(card => 
+              !card.isLegendary && 
+              card.cost && card.cost >= 3 && card.cost <= 5 && 
+              !globalUsedIds.has(card.id)
+            )
+            
+            while (roundCards.length < 4 && fallbackCards.length > 0) {
+              const randomIndex = Math.floor(Math.random() * fallbackCards.length)
+              const selected = fallbackCards.splice(randomIndex, 1)[0]
+              roundCards.push(selected)
+              globalUsedIds.add(selected.id)
+            }
           }
           
         } else if (structure.type === 'range') {
@@ -514,16 +571,18 @@ Deno.serve(async (req) => {
             globalUsedIds.add(selected.id)
           }
           
-          // If we couldn't get 4 cards from the range, try to fill with any available cards
+          // If we couldn't get 4 cards from the range, fill with cards from cost 3-5 range
           if (roundCards.length < 4) {
-            console.log(`Only found ${roundCards.length} cards in range ${minCost}-${maxCost}, filling with any available cards`)
-            const anyAvailable = cardDatabase.filter(card => 
+            console.log(`Only found ${roundCards.length} cards in range ${minCost}-${maxCost}, filling with cost 3-5 range cards`)
+            const fallbackCards = cardDatabase.filter(card => 
+              !card.isLegendary && 
+              card.cost && card.cost >= 3 && card.cost <= 5 && 
               !globalUsedIds.has(card.id)
             )
             
-            while (roundCards.length < 4 && anyAvailable.length > 0) {
-              const randomIndex = Math.floor(Math.random() * anyAvailable.length)
-              const selected = anyAvailable.splice(randomIndex, 1)[0]
+            while (roundCards.length < 4 && fallbackCards.length > 0) {
+              const randomIndex = Math.floor(Math.random() * fallbackCards.length)
+              const selected = fallbackCards.splice(randomIndex, 1)[0]
               roundCards.push(selected)
               globalUsedIds.add(selected.id)
             }

@@ -60,6 +60,10 @@ This project is built with:
 - shadcn-ui
 - Tailwind CSS
 
+## Which project did I create it for?
+
+I created this for Project O, a web3 card game.
+
 ## How can I deploy this project?
 
 Simply open [Lovable](https://lovable.dev/projects/cee92724-88da-4b0d-a193-7888527f8a09) and click on Share -> Publish.

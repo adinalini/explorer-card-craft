@@ -1,4 +1,5 @@
 import { CardImage } from "@/components/CardImage"
+import { getCardById } from "@/utils/cardData"
 
 interface Card {
   card_id: string
@@ -16,12 +17,27 @@ interface DeckDisplayProps {
 }
 
 export function DeckDisplay({ cards, playerName, isOwn, isDraftComplete = false }: DeckDisplayProps) {
-  // Sort cards by selection order
-  const sortedCards = [...cards].sort((a, b) => a.selection_order - b.selection_order)
+  // First separate legendary and normal cards
+  const legendaryCard = cards.find(card => card.is_legendary)
+  const normalCardsRaw = cards.filter(card => !card.is_legendary)
   
-  // Separate legendary and normal cards
-  const legendaryCard = sortedCards.find(card => card.is_legendary)
-  const normalCards = sortedCards.filter(card => !card.is_legendary)
+  // Sort normal cards by cost first, then alphabetically by name
+  const normalCards = [...normalCardsRaw].sort((a, b) => {
+    // Get cost from card data (we need to import and use getCardById)
+    const cardAData = getCardById(a.card_id)
+    const cardBData = getCardById(b.card_id)
+    
+    const costA = cardAData?.cost ?? 0
+    const costB = cardBData?.cost ?? 0
+    
+    // Sort by cost first
+    if (costA !== costB) {
+      return costA - costB
+    }
+    
+    // If costs are equal, sort alphabetically by name
+    return a.card_name.localeCompare(b.card_name)
+  })
 
   return (
     <div className="space-y-4">

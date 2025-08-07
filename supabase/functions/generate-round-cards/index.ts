@@ -17,21 +17,31 @@ interface Card {
 }
 
 // Triple Draft Card Generation Logic
+// Fisher-Yates shuffle for true randomization
+const shuffleArray = <T>(array: T[]): T[] => {
+  const shuffled = [...array]
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
+  }
+  return shuffled
+}
+
 const generateTripleDraftChoices = (usedCardIds: string[], cardDatabase: Card[]): Card[][] => {
   const availableCards = cardDatabase.filter(card => !usedCardIds.includes(card.id) && card.cost !== undefined)
   
   const choices: Card[][] = []
   const usedInChoices: Set<string> = new Set()
 
-  // 1. Guaranteed cost rounds - 1,2,3,4,5 (5 rounds)
+  // 1. Guaranteed cost rounds - 1,2,3,4,5 (5 rounds) - allow spells
   const guaranteedCosts = [1, 2, 3, 4, 5]
   for (const cost of guaranteedCosts) {
     const cardsOfCost = availableCards.filter(card => 
-      card.cost === cost && !card.isLegendary && !card.isSpell && !usedInChoices.has(card.id)
+      card.cost === cost && !card.isLegendary && !usedInChoices.has(card.id)
     )
     
     if (cardsOfCost.length >= 3) {
-      const shuffled = [...cardsOfCost].sort(() => Math.random() - 0.5)
+      const shuffled = shuffleArray(cardsOfCost)
       const costChoice = shuffled.slice(0, 3)
       choices.push(costChoice)
       costChoice.forEach(card => usedInChoices.add(card.id))
@@ -41,63 +51,111 @@ const generateTripleDraftChoices = (usedCardIds: string[], cardDatabase: Card[])
   // 2. 1 Guaranteed legendary choice round
   const legendaryCards = availableCards.filter(card => card.isLegendary && !usedInChoices.has(card.id))
   if (legendaryCards.length >= 3) {
-    const shuffled = [...legendaryCards].sort(() => Math.random() - 0.5)
+    const shuffled = shuffleArray(legendaryCards)
     const legendaryChoice = shuffled.slice(0, 3)
     choices.push(legendaryChoice)
     legendaryChoice.forEach(card => usedInChoices.add(card.id))
   }
 
-  // 3. 3 rounds where cards are in cost range (1-3)
+  // 3. 3 rounds where cards are in cost range (1-3) - randomly select costs first
   for (let i = 0; i < 3; i++) {
-    const lowCostCards = availableCards.filter(card => 
-      card.cost && card.cost >= 1 && card.cost <= 3 && !card.isLegendary && !card.isSpell && !usedInChoices.has(card.id)
-    )
+    const rangeChoice: Card[] = []
     
-    if (lowCostCards.length >= 3) {
-      const shuffled = [...lowCostCards].sort(() => Math.random() - 0.5)
-      const lowCostChoice = shuffled.slice(0, 3)
-      choices.push(lowCostChoice)
-      lowCostChoice.forEach(card => usedInChoices.add(card.id))
+    // Randomly select 3 costs from range 1-3 (with repeats allowed)
+    const selectedCosts = [
+      Math.floor(Math.random() * 3) + 1, // Random 1-3
+      Math.floor(Math.random() * 3) + 1, // Random 1-3
+      Math.floor(Math.random() * 3) + 1  // Random 1-3
+    ]
+    
+    // For each selected cost, pick one random card
+    for (const cost of selectedCosts) {
+      const cardsOfCost = availableCards.filter(card => 
+        card.cost === cost && !card.isLegendary && !usedInChoices.has(card.id)
+      )
+      
+      if (cardsOfCost.length > 0) {
+        const shuffled = shuffleArray(cardsOfCost)
+        const selectedCard = shuffled[0]
+        rangeChoice.push(selectedCard)
+        usedInChoices.add(selectedCard.id)
+      }
+    }
+    
+    if (rangeChoice.length === 3) {
+      choices.push(rangeChoice)
     }
   }
 
-  // 4. 2 rounds where cards are in cost range (4-6)
+  // 4. 2 rounds where cards are in cost range (4-6) - randomly select costs first
   for (let i = 0; i < 2; i++) {
-    const midCostCards = availableCards.filter(card => 
-      card.cost && card.cost >= 4 && card.cost <= 6 && !card.isLegendary && !card.isSpell && !usedInChoices.has(card.id)
-    )
+    const rangeChoice: Card[] = []
     
-    if (midCostCards.length >= 3) {
-      const shuffled = [...midCostCards].sort(() => Math.random() - 0.5)
-      const midCostChoice = shuffled.slice(0, 3)
-      choices.push(midCostChoice)
-      midCostChoice.forEach(card => usedInChoices.add(card.id))
+    // Randomly select 3 costs from range 4-6 (with repeats allowed)
+    const selectedCosts = [
+      Math.floor(Math.random() * 3) + 4, // Random 4-6
+      Math.floor(Math.random() * 3) + 4, // Random 4-6
+      Math.floor(Math.random() * 3) + 4  // Random 4-6
+    ]
+    
+    // For each selected cost, pick one random card
+    for (const cost of selectedCosts) {
+      const cardsOfCost = availableCards.filter(card => 
+        card.cost === cost && !card.isLegendary && !usedInChoices.has(card.id)
+      )
+      
+      if (cardsOfCost.length > 0) {
+        const shuffled = shuffleArray(cardsOfCost)
+        const selectedCard = shuffled[0]
+        rangeChoice.push(selectedCard)
+        usedInChoices.add(selectedCard.id)
+      }
+    }
+    
+    if (rangeChoice.length === 3) {
+      choices.push(rangeChoice)
     }
   }
 
-  // 5. 1 round where cards are in cost range (7-10)
-  const highCostCards = availableCards.filter(card => 
-    card.cost && card.cost >= 7 && card.cost <= 10 && !card.isLegendary && !card.isSpell && !usedInChoices.has(card.id)
-  )
+  // 5. 1 round where cards are in cost range (7-10) - randomly select costs first
+  const highRangeChoice: Card[] = []
   
-  if (highCostCards.length >= 3) {
-    const shuffled = [...highCostCards].sort(() => Math.random() - 0.5)
-    const highCostChoice = shuffled.slice(0, 3)
-    choices.push(highCostChoice)
-    highCostChoice.forEach(card => usedInChoices.add(card.id))
+  // Randomly select 3 costs from range 7-10 (with repeats allowed)
+  const selectedHighCosts = [
+    Math.floor(Math.random() * 4) + 7, // Random 7-10
+    Math.floor(Math.random() * 4) + 7, // Random 7-10
+    Math.floor(Math.random() * 4) + 7  // Random 7-10
+  ]
+  
+  // For each selected cost, pick one random card
+  for (const cost of selectedHighCosts) {
+    const cardsOfCost = availableCards.filter(card => 
+      card.cost === cost && !card.isLegendary && !usedInChoices.has(card.id)
+    )
+    
+    if (cardsOfCost.length > 0) {
+      const shuffled = shuffleArray(cardsOfCost)
+      const selectedCard = shuffled[0]
+      highRangeChoice.push(selectedCard)
+      usedInChoices.add(selectedCard.id)
+    }
+  }
+  
+  if (highRangeChoice.length === 3) {
+    choices.push(highRangeChoice)
   }
 
   // 6. 1 guaranteed spell round- 3 random spells selected
   const spellCards = availableCards.filter(card => card.isSpell && !usedInChoices.has(card.id))
   if (spellCards.length >= 3) {
-    const shuffled = [...spellCards].sort(() => Math.random() - 0.5)
+    const shuffled = shuffleArray(spellCards)
     const spellChoice = shuffled.slice(0, 3)
     choices.push(spellChoice)
     spellChoice.forEach(card => usedInChoices.add(card.id))
   }
 
   // Shuffle all choices to randomize order
-  return choices.sort(() => Math.random() - 0.5)
+  return shuffleArray(choices)
 }
 
 // Mega Draft Card Generation Logic  
@@ -107,28 +165,28 @@ const generateMegaDraftCards = (usedCardIds: string[], cardDatabase: Card[]): Ca
   const selectedCards: Card[] = []
   const usedInSelection: Set<string> = new Set()
 
-  // 1. Include 2 from the following costs: 1,2,3,4,5,6 (12 cards total)
+  // 1. Include 2 from the following costs: 1,2,3,4,5,6 (12 cards total) - allow spells
   const guaranteedCosts = [1, 2, 3, 4, 5, 6]
   for (const cost of guaranteedCosts) {
     const cardsOfCost = availableCards.filter(card => 
-      card.cost === cost && !card.isLegendary && !card.isSpell && !usedInSelection.has(card.id)
+      card.cost === cost && !card.isLegendary && !usedInSelection.has(card.id)
     )
     
     if (cardsOfCost.length >= 2) {
-      const shuffled = [...cardsOfCost].sort(() => Math.random() - 0.5)
+      const shuffled = shuffleArray(cardsOfCost)
       const selected = shuffled.slice(0, 2)
       selectedCards.push(...selected)
       selected.forEach(card => usedInSelection.add(card.id))
     }
   }
 
-  // 2. Include 2 from the range (7-10) (2 cards total)
+  // 2. Include 2 from the range (7-10) (2 cards total) - allow spells
   const highCostCards = availableCards.filter(card => 
-    card.cost && card.cost >= 7 && card.cost <= 10 && !card.isLegendary && !card.isSpell && !usedInSelection.has(card.id)
+    card.cost && card.cost >= 7 && card.cost <= 10 && !card.isLegendary && !usedInSelection.has(card.id)
   )
   
   if (highCostCards.length >= 2) {
-    const shuffled = [...highCostCards].sort(() => Math.random() - 0.5)
+    const shuffled = shuffleArray(highCostCards)
     const selected = shuffled.slice(0, 2)
     selectedCards.push(...selected)
     selected.forEach(card => usedInSelection.add(card.id))
@@ -138,7 +196,7 @@ const generateMegaDraftCards = (usedCardIds: string[], cardDatabase: Card[]): Ca
   const legendaryCards = availableCards.filter(card => card.isLegendary && !usedInSelection.has(card.id))
   
   if (legendaryCards.length >= 3) {
-    const shuffled = [...legendaryCards].sort(() => Math.random() - 0.5)
+    const shuffled = shuffleArray(legendaryCards)
     const selected = shuffled.slice(0, 3)
     selectedCards.push(...selected)
     selected.forEach(card => usedInSelection.add(card.id))
@@ -148,7 +206,7 @@ const generateMegaDraftCards = (usedCardIds: string[], cardDatabase: Card[]): Ca
   const spellCards = availableCards.filter(card => card.isSpell && !usedInSelection.has(card.id))
   
   if (spellCards.length >= 2) {
-    const shuffled = [...spellCards].sort(() => Math.random() - 0.5)
+    const shuffled = shuffleArray(spellCards)
     const selected = shuffled.slice(0, 2)
     selectedCards.push(...selected)
     selected.forEach(card => usedInSelection.add(card.id))
@@ -161,7 +219,7 @@ const generateMegaDraftCards = (usedCardIds: string[], cardDatabase: Card[]): Ca
   
   const needed = 36 - selectedCards.length
   if (remainingCards.length >= needed) {
-    const shuffled = [...remainingCards].sort(() => Math.random() - 0.5)
+    const shuffled = shuffleArray(remainingCards)
     const selected = shuffled.slice(0, needed)
     selectedCards.push(...selected)
   }

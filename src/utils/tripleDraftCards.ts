@@ -41,47 +41,92 @@ export const generateTripleDraftChoices = (usedCardIds: string[]): Card[][] => {
     legendaryChoice.forEach(card => usedInChoices.add(card.id))
   }
 
-  // 3. 3 rounds where cards are in cost range (1-3) - mix costs within range
+  // 3. 3 rounds where cards are in cost range (1-3) - randomly select costs first
   for (let i = 0; i < 3; i++) {
-    const lowCostCards = availableCards.filter(card => 
-      card.cost && card.cost >= 1 && card.cost <= 3 && !card.isLegendary && !usedInChoices.has(card.id)
-    )
+    const rangeChoice: Card[] = []
     
-    if (lowCostCards.length >= 3) {
-      // Truly random selection from all costs in range (1-3)
-      const shuffled = shuffleArray(lowCostCards)
-      const lowCostChoice = shuffled.slice(0, 3)
-      choices.push(lowCostChoice)
-      lowCostChoice.forEach(card => usedInChoices.add(card.id))
+    // Randomly select 3 costs from range 1-3 (with repeats allowed)
+    const selectedCosts = [
+      Math.floor(Math.random() * 3) + 1, // Random 1-3
+      Math.floor(Math.random() * 3) + 1, // Random 1-3
+      Math.floor(Math.random() * 3) + 1  // Random 1-3
+    ]
+    
+    // For each selected cost, pick one random card
+    for (const cost of selectedCosts) {
+      const cardsOfCost = availableCards.filter(card => 
+        card.cost === cost && !card.isLegendary && !usedInChoices.has(card.id)
+      )
+      
+      if (cardsOfCost.length > 0) {
+        const shuffled = shuffleArray(cardsOfCost)
+        const selectedCard = shuffled[0]
+        rangeChoice.push(selectedCard)
+        usedInChoices.add(selectedCard.id)
+      }
+    }
+    
+    if (rangeChoice.length === 3) {
+      choices.push(rangeChoice)
     }
   }
 
-  // 4. 2 rounds where cards are in cost range (4-6) - mix costs within range
+  // 4. 2 rounds where cards are in cost range (4-6) - randomly select costs first
   for (let i = 0; i < 2; i++) {
-    const midCostCards = availableCards.filter(card => 
-      card.cost && card.cost >= 4 && card.cost <= 6 && !card.isLegendary && !usedInChoices.has(card.id)
-    )
+    const rangeChoice: Card[] = []
     
-    if (midCostCards.length >= 3) {
-      // Truly random selection from all costs in range (4-6)
-      const shuffled = shuffleArray(midCostCards)
-      const midCostChoice = shuffled.slice(0, 3)
-      choices.push(midCostChoice)
-      midCostChoice.forEach(card => usedInChoices.add(card.id))
+    // Randomly select 3 costs from range 4-6 (with repeats allowed)
+    const selectedCosts = [
+      Math.floor(Math.random() * 3) + 4, // Random 4-6
+      Math.floor(Math.random() * 3) + 4, // Random 4-6
+      Math.floor(Math.random() * 3) + 4  // Random 4-6
+    ]
+    
+    // For each selected cost, pick one random card
+    for (const cost of selectedCosts) {
+      const cardsOfCost = availableCards.filter(card => 
+        card.cost === cost && !card.isLegendary && !usedInChoices.has(card.id)
+      )
+      
+      if (cardsOfCost.length > 0) {
+        const shuffled = shuffleArray(cardsOfCost)
+        const selectedCard = shuffled[0]
+        rangeChoice.push(selectedCard)
+        usedInChoices.add(selectedCard.id)
+      }
+    }
+    
+    if (rangeChoice.length === 3) {
+      choices.push(rangeChoice)
     }
   }
 
-  // 5. 1 round where cards are in cost range (7-10) - mix costs within range
-  const highCostCards = availableCards.filter(card => 
-    card.cost && card.cost >= 7 && card.cost <= 10 && !card.isLegendary && !usedInChoices.has(card.id)
-  )
+  // 5. 1 round where cards are in cost range (7-10) - randomly select costs first
+  const highRangeChoice: Card[] = []
   
-  if (highCostCards.length >= 3) {
-    // Truly random selection from all costs in range (7-10)
-    const shuffled = shuffleArray(highCostCards)
-    const highCostChoice = shuffled.slice(0, 3)
-    choices.push(highCostChoice)
-    highCostChoice.forEach(card => usedInChoices.add(card.id))
+  // Randomly select 3 costs from range 7-10 (with repeats allowed)
+  const selectedHighCosts = [
+    Math.floor(Math.random() * 4) + 7, // Random 7-10
+    Math.floor(Math.random() * 4) + 7, // Random 7-10
+    Math.floor(Math.random() * 4) + 7  // Random 7-10
+  ]
+  
+  // For each selected cost, pick one random card
+  for (const cost of selectedHighCosts) {
+    const cardsOfCost = availableCards.filter(card => 
+      card.cost === cost && !card.isLegendary && !usedInChoices.has(card.id)
+    )
+    
+    if (cardsOfCost.length > 0) {
+      const shuffled = shuffleArray(cardsOfCost)
+      const selectedCard = shuffled[0]
+      highRangeChoice.push(selectedCard)
+      usedInChoices.add(selectedCard.id)
+    }
+  }
+  
+  if (highRangeChoice.length === 3) {
+    choices.push(highRangeChoice)
   }
 
   // 6. 1 guaranteed spell round- 3 random spells selected

@@ -141,10 +141,10 @@ const RandomDeck = () => {
   return (
     <div className="h-screen flex flex-col overflow-hidden">
       {/* Purple gradient background only until "Good luck have fun!" */}
-      <div className="bg-gradient-to-br from-[hsl(var(--background-start))] to-[hsl(var(--background-end))] p-4 pb-0 flex-shrink-0">
-        <div className="max-w-4xl mx-auto space-y-6">
+      <div className="bg-gradient-to-br from-[hsl(var(--background-start))] to-[hsl(var(--background-end))] p-4 flex-shrink-0">
+        <div className="max-w-4xl mx-auto">
           {/* Header with back button */}
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between mb-4">
             <Button
               variant="ghost"
               onClick={() => navigate('/')}
@@ -156,7 +156,7 @@ const RandomDeck = () => {
           </div>
 
           {/* Title */}
-          <div className="text-center space-y-4 pb-8">
+          <div className="text-center space-y-2 pb-4">
             <h1 className="text-4xl md:text-6xl font-bold text-white drop-shadow-2xl">
               Random Deck
             </h1>
@@ -168,10 +168,10 @@ const RandomDeck = () => {
       </div>
 
       {/* White background for the rest - flex-1 to take remaining space with overflow */}
-      <div className="bg-white flex-1 flex flex-col pt-8 overflow-auto">
-        <div className="max-w-4xl mx-auto w-full h-full flex flex-col px-4">
+      <div className="bg-white flex-1 flex flex-col overflow-auto">
+        <div className="max-w-4xl mx-auto w-full h-full flex flex-col px-4 py-4">
           {/* Deck Display - takes available space */}
-          <div className="flex-1 flex justify-center items-start min-h-0">
+          <div className="flex justify-center">
             <div className="w-full max-w-2xl">
               {randomDeck.length > 0 ? (
                 <DeckDisplay

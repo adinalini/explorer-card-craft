@@ -401,6 +401,7 @@ const Room = () => {
               // Phase change detection OR phase 2 with locked selection (force unlock)
               const isPhaseTransition = room && updatedRoom.triple_draft_phase !== room.triple_draft_phase
               const isPhase2Locked = updatedRoom.triple_draft_phase === 2 && isSelectionLocked
+              const isInitialPhase2Load = !room && updatedRoom.triple_draft_phase === 2 // Handle initial load to Phase 2
               
               if (isPhaseTransition) {
                 console.log('🔷 TRIPLE: Phase transition detected', 
@@ -411,8 +412,12 @@ const Room = () => {
                 console.log('🔷 TRIPLE: Phase 2 detected with locked selection - forcing unlock')
               }
               
+              if (isInitialPhase2Load) {
+                console.log('🔷 TRIPLE: Initial load to Phase 2 detected - forcing unlock')
+              }
+              
               // Phase 1 → 2: unlock selections and clear selected card
-              if ((isPhaseTransition && updatedRoom.triple_draft_phase === 2) || isPhase2Locked) {
+              if ((isPhaseTransition && updatedRoom.triple_draft_phase === 2) || isPhase2Locked || isInitialPhase2Load) {
                 console.log('🔷 TRIPLE: Unlocking for phase 2')
                 setIsSelectionLocked(false)
                 setShowReveal(false)

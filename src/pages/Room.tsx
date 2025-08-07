@@ -250,22 +250,31 @@ const Room = () => {
           filter: `id=eq.${roomId}`
         },
         (payload) => {
+          console.log('🔄 ROOM UPDATE: Received room change event')
+          console.log('🔄 ROOM UPDATE: Event type:', payload.eventType)
+          console.log('🔄 ROOM UPDATE: Payload:', payload)
+          
           if (payload.eventType === 'UPDATE') {
             const updatedRoom = payload.new as Room
+            console.log('🔄 ROOM UPDATE: Setting new room data')
             setRoom(updatedRoom)
             
             const role = getUserRole(updatedRoom, userSessionId)
             setUserRole(role)
             
             if (updatedRoom.creator_ready && updatedRoom.joiner_ready && updatedRoom.status === 'waiting') {
+              console.log('🚀 ROOM UPDATE: Both players ready, starting draft countdown')
               setIsStartingDraft(true)
               
               if (role === 'creator') {
+                console.log('🚀 ROOM UPDATE: Creator will start draft in 5 seconds')
                 setTimeout(() => {
+                  console.log('🚀 ROOM UPDATE: Creator starting draft now')
                   startDraft(updatedRoom)
                   setIsStartingDraft(false)
                 }, 5000)
               } else {
+                console.log('🚀 ROOM UPDATE: Joiner waiting for draft start')
                 setTimeout(() => {
                   setIsStartingDraft(false)
                 }, 5000)
@@ -288,7 +297,14 @@ const Room = () => {
           filter: `room_id=eq.${roomId}`
         },
         (payload) => {
-          console.log(`${userRole}: Room cards update:`, payload.eventType)
+          console.log(`🃏 CARDS UPDATE: ${userRole} received card event: ${payload.eventType}`)
+          console.log('🃏 CARDS UPDATE: Payload:', payload)
+          
+          if (payload.eventType === 'INSERT') {
+            const newCard = payload.new as any
+            console.log(`🃏 CARDS UPDATE: New card inserted - ${newCard.card_name} (Round: ${newCard.round_number}, Side: ${newCard.side})`)
+          }
+          
           fetchRoomCards()
         }
       )
@@ -343,6 +359,9 @@ const Room = () => {
   const fetchRoom = async () => {
     if (!roomId) return
 
+    console.log('🔍 FETCH ROOM: Starting room data fetch')
+    console.log('🔍 FETCH ROOM: Room ID:', roomId)
+
     try {
       const { data, error } = await supabase
         .from('rooms')
@@ -350,16 +369,22 @@ const Room = () => {
         .eq('id', roomId)
         .single()
 
-      if (error) throw error
+      if (error) {
+        console.error('🚨 FETCH ROOM: Error fetching room:', error)
+        throw error
+      }
+      
+      console.log('🔍 FETCH ROOM: Successfully fetched room data:', data)
       setRoom(data)
       
       // Determine user role based on session storage flags
       if (data) {
         const role = getUserRole(data, userSessionId)
+        console.log('🔍 FETCH ROOM: User role determined:', role)
         setUserRole(role)
       }
     } catch (error) {
-      console.error('Error fetching room:', error)
+      console.error('🚨 FETCH ROOM: Complete failure:', error)
       toast({
         title: "Error",
         description: "Failed to load room data.",
@@ -373,6 +398,9 @@ const Room = () => {
   const fetchRoomCards = async () => {
     if (!roomId) return
 
+    console.log('🃏 FETCH CARDS: Starting card data fetch')
+    console.log('🃏 FETCH CARDS: Room ID:', roomId)
+
     try {
       const { data, error } = await supabase
         .from('room_cards')
@@ -380,10 +408,21 @@ const Room = () => {
         .eq('room_id', roomId)
         .order('round_number', { ascending: true })
 
-      if (error) throw error
+      if (error) {
+        console.error('🚨 FETCH CARDS: Error fetching cards:', error)
+        throw error
+      }
+      
+      console.log('🃏 FETCH CARDS: Successfully fetched cards:', data?.length || 0, 'total cards')
+      if (data) {
+        console.log('🃏 FETCH CARDS: Cards by round:', data.reduce((acc, card) => {
+          acc[card.round_number] = (acc[card.round_number] || 0) + 1
+          return acc
+        }, {} as Record<number, number>))
+      }
       setRoomCards(data || [])
     } catch (error) {
-      console.error('Error fetching room cards:', error)
+      console.error('🚨 FETCH CARDS: Complete failure:', error)
     }
   }
 
@@ -455,12 +494,19 @@ const Room = () => {
   const startDraft = async (roomData?: Room) => {
     const currentRoom = roomData || room
     if (!currentRoom) {
+      console.log('🚨 START DRAFT: No room data available')
       return
     }
+
+    console.log('🚀 START DRAFT: Beginning draft start process')
+    console.log('🚀 START DRAFT: Room ID:', roomId)
+    console.log('🚀 START DRAFT: Draft type:', currentRoom.draft_type)
+    console.log('🚀 START DRAFT: User role:', userRole)
 
     try {
       const supabaseWithToken = getSupabaseWithSession()
       
+      console.log('🚀 START DRAFT: Calling generate-round-cards edge function')
       const { data: response, error: cardError } = await supabase.functions.invoke('generate-round-cards', {
         body: { 
           roomId,
@@ -471,30 +517,35 @@ const Room = () => {
       })
 
       if (cardError) {
+        console.error('🚨 START DRAFT: Edge function error:', cardError)
         throw cardError
       }
       
-        const updateData = {
-          status: 'drafting', 
-          current_round: 1,
-          round_start_time: new Date().toISOString()
-        } as any
+      console.log('🚀 START DRAFT: Edge function response:', response)
+      
+      const updateData = {
+        status: 'drafting', 
+        current_round: 1,
+        round_start_time: new Date().toISOString()
+      } as any
 
-        // For triple draft, initialize phase and first pick
-        if (currentRoom.draft_type === 'triple') {
-          const firstPick = Math.random() < 0.5 ? 'creator' : 'joiner'
-          updateData.triple_draft_phase = 1
-          updateData.triple_draft_first_pick = firstPick
-          console.log(`🔷 TRIPLE: Starting with first pick: ${firstPick}`)
-        }
+      // For triple draft, initialize phase and first pick
+      if (currentRoom.draft_type === 'triple') {
+        const firstPick = Math.random() < 0.5 ? 'creator' : 'joiner'
+        updateData.triple_draft_phase = 1
+        updateData.triple_draft_first_pick = firstPick
+        console.log(`🔷 TRIPLE: Starting with first pick: ${firstPick}`)
+      }
 
-        const { data: roomUpdateData, error } = await supabaseWithToken
-          .from('rooms')
-          .update(updateData)
-          .eq('id', roomId!)
-          .select()
+      console.log('🚀 START DRAFT: Updating room status to drafting')
+      const { data: roomUpdateData, error } = await supabaseWithToken
+        .from('rooms')
+        .update(updateData)
+        .eq('id', roomId!)
+        .select()
 
       if (error) {
+        console.error('🚨 START DRAFT: Room update error:', error)
         toast({
           title: "Error",
           description: "Failed to start draft. Please refresh and try again.",
@@ -502,7 +553,10 @@ const Room = () => {
         })
         throw error
       }
+      
+      console.log('🚀 START DRAFT: Room update successful:', roomUpdateData)
     } catch (error) {
+      console.error('🚨 START DRAFT: Complete failure:', error)
       toast({
         title: "Error",
         description: "Failed to start draft. Please refresh and try again.",

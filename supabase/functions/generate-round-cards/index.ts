@@ -259,11 +259,13 @@ Deno.serve(async (req) => {
 
     const supabase = createClient(supabaseUrl, supabaseKey)
     
+    console.log('🚀 EDGE FUNCTION: Starting request processing')
+    
     let requestBody
     try {
       requestBody = await req.json()
     } catch (jsonError) {
-      console.error('Failed to parse request JSON:', jsonError)
+      console.error('🚨 EDGE FUNCTION: Failed to parse request JSON:', jsonError)
       return new Response(
         JSON.stringify({ 
           error: 'Invalid JSON in request body',
@@ -277,7 +279,7 @@ Deno.serve(async (req) => {
     }
     
     const { roomId, round, usedCardIds, roundType, draftType } = requestBody
-    console.log('Request parameters:', { 
+    console.log('🚀 EDGE FUNCTION: Request parameters:', { 
       roomId, 
       round, 
       usedCardIds: usedCardIds?.length || 0,
@@ -286,7 +288,7 @@ Deno.serve(async (req) => {
     })
     
     if (!roomId || (!round && round !== 'all')) {
-      console.error('Missing required parameters:', { roomId, round })
+      console.error('🚨 EDGE FUNCTION: Missing required parameters:', { roomId, round })
       return new Response(
         JSON.stringify({ 
           error: 'Missing required parameters: roomId and round are required',
@@ -299,7 +301,37 @@ Deno.serve(async (req) => {
       )
     }
 
-    console.log(`Starting card generation for round ${round} in room ${roomId}`)
+    console.log(`🚀 EDGE FUNCTION: Starting card generation for round ${round} in room ${roomId}`)
+    
+    // Check if cards already exist for this room to prevent duplicates
+    const { data: existingCards, error: checkError } = await supabase
+      .from('room_cards')
+      .select('id, round_number')
+      .eq('room_id', roomId)
+    
+    if (checkError) {
+      console.error('🚨 EDGE FUNCTION: Error checking existing cards:', checkError)
+    } else {
+      console.log(`🔍 EDGE FUNCTION: Found ${existingCards?.length || 0} existing cards in room`)
+      if (existingCards && existingCards.length > 0) {
+        console.log(`⚠️ EDGE FUNCTION: Cards already exist! Existing rounds:`, 
+          [...new Set(existingCards.map(card => card.round_number))].sort()
+        )
+        
+        // Return early if cards already exist
+        return new Response(
+          JSON.stringify({ 
+            message: 'Cards already exist for this room',
+            success: true,
+            cardsGenerated: 0
+          }),
+          { 
+            status: 200,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          }
+        )
+      }
+    }
 
     // Complete card database with corrected costs
     const cardDatabase: Card[] = [

@@ -21,7 +21,7 @@ export const generateTripleDraftChoices = (usedCardIds: string[]): Card[][] => {
   const guaranteedCosts = [1, 2, 3, 4, 5]
   for (const cost of guaranteedCosts) {
     const cardsOfCost = availableCards.filter(card => 
-      card.cost === cost && !card.isLegendary && !card.isSpell && !usedInChoices.has(card.id)
+      card.cost === cost && !card.isLegendary && !usedInChoices.has(card.id)
     )
     
     if (cardsOfCost.length >= 3) {
@@ -44,7 +44,7 @@ export const generateTripleDraftChoices = (usedCardIds: string[]): Card[][] => {
   // 3. 3 rounds where cards are in cost range (1-3) - mix costs within range
   for (let i = 0; i < 3; i++) {
     const lowCostCards = availableCards.filter(card => 
-      card.cost && card.cost >= 1 && card.cost <= 3 && !card.isLegendary && !card.isSpell && !usedInChoices.has(card.id)
+      card.cost && card.cost >= 1 && card.cost <= 3 && !card.isLegendary && !usedInChoices.has(card.id)
     )
     
     if (lowCostCards.length >= 3) {
@@ -59,7 +59,7 @@ export const generateTripleDraftChoices = (usedCardIds: string[]): Card[][] => {
   // 4. 2 rounds where cards are in cost range (4-6) - mix costs within range
   for (let i = 0; i < 2; i++) {
     const midCostCards = availableCards.filter(card => 
-      card.cost && card.cost >= 4 && card.cost <= 6 && !card.isLegendary && !card.isSpell && !usedInChoices.has(card.id)
+      card.cost && card.cost >= 4 && card.cost <= 6 && !card.isLegendary && !usedInChoices.has(card.id)
     )
     
     if (midCostCards.length >= 3) {
@@ -73,7 +73,7 @@ export const generateTripleDraftChoices = (usedCardIds: string[]): Card[][] => {
 
   // 5. 1 round where cards are in cost range (7-10) - mix costs within range
   const highCostCards = availableCards.filter(card => 
-    card.cost && card.cost >= 7 && card.cost <= 10 && !card.isLegendary && !card.isSpell && !usedInChoices.has(card.id)
+    card.cost && card.cost >= 7 && card.cost <= 10 && !card.isLegendary && !usedInChoices.has(card.id)
   )
   
   if (highCostCards.length >= 3) {

@@ -681,6 +681,12 @@ const Room = () => {
       return
     }
 
+    // ADDITIONAL SAFEGUARD: Double-check if we're already processing
+    if (isProcessingRound) {
+      console.log('❌ Process round end blocked - race condition detected')
+      return
+    }
+
     setIsProcessingRound(true)
     console.log('🟡 Setting isProcessingRound to true')
     
@@ -834,61 +840,13 @@ const Room = () => {
               console.log(`🔷 TRIPLE: Successfully advanced to round ${nextRound}`)
             }
           }
+          
+          // Reset UI state after round advancement
+          setIsSelectionLocked(false)
+          setShowReveal(false)
+          setIsRevealing(false)
+          setSelectedCard(null)
         }, 2000) // 2 second reveal phase
-        console.log('💾 Adding 2 cards to player decks...');
-        
-        // Add cards to decks
-        for (const card of selectedCards) {
-          const { error } = await supabaseWithToken
-            .from('player_decks')
-            .insert({
-              room_id: roomId,
-              player_side: card.selected_by,
-              card_id: card.card_id,
-              card_name: card.card_name,
-              card_image: card.card_image,
-              is_legendary: card.is_legendary,
-              selection_order: currentRound
-            });
-          
-          if (error) {
-            console.error('❌ Error adding card to deck:', error);
-          } else {
-            console.log(`✅ Added ${card.card_id} to ${card.selected_by} deck`);
-          }
-        }
-        
-        console.log('✅ Both players selected, advancing to next round');
-        
-        // Clear reveal state and advance to next round
-        setIsRevealing(false);
-        
-        // Check if draft is complete
-        const totalRounds = 13;
-        if (currentRound >= totalRounds) {
-          console.log('🏁 Triple draft complete - setting status to completed')
-          await supabaseWithToken
-            .from('rooms')
-            .update({ status: 'completed' })
-            .eq('id', roomId)
-        } else {
-          // Move to next round
-          const nextRound = currentRound + 1
-          const nextRoundStartTime = new Date().toISOString()
-          const { error: updateError } = await supabaseWithToken
-            .from('rooms')
-            .update({ 
-              current_round: nextRound,
-              round_start_time: nextRoundStartTime
-            })
-            .eq('id', roomId)
-          
-          if (updateError) {
-            console.error('❌ Error updating room for next round:', updateError)
-          } else {
-            console.log(`✅ Successfully advanced to round ${nextRound}`)
-          }
-        }
       } else {
         // Default draft: round-based progression
         const totalRounds = 13;
@@ -1073,7 +1031,12 @@ const Room = () => {
           // If both have selected and I'm the creator, process round end
           if (selectedCards.length >= 2 && userRole === 'creator' && !isProcessingRound) {
             console.log('🔷 TRIPLE: Both players selected, creator processing round end')
-            processRoundEnd()
+            // Add a small delay to prevent race conditions
+            setTimeout(() => {
+              if (!isProcessingRound) {
+                processRoundEnd()
+              }
+            }, 100)
           }
         }, 2000) // 2 second delay to show selection
       } else if (room?.draft_type === 'mega') {

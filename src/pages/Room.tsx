@@ -169,7 +169,8 @@ const Room = () => {
         }
       } else if (currentPhase === 2) {
         // Phase 2: Second player should auto-select if exactly 1 card selected
-        if (isMyTurn && selectedCards.length === 1) {
+        const mySelection = selectedCards.find(card => card.selected_by === userRole)
+        if (isMyTurn && selectedCards.length === 1 && !mySelection) {
           console.log('🔷 TRIPLE: Phase 2 - Auto-selecting for second pick player')
           await autoSelectRandomCard()
           
@@ -380,6 +381,26 @@ const Room = () => {
                   fetchPlayerDecks()
                 }, 100)
               }
+            }
+            
+            // CRITICAL FIX: Also handle round_start_time changes (indicates fresh timer for phase 2)
+            else if (updatedRoom.draft_type === 'triple' && 
+                     updatedRoom.status === 'drafting' &&
+                     room &&
+                     updatedRoom.round_start_time !== room.round_start_time &&
+                     updatedRoom.triple_draft_phase === 2) {
+              console.log('🔷 TRIPLE: Timer reset detected for phase 2')
+              console.log('🔷 TRIPLE: User role:', role)
+              console.log('🔷 TRIPLE: Is selection locked:', isSelectionLocked)
+              console.log('🔷 TRIPLE: Unlocking for phase 2 timer reset')
+              setIsSelectionLocked(false)
+              setShowReveal(false)
+              setSelectedCard(null)
+              
+              // Fetch fresh card data
+              setTimeout(() => {
+                fetchRoomCards()
+              }, 100)
             }
             
             // CRITICAL FIX: Only trigger draft start if:
@@ -1589,12 +1610,11 @@ const Room = () => {
     
     if (currentPhase === 1) {
       // Phase 1: First pick player's turn (only if no selection yet)
-      return userRole === firstPick && selectedCards.length === 0 && !isSelectionLocked
+      return userRole === firstPick && selectedCards.length === 0
     } else if (currentPhase === 2) {
       // Phase 2: Second pick player's turn (only if exactly 1 selection exists)
       const secondPick = firstPick === 'creator' ? 'joiner' : 'creator'
-      // CRITICAL FIX: Allow selection even if selection was just locked, 
-      // as long as we haven't selected yet in this phase
+      // CRITICAL FIX: Don't check isSelectionLocked here - let the room update handle unlocking
       const mySelection = selectedCards.find(card => card.selected_by === userRole)
       return userRole === secondPick && selectedCards.length === 1 && !mySelection
     }

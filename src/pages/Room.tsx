@@ -334,6 +334,42 @@ const Room = () => {
             const role = getUserRole(updatedRoom, userSessionId)
             setUserRole(role)
             
+            // CRITICAL FIX: Handle triple draft phase transitions
+            if (updatedRoom.draft_type === 'triple' && 
+                updatedRoom.status === 'drafting' && 
+                room &&
+                updatedRoom.triple_draft_phase !== room.triple_draft_phase) {
+              
+              console.log('🔷 TRIPLE: Phase transition detected', 
+                room.triple_draft_phase, '→', updatedRoom.triple_draft_phase)
+              
+              // Moving from phase 1 to phase 2: unlock selections and clear selected card
+              if (room.triple_draft_phase === 1 && updatedRoom.triple_draft_phase === 2) {
+                console.log('🔷 TRIPLE: Unlocking for phase 2')
+                setIsSelectionLocked(false)
+                setShowReveal(false)
+                setSelectedCard(null) // Clear selected card for new phase
+                
+                // Fetch fresh card data to ensure we have updated state
+                setTimeout(() => {
+                  fetchRoomCards()
+                }, 100)
+              }
+              // Moving to next round: unlock and reset
+              else if (updatedRoom.current_round !== room.current_round) {
+                console.log('🔷 TRIPLE: New round detected, unlocking')
+                setIsSelectionLocked(false)
+                setShowReveal(false)
+                setSelectedCard(null)
+                
+                // Fetch fresh data for new round
+                setTimeout(() => {
+                  fetchRoomCards()
+                  fetchPlayerDecks()
+                }, 100)
+              }
+            }
+            
             // CRITICAL FIX: Only trigger draft start if:
             // 1. Room is in 'waiting' status
             // 2. Both players are ready  
@@ -1172,9 +1208,40 @@ const Room = () => {
       console.log('🔷 TRIPLE PHASE END: Selected cards details:', selectedCards.map(c => `${c.card_id} by ${c.selected_by}`))
       
       if (currentPhase === 1 && selectedCards.length >= 1) {
+        // CRITICAL FIX: Add phase 1 selected card to player deck immediately
+        const phase1Card = selectedCards[0]
+        console.log('🔷 TRIPLE: Adding phase 1 card to deck:', phase1Card.card_id, 'by', phase1Card.selected_by)
+        
+        try {
+          // Check if card already exists in deck to prevent duplicates
+          const { data: existingDeck } = await supabaseWithToken
+            .from('player_decks')
+            .select('card_id')
+            .eq('room_id', roomId)
+            .eq('card_id', phase1Card.card_id)
+            .eq('player_side', phase1Card.selected_by)
+            .eq('selection_order', currentRound)
+          
+          if (!existingDeck || existingDeck.length === 0) {
+              await supabaseWithToken
+                .from('player_decks')
+                .insert({
+                  room_id: roomId,
+                  card_id: phase1Card.card_id,
+                  card_name: phase1Card.card_name,
+                  player_side: phase1Card.selected_by as 'creator' | 'joiner',
+                  selection_order: currentRound,
+                  is_legendary: phase1Card.is_legendary,
+                  card_image: phase1Card.card_image
+                })
+            console.log('🔷 TRIPLE: Phase 1 card added to deck successfully')
+          }
+        } catch (error) {
+          console.error('🔷 TRIPLE: Error adding phase 1 card to deck:', error)
+        }
+        
         // Move to phase 2
         console.log('🔷 TRIPLE: Moving to phase 2')
-        console.log('🔷 TRIPLE: Selected cards in phase 1:', selectedCards.length)
         setIsSelectionLocked(true)
         setShowReveal(true)
         
@@ -1191,20 +1258,71 @@ const Room = () => {
             .eq('id', roomId)
           
           console.log('🔷 TRIPLE: Phase 2 update result:', updateResult)
-          setIsSelectionLocked(false)
-          setShowReveal(false)
-          setSelectedCard(null)
+          // Don't unlock yet - let the room update listener handle the unlock
         }, 2000)
       } else if (currentPhase === 2 && selectedCards.length >= 2) {
-        // Process full round end
-        console.log('🔷 TRIPLE PHASE END: Phase 2 complete with 2+ selections, calling processRoundEnd')
+        // Add phase 2 selected card to player deck
+        const phase2Card = selectedCards.find(card => card.selected_by !== selectedCards[0].selected_by)
+        if (phase2Card) {
+          console.log('🔷 TRIPLE: Adding phase 2 card to deck:', phase2Card.card_id, 'by', phase2Card.selected_by)
+          
+          try {
+            // Check if card already exists in deck to prevent duplicates
+            const { data: existingDeck } = await supabaseWithToken
+              .from('player_decks')
+              .select('card_id')
+              .eq('room_id', roomId)
+              .eq('card_id', phase2Card.card_id)
+              .eq('player_side', phase2Card.selected_by)
+              .eq('selection_order', currentRound)
+            
+            if (!existingDeck || existingDeck.length === 0) {
+              await supabaseWithToken
+                .from('player_decks')
+                .insert({
+                  room_id: roomId,
+                  card_id: phase2Card.card_id,
+                  card_name: phase2Card.card_name,
+                  player_side: phase2Card.selected_by as 'creator' | 'joiner',
+                  selection_order: currentRound,
+                  is_legendary: phase2Card.is_legendary,
+                  card_image: phase2Card.card_image
+                })
+              console.log('🔷 TRIPLE: Phase 2 card added to deck successfully')
+            }
+          } catch (error) {
+            console.error('🔷 TRIPLE: Error adding phase 2 card to deck:', error)
+          }
+        }
+        
+        // Process round end - move to next round
+        console.log('🔷 TRIPLE PHASE END: Phase 2 complete, moving to next round')
         setIsSelectionLocked(true)
         setShowReveal(true)
         
-        // Small delay to show completion, then process round end
-        setTimeout(() => {
-          processRoundEnd()
-        }, 1000)
+        // Small delay to show completion, then move to next round
+        setTimeout(async () => {
+          const nextRound = currentRound + 1
+          if (nextRound <= 13) {
+            console.log('🔷 TRIPLE: Moving to round', nextRound)
+            await supabaseWithToken
+              .from('rooms')
+              .update({ 
+                current_round: nextRound,
+                triple_draft_phase: 1,
+                round_start_time: new Date().toISOString(),
+                triple_draft_first_pick: room.triple_draft_first_pick === 'creator' ? 'joiner' : 'creator' // Alternate first pick
+              })
+              .eq('id', roomId)
+          } else {
+            // Draft complete
+            console.log('🔷 TRIPLE: Draft complete')
+            await supabaseWithToken
+              .from('rooms')
+              .update({ status: 'completed' })
+              .eq('id', roomId)
+          }
+        }, 2000)
       } else {
         console.log('🔷 TRIPLE PHASE END: Conditions not met for phase transition')
         console.log('🔷 TRIPLE PHASE END: Phase:', currentPhase, 'Selected:', selectedCards.length)
@@ -1429,7 +1547,10 @@ const Room = () => {
     } else if (currentPhase === 2) {
       // Phase 2: Second pick player's turn (only if exactly 1 selection exists)
       const secondPick = firstPick === 'creator' ? 'joiner' : 'creator'
-      return userRole === secondPick && selectedCards.length === 1 && !isSelectionLocked
+      // CRITICAL FIX: Allow selection even if selection was just locked, 
+      // as long as we haven't selected yet in this phase
+      const mySelection = selectedCards.find(card => card.selected_by === userRole)
+      return userRole === secondPick && selectedCards.length === 1 && !mySelection
     }
     
     return false

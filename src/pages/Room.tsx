@@ -1371,9 +1371,9 @@ const Room = () => {
                     Round {room.current_round} of 13
                   </h2>
                   <div className="space-y-4">
-                    {/* Player Names */}
-                    <div className="grid grid-cols-2 gap-8 max-w-2xl mx-auto">
-                      <div className="text-center">
+                    {/* Player Names with Turn Arrow */}
+                    <div className="flex items-center justify-center gap-4 max-w-2xl mx-auto">
+                      <div className="text-center flex-1">
                         <div className="text-lg font-semibold text-black">
                           {room.creator_name} {room.first_pick_player === 'creator' ? '(First Pick)' : ''}
                         </div>
@@ -1381,7 +1381,21 @@ const Room = () => {
                           {userRole === 'creator' ? (isMyTurn ? 'Your turn' : 'Opponent\'s turn') : (isMyTurn ? 'Opponent\'s turn' : 'Your turn')}
                         </div>
                       </div>
-                      <div className="text-center">
+                      
+                      {/* Turn Arrow */}
+                      <div className="flex items-center justify-center w-12">
+                        {isMyTurn && userRole === 'creator' ? (
+                          <div className="text-2xl text-primary animate-pulse">←</div>
+                        ) : isMyTurn && userRole === 'joiner' ? (
+                          <div className="text-2xl text-primary animate-pulse">→</div>
+                        ) : !isMyTurn && userRole === 'creator' ? (
+                          <div className="text-2xl text-primary animate-pulse">→</div>
+                        ) : (
+                          <div className="text-2xl text-primary animate-pulse">←</div>
+                        )}
+                      </div>
+                      
+                      <div className="text-center flex-1">
                         <div className="text-lg font-semibold text-black">
                           {room.joiner_name} {room.first_pick_player === 'joiner' ? '(First Pick)' : ''}
                         </div>
@@ -1422,9 +1436,9 @@ const Room = () => {
                     </div>
                   </div>
                   <div className="space-y-4">
-                    {/* Player Names */}
-                    <div className="grid grid-cols-2 gap-8 max-w-2xl mx-auto">
-                      <div className="text-center">
+                    {/* Player Names with Turn Arrow */}
+                    <div className="flex items-center justify-center gap-4 max-w-2xl mx-auto">
+                      <div className="text-center flex-1">
                         <div className="text-lg font-semibold text-black">
                           {room.creator_name} {room.first_pick_player === 'creator' ? '(First Pick)' : ''}
                         </div>
@@ -1432,7 +1446,21 @@ const Room = () => {
                           {userRole === 'creator' ? (isMyTurn ? 'Your turn' : 'Opponent\'s turn') : (isMyTurn ? 'Opponent\'s turn' : 'Your turn')}
                         </div>
                       </div>
-                      <div className="text-center">
+                      
+                      {/* Turn Arrow */}
+                      <div className="flex items-center justify-center w-12">
+                        {isMyTurn && userRole === 'creator' ? (
+                          <div className="text-2xl text-primary animate-pulse">←</div>
+                        ) : isMyTurn && userRole === 'joiner' ? (
+                          <div className="text-2xl text-primary animate-pulse">→</div>
+                        ) : !isMyTurn && userRole === 'creator' ? (
+                          <div className="text-2xl text-primary animate-pulse">→</div>
+                        ) : (
+                          <div className="text-2xl text-primary animate-pulse">←</div>
+                        )}
+                      </div>
+                      
+                      <div className="text-center flex-1">
                         <div className="text-lg font-semibold text-black">
                           {room.joiner_name} {room.first_pick_player === 'joiner' ? '(First Pick)' : ''}
                         </div>

@@ -57,9 +57,10 @@ export function TripleDraftCards({
             }
             isDisabled = true
           } else if (currentPhase === 2 && !isSelectionLocked) {
-            // Phase 2: Show first pick as greyed with cross, others available for second pick
+            // Phase 2: Show first pick selection appropriately, others available for second pick
             if (isFirstPickSelection) {
-              showSelectedCross = true
+              showSelectedTick = isMySelection
+              showSelectedCross = !isMySelection
               isDisabled = true
             } else {
               isDisabled = !isMyTurn || isCardSelected
@@ -69,7 +70,8 @@ export function TripleDraftCards({
             // Phase 2 reveal: Show appropriate states
             if (isCardSelected) {
               if (isFirstPickSelection) {
-                showSelectedCross = true
+                showSelectedTick = isMySelection
+                showSelectedCross = !isMySelection
               } else {
                 showSelectedTick = isMySelection
                 showSelectedCross = !isMySelection

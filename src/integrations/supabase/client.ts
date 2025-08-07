@@ -13,6 +13,7 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABL
     storage: localStorage,
     persistSession: true,
     autoRefreshToken: true,
+    detectSessionInUrl: false, // Suppress GoTrueClient warnings
   }
 });
 
@@ -34,6 +35,7 @@ export const getSupabaseWithSession = () => {
         storage: localStorage,
         persistSession: false, // Disable session persistence to avoid conflicts
         autoRefreshToken: false, // Disable auto refresh to avoid conflicts
+        detectSessionInUrl: false, // Suppress GoTrueClient warnings
       },
       global: {
         headers: {

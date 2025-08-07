@@ -797,7 +797,44 @@ const Room = () => {
           }
         }
       } else if (room.draft_type === 'triple') {
-        // For triple draft, this should only be called when both players have selected
+        // TRIPLE DRAFT: Show reveal phase, then advance to next round
+        setIsSelectionLocked(true)
+        setShowReveal(true)
+        
+        console.log('🔷 TRIPLE: Starting reveal phase for 2 seconds')
+        
+        setTimeout(async () => {
+          console.log('🔷 TRIPLE: Reveal phase complete, advancing to next round')
+          
+          if (currentRound >= 13) {
+            // Draft is complete
+            console.log('🔷 TRIPLE: Draft complete!')
+            await supabaseWithToken
+              .from('rooms')
+              .update({ status: 'completed' })
+              .eq('id', roomId)
+          } else {
+            // Advance to next round
+            const nextRound = currentRound + 1
+            const nextRoundStartTime = new Date().toISOString()
+            
+            console.log(`🔷 TRIPLE: Advancing from round ${currentRound} to ${nextRound}`)
+            
+            const { error: updateError } = await supabaseWithToken
+              .from('rooms')
+              .update({ 
+                current_round: nextRound,
+                round_start_time: nextRoundStartTime
+              })
+              .eq('id', roomId)
+            
+            if (updateError) {
+              console.error('🔷 TRIPLE: Error advancing round:', updateError)
+            } else {
+              console.log(`🔷 TRIPLE: Successfully advanced to round ${nextRound}`)
+            }
+          }
+        }, 2000) // 2 second reveal phase
         console.log('💾 Adding 2 cards to player decks...');
         
         // Add cards to decks
@@ -1017,14 +1054,25 @@ const Room = () => {
       
       // For triple draft, handle turn progression
       if (room?.draft_type === 'triple') {
-        // Show selection for 2 seconds
-        setTimeout(() => {
-          // Check if both players have selected
-          const currentRoundCards = roomCards.filter(card => card.round_number === room.current_round)
-          const selectedCards = currentRoundCards.filter(card => card.selected_by)
+        console.log('🔷 TRIPLE: Card selected, showing 2-second highlight')
+        
+        // Show selection highlight for 2 seconds
+        setTimeout(async () => {
+          console.log('🔷 TRIPLE: Highlight phase complete, checking for round end')
           
-          // If both have selected, process round end
+          // Check if both players have selected
+          const { data: freshCards } = await supabaseWithToken
+            .from('room_cards')
+            .select('*')
+            .eq('room_id', roomId)
+            .eq('round_number', room.current_round)
+          
+          const selectedCards = freshCards?.filter(card => card.selected_by) || []
+          console.log(`🔷 TRIPLE: Found ${selectedCards.length} selected cards`)
+          
+          // If both have selected and I'm the creator, process round end
           if (selectedCards.length >= 2 && userRole === 'creator' && !isProcessingRound) {
+            console.log('🔷 TRIPLE: Both players selected, creator processing round end')
             processRoundEnd()
           }
         }, 2000) // 2 second delay to show selection
@@ -1139,9 +1187,16 @@ const Room = () => {
     return null
   })()
 
-  const currentRoundCards = roomCards.filter(card => 
-    card.round_number === room?.current_round && card.side === userRole
-  )
+  // For triple draft, show cards for "both" side, for others filter by user role
+  const currentRoundCards = roomCards.filter(card => {
+    if (!room?.current_round) return false
+    
+    if (room.draft_type === 'triple') {
+      return card.round_number === room.current_round && card.side === 'both'
+    } else {
+      return card.round_number === room.current_round && card.side === userRole
+    }
+  })
   const creatorDeck = playerDecks.filter(card => card.player_side === 'creator')
   const joinerDeck = playerDecks.filter(card => card.player_side === 'joiner')
 

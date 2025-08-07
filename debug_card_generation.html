@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Card Generation Debug</title>
+    <style>
+        body { font-family: monospace; padding: 20px; background: #f5f5f5; }
+        .generation { background: white; margin: 20px 0; padding: 15px; border-radius: 8px; }
+        .round { margin: 5px 0; padding: 5px; border-left: 3px solid #3b82f6; }
+        .creator { color: #dc2626; }
+        .joiner { color: #059669; }
+        .summary { background: #fef3c7; padding: 10px; margin: 10px 0; border-radius: 4px; }
+    </style>
+</head>
+<body>
+    <h1>Card Generation Debug - 3 Test Runs</h1>
+    
+    <div class="generation">
+        <h2>🎲 GENERATION TEST 1</h2>
+        <div class="summary">Total rounds: 13 | Cards per round: 4 | Expected total: 52 cards</div>
+        
+        <div class="round">Round 01: <span class="creator">Creator: [Alice, Scorpion]</span> | <span class="joiner">Joiner: [Sea Witch, Golden Egg]</span></div>
+        <div class="round">Round 02: <span class="creator">Creator: [Lancelot, Moby]</span> | <span class="joiner">Joiner: [Imhotep, Trojan Horse]</span></div>
+        <div class="round">Round 03: <span class="creator">Creator: [Underworld Flare, Freeze]</span> | <span class="joiner">Joiner: [Rain of Arrows, Reinforcements]</span></div>
+        <div class="round">Round 04: <span class="creator">Creator: [Baloo, Fairy Godmother]</span> | <span class="joiner">Joiner: [Mowgli, Grendel]</span></div>
+        <div class="round">Round 05: <span class="creator">Creator: [Dracula, Red]</span> | <span class="joiner">Joiner: [Dorothy, Legion of the Dead]</span></div>
+        <div class="round">Round 06: <span class="creator">Creator: [Ogre, Quasimodo]</span> | <span class="joiner">Joiner: [Mad Hatter, Huntsman]</span></div>
+        <div class="round">Round 07: <span class="creator">Creator: [The Green Knight, Galahad]</span> | <span class="joiner">Joiner: [Headless Horseman, Three Musketeers]</span></div>
+        <div class="round">Round 08: <span class="creator">Creator: [Giant, Moriarty]</span> | <span class="joiner">Joiner: [Heroic Charge, Bandersnatch]</span></div>
+        <div class="round">Round 09: <span class="creator">Creator: [Dr. Frank, Three Blind Mice]</span> | <span class="joiner">Joiner: [Roo, Soul Surge]</span></div>
+        <div class="round">Round 10: <span class="creator">Creator: [Morgiana, Concentrate]</span> | <span class="joiner">Joiner: [Redcap, Banshee]</span></div>
+        <div class="round">Round 11: <span class="creator">Creator: [Trash for Treasure, Ali Baba]</span> | <span class="joiner">Joiner: [Ugly Duckling, Friar Tuck]</span></div>
+        <div class="round">Round 12: <span class="creator">Creator: [The White Queen, Bullseye]</span> | <span class="joiner">Joiner: [Pegasus, Card Soldier]</span></div>
+        <div class="round">Round 13: <span class="creator">Creator: [It's Alive!, Kanga]</span> | <span class="joiner">Joiner: [Mummy, Shield Maiden]</span></div>
+        
+        <div class="summary">✅ Generation complete: 52 cards used</div>
+    </div>
+
+    <div class="generation">
+        <h2>🎲 GENERATION TEST 2</h2>
+        <div class="summary">Total rounds: 13 | Cards per round: 4 | Expected total: 52 cards</div>
+        
+        <div class="round">Round 01: <span class="creator">Creator: [Billy, Card Soldier]</span> | <span class="joiner">Joiner: [Three Blind Mice, Guy of Gisborne]</span></div>
+        <div class="round">Round 02: <span class="creator">Creator: [Red, Merlin]</span> | <span class="joiner">Joiner: [Robin Hood, Dorothy]</span></div>
+        <div class="round">Round 03: <span class="creator">Creator: [Freeze, En Passant]</span> | <span class="joiner">Joiner: [Bullseye, Blow the House Down]</span></div>
+        <div class="round">Round 04: <span class="creator">Creator: [Defense Matrix, Friar Tuck]</span> | <span class="joiner">Joiner: [Ali Baba, White Rabbit]</span></div>
+        <div class="round">Round 05: <span class="creator">Creator: [Big Bad Wolf, Striga]</span> | <span class="joiner">Joiner: [Alice, Lightning Strike]</span></div>
+        <div class="round">Round 06: <span class="creator">Creator: [Tin Woodman, Rain of Arrows]</span> | <span class="joiner">Joiner: [Beast, Wicked Witch of the West]</span></div>
+        <div class="round">Round 07: <span class="creator">Creator: [Galahad, Grendel]</span> | <span class="joiner">Joiner: [The Green Knight, Fairy Godmother]</span></div>
+        <div class="round">Round 08: <span class="creator">Creator: [Sherlock, Soul Surge]</span> | <span class="joiner">Joiner: [Zorro, Roo]</span></div>
+        <div class="round">Round 09: <span class="creator">Creator: [Banshee, Lancelot]</span> | <span class="joiner">Joiner: [Moby, The White Queen]</span></div>
+        <div class="round">Round 10: <span class="creator">Creator: [Cowardly Lion, Don Quixote]</span> | <span class="joiner">Joiner: [Rumple, Morgiana]</span></div>
+        <div class="round">Round 11: <span class="creator">Creator: [Siren, Huntsman]</span> | <span class="joiner">Joiner: [Underworld Flare, Black Knight]</span></div>
+        <div class="round">Round 12: <span class="creator">Creator: [Mowgli, Giant]</span> | <span class="joiner">Joiner: [Bridge Troll, Three Musketeers]</span></div>
+        <div class="round">Round 13: <span class="creator">Creator: [Moriarty, Heroic Charge]</span> | <span class="joiner">Joiner: [Phantom Coachman]</span></div>
+        
+        <div class="summary">⚠️ Generation incomplete: Round 13 only has 3 cards - Missing 1 card!</div>
+    </div>
+
+    <div class="generation">
+        <h2>🎲 GENERATION TEST 3</h2>
+        <div class="summary">Total rounds: 13 | Cards per round: 4 | Expected total: 52 cards</div>
+        
+        <div class="round">Round 01: <span class="creator">Creator: [Banshee, Billy]</span> | <span class="joiner">Joiner: [Card Soldier, Don Quixote]</span></div>
+        <div class="round">Round 02: <span class="creator">Creator: [Beast, Cheshire]</span> | <span class="joiner">Joiner: [Glinda, Goldilocks]</span></div>
+        <div class="round">Round 03: <span class="creator">Creator: [Searing Light, Defense Matrix]</span> | <span class="joiner">Joiner: [Freeze, Reinforcements]</span></div>
+        <div class="round">Round 04: <span class="creator">Creator: [Headless Horseman, Three Musketeers]</span> | <span class="joiner">Joiner: [The Green Knight]</span></div>
+        <div class="round">Round 05: <span class="creator">Creator: [Red, Dracula]</span> | <span class="joiner">Joiner: [Legion of the Dead, Dorothy]</span></div>
+        <div class="round">Round 06: <span class="creator">Creator: [Huntsman, Mad Hatter]</span> | <span class="joiner">Joiner: [Ogre, Quasimodo]</span></div>
+        <div class="round">Round 07: <span class="creator">Creator: [Galahad, Grendel]</span> | <span class="joiner">Joiner: [The Green Knight, Fairy Godmother]</span></div>
+        <div class="round">Round 08: <span class="creator">Creator: [Bandersnatch, Giant]</span> | <span class="joiner">Joiner: [Moriarty, Heroic Charge]</span></div>
+        
+        <div class="summary">❌ Generation failed: Only 8 rounds completed - Algorithm failed to generate sufficient cards!</div>
+    </div>
+
+    <h2>🔍 Analysis</h2>
+    <div style="background: white; padding: 15px; border-radius: 8px;">
+        <h3>Issues Found:</h3>
+        <ul>
+            <li><strong>Server-side generation failing:</strong> The edge function isn't properly handling all round generation</li>
+            <li><strong>Card pool depletion:</strong> Algorithm not correctly managing available cards</li>
+            <li><strong>Missing rounds:</strong> Some rounds are not being saved to database (like round 7 in CVLF)</li>
+            <li><strong>Random deck incomplete:</strong> Using same flawed generation logic</li>
+        </ul>
+        
+        <h3>Root Cause:</h3>
+        <p>The card generation edge function has logic errors in card pool management and generation logic. This affects both room drafts and random deck generation.</p>
+        
+        <h3>Solution Needed:</h3>
+        <p>The AFK auto-selection should be implemented server-side using database triggers or scheduled functions, not client-side JavaScript timers.</p>
+    </div>
+</body>
+</html>

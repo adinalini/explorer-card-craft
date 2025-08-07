@@ -199,25 +199,12 @@ const Room = () => {
         // Get duration based on draft type and phase
         let roundDuration = room.round_duration_seconds || 15
         if (room.draft_type === 'mega') roundDuration = 10
-        if (room.draft_type === 'triple') {
-          // For triple draft: 8 seconds per phase, so 16 seconds total per round
-          // But timer runs continuously - no reset between phases
-          roundDuration = 16
-        }
+        if (room.draft_type === 'triple') roundDuration = 8 // 8 seconds per phase
         
         const remaining = Math.max(0, roundDuration - elapsed)
         setTimeRemaining(remaining)
         
-        // For triple draft, check if phase timeout (8 seconds)
-        if (room.draft_type === 'triple') {
-          const phaseTimeRemaining = Math.max(0, 8 - (elapsed % 8))
-          setTimeRemaining(phaseTimeRemaining)
-          
-          if (phaseTimeRemaining <= 0 && !isSelectionLocked) {
-            setIsSelectionLocked(true)
-            handleTimeUp()
-          }
-        } else if (remaining <= 0 && !isSelectionLocked) {
+        if (remaining <= 0 && !isSelectionLocked) {
           setIsSelectionLocked(true)
           handleTimeUp()
         }
@@ -237,7 +224,7 @@ const Room = () => {
         }
       }
     }
-  }, [room?.status, room?.current_round, room?.draft_type, isSelectionLocked]) // Removed round_start_time and triple_draft_phase
+  }, [room?.status, room?.current_round, room?.draft_type, room?.round_start_time, room?.triple_draft_phase, isSelectionLocked])
 
   useEffect(() => {
     if (room?.current_round && room?.status === 'drafting' && userRole !== 'spectator') {

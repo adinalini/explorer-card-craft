@@ -53,7 +53,7 @@ interface Room {
   first_pick_player?: string | null
   mega_draft_turn_count?: number
   current_phase?: string
-  triple_draft_phase?: 1 | 2 | null
+  triple_draft_phase?: number | null
   triple_draft_first_pick?: string | null
 }
 
@@ -125,14 +125,18 @@ const Room = () => {
     
     if (room?.draft_type === 'triple') {
       // Triple draft auto-selection for phase timeout
-      console.log('🔷 TRIPLE: Phase timeout - auto-selecting')
-      await autoSelectRandomCard()
+      console.log('🔷 TRIPLE: Phase timeout - auto-selecting for current turn player')
       
-      // Move to next phase or process round end
-      if (userRole === 'creator') {
-        setTimeout(() => {
-          handleTriplePhaseEnd()
-        }, 500)
+      // Only auto-select if it's actually my turn
+      if (isMyTurn) {
+        await autoSelectRandomCard()
+        
+        // Move to next phase or process round end
+        if (userRole === 'creator') {
+          setTimeout(() => {
+            handleTriplePhaseEnd()
+          }, 500)
+        }
       }
       return
     }
@@ -534,6 +538,12 @@ const Room = () => {
       return
     }
 
+    // For triple draft, only auto-select if it's actually my turn
+    if (room.draft_type === 'triple' && !isMyTurn) {
+      console.log('🔹 TRIPLE: Auto-select skipped - not my turn')
+      return
+    }
+
     // CRITICAL FIX: Check if user has already selected manually first
     if (selectedCard) {
       if (room.draft_type === 'triple') {
@@ -550,9 +560,9 @@ const Room = () => {
         card.round_number === room.current_round && card.side === userRole
       )
     } else if (room.draft_type === 'triple') {
-      // For triple draft, all cards are in the middle (no sides)
+      // For triple draft, all cards are in the middle (no sides) but only for current round
       currentRoundCards = roomCards.filter(card => 
-        card.round_number === room.current_round
+        card.round_number === room.current_round && card.side === 'both'
       )
     } else if (room.draft_type === 'mega') {
       // For mega draft, all cards are in round 1
@@ -585,13 +595,23 @@ const Room = () => {
           .eq('side', userRole)
           .eq('selected_by', userRole)
         freshCheck = data || []
-      } else {
-        // For triple and mega draft, check if user has selected any card in this round
+      } else if (room.draft_type === 'triple') {
+        // For triple draft, check if user has selected any card in this round
         const { data, error: checkError } = await supabaseWithToken
           .from('room_cards')
           .select('*')
           .eq('room_id', roomId)
-          .eq('round_number', room.draft_type === 'mega' ? 1 : room.current_round)
+          .eq('round_number', room.current_round)
+          .eq('side', 'both')
+          .eq('selected_by', userRole)
+        freshCheck = data || []
+      } else {
+        // For mega draft, check if user has selected any card in round 1
+        const { data, error: checkError } = await supabaseWithToken
+          .from('room_cards')
+          .select('*')
+          .eq('room_id', roomId)
+          .eq('round_number', 1)
           .eq('selected_by', userRole)
         freshCheck = data || []
       }
@@ -636,7 +656,31 @@ const Room = () => {
     }
 
     // Get available cards for this user to select
-    const availableCards = currentRoundCards.filter(card => !card.selected_by)
+    let availableCards = currentRoundCards.filter(card => !card.selected_by)
+    
+    // For triple draft, further filter based on phase and turn
+    if (room.draft_type === 'triple') {
+      const currentPhase = room.triple_draft_phase || 1
+      const firstPickPlayer = room.triple_draft_first_pick || 'creator'
+      const selectedCards = currentRoundCards.filter(card => card.selected_by)
+      
+      if (currentPhase === 1) {
+        // Phase 1: First pick player can select from all 3 cards
+        if (userRole !== firstPickPlayer) {
+          console.log('🔹 TRIPLE: Auto-select blocked - not first pick player in phase 1')
+          return
+        }
+      } else if (currentPhase === 2) {
+        // Phase 2: Second pick player can select from remaining 2 cards
+        const secondPickPlayer = firstPickPlayer === 'creator' ? 'joiner' : 'creator'
+        if (userRole !== secondPickPlayer) {
+          console.log('🔹 TRIPLE: Auto-select blocked - not second pick player in phase 2')
+          return
+        }
+        // Filter out the card selected by first pick
+        availableCards = availableCards.filter(card => !selectedCards.some(selected => selected.card_id === card.card_id))
+      }
+    }
     
     // Check if user already has legendary in their deck (for mega draft)
     if (room.draft_type === 'mega') {
@@ -683,6 +727,17 @@ const Room = () => {
         .eq('room_id', roomId)
         .eq('card_id', card.card_id)
         .eq('round_number', room?.draft_type === 'mega' ? 1 : room?.current_round)
+        
+      // For triple draft, also check the side
+      if (room?.draft_type === 'triple') {
+        await supabaseWithToken
+          .from('room_cards')
+          .update({ selected_by: userRole })
+          .eq('room_id', roomId)
+          .eq('card_id', card.card_id)
+          .eq('round_number', room?.current_round)
+          .eq('side', 'both')
+      }
       
       setSelectedCard(card.card_id)
       console.log('✅ Auto-selected fallback card:', card.card_name)
@@ -1468,7 +1523,7 @@ const Room = () => {
                   isSelectionLocked={isSelectionLocked}
                   isMyTurn={isMyTurn}
                   onCardSelect={handleCardSelect}
-                  currentPhase={room.triple_draft_phase || 1}
+                  currentPhase={(room.triple_draft_phase || 1) as 1 | 2}
                   firstPickPlayer={room.triple_draft_first_pick || 'creator'}
                 />
               </div>

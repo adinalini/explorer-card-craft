@@ -67,7 +67,7 @@ const RandomDeck = () => {
           roundCards = getRandomCards(4, usedCardIds)
         }
 
-        // If we don't have enough cards, fill with random cards
+        // If we don't have enough cards, fill with any available cards as fallback
         if (roundCards.length < 4) {
           const additionalCards = getRandomCards(4 - roundCards.length, 
             [...usedCardIds, ...roundCards.map(c => c.id)])
@@ -86,12 +86,10 @@ const RandomDeck = () => {
             selection_order: round
           })
 
-          // Mark all cards from this round as used to prevent duplicates
-          roundCards.forEach(card => {
-            if (!usedCardIds.includes(card.id)) {
-              usedCardIds.push(card.id)
-            }
-          })
+          // Only mark the selected card as used
+          usedCardIds.push(selectedCard.id)
+        } else {
+          console.error(`No cards available for round ${round}`)
         }
       }
 

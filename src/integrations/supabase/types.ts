@@ -126,6 +126,7 @@ export type Database = {
           round_number: number
           selected_by: string | null
           side: string
+          turn_order: number | null
         }
         Insert: {
           card_id: string
@@ -137,6 +138,7 @@ export type Database = {
           round_number: number
           selected_by?: string | null
           side: string
+          turn_order?: number | null
         }
         Update: {
           card_id?: string
@@ -148,6 +150,7 @@ export type Database = {
           round_number?: number
           selected_by?: string | null
           side?: string
+          turn_order?: number | null
         }
         Relationships: [
           {
@@ -164,11 +167,14 @@ export type Database = {
           created_at: string
           creator_name: string
           creator_ready: boolean | null
+          current_phase: string | null
           current_round: number | null
           draft_type: string
+          first_pick_player: string | null
           id: string
           joiner_name: string | null
           joiner_ready: boolean | null
+          mega_draft_turn_count: number | null
           round_duration_seconds: number | null
           round_start_time: string | null
           status: string
@@ -177,11 +183,14 @@ export type Database = {
           created_at?: string
           creator_name: string
           creator_ready?: boolean | null
+          current_phase?: string | null
           current_round?: number | null
           draft_type?: string
+          first_pick_player?: string | null
           id: string
           joiner_name?: string | null
           joiner_ready?: boolean | null
+          mega_draft_turn_count?: number | null
           round_duration_seconds?: number | null
           round_start_time?: string | null
           status?: string
@@ -190,11 +199,14 @@ export type Database = {
           created_at?: string
           creator_name?: string
           creator_ready?: boolean | null
+          current_phase?: string | null
           current_round?: number | null
           draft_type?: string
+          first_pick_player?: string | null
           id?: string
           joiner_name?: string | null
           joiner_ready?: boolean | null
+          mega_draft_turn_count?: number | null
           round_duration_seconds?: number | null
           round_start_time?: string | null
           status?: string

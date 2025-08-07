@@ -50,6 +50,9 @@ interface Room {
   round_duration_seconds: number
   current_turn_player?: string | null
   mega_draft_cards?: string[]
+  first_pick_player?: string | null
+  mega_draft_turn_count?: number
+  current_phase?: string
 }
 
 interface RoomCard {
@@ -147,7 +150,10 @@ const Room = () => {
         const now = new Date()
         const roundStart = new Date(room.round_start_time!)
         const elapsed = (now.getTime() - roundStart.getTime()) / 1000
-        const roundDuration = room.round_duration_seconds || 15
+        // Get duration based on draft type
+        let roundDuration = room.round_duration_seconds || 15
+        if (room.draft_type === 'triple') roundDuration = 8
+        if (room.draft_type === 'mega') roundDuration = 10
         const remaining = Math.max(0, roundDuration - elapsed)
         
         setTimeRemaining(remaining)
@@ -495,10 +501,30 @@ const Room = () => {
       return
     }
 
-    // Get current round cards
-    let currentRoundCards = roomCards.filter(card => 
-      card.round_number === room.current_round && card.side === userRole
-    )
+    let currentRoundCards: RoomCard[] = []
+    let queryConditions: any = {
+      room_id: roomId,
+      round_number: room.current_round
+    }
+
+    // Handle different draft types for auto-selection
+    if (room.draft_type === 'default') {
+      queryConditions.side = userRole
+      currentRoundCards = roomCards.filter(card => 
+        card.round_number === room.current_round && card.side === userRole
+      )
+    } else if (room.draft_type === 'triple') {
+      // For triple draft, all cards are in the middle (no sides)
+      currentRoundCards = roomCards.filter(card => 
+        card.round_number === room.current_round
+      )
+    } else if (room.draft_type === 'mega') {
+      // For mega draft, all cards are in round 1
+      queryConditions.round_number = 1
+      currentRoundCards = roomCards.filter(card => 
+        card.round_number === 1
+      )
+    }
     
     // CRITICAL: Real-time check for manual selection
     const userSelectedCard = currentRoundCards.find(card => card.selected_by === userRole)
@@ -511,15 +537,29 @@ const Room = () => {
     // CRITICAL: Final fresh database check to prevent race condition
     try {
       const supabaseWithToken = getSupabaseWithSession()
-      const { data: freshCheck, error: checkError } = await supabaseWithToken
-        .from('room_cards')
-        .select('*')
-        .eq('room_id', roomId)
-        .eq('round_number', room.current_round)
-        .eq('side', userRole)
-        .eq('selected_by', userRole)
+      let freshCheck: any[] = []
       
-      if (!checkError && freshCheck && freshCheck.length > 0) {
+      if (room.draft_type === 'default') {
+        const { data, error: checkError } = await supabaseWithToken
+          .from('room_cards')
+          .select('*')
+          .eq('room_id', roomId)
+          .eq('round_number', room.current_round)
+          .eq('side', userRole)
+          .eq('selected_by', userRole)
+        freshCheck = data || []
+      } else {
+        // For triple and mega draft, check if user has selected any card in this round
+        const { data, error: checkError } = await supabaseWithToken
+          .from('room_cards')
+          .select('*')
+          .eq('room_id', roomId)
+          .eq('round_number', room.draft_type === 'mega' ? 1 : room.current_round)
+          .eq('selected_by', userRole)
+        freshCheck = data || []
+      }
+      
+      if (freshCheck && freshCheck.length > 0) {
         console.log('🚫 Auto-select skipped: Fresh database check shows manual selection exists')
         setSelectedCard(freshCheck[0].card_id)
         return
@@ -537,8 +577,7 @@ const Room = () => {
           .from('room_cards')
           .select('*')
           .eq('room_id', roomId)
-          .eq('round_number', room.current_round)
-          .eq('side', userRole)
+          .eq('round_number', room.draft_type === 'mega' ? 1 : room.current_round)
         
         if (!fetchError && freshCards && freshCards.length > 0) {
           currentRoundCards = freshCards
@@ -558,14 +597,45 @@ const Room = () => {
       }
     }
 
+    // Get available cards for this user to select
     const availableCards = currentRoundCards.filter(card => !card.selected_by)
+    
+    // Check if user already has legendary in their deck (for mega draft)
+    if (room.draft_type === 'mega') {
+      const userDeck = playerDecks.filter(card => card.player_side === userRole)
+      const hasLegendary = userDeck.some(card => card.is_legendary)
+      
+      if (hasLegendary) {
+        // Filter out legendary cards if user already has one
+        const nonLegendaryCards = availableCards.filter(card => !card.is_legendary)
+        if (nonLegendaryCards.length > 0) {
+          const randomCard = nonLegendaryCards[Math.floor(Math.random() * nonLegendaryCards.length)]
+          await performAutoSelect(randomCard)
+          return
+        }
+      }
+      
+      // If it's the last card and no legendary, force select a legendary
+      if (userDeck.length === 12 && !hasLegendary) {
+        const legendaryCards = availableCards.filter(card => card.is_legendary)
+        if (legendaryCards.length > 0) {
+          const randomCard = legendaryCards[Math.floor(Math.random() * legendaryCards.length)]
+          await performAutoSelect(randomCard)
+          return
+        }
+      }
+    }
+    
     if (availableCards.length === 0) {
       console.log('🚫 Auto-select skipped: No available cards (all selected)')
       return
     }
 
     const randomCard = availableCards[Math.floor(Math.random() * availableCards.length)]
-    
+    await performAutoSelect(randomCard)
+  }
+
+  const performAutoSelect = async (card: RoomCard) => {
     try {
       const supabaseWithToken = getSupabaseWithSession()
       
@@ -573,11 +643,11 @@ const Room = () => {
         .from('room_cards')
         .update({ selected_by: userRole })
         .eq('room_id', roomId)
-        .eq('card_id', randomCard.card_id)
-        .eq('round_number', room.current_round)
+        .eq('card_id', card.card_id)
+        .eq('round_number', room?.draft_type === 'mega' ? 1 : room?.current_round)
       
-      setSelectedCard(randomCard.card_id)
-      console.log('✅ Auto-selected fallback card:', randomCard.card_name)
+      setSelectedCard(card.card_id)
+      console.log('✅ Auto-selected fallback card:', card.card_name)
     } catch (error) {
       console.error('Error auto-selecting card:', error)
     }
@@ -779,24 +849,38 @@ const Room = () => {
       // Create authenticated client for card selection
       const supabaseWithToken = getSupabaseWithSession()
 
-      // Clear any previous selection for this user's side
-      console.log('Clearing previous selections for side:', userRole)
-      await supabaseWithToken
-        .from('room_cards')
-        .update({ selected_by: null })
-        .eq('room_id', roomId)
-        .eq('side', userRole)
-        .eq('round_number', room?.current_round)
-        .not('selected_by', 'is', null)
+      // Clear any previous selection for this user based on draft type
+      console.log('Clearing previous selections for user:', userRole)
+      
+      if (room?.draft_type === 'default') {
+        // Default draft: clear previous selection for this user's side
+        await supabaseWithToken
+          .from('room_cards')
+          .update({ selected_by: null })
+          .eq('room_id', roomId)
+          .eq('side', userRole)
+          .eq('round_number', room?.current_round)
+          .not('selected_by', 'is', null)
+      } else {
+        // Triple/Mega draft: clear any previous selection by this user in this round
+        const roundToCheck = room?.draft_type === 'mega' ? 1 : room?.current_round
+        await supabaseWithToken
+          .from('room_cards')
+          .update({ selected_by: null })
+          .eq('room_id', roomId)
+          .eq('round_number', roundToCheck)
+          .eq('selected_by', userRole)
+      }
 
       // Set new selection
       console.log('Setting new selection in database')
+      const roundToUpdate = room?.draft_type === 'mega' ? 1 : room?.current_round
       const { error } = await supabaseWithToken
         .from('room_cards')
         .update({ selected_by: userRole })
         .eq('room_id', roomId)
         .eq('card_id', cardId)
-        .eq('round_number', room?.current_round)
+        .eq('round_number', roundToUpdate)
 
       if (error) {
         console.error('Error updating card selection:', error)
@@ -865,6 +949,49 @@ const Room = () => {
       default: return type
     }
   }
+
+  // Calculate if it's the current user's turn for different draft types
+  const isMyTurn = (() => {
+    if (!room || room.status !== 'drafting') return false
+    
+    if (room.draft_type === 'default') {
+      const isCreatorTurn = room.current_round % 2 === 1
+      return (userRole === 'creator' && isCreatorTurn) || (userRole === 'joiner' && !isCreatorTurn)
+    }
+    
+    if (room.draft_type === 'triple') {
+      // Determine first pick player for this round
+      const isFirstPickPhase = room.current_phase === 'first_pick'
+      const firstPickPlayer = room.first_pick_player
+      
+      if (isFirstPickPhase) {
+        return userRole === firstPickPlayer
+      } else {
+        return userRole !== firstPickPlayer
+      }
+    }
+    
+    if (room.draft_type === 'mega') {
+      // Complex turn pattern: 1-2-2-2-2-2...-1
+      const totalTurns = room.mega_draft_turn_count || 0
+      const firstPickPlayer = room.first_pick_player
+      
+      if (totalTurns === 0) {
+        // First turn
+        return userRole === firstPickPlayer
+      } else if (totalTurns === 25) {
+        // Last turn (26th turn)
+        return userRole !== firstPickPlayer
+      } else {
+        // Turns 1-24: alternate in pairs except first
+        const turnGroup = Math.floor(totalTurns / 2)
+        const isFirstPickTurn = turnGroup % 2 === 0
+        return (userRole === firstPickPlayer) === isFirstPickTurn
+      }
+    }
+    
+    return false
+  })()
 
   const currentRoundCards = roomCards.filter(card => 
     card.round_number === room?.current_round && card.side === userRole
@@ -974,96 +1101,203 @@ const Room = () => {
             </div>
           </div>
         ) : room.status === 'drafting' ? (
-          // Draft in progress
+          // Draft in progress - Different layouts based on draft type
           <div className="space-y-8">
-            {/* Draft Status */}
-            <div className="text-center space-y-4">
-              <h2 className="text-2xl font-bold text-black">
-                Round {room.current_round} of 13
-              </h2>
-              {!isSelectionLocked ? (
-                <div className="space-y-2">
-                  <p className="text-lg text-black">Choose your card!</p>
-                  <div className="text-2xl font-bold text-primary">
-                    {Math.ceil(timeRemaining)}s remaining
-                  </div>
-                </div>
-              ) : (
-                <p className="text-lg text-black">Revealing selections...</p>
-              )}
-            </div>
-
-            {/* Card Selection - Mobile responsive */}
-            <div className="space-y-8">
-              {/* Mobile: Stack vertically, Desktop: Side by side */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {/* Creator's cards */}
-                <div className="space-y-4">
-                  <h3 className="text-xl font-semibold text-center text-black">
-                    {room.creator_name}'s Cards
-                  </h3>
-                  <div className="grid grid-cols-2 gap-4">
-                    {roomCards
-                      .filter(card => 
-                        card.round_number === room.current_round && 
-                        card.side === 'creator'
-                      )
-                      .sort((a, b) => a.card_id.localeCompare(b.card_id))
-                      .map((card, index) => (
-                        <DraftCard
-                          key={`${card.id}-${index}`}
-                          cardId={card.card_id}
-                          cardName={card.card_name}
-                          cardImage={card.card_image}
-                          isLegendary={card.is_legendary}
-                          isSelected={
-                            isSelectionLocked 
-                              ? card.selected_by === 'creator'
-                              : (userRole === 'creator' ? selectedCard === card.card_id : false)
-                          }
-                          onSelect={() => userRole === 'creator' ? handleCardSelect(card.card_id) : {}}
-                          disabled={isSelectionLocked || userRole !== 'creator'}
-                          isRevealing={isSelectionLocked}
-                          showUnselectedOverlay={isSelectionLocked && !card.selected_by}
-                        />
-                      ))}
-                  </div>
+            {room.draft_type === 'default' ? (
+              // Default Draft Layout
+              <div className="space-y-8">
+                {/* Draft Status */}
+                <div className="text-center space-y-4">
+                  <h2 className="text-2xl font-bold text-black">
+                    Round {room.current_round} of 13
+                  </h2>
+                  {!isSelectionLocked ? (
+                    <div className="space-y-2">
+                      <p className="text-lg text-black">Choose your card!</p>
+                      <div className="text-2xl font-bold text-primary">
+                        {Math.ceil(timeRemaining)}s remaining
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="text-lg text-black">Revealing selections...</p>
+                  )}
                 </div>
 
-                {/* Joiner's cards */}
-                <div className="space-y-4">
-                  <h3 className="text-xl font-semibold text-center text-black">
-                    {room.joiner_name}'s Cards
-                  </h3>
-                  <div className="grid grid-cols-2 gap-4">
-                    {roomCards
-                      .filter(card => 
-                        card.round_number === room.current_round && 
-                        card.side === 'joiner'
-                      )
-                      .sort((a, b) => a.card_id.localeCompare(b.card_id))
-                      .map((card, index) => (
-                        <DraftCard
-                          key={`${card.id}-${index}`}
-                          cardId={card.card_id}
-                          cardName={card.card_name}
-                          cardImage={card.card_image}
-                          isLegendary={card.is_legendary}
-                          isSelected={
-                            isSelectionLocked 
-                              ? card.selected_by === 'joiner'
-                              : (userRole === 'joiner' ? selectedCard === card.card_id : false)
-                          }
-                          onSelect={() => userRole === 'joiner' ? handleCardSelect(card.card_id) : {}}
-                          disabled={isSelectionLocked || userRole !== 'joiner'}
-                          isRevealing={isSelectionLocked}
-                          showUnselectedOverlay={isSelectionLocked && !card.selected_by}
-                        />
-                      ))}
+                {/* Card Selection - Mobile responsive */}
+                <div className="space-y-8">
+                  {/* Mobile: Stack vertically, Desktop: Side by side */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    {/* Creator's cards */}
+                    <div className="space-y-4">
+                      <h3 className="text-xl font-semibold text-center text-black">
+                        {room.creator_name}'s Cards
+                      </h3>
+                      <div className="grid grid-cols-2 gap-4">
+                        {roomCards
+                          .filter(card => 
+                            card.round_number === room.current_round && 
+                            card.side === 'creator'
+                          )
+                          .sort((a, b) => a.card_id.localeCompare(b.card_id))
+                          .map((card, index) => (
+                            <DraftCard
+                              key={`${card.id}-${index}`}
+                              cardId={card.card_id}
+                              cardName={card.card_name}
+                              cardImage={card.card_image}
+                              isLegendary={card.is_legendary}
+                              isSelected={
+                                isSelectionLocked 
+                                  ? card.selected_by === 'creator'
+                                  : (userRole === 'creator' ? selectedCard === card.card_id : false)
+                              }
+                              onSelect={() => userRole === 'creator' ? handleCardSelect(card.card_id) : {}}
+                              disabled={isSelectionLocked || userRole !== 'creator'}
+                              isRevealing={isSelectionLocked}
+                              showUnselectedOverlay={isSelectionLocked && !card.selected_by}
+                            />
+                          ))}
+                      </div>
+                    </div>
+
+                    {/* Joiner's cards */}
+                    <div className="space-y-4">
+                      <h3 className="text-xl font-semibold text-center text-black">
+                        {room.joiner_name}'s Cards
+                      </h3>
+                      <div className="grid grid-cols-2 gap-4">
+                        {roomCards
+                          .filter(card => 
+                            card.round_number === room.current_round && 
+                            card.side === 'joiner'
+                          )
+                          .sort((a, b) => a.card_id.localeCompare(b.card_id))
+                          .map((card, index) => (
+                            <DraftCard
+                              key={`${card.id}-${index}`}
+                              cardId={card.card_id}
+                              cardName={card.card_name}
+                              cardImage={card.card_image}
+                              isLegendary={card.is_legendary}
+                              isSelected={
+                                isSelectionLocked 
+                                  ? card.selected_by === 'joiner'
+                                  : (userRole === 'joiner' ? selectedCard === card.card_id : false)
+                              }
+                              onSelect={() => userRole === 'joiner' ? handleCardSelect(card.card_id) : {}}
+                              disabled={isSelectionLocked || userRole !== 'joiner'}
+                              isRevealing={isSelectionLocked}
+                              showUnselectedOverlay={isSelectionLocked && !card.selected_by}
+                            />
+                          ))}
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
+            ) : room.draft_type === 'triple' ? (
+              // Triple Draft Layout
+              <div className="space-y-8">
+                {/* Draft Status */}
+                <div className="text-center space-y-4">
+                  <h2 className="text-2xl font-bold text-black">
+                    Round {room.current_round} of 13 - {room.current_phase === 'first_pick' ? 'First Pick' : 'Second Pick'}
+                  </h2>
+                  <div className="space-y-2">
+                    <div className="flex justify-center gap-8">
+                      <div className="text-center">
+                        <div className="text-lg font-semibold text-black">
+                          {room.creator_name} {room.first_pick_player === 'creator' && room.current_phase === 'first_pick' ? '(First Pick)' : ''}
+                          {room.first_pick_player !== 'creator' && room.current_phase === 'second_pick' ? '(Your Turn)' : ''}
+                        </div>
+                        {userRole === 'creator' && (
+                          <div className="text-sm text-muted-foreground">
+                            {isMyTurn ? 'Make your selection' : 'Waiting for other player'}
+                          </div>
+                        )}
+                      </div>
+                      <div className="text-center">
+                        <div className="text-lg font-semibold text-black">
+                          {room.joiner_name} {room.first_pick_player === 'joiner' && room.current_phase === 'first_pick' ? '(First Pick)' : ''}
+                          {room.first_pick_player !== 'joiner' && room.current_phase === 'second_pick' ? '(Your Turn)' : ''}
+                        </div>
+                        {userRole === 'joiner' && (
+                          <div className="text-sm text-muted-foreground">
+                            {isMyTurn ? 'Make your selection' : 'Waiting for other player'}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    {!isSelectionLocked ? (
+                      <div className="text-2xl font-bold text-primary">
+                        {Math.ceil(timeRemaining)}s remaining
+                      </div>
+                    ) : (
+                      <p className="text-lg text-black">Revealing selection...</p>
+                    )}
+                  </div>
+                </div>
+
+                {/* Triple Draft Cards */}
+                <TripleDraftCards
+                  cards={roomCards.filter(card => card.round_number === room.current_round)}
+                  selectedCard={selectedCard}
+                  userRole={userRole}
+                  isSelectionLocked={isSelectionLocked}
+                  onCardSelect={handleCardSelect}
+                />
+              </div>
+            ) : (
+              // Mega Draft Layout
+              <div className="space-y-8">
+                {/* Draft Status */}
+                <div className="text-center space-y-4">
+                  <h2 className="text-2xl font-bold text-black">
+                    Mega Draft - Turn {(room.mega_draft_turn_count || 0) + 1} of 26
+                  </h2>
+                  <div className="space-y-2">
+                    <div className="flex justify-center gap-8">
+                      <div className="text-center">
+                        <div className="text-lg font-semibold text-black">
+                          {room.creator_name} {room.first_pick_player === 'creator' ? '(First Pick Player)' : ''}
+                        </div>
+                        {userRole === 'creator' && (
+                          <div className="text-sm text-muted-foreground">
+                            {isMyTurn ? 'Make your selection' : 'Waiting for other player'}
+                          </div>
+                        )}
+                      </div>
+                      <div className="text-center">
+                        <div className="text-lg font-semibold text-black">
+                          {room.joiner_name} {room.first_pick_player === 'joiner' ? '(First Pick Player)' : ''}
+                        </div>
+                        {userRole === 'joiner' && (
+                          <div className="text-sm text-muted-foreground">
+                            {isMyTurn ? 'Make your selection' : 'Waiting for other player'}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    {!isSelectionLocked ? (
+                      <div className="text-2xl font-bold text-primary">
+                        {Math.ceil(timeRemaining)}s remaining
+                      </div>
+                    ) : (
+                      <p className="text-lg text-black">Processing selection...</p>
+                    )}
+                  </div>
+                </div>
+
+                {/* Mega Draft Grid */}
+                <MegaDraftGrid
+                  cards={roomCards.filter(card => card.round_number === 1)} // All cards in round 1 for mega draft
+                  selectedCard={selectedCard}
+                  userRole={userRole}
+                  isMyTurn={isMyTurn}
+                  onCardSelect={handleCardSelect}
+                />
+              </div>
+            )}
 
             {/* Player Decks - Mobile responsive */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-12">

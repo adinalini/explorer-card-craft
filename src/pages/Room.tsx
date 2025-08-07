@@ -234,10 +234,18 @@ const Room = () => {
         console.log('🕐 TIMER UPDATE - Remaining:', remaining)
         setTimeRemaining(remaining)
         
+        // CRITICAL FIX: Only trigger handleTimeUp if timer expires AND not already locked
         if (remaining <= 0 && !isSelectionLocked) {
           console.log('🕐 TIMER EXPIRED - Triggering handleTimeUp')
           setIsSelectionLocked(true)
           handleTimeUp()
+        } else if (remaining <= 0 && isSelectionLocked) {
+          console.log('🕐 TIMER AT ZERO - But selection locked, stopping timer')
+          // Stop the timer when it reaches 0 and is locked
+          if (timerIntervalRef.current) {
+            clearInterval(timerIntervalRef.current)
+            timerIntervalRef.current = null
+          }
         }
       }
 
@@ -1075,12 +1083,22 @@ const Room = () => {
   }
 
   const handleTriplePhaseEnd = async () => {
-    if (!room || !roomId || userRole !== 'creator') return
+    console.log('🔷 TRIPLE PHASE END: Function called')
+    console.log('🔷 TRIPLE PHASE END: Room:', room?.id)
+    console.log('🔷 TRIPLE PHASE END: User role:', userRole)
+    
+    if (!room || !roomId || userRole !== 'creator') {
+      console.log('🔷 TRIPLE PHASE END: Blocked - missing data or not creator')
+      return
+    }
     
     try {
       const supabaseWithToken = getSupabaseWithSession()
       const currentRound = room.current_round
       const currentPhase = room.triple_draft_phase || 1
+      
+      console.log('🔷 TRIPLE PHASE END: Current round:', currentRound)
+      console.log('🔷 TRIPLE PHASE END: Current phase:', currentPhase)
       
       // Get current round cards
       const { data: roundCards } = await supabaseWithToken
@@ -1090,6 +1108,10 @@ const Room = () => {
         .eq('round_number', currentRound)
       
       const selectedCards = roundCards?.filter(card => card.selected_by) || []
+      
+      console.log('🔷 TRIPLE PHASE END: Total round cards:', roundCards?.length || 0)
+      console.log('🔷 TRIPLE PHASE END: Selected cards:', selectedCards.length)
+      console.log('🔷 TRIPLE PHASE END: Selected cards details:', selectedCards.map(c => `${c.card_id} by ${c.selected_by}`))
       
       if (currentPhase === 1 && selectedCards.length >= 1) {
         // Move to phase 2
@@ -1117,7 +1139,11 @@ const Room = () => {
         }, 2000)
       } else if (currentPhase === 2 && selectedCards.length >= 2) {
         // Process full round end
+        console.log('🔷 TRIPLE PHASE END: Phase 2 complete with 2+ selections, calling processRoundEnd')
         processRoundEnd()
+      } else {
+        console.log('🔷 TRIPLE PHASE END: Conditions not met for phase transition')
+        console.log('🔷 TRIPLE PHASE END: Phase:', currentPhase, 'Selected:', selectedCards.length)
       }
     } catch (error) {
       console.error('🔷 TRIPLE: Error in phase end:', error)

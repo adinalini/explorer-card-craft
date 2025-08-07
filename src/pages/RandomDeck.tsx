@@ -2,7 +2,7 @@ import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import { DeckDisplay } from "@/components/DeckDisplay"
-import { getRandomCards } from "@/utils/cardData"
+import { supabase } from "@/integrations/supabase/client"
 import { ArrowLeft } from "lucide-react"
 
 interface RandomCard {
@@ -22,38 +22,61 @@ const RandomDeck = () => {
     setIsGenerating(true)
     
     try {
-      const deck: RandomCard[] = []
-      const usedCardIds: string[] = []
-
-      // Generate exactly 13 cards - one per round
-      for (let round = 1; round <= 13; round++) {
-        // Get all available cards excluding already used ones
-        const availableCards = getRandomCards(100, usedCardIds) // Get plenty of cards to choose from
-        
-        if (availableCards.length > 0) {
-          // Pick a random card from available cards
-          const selectedCard = availableCards[Math.floor(Math.random() * availableCards.length)]
-          
-          // Add the selected card to the deck
-          deck.push({
-            card_id: selectedCard.id,
-            card_name: selectedCard.name,
-            card_image: selectedCard.image,
-            is_legendary: selectedCard.isLegendary,
-            selection_order: round
-          })
-          
-          // Mark this card as used
-          usedCardIds.push(selectedCard.id)
-        } else {
-          console.error(`No available cards for round ${round}`)
-          break
+      // Generate a temporary room ID for the random deck generation
+      const tempRoomId = `random_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+      
+      // Call the backend function to generate all 13 rounds of cards (4 cards per round)
+      const { data, error } = await supabase.functions.invoke('generate-round-cards', {
+        body: {
+          roomId: tempRoomId,
+          round: 'all',
+          usedCardIds: [],
+          roundType: 'default'
         }
+      })
+
+      if (error) {
+        console.error('Error calling generate-round-cards:', error)
+        throw error
       }
 
-      // Ensure we have exactly 13 cards
-      if (deck.length !== 13) {
-        console.error(`Expected 13 cards, got ${deck.length}`)
+      if (!data || !data.success) {
+        throw new Error('Failed to generate cards from backend')
+      }
+
+      // The backend returns all cards for all rounds
+      // Group them by round and randomly select 1 from each round
+      const cardsByRound: { [key: number]: any[] } = {}
+      
+      // Group cards by round number
+      data.cards?.forEach((card: any) => {
+        const roundNum = card.round_number
+        if (!cardsByRound[roundNum]) {
+          cardsByRound[roundNum] = []
+        }
+        cardsByRound[roundNum].push(card)
+      })
+
+      const deck: RandomCard[] = []
+
+      // For each round, randomly select 1 card from the 4 available
+      for (let round = 1; round <= 13; round++) {
+        const roundCards = cardsByRound[round] || []
+        
+        if (roundCards.length > 0) {
+          // Randomly pick one card from this round
+          const selectedCard = roundCards[Math.floor(Math.random() * roundCards.length)]
+          
+          deck.push({
+            card_id: selectedCard.card_id,
+            card_name: selectedCard.card_name,
+            card_image: selectedCard.card_image,
+            is_legendary: selectedCard.is_legendary,
+            selection_order: round
+          })
+        } else {
+          console.error(`No cards available for round ${round}`)
+        }
       }
 
       setRandomDeck(deck)

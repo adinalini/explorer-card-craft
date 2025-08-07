@@ -11,6 +11,7 @@ interface DraftCardProps {
   disabled?: boolean
   isRevealing?: boolean
   showUnselectedOverlay?: boolean
+  isOpponentCard?: boolean
 }
 
 export function DraftCard({ 
@@ -22,7 +23,8 @@ export function DraftCard({
   onSelect, 
   disabled = false,
   isRevealing = false,
-  showUnselectedOverlay = false
+  showUnselectedOverlay = false,
+  isOpponentCard = false
 }: DraftCardProps) {
   return (
     <div
@@ -40,12 +42,19 @@ export function DraftCard({
       onClick={!disabled ? onSelect : undefined}
     >
       <div className="aspect-[3/4] relative">
-        <CardImage
-          cardId={cardId}
-          cardName={cardName}
-          className="w-full h-full object-cover"
-        />
-        {isLegendary && (
+        {isOpponentCard ? (
+          // Show card back for opponent selections during drafting
+          <div className="w-full h-full bg-gradient-to-br from-blue-900 to-purple-900 flex items-center justify-center">
+            <div className="text-white text-4xl">🂠</div>
+          </div>
+        ) : (
+          <CardImage
+            cardId={cardId}
+            cardName={cardName}
+            className="w-full h-full object-cover"
+          />
+        )}
+        {isLegendary && !isOpponentCard && (
           <div className="absolute top-2 right-2 bg-yellow-500 text-white px-2 py-1 rounded text-xs font-bold">
             LEGENDARY
           </div>
@@ -58,7 +67,7 @@ export function DraftCard({
       </div>
       <div className="p-2 bg-white">
         <h3 className="text-sm font-semibold text-center text-black truncate">
-          {cardName}
+          {isOpponentCard ? "Hidden Card" : cardName}
         </h3>
       </div>
     </div>

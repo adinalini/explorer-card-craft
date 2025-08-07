@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
@@ -276,6 +276,9 @@ const Index = () => {
                 </div>
                 <DialogHeader className="relative z-10 pt-6">
                   <DialogTitle className="text-2xl text-center text-white">Create New Room</DialogTitle>
+                  <DialogDescription className="text-center text-white/80">
+                    Set up a new drafting room and invite players to join
+                  </DialogDescription>
                 </DialogHeader>
                 <div className="space-y-6 py-4">
                   <div className="space-y-4">
@@ -350,6 +353,9 @@ const Index = () => {
                 </div>
                 <DialogHeader className="relative z-10 pt-6">
                   <DialogTitle className="text-2xl text-center text-white">Join Room</DialogTitle>
+                  <DialogDescription className="text-center text-white/80">
+                    Enter the room ID to join an existing draft
+                  </DialogDescription>
                 </DialogHeader>
                 <div className="space-y-6 py-4">
                   <div className="space-y-2">

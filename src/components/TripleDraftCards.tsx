@@ -36,9 +36,10 @@ export function TripleDraftCards({
                 : selectedCard === card.card_id
             }
             onSelect={() => onCardSelect(card.card_id)}
-            disabled={isSelectionLocked || card.selected_by}
+            disabled={isSelectionLocked || (card.selected_by && card.selected_by !== userRole)}
             isRevealing={isSelectionLocked}
             showUnselectedOverlay={isSelectionLocked && !card.selected_by}
+            isOpponentCard={card.selected_by && card.selected_by !== userRole && !isSelectionLocked}
           />
         ))}
       </div>

@@ -1385,13 +1385,13 @@ const Room = () => {
                       {/* Turn Arrow */}
                       <div className="flex items-center justify-center w-12">
                         {isMyTurn && userRole === 'creator' ? (
-                          <div className="text-2xl text-primary animate-pulse">←</div>
+                          <div className="text-6xl text-primary animate-pulse">←</div>
                         ) : isMyTurn && userRole === 'joiner' ? (
-                          <div className="text-2xl text-primary animate-pulse">→</div>
+                          <div className="text-6xl text-primary animate-pulse">→</div>
                         ) : !isMyTurn && userRole === 'creator' ? (
-                          <div className="text-2xl text-primary animate-pulse">→</div>
+                          <div className="text-6xl text-primary animate-pulse">→</div>
                         ) : (
-                          <div className="text-2xl text-primary animate-pulse">←</div>
+                          <div className="text-6xl text-primary animate-pulse">←</div>
                         )}
                       </div>
                       
@@ -1450,13 +1450,13 @@ const Room = () => {
                       {/* Turn Arrow */}
                       <div className="flex items-center justify-center w-12">
                         {isMyTurn && userRole === 'creator' ? (
-                          <div className="text-2xl text-primary animate-pulse">←</div>
+                          <div className="text-6xl text-primary animate-pulse">←</div>
                         ) : isMyTurn && userRole === 'joiner' ? (
-                          <div className="text-2xl text-primary animate-pulse">→</div>
+                          <div className="text-6xl text-primary animate-pulse">→</div>
                         ) : !isMyTurn && userRole === 'creator' ? (
-                          <div className="text-2xl text-primary animate-pulse">→</div>
+                          <div className="text-6xl text-primary animate-pulse">→</div>
                         ) : (
-                          <div className="text-2xl text-primary animate-pulse">←</div>
+                          <div className="text-6xl text-primary animate-pulse">←</div>
                         )}
                       </div>
                       

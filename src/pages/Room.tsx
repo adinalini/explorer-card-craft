@@ -899,6 +899,18 @@ const Room = () => {
       return
     }
 
+    // CRITICAL: For triple draft, check if it's the user's turn
+    if (room?.draft_type === 'triple') {
+      const isFirstPickPhase = room.current_phase === 'first_pick'
+      const firstPickPlayer = room.first_pick_player
+      const isUserTurn = isFirstPickPhase ? userRole === firstPickPlayer : userRole !== firstPickPlayer
+      
+      if (!isUserTurn) {
+        console.log('Selection blocked - not user\'s turn in triple draft')
+        return
+      }
+    }
+
     // Additional check: verify time hasn't expired even if isSelectionLocked hasn't been updated yet
     if (room?.status === 'drafting' && room.round_start_time) {
       const now = new Date()
@@ -992,8 +1004,47 @@ const Room = () => {
 
       console.log('✅ Manual selection confirmed:', cardId)
       
-      // For mega draft, immediately lock and start reveal phase
-      if (room?.draft_type === 'mega') {
+      // For triple draft, immediately progress turn after selection
+      if (room?.draft_type === 'triple') {
+        setIsSelectionLocked(true)
+        setShowReveal(true)
+        
+        // Add selected card to deck immediately
+        try {
+          const cardData = roomCards.find(card => card.card_id === cardId)
+          if (cardData) {
+            const { error: deckError } = await supabaseWithToken
+              .from('player_decks')
+              .insert({
+                room_id: roomId,
+                player_side: userRole,
+                card_id: cardId,
+                card_name: cardData.card_name,
+                card_image: cardData.card_image,
+                is_legendary: cardData.is_legendary,
+                selection_order: ((room.current_round - 1) * 2) + (room.current_phase === 'first_pick' ? 1 : 2)
+              })
+            
+            if (deckError) {
+              console.error('Error adding card to deck:', deckError)
+            } else {
+              console.log('✅ Added card to deck:', cardId)
+            }
+          }
+        } catch (deckError) {
+          console.error('Error in deck update:', deckError)
+        }
+        
+        // Progress to next turn/round if creator
+        if (userRole === 'creator' && !isProcessingRound) {
+          setTimeout(() => {
+            if (!isProcessingRound) {
+              processRoundEnd()
+            }
+          }, 1000) // Short delay to show selection
+        }
+      } else if (room?.draft_type === 'mega') {
+        // For mega draft, immediately lock and start reveal phase
         setIsSelectionLocked(true)
         setShowReveal(true)
         

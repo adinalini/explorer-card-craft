@@ -1608,6 +1608,11 @@ const Room = () => {
         setShowReveal(true)
         setIsRevealing(true)
         
+        // Force immediate card data refresh to show correct tick/cross
+        setTimeout(() => {
+          fetchRoomCards()
+        }, 100)
+        
         // After 2 seconds, trigger phase end check
         setTimeout(() => {
           console.log('🔷 TRIPLE: Reveal ended, checking phase advancement')

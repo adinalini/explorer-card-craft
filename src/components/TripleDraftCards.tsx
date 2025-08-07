@@ -57,7 +57,7 @@ export function TripleDraftCards({
             }
             isDisabled = true
           } else if (currentPhase === 2 && !isSelectionLocked) {
-            // Phase 2: Show first pick selection appropriately, others available for second pick
+            // Phase 2: First pick card shows as selected (tick/cross), others available for second pick
             if (isFirstPickSelection) {
               showSelectedTick = isMySelection
               showSelectedCross = !isMySelection
@@ -67,15 +67,10 @@ export function TripleDraftCards({
               showOverlay = !isMyTurn
             }
           } else if (currentPhase === 2 && isSelectionLocked) {
-            // Phase 2 reveal: Show appropriate states
+            // Phase 2 reveal: Show all selections
             if (isCardSelected) {
-              if (isFirstPickSelection) {
-                showSelectedTick = isMySelection
-                showSelectedCross = !isMySelection
-              } else {
-                showSelectedTick = isMySelection
-                showSelectedCross = !isMySelection
-              }
+              showSelectedTick = isMySelection
+              showSelectedCross = !isMySelection
             }
             isDisabled = true
           }

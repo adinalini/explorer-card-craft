@@ -93,6 +93,7 @@ const Room = () => {
   const [userSessionId] = useState(getUserSessionId())
   const [userRole, setUserRole] = useState<'creator' | 'joiner' | 'spectator'>('spectator')
   const [isStartingDraft, setIsStartingDraft] = useState(false)
+  const [draftStartTimeout, setDraftStartTimeout] = useState<NodeJS.Timeout | null>(null)
   const [backgroundAutoSelectTimeout, setBackgroundAutoSelectTimeout] = useState<NodeJS.Timeout | null>(null)
   const [isProcessingRound, setIsProcessingRound] = useState(false)
   const [isProcessingSelection, setIsProcessingSelection] = useState<boolean>(false)
@@ -336,21 +337,32 @@ const Room = () => {
             if (updatedRoom.creator_ready && updatedRoom.joiner_ready && updatedRoom.status === 'waiting' && !isStartingDraft && room?.status !== 'drafting') {
               console.log('🚀 ROOM UPDATE: Both players ready, starting draft countdown')
               
+              // Cancel any existing draft start timeout to prevent race conditions
+              if (draftStartTimeout) {
+                console.log('🚀 ROOM UPDATE: Cancelling existing draft start timeout')
+                clearTimeout(draftStartTimeout)
+                setDraftStartTimeout(null)
+              }
+              
               // Set flag immediately to prevent any race conditions
               setIsStartingDraft(true)
               
               if (role === 'creator') {
                 console.log('🚀 ROOM UPDATE: Creator will start draft in 5 seconds')
-                setTimeout(() => {
+                const timeoutId = setTimeout(() => {
                   console.log('🚀 ROOM UPDATE: Creator starting draft now')
                   startDraft(updatedRoom)
                   setIsStartingDraft(false)
+                  setDraftStartTimeout(null)
                 }, 5000)
+                setDraftStartTimeout(timeoutId)
               } else {
                 console.log('🚀 ROOM UPDATE: Joiner waiting for draft start')
-                setTimeout(() => {
+                const timeoutId = setTimeout(() => {
                   setIsStartingDraft(false)
+                  setDraftStartTimeout(null)
                 }, 5000)
+                setDraftStartTimeout(timeoutId)
               }
             }
           }
@@ -412,6 +424,9 @@ const Room = () => {
       supabase.removeChannel(decksChannel)
       if (backgroundAutoSelectTimeout) {
         clearTimeout(backgroundAutoSelectTimeout)
+      }
+      if (draftStartTimeout) {
+        clearTimeout(draftStartTimeout)
       }
     }
   }, [roomId, userSessionId])

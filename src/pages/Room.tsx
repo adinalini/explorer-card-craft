@@ -901,11 +901,7 @@ const Room = () => {
 
     // CRITICAL: For triple draft, check if it's the user's turn
     if (room?.draft_type === 'triple') {
-      const isFirstPickPhase = room.current_phase === 'first_pick'
-      const firstPickPlayer = room.first_pick_player
-      const isUserTurn = isFirstPickPhase ? userRole === firstPickPlayer : userRole !== firstPickPlayer
-      
-      if (!isUserTurn) {
+      if (!isMyTurn) {
         console.log('Selection blocked - not user\'s turn in triple draft')
         return
       }
@@ -1127,10 +1123,12 @@ const Room = () => {
     }
     
     if (room.draft_type === 'triple') {
-      // Determine first pick player for this round
+      // FIXED: Proper turn logic for triple draft
       const isFirstPickPhase = room.current_phase === 'first_pick'
       const firstPickPlayer = room.first_pick_player
       
+      // First pick phase: first pick player goes first
+      // Second pick phase: other player goes first  
       if (isFirstPickPhase) {
         return userRole === firstPickPlayer
       } else {
@@ -1421,6 +1419,7 @@ const Room = () => {
                   selectedCard={selectedCard}
                   userRole={userRole}
                   isSelectionLocked={isSelectionLocked}
+                  isMyTurn={isMyTurn}
                   onCardSelect={handleCardSelect}
                 />
               </div>

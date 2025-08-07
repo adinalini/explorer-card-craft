@@ -2,7 +2,7 @@ import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import { DeckDisplay } from "@/components/DeckDisplay"
-import { supabase } from "@/integrations/supabase/client"
+import { getRandomCards, getCardById } from "@/utils/cardData"
 import { ArrowLeft } from "lucide-react"
 
 interface RandomCard {
@@ -20,69 +20,82 @@ const RandomDeck = () => {
 
   const generateRandomDeck = async () => {
     setIsGenerating(true)
-    console.log('Starting random deck generation...')
+    console.log('Starting random deck generation using backend rules...')
     
     try {
-      // Generate a temporary room ID for the random deck generation
-      const tempRoomId = `random_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
-      console.log('Calling backend with roomId:', tempRoomId)
-      
-      // Call the backend function to generate all 13 rounds of cards (4 cards per round)
-      const { data, error } = await supabase.functions.invoke('generate-round-cards', {
-        body: {
-          roomId: tempRoomId,
-          round: 'all',
-          usedCardIds: [],
-          roundType: 'default'
-        }
-      })
+      // Implement the same round structures as the backend
+      const roundStructures = [
+        { type: 'legendary', count: 2 },    // Round 1: 2 legendary cards
+        { type: 'spell', count: 2 },        // Round 2: 2 spell cards
+        { type: 'cost', min: 1, max: 3, count: 2 },     // Round 3: 2 low cost cards
+        { type: 'cost', min: 4, max: 5, count: 2 },     // Round 4: 2 mid cost cards
+        { type: 'cost', min: 6, max: 10, count: 2 },    // Round 5: 2 high cost cards
+        { type: 'pool', count: 2 },         // Round 6-13: 2 random cards each
+        { type: 'pool', count: 2 },
+        { type: 'pool', count: 2 },
+        { type: 'pool', count: 2 },
+        { type: 'pool', count: 2 },
+        { type: 'pool', count: 2 },
+        { type: 'pool', count: 2 },
+        { type: 'pool', count: 2 }
+      ]
 
-      console.log('Backend response:', { data, error })
-
-      if (error) {
-        console.error('Error calling generate-round-cards:', error)
-        throw error
-      }
-
-      if (!data || !data.success) {
-        throw new Error('Failed to generate cards from backend')
-      }
-
-      // The backend returns all cards for all rounds
-      // Group them by round and randomly select 1 from each round
-      const cardsByRound: { [key: number]: any[] } = {}
-      
-      // Group cards by round number
-      data.cards?.forEach((card: any) => {
-        const roundNum = card.round_number
-        if (!cardsByRound[roundNum]) {
-          cardsByRound[roundNum] = []
-        }
-        cardsByRound[roundNum].push(card)
-      })
-
+      const usedCardIds: string[] = []
       const deck: RandomCard[] = []
 
-      // For each round, randomly select 1 card from the 4 available
+      // Generate cards for each round using the same logic as backend
       for (let round = 1; round <= 13; round++) {
-        const roundCards = cardsByRound[round] || []
-        
+        const structure = roundStructures[round - 1]
+        let roundCards: any[] = []
+
+        if (structure.type === 'legendary') {
+          // Get legendary cards
+          const allCards = getRandomCards(1000, usedCardIds)
+          roundCards = allCards.filter(card => card.isLegendary).slice(0, 4)
+        } else if (structure.type === 'spell') {
+          // Get spell cards  
+          const allCards = getRandomCards(1000, usedCardIds)
+          roundCards = allCards.filter(card => card.isSpell).slice(0, 4)
+        } else if (structure.type === 'cost') {
+          // Get cards within cost range
+          const allCards = getRandomCards(1000, usedCardIds)
+          roundCards = allCards.filter(card => 
+            card.cost >= structure.min && card.cost <= structure.max
+          ).slice(0, 4)
+        } else if (structure.type === 'pool') {
+          // Get random cards
+          roundCards = getRandomCards(4, usedCardIds)
+        }
+
+        // If we don't have enough cards, fill with random cards
+        if (roundCards.length < 4) {
+          const additionalCards = getRandomCards(4 - roundCards.length, 
+            [...usedCardIds, ...roundCards.map(c => c.id)])
+          roundCards = [...roundCards, ...additionalCards]
+        }
+
+        // Randomly select 1 card from the 4 generated for this round
         if (roundCards.length > 0) {
-          // Randomly pick one card from this round
           const selectedCard = roundCards[Math.floor(Math.random() * roundCards.length)]
           
           deck.push({
-            card_id: selectedCard.card_id,
-            card_name: selectedCard.card_name,
-            card_image: selectedCard.card_image,
-            is_legendary: selectedCard.is_legendary,
+            card_id: selectedCard.id,
+            card_name: selectedCard.name,
+            card_image: selectedCard.image,
+            is_legendary: selectedCard.isLegendary,
             selection_order: round
           })
-        } else {
-          console.error(`No cards available for round ${round}`)
+
+          // Mark all cards from this round as used to prevent duplicates
+          roundCards.forEach(card => {
+            if (!usedCardIds.includes(card.id)) {
+              usedCardIds.push(card.id)
+            }
+          })
         }
       }
 
+      console.log('Generated deck with', deck.length, 'cards')
       setRandomDeck(deck)
     } catch (error) {
       console.error('Error generating random deck:', error)

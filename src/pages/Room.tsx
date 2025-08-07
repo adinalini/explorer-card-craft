@@ -119,12 +119,18 @@ const Room = () => {
   const [showReveal, setShowReveal] = useState(false)
 
   const handleTimeUp = async () => {
+    // Triple draft has no timer pressure - skip auto-selection
+    if (room?.draft_type === 'triple') {
+      console.log('🔷 TRIPLE: Timer disabled - no auto-selection')
+      return
+    }
+    
     if (isSelectionLocked || isProcessingRound || isProcessingSelection) return
     
     setIsSelectionLocked(true)
     setShowReveal(true)
     
-    // Add 0.5s delay to prevent double selection for ALL draft types
+    // Add 0.5s delay to prevent double selection for default/mega draft types
     setTimeout(() => {
       // Check if user has made a manual selection after delay
       let currentRoundCards: RoomCard[] = []
@@ -132,10 +138,6 @@ const Room = () => {
       if (room?.draft_type === 'default') {
         currentRoundCards = roomCards.filter(card => 
           card.round_number === room?.current_round && card.side === userRole
-        )
-      } else if (room?.draft_type === 'triple') {
-        currentRoundCards = roomCards.filter(card => 
-          card.round_number === room?.current_round
         )
       } else if (room?.draft_type === 'mega') {
         currentRoundCards = roomCards.filter(card => 
@@ -151,7 +153,7 @@ const Room = () => {
       }
     }, 500)
     
-    // For triple/mega draft, processRoundEnd is handled by card selection, not timer
+    // For default draft only, processRoundEnd is handled by timer
     if (userRole === 'creator' && !isProcessingRound && room?.draft_type === 'default') {
       setTimeout(() => {
         if (!isProcessingRound) {
@@ -163,14 +165,14 @@ const Room = () => {
 
   // Centralized timer effect
   useEffect(() => {
-    if (room?.status === 'drafting' && room.round_start_time) {
+    // Triple draft has no timer - players can take their time
+    if (room?.status === 'drafting' && room.round_start_time && room.draft_type !== 'triple') {
       const updateTimer = () => {
         const now = new Date()
         const roundStart = new Date(room.round_start_time!)
         const elapsed = (now.getTime() - roundStart.getTime()) / 1000
         // Get duration based on draft type
         let roundDuration = room.round_duration_seconds || 15
-        if (room.draft_type === 'triple') roundDuration = 8
         if (room.draft_type === 'mega') roundDuration = 10
         const remaining = Math.max(0, roundDuration - elapsed)
         
@@ -195,8 +197,15 @@ const Room = () => {
           timerIntervalRef.current = null
         }
       }
+    } else if (room?.draft_type === 'triple') {
+      // For triple draft, clear any existing timer and set no time pressure
+      if (timerIntervalRef.current) {
+        clearInterval(timerIntervalRef.current)
+        timerIntervalRef.current = null
+      }
+      setTimeRemaining(999) // Show unlimited time for triple draft
     }
-  }, [room?.status, room?.round_start_time, room?.current_round, isSelectionLocked])
+  }, [room?.status, room?.round_start_time, room?.current_round, room?.draft_type, isSelectionLocked])
 
   useEffect(() => {
     if (room?.current_round && room?.status === 'drafting' && userRole !== 'spectator') {

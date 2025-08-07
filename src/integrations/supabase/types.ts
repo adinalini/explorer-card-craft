@@ -178,6 +178,8 @@ export type Database = {
           round_duration_seconds: number | null
           round_start_time: string | null
           status: string
+          triple_draft_first_pick: string | null
+          triple_draft_phase: number | null
         }
         Insert: {
           created_at?: string
@@ -194,6 +196,8 @@ export type Database = {
           round_duration_seconds?: number | null
           round_start_time?: string | null
           status?: string
+          triple_draft_first_pick?: string | null
+          triple_draft_phase?: number | null
         }
         Update: {
           created_at?: string
@@ -210,6 +214,8 @@ export type Database = {
           round_duration_seconds?: number | null
           round_start_time?: string | null
           status?: string
+          triple_draft_first_pick?: string | null
+          triple_draft_phase?: number | null
         }
         Relationships: []
       }

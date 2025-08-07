@@ -682,17 +682,6 @@ const Room = () => {
         }
       }
 
-      if (error) {
-        console.error('🚨 START DRAFT: Room update error:', error)
-        toast({
-          title: "Error",
-          description: "Failed to start draft. Please refresh and try again.",
-          variant: "destructive"
-        })
-        throw error
-      }
-      
-      console.log('🚀 START DRAFT: Room update successful:', roomUpdateData)
     } catch (error) {
       console.error('🚨 START DRAFT: Complete failure:', error)
       toast({

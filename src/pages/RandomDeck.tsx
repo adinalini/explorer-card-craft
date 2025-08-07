@@ -139,9 +139,9 @@ const RandomDeck = () => {
   }, [])
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="h-screen flex flex-col overflow-hidden">
       {/* Purple gradient background only until "Good luck have fun!" */}
-      <div className="bg-gradient-to-br from-[hsl(var(--background-start))] to-[hsl(var(--background-end))] p-4 pb-0">
+      <div className="bg-gradient-to-br from-[hsl(var(--background-start))] to-[hsl(var(--background-end))] p-4 pb-0 flex-shrink-0">
         <div className="max-w-4xl mx-auto space-y-6">
           {/* Header with back button */}
           <div className="flex items-center justify-between">
@@ -167,11 +167,11 @@ const RandomDeck = () => {
         </div>
       </div>
 
-      {/* White background for the rest - flex-1 to take remaining space */}
-      <div className="bg-white flex-1 flex flex-col p-4 pt-8">
-        <div className="max-w-4xl mx-auto w-full flex-1 flex flex-col">
+      {/* White background for the rest - flex-1 to take remaining space with overflow */}
+      <div className="bg-white flex-1 flex flex-col p-4 pt-8 overflow-auto">
+        <div className="max-w-4xl mx-auto w-full flex-1 flex flex-col min-h-0">
           {/* Deck Display - takes available space */}
-          <div className="flex-1 flex justify-center mb-4">
+          <div className="flex-1 flex justify-center mb-4 overflow-auto">
             <div className="w-full max-w-2xl">
               {randomDeck.length > 0 ? (
                 <DeckDisplay
@@ -190,8 +190,8 @@ const RandomDeck = () => {
         </div>
       </div>
 
-      {/* Fixed button at bottom */}
-      <div className="bg-white border-t border-gray-200 p-4 mt-auto">
+      {/* Fixed button at bottom - always visible */}
+      <div className="bg-white border-t border-gray-200 p-4 flex-shrink-0">
         <div className="max-w-4xl mx-auto flex justify-center">
           <Button
             onClick={generateRandomDeck}

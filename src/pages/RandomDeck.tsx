@@ -20,10 +20,12 @@ const RandomDeck = () => {
 
   const generateRandomDeck = async () => {
     setIsGenerating(true)
+    console.log('Starting random deck generation...')
     
     try {
       // Generate a temporary room ID for the random deck generation
       const tempRoomId = `random_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+      console.log('Calling backend with roomId:', tempRoomId)
       
       // Call the backend function to generate all 13 rounds of cards (4 cards per round)
       const { data, error } = await supabase.functions.invoke('generate-round-cards', {
@@ -34,6 +36,8 @@ const RandomDeck = () => {
           roundType: 'default'
         }
       })
+
+      console.log('Backend response:', { data, error })
 
       if (error) {
         console.error('Error calling generate-round-cards:', error)

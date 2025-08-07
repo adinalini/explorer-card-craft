@@ -117,6 +117,7 @@ const Room = () => {
   const [timeRemaining, setTimeRemaining] = useState<number>(0)
   
   const timerIntervalRef = useRef<NodeJS.Timeout | null>(null)
+  const fetchCardsTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   const [showReveal, setShowReveal] = useState(false)
 
@@ -303,9 +304,15 @@ const Room = () => {
           if (payload.eventType === 'INSERT') {
             const newCard = payload.new as any
             console.log(`🃏 CARDS UPDATE: New card inserted - ${newCard.card_name} (Round: ${newCard.round_number}, Side: ${newCard.side})`)
+            // Debounce multiple INSERT events to prevent excessive API calls
+            clearTimeout(fetchCardsTimeoutRef.current)
+            fetchCardsTimeoutRef.current = setTimeout(() => {
+              fetchRoomCards()
+            }, 200)
+          } else {
+            // For UPDATE events, fetch immediately
+            fetchRoomCards()
           }
-          
-          fetchRoomCards()
         }
       )
       .subscribe()

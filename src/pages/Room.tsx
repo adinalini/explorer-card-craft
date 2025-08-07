@@ -123,15 +123,31 @@ const Room = () => {
     setIsSelectionLocked(true)
     setShowReveal(true)
     
-    // Check if user has made a manual selection
-    const currentRoundCards = roomCards.filter(card => 
-      card.round_number === room?.current_round && card.side === userRole
-    )
-    const hasManualSelection = selectedCard || currentRoundCards.some(card => card.selected_by === userRole)
-    
-    // Only auto-select if no manual selection exists
-    if (!hasManualSelection && userRole !== 'spectator') {
-      await autoSelectRandomCard()
+    // Add 0.5s delay to prevent double selection in default draft
+    if (room?.draft_type === 'default') {
+      setTimeout(() => {
+        // Check if user has made a manual selection after delay
+        const currentRoundCards = roomCards.filter(card => 
+          card.round_number === room?.current_round && card.side === userRole
+        )
+        const hasManualSelection = selectedCard || currentRoundCards.some(card => card.selected_by === userRole)
+        
+        // Only auto-select if no manual selection exists
+        if (!hasManualSelection && userRole !== 'spectator') {
+          autoSelectRandomCard()
+        }
+      }, 500)
+    } else {
+      // For triple and mega draft, no delay needed
+      const currentRoundCards = roomCards.filter(card => 
+        card.round_number === (room?.draft_type === 'mega' ? 1 : room?.current_round)
+      )
+      const hasManualSelection = selectedCard || currentRoundCards.some(card => card.selected_by === userRole)
+      
+      // Only auto-select if no manual selection exists
+      if (!hasManualSelection && userRole !== 'spectator') {
+        await autoSelectRandomCard()
+      }
     }
     
     if (userRole === 'creator' && !isProcessingRound) {
@@ -783,8 +799,56 @@ const Room = () => {
             console.log(`✅ Successfully advanced to mega draft turn ${newTurnCount}`)
           }
         }
+      } else if (room.draft_type === 'triple') {
+        // Triple draft: handle phase progression
+        const totalRounds = 13;
+        
+        if (currentRound >= totalRounds) {
+          console.log('🏁 Triple draft complete - setting status to completed')
+          await supabaseWithToken
+            .from('rooms')
+            .update({ status: 'completed' })
+            .eq('id', roomId)
+        } else {
+          // Check current phase and advance appropriately
+          if (room.current_phase === 'first_pick') {
+            // Move to second pick of same round
+            const nextRoundStartTime = new Date().toISOString()
+            const { error: updateError } = await supabaseWithToken
+              .from('rooms')
+              .update({ 
+                current_phase: 'second_pick',
+                round_start_time: nextRoundStartTime
+              })
+              .eq('id', roomId)
+            
+            if (updateError) {
+              console.error('❌ Error updating triple draft phase:', updateError)
+            } else {
+              console.log(`✅ Successfully moved to second pick of round ${currentRound}`)
+            }
+          } else {
+            // Move to next round's first pick
+            const nextRound = currentRound + 1
+            const nextRoundStartTime = new Date().toISOString()
+            const { error: updateError } = await supabaseWithToken
+              .from('rooms')
+              .update({ 
+                current_round: nextRound,
+                current_phase: 'first_pick',
+                round_start_time: nextRoundStartTime
+              })
+              .eq('id', roomId)
+            
+            if (updateError) {
+              console.error('❌ Error updating room for next round:', updateError)
+            } else {
+              console.log(`✅ Successfully advanced to round ${nextRound}`)
+            }
+          }
+        }
       } else {
-        // Default and Triple draft: round-based progression
+        // Default draft: round-based progression
         const totalRounds = 13;
         
         if (currentRound >= totalRounds) {
@@ -798,10 +862,6 @@ const Room = () => {
           const nextRoundStartTime = new Date().toISOString()
           
           console.log(`⏭️ Advancing to round ${nextRound}`)
-          if (currentRound === 6) {
-            console.log('🔍 ROUND 6 DEBUG - Advancing from round 6 to round 7')
-            console.log('🔍 ROUND 6 DEBUG - Next round start time:', nextRoundStartTime)
-          }
           
           const { error: updateError } = await supabaseWithToken
             .from('rooms')
@@ -816,8 +876,6 @@ const Room = () => {
           } else {
             console.log(`✅ Successfully advanced to round ${nextRound}`)
           }
-
-          // Cards were already generated at the start - no need to generate more
         }
       }
     } catch (error) {
@@ -846,7 +904,9 @@ const Room = () => {
       const now = new Date()
       const roundStart = new Date(room.round_start_time)
       const elapsed = (now.getTime() - roundStart.getTime()) / 1000
-      const roundDuration = room.round_duration_seconds || 15
+      let roundDuration = room.round_duration_seconds || 15
+      if (room.draft_type === 'triple') roundDuration = 8
+      if (room.draft_type === 'mega') roundDuration = 10
       const remaining = roundDuration - elapsed
 
       if (remaining <= 0) {
@@ -855,11 +915,18 @@ const Room = () => {
       }
     }
 
-    // In drafting, clicking the same card should NOT deselect it - it should keep it selected
-    // Only allow changing selection to a different card
-    if (selectedCard === cardId) {
-      console.log('Same card clicked - keeping selection (no deselect in drafting)')
-      return
+    // For mega draft, immediately lock and reveal on selection
+    if (room?.draft_type === 'mega') {
+      if (selectedCard === cardId) {
+        console.log('Same card clicked in mega draft - ignoring')
+        return
+      }
+    } else {
+      // For default and triple draft, clicking the same card should NOT deselect it
+      if (selectedCard === cardId) {
+        console.log('Same card clicked - keeping selection (no deselect in drafting)')
+        return
+      }
     }
 
     console.log('Setting new selection')
@@ -924,6 +991,20 @@ const Room = () => {
       }
 
       console.log('✅ Manual selection confirmed:', cardId)
+      
+      // For mega draft, immediately lock and start reveal phase
+      if (room?.draft_type === 'mega') {
+        setIsSelectionLocked(true)
+        setShowReveal(true)
+        
+        if (userRole === 'creator' && !isProcessingRound) {
+          setTimeout(() => {
+            if (!isProcessingRound) {
+              processRoundEnd()
+            }
+          }, 1500) // Shorter delay for mega draft
+        }
+      }
     } catch (error) {
       console.error('Error in handleCardSelect:', error)
       setSelectedCard(null) // Reset on error
@@ -1236,33 +1317,29 @@ const Room = () => {
                 {/* Draft Status */}
                 <div className="text-center space-y-4">
                   <h2 className="text-2xl font-bold text-black">
-                    Round {room.current_round} of 13 - {room.current_phase === 'first_pick' ? 'First Pick' : 'Second Pick'}
+                    Round {room.current_round} of 13
                   </h2>
-                  <div className="space-y-2">
-                    <div className="flex justify-center gap-8">
+                  <div className="space-y-4">
+                    {/* Player Names */}
+                    <div className="grid grid-cols-2 gap-8 max-w-2xl mx-auto">
                       <div className="text-center">
                         <div className="text-lg font-semibold text-black">
-                          {room.creator_name} {room.first_pick_player === 'creator' && room.current_phase === 'first_pick' ? '(First Pick)' : ''}
-                          {room.first_pick_player !== 'creator' && room.current_phase === 'second_pick' ? '(Your Turn)' : ''}
+                          {room.creator_name} {room.first_pick_player === 'creator' ? '(First Pick)' : ''}
                         </div>
-                        {userRole === 'creator' && (
-                          <div className="text-sm text-muted-foreground">
-                            {isMyTurn ? 'Make your selection' : 'Waiting for other player'}
-                          </div>
-                        )}
+                        <div className="text-sm text-muted-foreground mt-1">
+                          {userRole === 'creator' ? (isMyTurn ? 'Your turn' : 'Opponent\'s turn') : (isMyTurn ? 'Opponent\'s turn' : 'Your turn')}
+                        </div>
                       </div>
                       <div className="text-center">
                         <div className="text-lg font-semibold text-black">
-                          {room.joiner_name} {room.first_pick_player === 'joiner' && room.current_phase === 'first_pick' ? '(First Pick)' : ''}
-                          {room.first_pick_player !== 'joiner' && room.current_phase === 'second_pick' ? '(Your Turn)' : ''}
+                          {room.joiner_name} {room.first_pick_player === 'joiner' ? '(First Pick)' : ''}
                         </div>
-                        {userRole === 'joiner' && (
-                          <div className="text-sm text-muted-foreground">
-                            {isMyTurn ? 'Make your selection' : 'Waiting for other player'}
-                          </div>
-                        )}
+                        <div className="text-sm text-muted-foreground mt-1">
+                          {userRole === 'joiner' ? (isMyTurn ? 'Your turn' : 'Opponent\'s turn') : (isMyTurn ? 'Opponent\'s turn' : 'Your turn')}
+                        </div>
                       </div>
                     </div>
+                    
                     {!isSelectionLocked ? (
                       <div className="text-2xl font-bold text-primary">
                         {Math.ceil(timeRemaining)}s remaining
@@ -1287,32 +1364,33 @@ const Room = () => {
               <div className="space-y-8">
                 {/* Draft Status */}
                 <div className="text-center space-y-4">
-                  <h2 className="text-2xl font-bold text-black">
-                    Mega Draft - Turn {(room.mega_draft_turn_count || 0) + 1} of 26
-                  </h2>
-                  <div className="space-y-2">
-                    <div className="flex justify-center gap-8">
+                  <div className="flex justify-between items-center max-w-4xl mx-auto">
+                    <h2 className="text-2xl font-bold text-black">Mega Draft</h2>
+                    <div className="text-lg font-semibold text-primary">
+                      Progress: {Math.min((room.mega_draft_turn_count || 0) + 1, 23)}/23 cards selected
+                    </div>
+                  </div>
+                  <div className="space-y-4">
+                    {/* Player Names */}
+                    <div className="grid grid-cols-2 gap-8 max-w-2xl mx-auto">
                       <div className="text-center">
                         <div className="text-lg font-semibold text-black">
-                          {room.creator_name} {room.first_pick_player === 'creator' ? '(First Pick Player)' : ''}
+                          {room.creator_name} {room.first_pick_player === 'creator' ? '(First Pick)' : ''}
                         </div>
-                        {userRole === 'creator' && (
-                          <div className="text-sm text-muted-foreground">
-                            {isMyTurn ? 'Make your selection' : 'Waiting for other player'}
-                          </div>
-                        )}
+                        <div className="text-sm text-muted-foreground mt-1">
+                          {userRole === 'creator' ? (isMyTurn ? 'Your turn' : 'Opponent\'s turn') : (isMyTurn ? 'Opponent\'s turn' : 'Your turn')}
+                        </div>
                       </div>
                       <div className="text-center">
                         <div className="text-lg font-semibold text-black">
-                          {room.joiner_name} {room.first_pick_player === 'joiner' ? '(First Pick Player)' : ''}
+                          {room.joiner_name} {room.first_pick_player === 'joiner' ? '(First Pick)' : ''}
                         </div>
-                        {userRole === 'joiner' && (
-                          <div className="text-sm text-muted-foreground">
-                            {isMyTurn ? 'Make your selection' : 'Waiting for other player'}
-                          </div>
-                        )}
+                        <div className="text-sm text-muted-foreground mt-1">
+                          {userRole === 'joiner' ? (isMyTurn ? 'Your turn' : 'Opponent\'s turn') : (isMyTurn ? 'Opponent\'s turn' : 'Your turn')}
+                        </div>
                       </div>
                     </div>
+                    
                     {!isSelectionLocked ? (
                       <div className="text-2xl font-bold text-primary">
                         {Math.ceil(timeRemaining)}s remaining

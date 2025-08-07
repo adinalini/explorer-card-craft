@@ -577,7 +577,8 @@ Deno.serve(async (req) => {
         const choice = tripleChoices[choiceIndex]
         
         if (choice && choice.length >= 3) {
-          for (let cardIndex = 0; cardIndex < choice.length; cardIndex++) {
+          // Only add the first 3 cards for each round
+          for (let cardIndex = 0; cardIndex < 3; cardIndex++) {
             const card = choice[cardIndex]
             tripleCardsToInsert.push({
               room_id: roomId,
@@ -594,13 +595,14 @@ Deno.serve(async (req) => {
         }
       }
       
-      // Set first pick player randomly
+      // Set first pick player randomly and set initial phase
       const firstPickPlayer = Math.random() < 0.5 ? 'creator' : 'joiner'
       
       await supabase
         .from('rooms')
         .update({ 
-          first_pick_player: firstPickPlayer
+          first_pick_player: firstPickPlayer,
+          current_phase: 'first_pick'
         })
         .eq('id', roomId)
       

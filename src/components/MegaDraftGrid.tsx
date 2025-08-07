@@ -24,11 +24,11 @@ export function MegaDraftGrid({
           cardName={card.card_name}
           cardImage={card.card_image}
           isLegendary={card.is_legendary}
-          isSelected={card.selected_by === userRole}
+          isSelected={!!card.selected_by}
           onSelect={() => onCardSelect(card.card_id)}
           disabled={!isMyTurn || !!card.selected_by}
-          isRevealing={false}
-          showUnselectedOverlay={!!card.selected_by}
+          isRevealing={!!card.selected_by} // Show reveal state if already selected
+          showUnselectedOverlay={false} // Don't show overlay since selection is immediate
         />
       ))}
     </div>

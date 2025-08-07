@@ -752,38 +752,73 @@ const Room = () => {
         }
       }
 
-      // Check if draft is complete (13 rounds)
-      if (currentRound >= 13) {
-        console.log('🏁 Draft complete - setting status to completed')
-        await supabaseWithToken
-          .from('rooms')
-          .update({ status: 'completed' })
-          .eq('id', roomId)
-      } else {
-        const nextRound = currentRound + 1
-        const nextRoundStartTime = new Date().toISOString()
-        
-        console.log(`⏭️ Advancing to round ${nextRound}`)
-        if (currentRound === 6) {
-          console.log('🔍 ROUND 6 DEBUG - Advancing from round 6 to round 7')
-          console.log('🔍 ROUND 6 DEBUG - Next round start time:', nextRoundStartTime)
-        }
-        
-        const { error: updateError } = await supabaseWithToken
-          .from('rooms')
-          .update({ 
-            current_round: nextRound,
-            round_start_time: nextRoundStartTime
-          })
-          .eq('id', roomId)
-          
-        if (updateError) {
-          console.error('❌ Error updating room for next round:', updateError)
-        } else {
-          console.log(`✅ Successfully advanced to round ${nextRound}`)
-        }
+      // Handle different draft types
+      if (room.draft_type === 'mega') {
+        // Mega draft: advance turn count and check completion
+        const newTurnCount = (room.mega_draft_turn_count || 0) + 1;
+        const isComplete = newTurnCount >= 24; // 12 picks each
 
-        // Cards were already generated at the start - no need to generate more
+        console.log(`🎯 Mega draft turn ${newTurnCount}/24`)
+        
+        if (isComplete) {
+          console.log('🏁 Mega draft complete - setting status to completed')
+          await supabaseWithToken
+            .from('rooms')
+            .update({ status: 'completed' })
+            .eq('id', roomId)
+        } else {
+          // Continue mega draft
+          const nextRoundStartTime = new Date().toISOString()
+          const { error: updateError } = await supabaseWithToken
+            .from('rooms')
+            .update({ 
+              mega_draft_turn_count: newTurnCount,
+              round_start_time: nextRoundStartTime
+            })
+            .eq('id', roomId)
+          
+          if (updateError) {
+            console.error('❌ Error updating mega draft turn:', updateError)
+          } else {
+            console.log(`✅ Successfully advanced to mega draft turn ${newTurnCount}`)
+          }
+        }
+      } else {
+        // Default and Triple draft: round-based progression
+        const totalRounds = 13;
+        
+        if (currentRound >= totalRounds) {
+          console.log('🏁 Draft complete - setting status to completed')
+          await supabaseWithToken
+            .from('rooms')
+            .update({ status: 'completed' })
+            .eq('id', roomId)
+        } else {
+          const nextRound = currentRound + 1
+          const nextRoundStartTime = new Date().toISOString()
+          
+          console.log(`⏭️ Advancing to round ${nextRound}`)
+          if (currentRound === 6) {
+            console.log('🔍 ROUND 6 DEBUG - Advancing from round 6 to round 7')
+            console.log('🔍 ROUND 6 DEBUG - Next round start time:', nextRoundStartTime)
+          }
+          
+          const { error: updateError } = await supabaseWithToken
+            .from('rooms')
+            .update({ 
+              current_round: nextRound,
+              round_start_time: nextRoundStartTime
+            })
+            .eq('id', roomId)
+            
+          if (updateError) {
+            console.error('❌ Error updating room for next round:', updateError)
+          } else {
+            console.log(`✅ Successfully advanced to round ${nextRound}`)
+          }
+
+          // Cards were already generated at the start - no need to generate more
+        }
       }
     } catch (error) {
       console.error('❌ Error processing round end:', error)

@@ -566,30 +566,43 @@ Deno.serve(async (req) => {
       // Generate all 13 triple draft choices
       const tripleChoices = generateTripleDraftChoices(excludeIds, cardDatabase)
       
-      // Shuffle the choices to randomize round order
-      const shuffledChoices = [...tripleChoices].sort(() => Math.random() - 0.5)
+      if (!tripleChoices || tripleChoices.length === 0) {
+        throw new Error('Unable to generate triple draft choices')
+      }
       
       const tripleCardsToInsert = []
       
       for (let roundNum = 1; roundNum <= 13; roundNum++) {
-        const choiceIndex = (roundNum - 1) % shuffledChoices.length
-        const choice = shuffledChoices[choiceIndex]
+        const choiceIndex = (roundNum - 1) % tripleChoices.length
+        const choice = tripleChoices[choiceIndex]
         
         if (choice && choice.length >= 3) {
-          for (const card of choice) {
+          for (let cardIndex = 0; cardIndex < choice.length; cardIndex++) {
+            const card = choice[cardIndex]
             tripleCardsToInsert.push({
               room_id: roomId,
               round_number: roundNum,
-              side: 'shared', // Triple draft uses shared cards
+              side: 'both', // Triple draft cards are available to both players
               card_id: card.id,
               card_name: card.name,
               card_image: card.image,
               is_legendary: card.isLegendary || false,
-              selected_by: null
+              selected_by: null,
+              turn_order: cardIndex + 1
             })
           }
         }
       }
+      
+      // Set first pick player randomly
+      const firstPickPlayer = Math.random() < 0.5 ? 'creator' : 'joiner'
+      
+      await supabase
+        .from('rooms')
+        .update({ 
+          first_pick_player: firstPickPlayer
+        })
+        .eq('id', roomId)
       
       const { error } = await supabase
         .from('room_cards')
@@ -600,11 +613,14 @@ Deno.serve(async (req) => {
         throw error
       }
 
+      console.log(`Successfully generated triple draft with ${tripleCardsToInsert.length} cards, first pick: ${firstPickPlayer}`)
+
       return new Response(
         JSON.stringify({ 
           success: true, 
           draftType: 'triple',
-          totalCards: tripleCardsToInsert.length
+          totalCards: tripleCardsToInsert.length,
+          firstPickPlayer
         }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
@@ -614,17 +630,32 @@ Deno.serve(async (req) => {
       // Generate 36 cards for mega draft
       const megaCards = generateMegaDraftCards(excludeIds, cardDatabase)
       
+      if (!megaCards || megaCards.length === 0) {
+        throw new Error('Unable to generate mega draft cards')
+      }
+      
       const megaCardsToInsert = megaCards.map((card, index) => ({
         room_id: roomId,
         round_number: 1, // All cards are in round 1 for mega draft
-        side: 'shared', // Mega draft uses shared cards
+        side: 'both', // Mega draft cards are available to both players
         card_id: card.id,
         card_name: card.name,
         card_image: card.image,
         is_legendary: card.isLegendary || false,
         selected_by: null,
-        position: index // Track position in the 6x6 grid
+        turn_order: index + 1 // Track position in the 6x6 grid
       }))
+      
+      // Set first pick player randomly
+      const firstPickPlayer = Math.random() < 0.5 ? 'creator' : 'joiner'
+      
+      await supabase
+        .from('rooms')
+        .update({ 
+          first_pick_player: firstPickPlayer,
+          mega_draft_turn_count: 0
+        })
+        .eq('id', roomId)
       
       const { error } = await supabase
         .from('room_cards')
@@ -635,33 +666,14 @@ Deno.serve(async (req) => {
         throw error
       }
 
-      // Also need to set up turn sequence for mega draft
-      const firstPick = Math.random() < 0.5 ? 'creator' : 'joiner'
-      const turnSequence = [firstPick]
-      
-      // Generate the 1,2,2,2,2,2,2,2,2,2,2,2,1 pattern
-      const otherPlayer = firstPick === 'creator' ? 'joiner' : 'creator'
-      for (let i = 0; i < 12; i++) {
-        turnSequence.push(otherPlayer, otherPlayer)
-      }
-      turnSequence.push(otherPlayer) // Final turn for the other player
-      
-      // Update room with mega draft info
-      await supabase
-        .from('rooms')
-        .update({ 
-          current_turn_player: firstPick,
-          mega_draft_cards: JSON.stringify(turnSequence)
-        })
-        .eq('id', roomId)
+      console.log(`Successfully generated mega draft with ${megaCards.length} cards, first pick: ${firstPickPlayer}`)
 
       return new Response(
         JSON.stringify({ 
           success: true, 
           draftType: 'mega',
           totalCards: megaCardsToInsert.length,
-          firstPick,
-          turnSequence
+          firstPickPlayer
         }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )

@@ -239,16 +239,13 @@ const Room = () => {
         const roundStart = new Date(room.round_start_time!)
         const elapsed = (now.getTime() - roundStart.getTime()) / 1000
         
-        console.log('🕐 TIMER UPDATE - Elapsed:', elapsed)
-        console.log('🕐 TIMER UPDATE - Draft type:', room.draft_type)
-        
         // Get duration based on draft type
         let roundDuration = room.round_duration_seconds || 15
         if (room.draft_type === 'mega') roundDuration = 10
         if (room.draft_type === 'triple') roundDuration = 8 // Simple 8 seconds per phase
         
         const remaining = Math.max(0, roundDuration - elapsed)
-        console.log('🕐 TIMER UPDATE - Remaining:', remaining)
+        console.log('🕐 TIMER: Elapsed:', elapsed.toFixed(1), 'Remaining:', remaining.toFixed(1))
         setTimeRemaining(remaining)
         
         // CRITICAL FIX: Only trigger handleTimeUp if timer expires AND not already locked
@@ -397,12 +394,8 @@ const Room = () => {
           filter: `room_id=eq.${roomId}`
         },
         (payload) => {
-          console.log(`🃏 CARDS UPDATE: ${userRole} received card event: ${payload.eventType}`)
-          console.log('🃏 CARDS UPDATE: Payload:', payload)
-          
           if (payload.eventType === 'INSERT') {
             const newCard = payload.new as any
-            console.log(`🃏 CARDS UPDATE: New card inserted - ${newCard.card_name} (Round: ${newCard.round_number}, Side: ${newCard.side})`)
             // Debounce multiple INSERT events to prevent excessive API calls
             clearTimeout(fetchCardsTimeoutRef.current)
             fetchCardsTimeoutRef.current = setTimeout(() => {
@@ -600,6 +593,9 @@ const Room = () => {
     }
   }
 
+  // Add a state to prevent multiple simultaneous draft starts
+  const [isDraftStarting, setIsDraftStarting] = useState(false)
+
   const startDraft = async (roomData?: Room) => {
     const currentRoom = roomData || room
     if (!currentRoom) {
@@ -613,10 +609,14 @@ const Room = () => {
       return
     }
 
+    // CRITICAL: Prevent race conditions with state flag
+    if (isDraftStarting) {
+      console.log('🚀 START DRAFT: Already starting, skipping duplicate call')
+      return
+    }
+
+    setIsDraftStarting(true)
     console.log('🚀 START DRAFT: Beginning draft start process')
-    console.log('🚀 START DRAFT: Room ID:', roomId)
-    console.log('🚀 START DRAFT: Draft type:', currentRoom.draft_type)
-    console.log('🚀 START DRAFT: User role:', userRole)
 
     try {
       const supabaseWithToken = getSupabaseWithSession()
@@ -693,6 +693,8 @@ const Room = () => {
         description: "Failed to start draft. Please refresh and try again.",
         variant: "destructive"
       })
+    } finally {
+      setIsDraftStarting(false) // Always reset the flag
     }
   }
 

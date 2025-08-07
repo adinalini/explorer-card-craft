@@ -306,6 +306,18 @@ const Room = () => {
     fetchRoomCards()
     fetchPlayerDecks()
 
+    // Add failsafe cleanup for stuck draft starting states
+    const stuckStateCleanup = setInterval(() => {
+      if (isStartingDraft && room?.status === 'drafting') {
+        console.log('🔧 FAILSAFE: Clearing stuck isStartingDraft state')
+        setIsStartingDraft(false)
+      }
+      if (isDraftStarting && room?.status === 'drafting') {
+        console.log('🔧 FAILSAFE: Clearing stuck isDraftStarting state')  
+        setIsDraftStarting(false)
+      }
+    }, 5000) // Check every 5 seconds
+
     // Subscribe to room changes with realtime
     const roomChannel = supabase
       .channel(`room-${roomId}`)
@@ -373,15 +385,18 @@ const Room = () => {
             // CRITICAL FIX: Only trigger draft start if:
             // 1. Room is in 'waiting' status
             // 2. Both players are ready  
-            // 3. Draft is not already starting
+            // 3. Draft is not already starting (multiple flags check)
             // 4. Draft is not already active (status is not 'drafting' and current_round is 0)
+            // 5. No existing draft timeout is running
             if (updatedRoom.creator_ready && 
                 updatedRoom.joiner_ready && 
                 updatedRoom.status === 'waiting' && 
                 !isStartingDraft && 
-                !isDraftAlreadyActive) {
+                !isDraftStarting && 
+                !isDraftAlreadyActive && 
+                !draftStartTimeout) {
               
-              console.log('🚀 ROOM UPDATE: Both players ready, starting draft countdown')
+    console.log('🚀 ROOM UPDATE: Both players ready, starting draft countdown')
               
               // Cancel any existing draft start timeout to prevent race conditions
               if (draftStartTimeout) {
@@ -390,7 +405,7 @@ const Room = () => {
                 setDraftStartTimeout(null)
               }
               
-              // Set flag immediately to prevent any race conditions
+              // Set flags immediately to prevent any race conditions
               setIsStartingDraft(true)
               
               if (role === 'creator') {
@@ -398,8 +413,14 @@ const Room = () => {
                 const timeoutId = setTimeout(() => {
                   console.log('🚀 ROOM UPDATE: Creator starting draft now')
                   startDraft(updatedRoom)
-                  setIsStartingDraft(false)
-                  setDraftStartTimeout(null)
+                    .then(() => {
+                      setIsStartingDraft(false)
+                      setDraftStartTimeout(null)
+                    })
+                    .catch(() => {
+                      setIsStartingDraft(false)
+                      setDraftStartTimeout(null)
+                    })
                 }, 5000)
                 setDraftStartTimeout(timeoutId)
               } else {
@@ -407,11 +428,23 @@ const Room = () => {
                 const timeoutId = setTimeout(() => {
                   setIsStartingDraft(false)
                   setDraftStartTimeout(null)
-                }, 5000)
+                }, 6000) // Give joiner a bit more time to see the draft start
                 setDraftStartTimeout(timeoutId)
               }
             } else if (isDraftAlreadyActive) {
               console.log('🚀 ROOM UPDATE: Draft already active, skipping countdown')
+              // Clear any stale flags if draft is already active
+              if (isStartingDraft || isDraftStarting) {
+                setIsStartingDraft(false)
+                if (draftStartTimeout) {
+                  clearTimeout(draftStartTimeout)
+                  setDraftStartTimeout(null)
+                }
+              }
+            } else if (isStartingDraft || isDraftStarting) {
+              console.log('🚀 ROOM UPDATE: Draft start already in progress, ignoring duplicate trigger')
+            } else if (draftStartTimeout) {
+              console.log('🚀 ROOM UPDATE: Draft timeout already running, ignoring duplicate trigger')
             }
           }
         }
@@ -466,6 +499,7 @@ const Room = () => {
       supabase.removeChannel(roomChannel)
       supabase.removeChannel(cardsChannel)
       supabase.removeChannel(decksChannel)
+      clearInterval(stuckStateCleanup)
       if (backgroundAutoSelectTimeout) {
         clearTimeout(backgroundAutoSelectTimeout)
       }
@@ -584,13 +618,22 @@ const Room = () => {
   const handleReady = async () => {
     if (!room || userRole === 'spectator') return
     
-    // Prevent interaction once both are ready
-    if (room.creator_ready && room.joiner_ready) return
+    console.log('🔘 READY: Handling ready state change')
+    console.log('🔘 READY: Current ready states - Creator:', room.creator_ready, 'Joiner:', room.joiner_ready)
+    console.log('🔘 READY: User role:', userRole, 'Room status:', room.status)
+    
+    // Prevent interaction once both are ready or if draft is already starting/active
+    if ((room.creator_ready && room.joiner_ready) || room.status !== 'waiting' || isStartingDraft || isDraftStarting) {
+      console.log('🔘 READY: Interaction blocked - both ready or draft active')
+      return
+    }
 
     const updateField = userRole === 'creator' ? 'creator_ready' : 'joiner_ready'
     const currentValue = userRole === 'creator' ? room.creator_ready : room.joiner_ready
     
     try {
+      console.log('🔘 READY: Updating ready status to:', !currentValue)
+      
       // Create authenticated client to bypass RLS restrictions
       const supabaseWithToken = getSupabaseWithSession()
 
@@ -619,8 +662,11 @@ const Room = () => {
       if (updateData && updateData.length === 0) {
         throw new Error('Failed to update room - permission denied')
       }
+      
+      console.log('🔘 READY: Ready status updated successfully')
       setIsReady(!currentValue)
     } catch (error) {
+      console.error('🚨 READY: Error updating ready status:', error)
       toast({
         title: "Error",
         description: "Failed to update ready status.",

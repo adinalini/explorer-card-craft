@@ -894,9 +894,24 @@ const Room = () => {
     console.log('Current Selected Card:', selectedCard)
     console.log('Current Round:', room?.current_round)
     
-    if (isSelectionLocked || userRole === 'spectator') {
-      console.log('Selection blocked - locked or spectator')
+    if (isSelectionLocked || userRole === 'spectator' || isProcessingSelection) {
+      console.log('Selection blocked - locked, spectator, or processing')
       return
+    }
+
+    // CRITICAL FIX: For default draft, prevent multiple selections per user per round
+    if (room?.draft_type === 'default') {
+      const currentRoundCards = roomCards.filter(card => 
+        card.round_number === room?.current_round && card.side === userRole
+      )
+      const existingSelection = currentRoundCards.find(card => card.selected_by === userRole)
+      
+      // If user already has a selection and it's different, block new selection
+      if (existingSelection && existingSelection.card_id !== cardId) {
+        console.log('Selection blocked - user already has a different selection in default draft')
+        setIsProcessingSelection(false)
+        return
+      }
     }
 
     // Additional check: verify time hasn't expired even if isSelectionLocked hasn't been updated yet
@@ -991,6 +1006,16 @@ const Room = () => {
       }
 
       console.log('✅ Manual selection confirmed:', cardId)
+      
+      // For default draft, immediately enter revealing phase with delay protection
+      if (room?.draft_type === 'default') {
+        setShowReveal(true)
+        
+        // Add 0.5s delay to ensure only the last selection is processed
+        setTimeout(() => {
+          setIsSelectionLocked(true)
+        }, 500)
+      }
       
       // For mega draft, immediately lock and start reveal phase
       if (room?.draft_type === 'mega') {

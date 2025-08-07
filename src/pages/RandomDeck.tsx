@@ -170,9 +170,9 @@ const RandomDeck = () => {
       {/* White background for the rest - flex-1 to take remaining space with overflow */}
       <div className="bg-white flex-1 flex flex-col overflow-auto">
         <div className="max-w-4xl mx-auto w-full h-full flex flex-col px-4 py-4">
-          {/* Deck Display - takes available space */}
+          {/* Deck Display - takes available space with mobile scaling */}
           <div className="flex justify-center">
-            <div className="w-full max-w-2xl">
+            <div className="w-full max-w-2xl transform scale-80 md:scale-100 origin-top">
               {randomDeck.length > 0 ? (
                 <DeckDisplay
                   cards={randomDeck}

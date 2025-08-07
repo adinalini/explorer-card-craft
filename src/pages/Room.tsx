@@ -194,12 +194,22 @@ const Room = () => {
       const updateTimer = () => {
         const now = new Date()
         const roundStart = new Date(room.round_start_time!)
-        const elapsed = (now.getTime() - roundStart.getTime()) / 1000
+        
+        // For triple draft, calculate elapsed time considering phase
+        let elapsed = (now.getTime() - roundStart.getTime()) / 1000
         
         // Get duration based on draft type and phase
         let roundDuration = room.round_duration_seconds || 15
         if (room.draft_type === 'mega') roundDuration = 10
-        if (room.draft_type === 'triple') roundDuration = 8 // 8 seconds per phase
+        if (room.draft_type === 'triple') {
+          roundDuration = 8 // 8 seconds per phase
+          // For triple draft, adjust elapsed time based on current phase
+          const currentPhase = room.triple_draft_phase || 1
+          if (currentPhase === 2) {
+            // In phase 2, we need to subtract 8 seconds from elapsed to start fresh
+            elapsed = Math.max(0, elapsed - 8)
+          }
+        }
         
         const remaining = Math.max(0, roundDuration - elapsed)
         setTimeRemaining(remaining)
@@ -1066,8 +1076,9 @@ const Room = () => {
           await supabaseWithToken
             .from('rooms')
             .update({ 
-              triple_draft_phase: 2
-              // Don't update round_start_time to avoid timer reset
+              triple_draft_phase: 2,
+              // Update round_start_time to phase 2 start time for proper timer calculation
+              round_start_time: new Date().toISOString()
             })
             .eq('id', roomId)
           

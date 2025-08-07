@@ -31,13 +31,14 @@ export const generateTripleDraftChoices = (usedCardIds: string[]): Card[][] => {
     legendaryChoice.forEach(card => usedInChoices.add(card.id))
   }
 
-  // 3. 3 rounds where cards are in cost range (1-3)
+  // 3. 3 rounds where cards are in cost range (1-3) - mix costs within range
   for (let i = 0; i < 3; i++) {
     const lowCostCards = availableCards.filter(card => 
       card.cost && card.cost >= 1 && card.cost <= 3 && !card.isLegendary && !card.isSpell && !usedInChoices.has(card.id)
     )
     
     if (lowCostCards.length >= 3) {
+      // Ensure we get a mix of costs within the range when possible
       const shuffled = [...lowCostCards].sort(() => Math.random() - 0.5)
       const lowCostChoice = shuffled.slice(0, 3)
       choices.push(lowCostChoice)
@@ -45,13 +46,14 @@ export const generateTripleDraftChoices = (usedCardIds: string[]): Card[][] => {
     }
   }
 
-  // 4. 2 rounds where cards are in cost range (4-6)
+  // 4. 2 rounds where cards are in cost range (4-6) - mix costs within range
   for (let i = 0; i < 2; i++) {
     const midCostCards = availableCards.filter(card => 
       card.cost && card.cost >= 4 && card.cost <= 6 && !card.isLegendary && !card.isSpell && !usedInChoices.has(card.id)
     )
     
     if (midCostCards.length >= 3) {
+      // Ensure we get a mix of costs within the range when possible
       const shuffled = [...midCostCards].sort(() => Math.random() - 0.5)
       const midCostChoice = shuffled.slice(0, 3)
       choices.push(midCostChoice)
@@ -59,12 +61,13 @@ export const generateTripleDraftChoices = (usedCardIds: string[]): Card[][] => {
     }
   }
 
-  // 5. 1 round where cards are in cost range (7-10)
+  // 5. 1 round where cards are in cost range (7-10) - mix costs within range
   const highCostCards = availableCards.filter(card => 
     card.cost && card.cost >= 7 && card.cost <= 10 && !card.isLegendary && !card.isSpell && !usedInChoices.has(card.id)
   )
   
   if (highCostCards.length >= 3) {
+    // Ensure we get a mix of costs within the range when possible
     const shuffled = [...highCostCards].sort(() => Math.random() - 0.5)
     const highCostChoice = shuffled.slice(0, 3)
     choices.push(highCostChoice)

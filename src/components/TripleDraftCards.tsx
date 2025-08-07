@@ -68,15 +68,13 @@ export function TripleDraftCards({
               showOverlay = !isMyTurn
             }
           } else if (currentPhase === 2 && isSelectionLocked) {
-            // Phase 2 end: Show tick for my selection, cross for others
-            if (isMySelection) {
-              showSelectedTick = true
-            } else if (isCardSelected) {
-              // Show tick for first pick, cross for second pick if not mine
-              if (isFirstPickSelection) {
+            // Phase 2 end: Show tick for selections made by their respective players
+            if (isCardSelected) {
+              if (isMySelection) {
                 showSelectedTick = true
               } else {
-                showSelectedCross = true
+                showSelectedTick = isFirstPickSelection
+                showSelectedCross = !isFirstPickSelection
               }
             }
             isDisabled = true

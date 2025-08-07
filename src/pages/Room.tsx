@@ -1116,22 +1116,19 @@ const Room = () => {
         console.log('🔷 AUTO-SELECT: First Pick Player:', room.triple_draft_first_pick)
         console.log('🔷 AUTO-SELECT: Selection Locked:', isSelectionLocked)
         
-        // Fetch fresh room data to see if anything changed
-        setTimeout(async () => {
-          console.log('🔄 AUTO-SELECT: Fetching fresh room data for verification...')
-          const { data: freshRoom } = await supabaseWithToken
-            .from('rooms')
-            .select('*')
-            .eq('id', roomId)
-            .single()
-          
-          console.log('🔄 AUTO-SELECT: Fresh room data:', {
-            current_round: freshRoom?.current_round,
-            triple_draft_phase: freshRoom?.triple_draft_phase,
-            round_start_time: freshRoom?.round_start_time,
-            status: freshRoom?.status
-          })
-        }, 100)
+        // For triple draft, trigger reveal phase for auto-selection
+        console.log('🔷 TRIPLE AUTO-SELECT: Starting reveal phase...')
+        setIsSelectionLocked(true)
+        setShowReveal(true)
+        setIsRevealing(true)
+        
+        // After 2 seconds, trigger phase end check
+        setTimeout(() => {
+          console.log('🔷 TRIPLE AUTO-SELECT: Reveal ended, checking phase advancement')
+          setShowReveal(false)
+          setIsRevealing(false)
+          handleTriplePhaseEnd()
+        }, 2000)
       }
       
     } catch (error) {
@@ -1467,48 +1464,36 @@ const Room = () => {
           console.error('🔷 TRIPLE: Error adding phase 1 card to deck:', error)
         }
         
-        // Show reveal phase first with selected state locked
-        console.log('🔷 TRIPLE PHASE END: 🎭 Starting reveal phase...')
-        setIsSelectionLocked(true)
-        setShowReveal(true)
-        setIsRevealing(true)
+        // Move to phase 2 immediately without additional reveal
+        const newRoundStartTime = new Date().toISOString()
+        console.log('🔷 TRIPLE PHASE END: 🕐 New round start time:', newRoundStartTime)
         
-        // After reveal phase, move to phase 2
-        setTimeout(async () => {
-          console.log('🔷 TRIPLE PHASE END: 🔄 Ending reveal and updating to phase 2...')
-          setShowReveal(false)
-          setIsRevealing(false)
-          
-          const newRoundStartTime = new Date().toISOString()
-          console.log('🔷 TRIPLE PHASE END: 🕐 New round start time:', newRoundStartTime)
-          
-          const { data: phaseUpdateResult, error: phaseUpdateError } = await supabaseWithToken
-            .from('rooms')
-            .update({ 
-              triple_draft_phase: 2,
-              round_start_time: newRoundStartTime
-            })
-            .eq('id', roomId)
-            .select()
-          
-          if (phaseUpdateError) {
-            console.error('🔷 TRIPLE PHASE END: ❌ Error updating to phase 2:', phaseUpdateError)
-            return
-          }
-          
-          console.log('🔷 TRIPLE PHASE END: ✅ Successfully moved to phase 2')
-          console.log('🔷 TRIPLE PHASE END: 📊 Phase update result:', phaseUpdateResult)
-          
-          // Verify the phase change took effect
-          const { data: verifyRoom } = await supabaseWithToken
-            .from('rooms')
-            .select('triple_draft_phase, round_start_time')
-            .eq('id', roomId)
-            .single()
-          
-          console.log('🔷 TRIPLE PHASE END: 🔍 Verification - Room phase is now:', verifyRoom?.triple_draft_phase)
-          console.log('🔷 TRIPLE PHASE END: 🔍 Verification - Round start time:', verifyRoom?.round_start_time)
-        }, 2000)
+        const { data: phaseUpdateResult, error: phaseUpdateError } = await supabaseWithToken
+          .from('rooms')
+          .update({ 
+            triple_draft_phase: 2,
+            round_start_time: newRoundStartTime
+          })
+          .eq('id', roomId)
+          .select()
+        
+        if (phaseUpdateError) {
+          console.error('🔷 TRIPLE PHASE END: ❌ Error updating to phase 2:', phaseUpdateError)
+          return
+        }
+        
+        console.log('🔷 TRIPLE PHASE END: ✅ Successfully moved to phase 2')
+        console.log('🔷 TRIPLE PHASE END: 📊 Phase update result:', phaseUpdateResult)
+        
+        // Verify the phase change took effect
+        const { data: verifyRoom } = await supabaseWithToken
+          .from('rooms')
+          .select('triple_draft_phase, round_start_time')
+          .eq('id', roomId)
+          .single()
+        
+        console.log('🔷 TRIPLE PHASE END: 🔍 Verification - Room phase is now:', verifyRoom?.triple_draft_phase)
+        console.log('🔷 TRIPLE PHASE END: 🔍 Verification - Round start time:', verifyRoom?.round_start_time)
       } else if (currentPhase === 2 && selectedCards.length >= 2) {
         console.log('🔷 TRIPLE: Phase 2 complete - moving to next round')
         
@@ -1548,21 +1533,28 @@ const Room = () => {
           }
         }
         
-        // Show reveal phase before moving to next round
-        console.log('🔷 TRIPLE: 🎭 Starting final reveal phase...')
-        setIsSelectionLocked(true)
-        setShowReveal(true)
-        setIsRevealing(true)
-        
-        setTimeout(async () => {
-          console.log('🔷 TRIPLE: 🔄 Ending reveal and moving to next round...')
-          setShowReveal(false)
-          setIsRevealing(false)
-          
-          // Move to next round
+        // Move to next round immediately without additional reveal  
           const nextRound = currentRound + 1
           if (nextRound <= 13) {
             console.log('🔷 TRIPLE: Moving to round', nextRound)
+            
+            // Generate cards for the next round
+            console.log('🔷 TRIPLE: Generating cards for next round:', nextRound)
+            const { data: cardGenResponse, error: cardGenError } = await supabase.functions.invoke('generate-round-cards', {
+              body: { 
+                roomId,
+                round: nextRound.toString(),
+                usedCardIds: [],
+                draftType: 'triple'
+              }
+            })
+            
+            if (cardGenError) {
+              console.error('🔷 TRIPLE: Error generating cards for next round:', cardGenError)
+            } else {
+              console.log('🔷 TRIPLE: Cards generated for next round:', cardGenResponse)
+            }
+            
             await supabaseWithToken
               .from('rooms')
               .update({ 
@@ -1580,7 +1572,6 @@ const Room = () => {
               .update({ status: 'completed' })
               .eq('id', roomId)
           }
-        }, 2000)
       } else {
         console.log('🔷 TRIPLE PHASE END: ❌ CONDITIONS NOT MET FOR PHASE TRANSITION')
         console.log('🔷 TRIPLE PHASE END: 📊 Current state analysis:')
@@ -1743,13 +1734,20 @@ const Room = () => {
 
       console.log('✅ Manual selection confirmed:', cardId)
       
-      // For triple draft, just trigger normal phase end check without reveal
+      // For triple draft, trigger reveal phase first, then phase end check
       if (room?.draft_type === 'triple') {
-        console.log('🔷 TRIPLE: Card selected, triggering phase end check')
-        // Brief delay to let database update propagate
+        console.log('🔷 TRIPLE: Card selected, starting reveal phase')
+        setIsSelectionLocked(true)
+        setShowReveal(true)
+        setIsRevealing(true)
+        
+        // After 2 seconds, trigger phase end check
         setTimeout(() => {
+          console.log('🔷 TRIPLE: Reveal ended, checking phase advancement')
+          setShowReveal(false)
+          setIsRevealing(false)
           handleTriplePhaseEnd()
-        }, 100)
+        }, 2000)
       } else if (room?.draft_type === 'mega') {
         // For mega draft, immediately lock and start reveal phase
         setIsSelectionLocked(true)

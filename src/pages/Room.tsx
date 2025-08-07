@@ -638,26 +638,49 @@ const Room = () => {
       
       console.log('🚀 START DRAFT: Edge function response:', response)
       
-      const updateData = {
-        status: 'drafting', 
-        current_round: 1,
-        round_start_time: new Date().toISOString()
-      } as any
+      // CRITICAL FIX: Only update room if cards were actually generated (not already existing)
+      if (response?.cardsGenerated > 0 || !response?.message?.includes('already exist')) {
+        const updateData = {
+          status: 'drafting', 
+          current_round: 1,
+          round_start_time: new Date().toISOString()
+        } as any
 
-      // For triple draft, use the first pick from edge function response
-      if (currentRoom.draft_type === 'triple') {
-        const firstPick = response?.firstPickPlayer || 'creator' // Use edge function result
-        updateData.triple_draft_phase = 1
-        updateData.triple_draft_first_pick = firstPick
-        console.log(`🔷 TRIPLE: Starting with first pick: ${firstPick}`)
+        // For triple draft, use the first pick from edge function response
+        if (currentRoom.draft_type === 'triple') {
+          const firstPick = response?.firstPickPlayer || 'creator' // Use edge function result
+          updateData.triple_draft_phase = 1
+          updateData.triple_draft_first_pick = firstPick
+          console.log(`🔷 TRIPLE: Starting with first pick: ${firstPick}`)
+        }
+
+        console.log('🚀 START DRAFT: Updating room status to drafting')
+        const { data: roomUpdateData, error } = await supabaseWithToken
+          .from('rooms')
+          .update(updateData)
+          .eq('id', roomId!)
+          .select()
+        
+        if (error) {
+          console.error('🚨 START DRAFT: Room update error:', error)
+          toast({
+            title: "Error",
+            description: "Failed to start draft. Please refresh and try again.",
+            variant: "destructive"
+          })
+          throw error
+        }
+        
+        console.log('🚀 START DRAFT: Room update successful:', roomUpdateData)
+      } else {
+        console.log('🚀 START DRAFT: Cards already exist, skipping room update to prevent timer reset')
+        
+        // For triple draft, still log the first pick info for consistency
+        if (currentRoom.draft_type === 'triple') {
+          const firstPick = response?.firstPickPlayer || 'creator'
+          console.log(`🔷 TRIPLE: Starting with first pick: ${firstPick}`)
+        }
       }
-
-      console.log('🚀 START DRAFT: Updating room status to drafting')
-      const { data: roomUpdateData, error } = await supabaseWithToken
-        .from('rooms')
-        .update(updateData)
-        .eq('id', roomId!)
-        .select()
 
       if (error) {
         console.error('🚨 START DRAFT: Room update error:', error)

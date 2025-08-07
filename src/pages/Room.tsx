@@ -1183,7 +1183,8 @@ const Room = () => {
             .from('rooms')
             .update({ 
               triple_draft_phase: 2,
-              // DON'T reset round_start_time - keep the same timer for phase 2
+              // CRITICAL FIX: Reset timer for phase 2 so joiner gets fresh 8 seconds
+              round_start_time: new Date().toISOString()
             })
             .eq('id', roomId)
           

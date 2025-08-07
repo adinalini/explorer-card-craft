@@ -328,13 +328,26 @@ const Room = () => {
           if (payload.eventType === 'UPDATE') {
             const updatedRoom = payload.new as Room
             console.log('🔄 ROOM UPDATE: Setting new room data')
+            
+            // CRITICAL FIX: Check if draft has already been started for this room
+            const isDraftAlreadyActive = updatedRoom.status === 'drafting' || updatedRoom.current_round > 0
+            
             setRoom(updatedRoom)
             
             const role = getUserRole(updatedRoom, userSessionId)
             setUserRole(role)
             
-            // CRITICAL FIX: Only trigger draft start for rooms in 'waiting' status, never if already drafting or starting
-            if (updatedRoom.creator_ready && updatedRoom.joiner_ready && updatedRoom.status === 'waiting' && !isStartingDraft && room?.status !== 'drafting') {
+            // CRITICAL FIX: Only trigger draft start if:
+            // 1. Room is in 'waiting' status
+            // 2. Both players are ready  
+            // 3. Draft is not already starting
+            // 4. Draft is not already active (status is not 'drafting' and current_round is 0)
+            if (updatedRoom.creator_ready && 
+                updatedRoom.joiner_ready && 
+                updatedRoom.status === 'waiting' && 
+                !isStartingDraft && 
+                !isDraftAlreadyActive) {
+              
               console.log('🚀 ROOM UPDATE: Both players ready, starting draft countdown')
               
               // Cancel any existing draft start timeout to prevent race conditions
@@ -364,6 +377,8 @@ const Room = () => {
                 }, 5000)
                 setDraftStartTimeout(timeoutId)
               }
+            } else if (isDraftAlreadyActive) {
+              console.log('🚀 ROOM UPDATE: Draft already active, skipping countdown')
             }
           }
         }

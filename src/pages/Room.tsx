@@ -589,9 +589,9 @@ const Room = () => {
         round_start_time: new Date().toISOString()
       } as any
 
-      // For triple draft, initialize phase and first pick
+      // For triple draft, use the first pick from edge function response
       if (currentRoom.draft_type === 'triple') {
-        const firstPick = Math.random() < 0.5 ? 'creator' : 'joiner'
+        const firstPick = response?.firstPickPlayer || 'creator' // Use edge function result
         updateData.triple_draft_phase = 1
         updateData.triple_draft_first_pick = firstPick
         console.log(`🔷 TRIPLE: Starting with first pick: ${firstPick}`)

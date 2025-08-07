@@ -12,6 +12,7 @@ interface DraftCardProps {
   isRevealing?: boolean
   showUnselectedOverlay?: boolean
   isOpponentCard?: boolean
+  showSelectedCross?: boolean
 }
 
 export function DraftCard({ 
@@ -24,7 +25,8 @@ export function DraftCard({
   disabled = false,
   isRevealing = false,
   showUnselectedOverlay = false,
-  isOpponentCard = false
+  isOpponentCard = false,
+  showSelectedCross = false
 }: DraftCardProps) {
   return (
     <div
@@ -63,6 +65,14 @@ export function DraftCard({
           <div className="absolute inset-0 bg-black bg-opacity-60 flex items-center justify-center">
             <div className="text-white text-6xl font-bold">✕</div>
           </div>
+        )}
+        {showSelectedCross && (
+          <div className="absolute inset-0 bg-black bg-opacity-60 flex items-center justify-center">
+            <div className="text-white text-6xl font-bold">✕</div>
+          </div>
+        )}
+        {showUnselectedOverlay && !isRevealing && (
+          <div className="absolute inset-0 bg-black bg-opacity-30"></div>
         )}
       </div>
       <div className="p-2 bg-white">

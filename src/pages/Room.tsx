@@ -97,6 +97,7 @@ const Room = () => {
   const [megaDraftCards, setMegaDraftCards] = useState<any[]>([])
   const [megaDraftTurnSequence, setMegaDraftTurnSequence] = useState<string[]>([])
   const [currentTurnIndex, setCurrentTurnIndex] = useState(0)
+  const [isRevealing, setIsRevealing] = useState(false)
 
   const extendSession = async () => {
     const sessionId = sessionStorage.getItem('userSessionId')
@@ -800,9 +801,37 @@ const Room = () => {
           }
         }
       } else if (room.draft_type === 'triple') {
-        // Triple draft: handle phase progression
-        const totalRounds = 13;
+        // For triple draft, this should only be called when both players have selected
+        console.log('💾 Adding 2 cards to player decks...');
         
+        // Add cards to decks
+        for (const card of selectedCards) {
+          const { error } = await supabaseWithToken
+            .from('player_decks')
+            .insert({
+              room_id: roomId,
+              player_side: card.selected_by,
+              card_id: card.card_id,
+              card_name: card.card_name,
+              card_image: card.card_image,
+              is_legendary: card.is_legendary,
+              selection_order: currentRound
+            });
+          
+          if (error) {
+            console.error('❌ Error adding card to deck:', error);
+          } else {
+            console.log(`✅ Added ${card.card_id} to ${card.selected_by} deck`);
+          }
+        }
+        
+        console.log('✅ Both players selected, advancing to next round');
+        
+        // Clear reveal state and advance to next round
+        setIsRevealing(false);
+        
+        // Check if draft is complete
+        const totalRounds = 13;
         if (currentRound >= totalRounds) {
           console.log('🏁 Triple draft complete - setting status to completed')
           await supabaseWithToken
@@ -810,41 +839,21 @@ const Room = () => {
             .update({ status: 'completed' })
             .eq('id', roomId)
         } else {
-          // Check current phase and advance appropriately
-          if (room.current_phase === 'first_pick') {
-            // Move to second pick of same round
-            const nextRoundStartTime = new Date().toISOString()
-            const { error: updateError } = await supabaseWithToken
-              .from('rooms')
-              .update({ 
-                current_phase: 'second_pick',
-                round_start_time: nextRoundStartTime
-              })
-              .eq('id', roomId)
-            
-            if (updateError) {
-              console.error('❌ Error updating triple draft phase:', updateError)
-            } else {
-              console.log(`✅ Successfully moved to second pick of round ${currentRound}`)
-            }
+          // Move to next round
+          const nextRound = currentRound + 1
+          const nextRoundStartTime = new Date().toISOString()
+          const { error: updateError } = await supabaseWithToken
+            .from('rooms')
+            .update({ 
+              current_round: nextRound,
+              round_start_time: nextRoundStartTime
+            })
+            .eq('id', roomId)
+          
+          if (updateError) {
+            console.error('❌ Error updating room for next round:', updateError)
           } else {
-            // Move to next round's first pick
-            const nextRound = currentRound + 1
-            const nextRoundStartTime = new Date().toISOString()
-            const { error: updateError } = await supabaseWithToken
-              .from('rooms')
-              .update({ 
-                current_round: nextRound,
-                current_phase: 'first_pick',
-                round_start_time: nextRoundStartTime
-              })
-              .eq('id', roomId)
-            
-            if (updateError) {
-              console.error('❌ Error updating room for next round:', updateError)
-            } else {
-              console.log(`✅ Successfully advanced to round ${nextRound}`)
-            }
+            console.log(`✅ Successfully advanced to round ${nextRound}`)
           }
         }
       } else {
@@ -1113,48 +1122,27 @@ const Room = () => {
     }
   }
 
-  // Calculate if it's the current user's turn for different draft types
+  // Determine current turn for triple draft
   const isMyTurn = (() => {
     if (!room || room.status !== 'drafting') return false
+    if (room.draft_type !== 'triple') return true
+    if (isRevealing) return false // No turns during reveal phase
     
-    if (room.draft_type === 'default') {
-      const isCreatorTurn = room.current_round % 2 === 1
-      return (userRole === 'creator' && isCreatorTurn) || (userRole === 'joiner' && !isCreatorTurn)
+    const roundCards = roomCards.filter(card => card.round_number === room.current_round)
+    const selectedCards = roundCards.filter(card => card.selected_by)
+    
+    // If no selections yet, creator goes first
+    if (selectedCards.length === 0) {
+      return userRole === 'creator'
     }
     
-    if (room.draft_type === 'triple') {
-      // FIXED: Proper turn logic for triple draft
-      const isFirstPickPhase = room.current_phase === 'first_pick'
-      const firstPickPlayer = room.first_pick_player
-      
-      // First pick phase: first pick player goes first
-      // Second pick phase: other player goes first  
-      if (isFirstPickPhase) {
-        return userRole === firstPickPlayer
-      } else {
-        return userRole !== firstPickPlayer
-      }
+    // If one selection made, the other player goes
+    if (selectedCards.length === 1) {
+      const whoSelected = selectedCards[0].selected_by
+      return userRole !== whoSelected
     }
     
-    if (room.draft_type === 'mega') {
-      // Complex turn pattern: 1-2-2-2-2-2...-1
-      const totalTurns = room.mega_draft_turn_count || 0
-      const firstPickPlayer = room.first_pick_player
-      
-      if (totalTurns === 0) {
-        // First turn
-        return userRole === firstPickPlayer
-      } else if (totalTurns === 25) {
-        // Last turn (26th turn)
-        return userRole !== firstPickPlayer
-      } else {
-        // Turns 1-24: alternate in pairs except first
-        const turnGroup = Math.floor(totalTurns / 2)
-        const isFirstPickTurn = turnGroup % 2 === 0
-        return (userRole === firstPickPlayer) === isFirstPickTurn
-      }
-    }
-    
+    // If both selected, nobody's turn (waiting for next round)
     return false
   })()
 

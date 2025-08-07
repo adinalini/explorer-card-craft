@@ -386,6 +386,14 @@ const Index = () => {
               </DialogContent>
             </Dialog>
           </div>
+          
+          <Button 
+            onClick={() => navigate('/random')}
+            size="lg" 
+            className="bg-orange-500 hover:bg-orange-600 text-white px-12 py-6 text-xl font-semibold rounded-2xl shadow-2xl transform transition-all duration-200 hover:scale-105"
+          >
+            Give me a random deck 🎲
+          </Button>
         </div>
       </div>
       

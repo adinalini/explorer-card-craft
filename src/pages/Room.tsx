@@ -478,17 +478,18 @@ const Room = () => {
       return
     }
 
-    // Double-check: if user has already selected manually, don't auto-select
+    // CRITICAL FIX: Check if user has already selected manually first
     if (selectedCard) {
       console.log('🚫 Auto-select skipped: User has manual selection in state')
       return
     }
 
+    // Get current round cards
     let currentRoundCards = roomCards.filter(card => 
       card.round_number === room.current_round && card.side === userRole
     )
     
-    // Check database for existing selection - this is the KEY check to prevent auto-select conflict
+    // CRITICAL: Real-time check for manual selection
     const userSelectedCard = currentRoundCards.find(card => card.selected_by === userRole)
     if (userSelectedCard) {
       console.log('🚫 Auto-select skipped: Database shows manual selection exists')
@@ -496,7 +497,7 @@ const Room = () => {
       return
     }
 
-    // Also do a fresh database check to be absolutely sure
+    // CRITICAL: Final fresh database check to prevent race condition
     try {
       const supabaseWithToken = getSupabaseWithSession()
       const { data: freshCheck, error: checkError } = await supabaseWithToken
@@ -514,6 +515,8 @@ const Room = () => {
       }
     } catch (error) {
       console.error('Error in fresh database check:', error)
+      // If we can't check, don't auto-select to be safe
+      return
     }
 
     if (currentRoundCards.length === 0) {

@@ -1009,45 +1009,19 @@ const Room = () => {
 
       console.log('✅ Manual selection confirmed:', cardId)
       
-      // For triple draft, immediately progress turn after selection
+      // For triple draft, handle turn progression
       if (room?.draft_type === 'triple') {
-        setIsSelectionLocked(true)
-        setShowReveal(true)
-        
-        // Add selected card to deck immediately
-        try {
-          const cardData = roomCards.find(card => card.card_id === cardId)
-          if (cardData) {
-            const { error: deckError } = await supabaseWithToken
-              .from('player_decks')
-              .insert({
-                room_id: roomId,
-                player_side: userRole,
-                card_id: cardId,
-                card_name: cardData.card_name,
-                card_image: cardData.card_image,
-                is_legendary: cardData.is_legendary,
-                selection_order: ((room.current_round - 1) * 2) + (room.current_phase === 'first_pick' ? 1 : 2)
-              })
-            
-            if (deckError) {
-              console.error('Error adding card to deck:', deckError)
-            } else {
-              console.log('✅ Added card to deck:', cardId)
-            }
+        // Show selection for 2 seconds
+        setTimeout(() => {
+          // Check if both players have selected
+          const currentRoundCards = roomCards.filter(card => card.round_number === room.current_round)
+          const selectedCards = currentRoundCards.filter(card => card.selected_by)
+          
+          // If both have selected, process round end
+          if (selectedCards.length >= 2 && userRole === 'creator' && !isProcessingRound) {
+            processRoundEnd()
           }
-        } catch (deckError) {
-          console.error('Error in deck update:', deckError)
-        }
-        
-        // Progress to next turn/round if creator
-        if (userRole === 'creator' && !isProcessingRound) {
-          setTimeout(() => {
-            if (!isProcessingRound) {
-              processRoundEnd()
-            }
-          }, 1000) // Short delay to show selection
-        }
+        }, 2000) // 2 second delay to show selection
       } else if (room?.draft_type === 'mega') {
         // For mega draft, immediately lock and start reveal phase
         setIsSelectionLocked(true)
@@ -1144,6 +1118,29 @@ const Room = () => {
     
     // If both selected, nobody's turn (waiting for next round)
     return false
+  })()
+
+  // Get whose turn it is for triple draft display
+  const currentTurnPlayer = (() => {
+    if (!room || room.status !== 'drafting' || room.draft_type !== 'triple') return null
+    if (isRevealing) return null
+    
+    const roundCards = roomCards.filter(card => card.round_number === room.current_round)
+    const selectedCards = roundCards.filter(card => card.selected_by)
+    
+    // If no selections yet, creator goes first
+    if (selectedCards.length === 0) {
+      return 'creator'
+    }
+    
+    // If one selection made, the other player goes
+    if (selectedCards.length === 1) {
+      const whoSelected = selectedCards[0].selected_by
+      return whoSelected === 'creator' ? 'joiner' : 'creator'
+    }
+    
+    // If both selected, nobody's turn
+    return null
   })()
 
   const currentRoundCards = roomCards.filter(card => 
@@ -1365,21 +1362,21 @@ const Room = () => {
                         </div>
                       </div>
                       
-                      {/* Turn Arrow with Whose Turn Display */}
-                      <div className="flex flex-col items-center justify-center w-12">
-                        {isMyTurn && userRole === 'creator' ? (
-                          <div className="text-6xl text-primary animate-pulse">←</div>
-                        ) : isMyTurn && userRole === 'joiner' ? (
-                          <div className="text-6xl text-primary animate-pulse">→</div>
-                        ) : !isMyTurn && userRole === 'creator' ? (
-                          <div className="text-6xl text-primary animate-pulse">→</div>
-                        ) : (
-                          <div className="text-6xl text-primary animate-pulse">←</div>
-                        )}
-                        <div className="text-sm text-primary font-medium mt-1">
-                          {isMyTurn ? 'Your turn' : 'Opponent\'s turn'}
-                        </div>
-                      </div>
+                       {/* Turn Arrow with Whose Turn Display */}
+                       <div className="flex flex-col items-center justify-center w-12">
+                         {currentTurnPlayer === 'creator' ? (
+                           <div className="text-6xl text-primary animate-pulse">←</div>
+                         ) : currentTurnPlayer === 'joiner' ? (
+                           <div className="text-6xl text-primary animate-pulse">→</div>
+                         ) : (
+                           <div className="text-6xl text-muted"></div>
+                         )}
+                         <div className="text-sm text-primary font-medium mt-1">
+                           {currentTurnPlayer === 'creator' ? `${room.creator_name}'s turn` : 
+                            currentTurnPlayer === 'joiner' ? `${room.joiner_name}'s turn` : 
+                            'Revealing...'}
+                         </div>
+                       </div>
                       
                       <div className="text-center flex-1">
                         <div className="text-lg font-semibold text-black">

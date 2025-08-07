@@ -72,7 +72,7 @@ export function DraftCard({
           </div>
         )}
         {showUnselectedOverlay && !isRevealing && (
-          <div className="absolute inset-0 bg-black bg-opacity-30"></div>
+          <div className="absolute inset-0 bg-black bg-opacity-50"></div>
         )}
       </div>
       <div className="p-2 bg-white">

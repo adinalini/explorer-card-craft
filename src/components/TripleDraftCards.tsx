@@ -41,8 +41,8 @@ export function TripleDraftCards({
             disabled={isSelectionLocked || !isMyTurn || !!card.selected_by}
             isRevealing={isSelectionLocked}
             showUnselectedOverlay={!isMyTurn && !isSelectionLocked}
-            showSelectedCross={!!card.selected_by && !isSelectionLocked}
-            isOpponentCard={card.selected_by && card.selected_by !== userRole && !isSelectionLocked}
+            showSelectedCross={!!card.selected_by && isSelectionLocked}
+            isOpponentCard={false}
           />
         ))}
       </div>

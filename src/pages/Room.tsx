@@ -148,24 +148,40 @@ const Room = () => {
       console.log('🔷 TRIPLE: Selected cards count:', selectedCards.length)
       console.log('🔷 TRIPLE: Should have selections for phase:', currentPhase)
       
-      // Only auto-select if it's my turn AND selection is actually needed
-      if (isMyTurn && selectedCards.length < currentPhase) {
-        console.log('🔷 TRIPLE: Auto-selecting for current turn player')
-        await autoSelectRandomCard()
-        
-        // CRITICAL FIX: Trigger phase end check after auto-selection
-        if (userRole === 'creator') {
-          console.log('🔷 TRIPLE: Creator triggering phase end after auto-select')
-          setTimeout(() => {
+      // Phase-specific auto-selection logic
+      if (currentPhase === 1) {
+        // Phase 1: First player should auto-select if no cards selected yet
+        if (isMyTurn && selectedCards.length === 0) {
+          console.log('🔷 TRIPLE: Phase 1 - Auto-selecting for first pick player')
+          await autoSelectRandomCard()
+          
+          if (userRole === 'creator') {
+            setTimeout(() => {
+              handleTriplePhaseEnd()
+            }, 500)
+          }
+        } else {
+          console.log('🔷 TRIPLE: Phase 1 - No auto-select needed')
+          if (userRole === 'creator') {
             handleTriplePhaseEnd()
-          }, 500)
+          }
         }
-      } else {
-        console.log('🔷 TRIPLE: No auto-select needed - selections complete or not my turn')
-        // Still trigger phase end check in case we're waiting for phase transition
-        if (userRole === 'creator') {
-          console.log('🔷 TRIPLE: Creator checking phase end without auto-select')
-          handleTriplePhaseEnd()
+      } else if (currentPhase === 2) {
+        // Phase 2: Second player should auto-select if exactly 1 card selected
+        if (isMyTurn && selectedCards.length === 1) {
+          console.log('🔷 TRIPLE: Phase 2 - Auto-selecting for second pick player')
+          await autoSelectRandomCard()
+          
+          if (userRole === 'creator') {
+            setTimeout(() => {
+              handleTriplePhaseEnd()
+            }, 500)
+          }
+        } else {
+          console.log('🔷 TRIPLE: Phase 2 - No auto-select needed')
+          if (userRole === 'creator') {
+            handleTriplePhaseEnd()
+          }
         }
       }
       return
@@ -559,6 +575,12 @@ const Room = () => {
     const currentRoom = roomData || room
     if (!currentRoom) {
       console.log('🚨 START DRAFT: No room data available')
+      return
+    }
+
+    // Prevent duplicate draft starts
+    if (currentRoom.status === 'drafting') {
+      console.log('🚀 START DRAFT: Already drafting, skipping')
       return
     }
 
@@ -1116,8 +1138,7 @@ const Room = () => {
             .from('rooms')
             .update({ 
               triple_draft_phase: 2,
-              // CRITICAL: Set a new round_start_time for phase 2
-              round_start_time: new Date().toISOString()
+              // DON'T reset round_start_time - keep the same timer for phase 2
             })
             .eq('id', roomId)
           

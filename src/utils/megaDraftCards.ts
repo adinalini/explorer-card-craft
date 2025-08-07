@@ -1,5 +1,15 @@
 import { cardDatabase, Card } from "./cardData"
 
+// Fisher-Yates shuffle for true randomization
+const shuffleArray = <T>(array: T[]): T[] => {
+  const shuffled = [...array]
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
+  }
+  return shuffled
+}
+
 // Generate 36 cards for mega draft following the specified rules
 export const generateMegaDraftCards = (usedCardIds: string[]): Card[] => {
   const availableCards = cardDatabase.filter(card => !usedCardIds.includes(card.id) && card.cost !== undefined)
@@ -11,11 +21,11 @@ export const generateMegaDraftCards = (usedCardIds: string[]): Card[] => {
   const guaranteedCosts = [1, 2, 3, 4, 5, 6]
   for (const cost of guaranteedCosts) {
     const cardsOfCost = availableCards.filter(card => 
-      card.cost === cost && !card.isLegendary && !card.isSpell && !usedInSelection.has(card.id)
+      card.cost === cost && !card.isLegendary && !usedInSelection.has(card.id)
     )
     
     if (cardsOfCost.length >= 2) {
-      const shuffled = [...cardsOfCost].sort(() => Math.random() - 0.5)
+      const shuffled = shuffleArray(cardsOfCost)
       const selected = shuffled.slice(0, 2)
       selectedCards.push(...selected)
       selected.forEach(card => usedInSelection.add(card.id))
@@ -24,11 +34,11 @@ export const generateMegaDraftCards = (usedCardIds: string[]): Card[] => {
 
   // 2. Include 2 from the range (7-10) (2 cards total)
   const highCostCards = availableCards.filter(card => 
-    card.cost && card.cost >= 7 && card.cost <= 10 && !card.isLegendary && !card.isSpell && !usedInSelection.has(card.id)
+    card.cost && card.cost >= 7 && card.cost <= 10 && !card.isLegendary && !usedInSelection.has(card.id)
   )
   
   if (highCostCards.length >= 2) {
-    const shuffled = [...highCostCards].sort(() => Math.random() - 0.5)
+    const shuffled = shuffleArray(highCostCards)
     const selected = shuffled.slice(0, 2)
     selectedCards.push(...selected)
     selected.forEach(card => usedInSelection.add(card.id))
@@ -38,7 +48,7 @@ export const generateMegaDraftCards = (usedCardIds: string[]): Card[] => {
   const legendaryCards = availableCards.filter(card => card.isLegendary && !usedInSelection.has(card.id))
   
   if (legendaryCards.length >= 3) {
-    const shuffled = [...legendaryCards].sort(() => Math.random() - 0.5)
+    const shuffled = shuffleArray(legendaryCards)
     const selected = shuffled.slice(0, 3)
     selectedCards.push(...selected)
     selected.forEach(card => usedInSelection.add(card.id))
@@ -48,7 +58,7 @@ export const generateMegaDraftCards = (usedCardIds: string[]): Card[] => {
   const spellCards = availableCards.filter(card => card.isSpell && !usedInSelection.has(card.id))
   
   if (spellCards.length >= 2) {
-    const shuffled = [...spellCards].sort(() => Math.random() - 0.5)
+    const shuffled = shuffleArray(spellCards)
     const selected = shuffled.slice(0, 2)
     selectedCards.push(...selected)
     selected.forEach(card => usedInSelection.add(card.id))
@@ -61,7 +71,7 @@ export const generateMegaDraftCards = (usedCardIds: string[]): Card[] => {
   
   const needed = 36 - selectedCards.length
   if (remainingCards.length >= needed) {
-    const shuffled = [...remainingCards].sort(() => Math.random() - 0.5)
+    const shuffled = shuffleArray(remainingCards)
     const selected = shuffled.slice(0, needed)
     selectedCards.push(...selected)
   }

@@ -155,36 +155,24 @@ const Room = () => {
         if (isMyTurn && selectedCards.length === 0) {
           console.log('🔷 TRIPLE: Phase 1 - Auto-selecting for first pick player')
           await autoSelectRandomCard()
-          
-          if (userRole === 'creator') {
-            setTimeout(() => {
-              handleTriplePhaseEnd()
-            }, 500)
-          }
-        } else {
-          console.log('🔷 TRIPLE: Phase 1 - No auto-select needed')
-          if (userRole === 'creator') {
-            handleTriplePhaseEnd()
-          }
         }
+        
+        // CRITICAL FIX: Always trigger phase end check after auto-select or timeout
+        setTimeout(() => {
+          handleTriplePhaseEnd()
+        }, 500)
       } else if (currentPhase === 2) {
         // Phase 2: Second player should auto-select if exactly 1 card selected
         const mySelection = selectedCards.find(card => card.selected_by === userRole)
         if (isMyTurn && selectedCards.length === 1 && !mySelection) {
           console.log('🔷 TRIPLE: Phase 2 - Auto-selecting for second pick player')
           await autoSelectRandomCard()
-          
-          if (userRole === 'creator') {
-            setTimeout(() => {
-              handleTriplePhaseEnd()
-            }, 500)
-          }
-        } else {
-          console.log('🔷 TRIPLE: Phase 2 - No auto-select needed')
-          if (userRole === 'creator') {
-            handleTriplePhaseEnd()
-          }
         }
+        
+        // CRITICAL FIX: Always trigger phase end check after auto-select or timeout
+        setTimeout(() => {
+          handleTriplePhaseEnd()
+        }, 500)
       }
       return
     }
@@ -1245,10 +1233,18 @@ const Room = () => {
     console.log('🔷 TRIPLE PHASE END: Room:', room?.id)
     console.log('🔷 TRIPLE PHASE END: User role:', userRole)
     
-    if (!room || !roomId || userRole !== 'creator') {
-      console.log('🔷 TRIPLE PHASE END: Blocked - missing data or not creator')
+    if (!room || !roomId) {
+      console.log('🔷 TRIPLE PHASE END: Blocked - missing room data')
       return
     }
+    
+    // CRITICAL FIX: Both players can trigger phase transitions, but use a lock to prevent duplicates
+    if (isProcessingRound) {
+      console.log('🔷 TRIPLE PHASE END: Already processing, skipping')
+      return
+    }
+    
+    setIsProcessingRound(true)
     
     // Add a small delay to ensure card updates have been processed
     await new Promise(resolve => setTimeout(resolve, 200))
@@ -1275,7 +1271,9 @@ const Room = () => {
       console.log('🔷 TRIPLE PHASE END: Selected cards details:', selectedCards.map(c => `${c.card_id} by ${c.selected_by}`))
       
       if (currentPhase === 1 && selectedCards.length >= 1) {
-        // CRITICAL FIX: Add phase 1 selected card to player deck immediately
+        console.log('🔷 TRIPLE: Phase 1 complete - transitioning to phase 2')
+        
+        // Add phase 1 selected card to player deck immediately
         const phase1Card = selectedCards[0]
         console.log('🔷 TRIPLE: Adding phase 1 card to deck:', phase1Card.card_id, 'by', phase1Card.selected_by)
         
@@ -1290,44 +1288,37 @@ const Room = () => {
             .eq('selection_order', currentRound)
           
           if (!existingDeck || existingDeck.length === 0) {
-              await supabaseWithToken
-                .from('player_decks')
-                .insert({
-                  room_id: roomId,
-                  card_id: phase1Card.card_id,
-                  card_name: phase1Card.card_name,
-                  player_side: phase1Card.selected_by as 'creator' | 'joiner',
-                  selection_order: currentRound,
-                  is_legendary: phase1Card.is_legendary,
-                  card_image: phase1Card.card_image
-                })
+            await supabaseWithToken
+              .from('player_decks')
+              .insert({
+                room_id: roomId,
+                card_id: phase1Card.card_id,
+                card_name: phase1Card.card_name,
+                player_side: phase1Card.selected_by as 'creator' | 'joiner',
+                selection_order: currentRound,
+                is_legendary: phase1Card.is_legendary,
+                card_image: phase1Card.card_image
+              })
             console.log('🔷 TRIPLE: Phase 1 card added to deck successfully')
           }
         } catch (error) {
           console.error('🔷 TRIPLE: Error adding phase 1 card to deck:', error)
         }
         
-        // Move to phase 2
-        console.log('🔷 TRIPLE: Moving to phase 2')
-        setIsSelectionLocked(true)
-        setShowReveal(true)
+        // Move to phase 2 with fresh timer
+        console.log('🔷 TRIPLE: Updating room to phase 2')
+        await supabaseWithToken
+          .from('rooms')
+          .update({ 
+            triple_draft_phase: 2,
+            round_start_time: new Date().toISOString()
+          })
+          .eq('id', roomId)
         
-        // Show phase 1 end (2 seconds)
-        setTimeout(async () => {
-          console.log('🔷 TRIPLE: Phase 1 timeout complete, updating to phase 2')
-          const updateResult = await supabaseWithToken
-            .from('rooms')
-            .update({ 
-              triple_draft_phase: 2,
-              // CRITICAL FIX: Reset timer for phase 2 so joiner gets fresh 8 seconds
-              round_start_time: new Date().toISOString()
-            })
-            .eq('id', roomId)
-          
-          console.log('🔷 TRIPLE: Phase 2 update result:', updateResult)
-          // Don't unlock yet - let the room update listener handle the unlock
-        }, 2000)
+        console.log('🔷 TRIPLE: Successfully moved to phase 2')
       } else if (currentPhase === 2 && selectedCards.length >= 2) {
+        console.log('🔷 TRIPLE: Phase 2 complete - moving to next round')
+        
         // Add phase 2 selected card to player deck
         const phase2Card = selectedCards.find(card => card.selected_by !== selectedCards[0].selected_by)
         if (phase2Card) {
@@ -1362,40 +1353,35 @@ const Room = () => {
           }
         }
         
-        // Process round end - move to next round
-        console.log('🔷 TRIPLE PHASE END: Phase 2 complete, moving to next round')
-        setIsSelectionLocked(true)
-        setShowReveal(true)
-        
-        // Small delay to show completion, then move to next round
-        setTimeout(async () => {
-          const nextRound = currentRound + 1
-          if (nextRound <= 13) {
-            console.log('🔷 TRIPLE: Moving to round', nextRound)
-            await supabaseWithToken
-              .from('rooms')
-              .update({ 
-                current_round: nextRound,
-                triple_draft_phase: 1,
-                round_start_time: new Date().toISOString(),
-                triple_draft_first_pick: room.triple_draft_first_pick === 'creator' ? 'joiner' : 'creator' // Alternate first pick
-              })
-              .eq('id', roomId)
-          } else {
-            // Draft complete
-            console.log('🔷 TRIPLE: Draft complete')
-            await supabaseWithToken
-              .from('rooms')
-              .update({ status: 'completed' })
-              .eq('id', roomId)
-          }
-        }, 2000)
+        // Move to next round
+        const nextRound = currentRound + 1
+        if (nextRound <= 13) {
+          console.log('🔷 TRIPLE: Moving to round', nextRound)
+          await supabaseWithToken
+            .from('rooms')
+            .update({ 
+              current_round: nextRound,
+              triple_draft_phase: 1,
+              round_start_time: new Date().toISOString(),
+              triple_draft_first_pick: room.triple_draft_first_pick === 'creator' ? 'joiner' : 'creator' // Alternate first pick
+            })
+            .eq('id', roomId)
+        } else {
+          // Draft complete
+          console.log('🔷 TRIPLE: Draft complete')
+          await supabaseWithToken
+            .from('rooms')
+            .update({ status: 'completed' })
+            .eq('id', roomId)
+        }
       } else {
         console.log('🔷 TRIPLE PHASE END: Conditions not met for phase transition')
         console.log('🔷 TRIPLE PHASE END: Phase:', currentPhase, 'Selected:', selectedCards.length)
       }
     } catch (error) {
       console.error('🔷 TRIPLE: Error in phase end:', error)
+    } finally {
+      setIsProcessingRound(false)
     }
   }
 

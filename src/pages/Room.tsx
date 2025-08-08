@@ -410,6 +410,25 @@ const Room = () => {
                     setIsSelectionLocked(false)
                     setShowReveal(false)
                     fetchRoomCards()
+                    
+                    // CRITICAL FIX: Update round_start_time after reveal phase completes for Phase 2
+                    if (updatedRoom.triple_draft_phase === 2) {
+                      const phase2StartTime = new Date().toISOString()
+                      console.log('🔷 TRIPLE PHASE END: 🕐 Setting Phase 2 start time after reveal:', phase2StartTime)
+                      
+                      supabase
+                        .from('rooms')
+                        .update({ 
+                          round_start_time: phase2StartTime
+                        })
+                        .eq('id', roomId)
+                        .then(() => {
+                          console.log('🔷 TRIPLE PHASE END: ✅ Phase 2 timer started after reveal')
+                        })
+                        .catch((error) => {
+                          console.error('🔷 TRIPLE PHASE END: ❌ Error setting Phase 2 start time:', error)
+                        })
+                    }
                   }, 2100)
                 }
               }
@@ -1504,15 +1523,14 @@ const Room = () => {
         }
         
         // Move to phase 2 immediately without additional reveal
-        // CRITICAL FIX: Set a proper Phase 2 start time to fix timer calculation
-        const phase2StartTime = new Date().toISOString()
-        console.log('🔷 TRIPLE PHASE END: 🕐 Setting Phase 2 start time:', phase2StartTime)
+        // CRITICAL FIX: Don't update round_start_time immediately to prevent timer from starting during reveal
+        console.log('🔷 TRIPLE PHASE END: 🕐 Keeping existing round start time to prevent timer from starting during reveal')
         
         const { data: phaseUpdateResult, error: phaseUpdateError } = await supabaseWithToken
           .from('rooms')
           .update({ 
-            triple_draft_phase: 2,
-            round_start_time: phase2StartTime // CRITICAL FIX: Update start time for Phase 2
+            triple_draft_phase: 2
+            // CRITICAL FIX: Don't update round_start_time here - it will be updated after reveal phase
           })
           .eq('id', roomId)
           .select()

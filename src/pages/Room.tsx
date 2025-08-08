@@ -172,19 +172,34 @@ const Room = () => {
       )
       const selectedCards = currentRoundCards.filter(card => card.selected_by)
       
-      // Phase-specific auto-selection logic
-      if (currentPhase === 1 && isMyTurn && selectedCards.length === 0) {
-        await autoSelectRandomCard()
-      } else if (currentPhase === 2) {
-        const mySelection = selectedCards.find(card => card.selected_by === userRole)
-        if (isMyTurn && selectedCards.length === 1 && !mySelection) {
-          await autoSelectRandomCard()
+      // Add 0.5s delay to prevent double selection for triple draft
+      setTimeout(async () => {
+        // Check if user has made a manual selection after delay
+        const freshRoundCards = roomCards.filter(card => 
+          card.round_number === room.current_round
+        )
+        const freshSelectedCards = freshRoundCards.filter(card => card.selected_by)
+        const hasManualSelection = selectedCard || freshSelectedCards.some(card => card.selected_by === userRole)
+        
+        // Only auto-select if no manual selection exists
+        if (!hasManualSelection) {
+          // Phase-specific auto-selection logic
+          if (currentPhase === 1 && isMyTurn && freshSelectedCards.length === 0) {
+            await autoSelectRandomCard()
+          } else if (currentPhase === 2) {
+            const mySelection = freshSelectedCards.find(card => card.selected_by === userRole)
+            if (isMyTurn && freshSelectedCards.length === 1 && !mySelection) {
+              await autoSelectRandomCard()
+            }
+          }
+        } else {
+          console.log('🔷 TRIPLE: Auto-select skipped - manual selection detected after 0.5s delay')
         }
-      }
-      
-      // Always trigger phase end check after timeout
-      setTimeout(() => {
-        handleTriplePhaseEnd()
+        
+        // Always trigger phase end check after timeout
+        setTimeout(() => {
+          handleTriplePhaseEnd()
+        }, 500)
       }, 500)
       return
     }
@@ -232,6 +247,7 @@ const Room = () => {
   useEffect(() => {
     
     if (room?.status === 'drafting' && room.round_start_time) {
+
       const updateTimer = () => {
         const now = new Date()
         const roundStart = new Date(room.round_start_time!)
@@ -240,7 +256,7 @@ const Room = () => {
         // Get duration based on draft type
         let roundDuration = room.round_duration_seconds || 15
         if (room.draft_type === 'mega') roundDuration = 10
-        if (room.draft_type === 'triple') roundDuration = 8 // Simple 8 seconds per phase
+        if (room.draft_type === 'triple') roundDuration = 8 // 8 seconds total for the round (both phases)
         
         const remaining = Math.max(0, roundDuration - elapsed)
         setTimeRemaining(remaining)
@@ -251,6 +267,15 @@ const Room = () => {
           handleTimeUp()
         } else if (remaining <= 0 && isSelectionLocked) {
           // Stop the timer when it reaches 0 and is locked
+          if (timerIntervalRef.current) {
+            clearInterval(timerIntervalRef.current)
+            timerIntervalRef.current = null
+          }
+        }
+        
+        // For triple draft, prevent timer from resetting when auto-select happens near the end
+        if (room.draft_type === 'triple' && remaining <= 1 && isSelectionLocked) {
+          // If timer is at 1 second or less and selection is locked, stop the timer
           if (timerIntervalRef.current) {
             clearInterval(timerIntervalRef.current)
             timerIntervalRef.current = null
@@ -274,7 +299,7 @@ const Room = () => {
         }
       }
     }
-  }, [room?.status, room?.current_round, room?.draft_type, room?.round_start_time, isSelectionLocked]) // REMOVED triple_draft_phase from dependencies
+  }, [room?.status, room?.current_round, room?.draft_type, room?.round_start_time, room?.triple_draft_phase, isSelectionLocked])
 
   useEffect(() => {
     if (room?.current_round && room?.status === 'drafting' && userRole !== 'spectator') {
@@ -803,6 +828,19 @@ const Room = () => {
         console.log('🔹 TRIPLE: Auto-select skipped - User has manual selection in state')
       }
       return
+    }
+
+    // For triple draft, add additional check for recent manual selections
+    if (room.draft_type === 'triple') {
+      const currentRoundCards = roomCards.filter(card => 
+        card.round_number === room.current_round
+      )
+      const userSelectedCard = currentRoundCards.find(card => card.selected_by === userRole)
+      if (userSelectedCard) {
+        console.log('🔹 TRIPLE: Auto-select skipped - Database shows manual selection exists')
+        setSelectedCard(userSelectedCard.card_id)
+        return
+      }
     }
 
     let currentRoundCards: RoomCard[] = []
@@ -1434,14 +1472,14 @@ const Room = () => {
         }
         
         // Move to phase 2 immediately without additional reveal
-        const newRoundStartTime = new Date().toISOString()
-        console.log('🔷 TRIPLE PHASE END: 🕐 New round start time:', newRoundStartTime)
+        // Don't update round_start_time to prevent timer reset
+        console.log('🔷 TRIPLE PHASE END: 🕐 Keeping existing round start time to prevent timer reset')
         
         const { data: phaseUpdateResult, error: phaseUpdateError } = await supabaseWithToken
           .from('rooms')
           .update({ 
-            triple_draft_phase: 2,
-            round_start_time: newRoundStartTime
+            triple_draft_phase: 2
+            // Removed round_start_time update to prevent timer reset
           })
           .eq('id', roomId)
           .select()

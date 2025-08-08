@@ -405,14 +405,46 @@ const Room = () => {
         },
         (payload) => {
           if (payload.eventType === 'INSERT') {
-            const newCard = payload.new as any
             // Debounce multiple INSERT events to prevent excessive API calls
             clearTimeout(fetchCardsTimeoutRef.current)
             fetchCardsTimeoutRef.current = setTimeout(() => {
               fetchRoomCards()
             }, 200)
+          } else if (payload.eventType === 'UPDATE') {
+            // Always refresh cards on updates
+            fetchRoomCards()
+
+            // For triple draft: instantly enter reveal on any selection update so both clients sync
+            try {
+              const updated = (payload as any).new as RoomCard
+              const prev = (payload as any).old as RoomCard | undefined
+
+              if (
+                room?.draft_type === 'triple' &&
+                room?.status === 'drafting' &&
+                updated?.round_number === room?.current_round &&
+                !isSelectionLocked &&
+                // selection changed from null → player or between players
+                updated?.selected_by && updated?.selected_by !== prev?.selected_by
+              ) {
+                setIsSelectionLocked(true)
+                setShowReveal(true)
+                setIsRevealing(true)
+
+                // Short delay to ensure we render updated ticks/crosses
+                setTimeout(() => {
+                  fetchRoomCards()
+                }, 100)
+
+                // After reveal, advance phase if eligible
+                setTimeout(() => {
+                  setShowReveal(false)
+                  setIsRevealing(false)
+                  handleTriplePhaseEnd()
+                }, 2000)
+              }
+            } catch {}
           } else {
-            // For UPDATE events, fetch immediately
             fetchRoomCards()
           }
         }

@@ -97,7 +97,7 @@ const Room = () => {
   const [isStartingDraft, setIsStartingDraft] = useState(false)
   const [draftStartTimeout, setDraftStartTimeout] = useState<NodeJS.Timeout | null>(null)
   const [backgroundAutoSelectTimeout, setBackgroundAutoSelectTimeout] = useState<NodeJS.Timeout | null>(null)
-  const [isProcessingRound, setIsProcessingRound] = useState(false)
+  const isProcessingRoundRef = useRef(false)
   const [isProcessingSelection, setIsProcessingSelection] = useState<boolean>(false)
   const [megaDraftCards, setMegaDraftCards] = useState<any[]>([])
   const [megaDraftTurnSequence, setMegaDraftTurnSequence] = useState<string[]>([])
@@ -163,7 +163,7 @@ const Room = () => {
   }, [room?.current_round, room?.triple_draft_phase, room?.status])
 
   const handleTimeUp = async () => {
-    if (isSelectionLocked || isProcessingRound || isProcessingSelection) return
+    if (isSelectionLocked || isProcessingRoundRef.current || isProcessingSelection) return
     
     if (room?.draft_type === 'triple') {
       const currentPhase = room.triple_draft_phase || 1
@@ -181,25 +181,32 @@ const Room = () => {
         const freshSelectedCards = freshRoundCards.filter(card => card.selected_by)
         const hasManualSelection = selectedCard || freshSelectedCards.some(card => card.selected_by === userRole)
         
+        let autoSelectTriggered = false
+        
         // Only auto-select if no manual selection exists
         if (!hasManualSelection) {
           // Phase-specific auto-selection logic
           if (currentPhase === 1 && isMyTurn && freshSelectedCards.length === 0) {
             await autoSelectRandomCard()
+            autoSelectTriggered = true
           } else if (currentPhase === 2) {
             const mySelection = freshSelectedCards.find(card => card.selected_by === userRole)
             if (isMyTurn && freshSelectedCards.length === 1 && !mySelection) {
               await autoSelectRandomCard()
+              autoSelectTriggered = true
             }
           }
         } else {
           console.log('🔷 TRIPLE: Auto-select skipped - manual selection detected after 0.5s delay')
         }
         
-        // Always trigger phase end check after timeout
-        setTimeout(() => {
-          handleTriplePhaseEnd()
-        }, 500)
+        // Only trigger phase end check if auto-select was NOT triggered
+        // This prevents duplicate calls to handleTriplePhaseEnd
+        if (!autoSelectTriggered) {
+          setTimeout(() => {
+            handleTriplePhaseEnd()
+          }, 500)
+        }
       }, 500)
       return
     }
@@ -234,9 +241,9 @@ const Room = () => {
     }, 500)
     
     // For default draft only, processRoundEnd is handled by timer
-    if (userRole === 'creator' && !isProcessingRound && room?.draft_type === 'default') {
+    if (userRole === 'creator' && !isProcessingRoundRef.current && room?.draft_type === 'default') {
       setTimeout(() => {
-        if (!isProcessingRound) {
+        if (!isProcessingRoundRef.current) {
           processRoundEnd()
         }
       }, 3000)
@@ -260,11 +267,11 @@ const Room = () => {
       if (room.draft_type === 'triple') roundDuration = 8 // 8 seconds total for the round (both phases)
       
       const remaining = Math.max(0, roundDuration - elapsed)
-      setTimeRemaining(Math.ceil(remaining))
+      setTimeRemaining(Math.floor(remaining))
       
       // CRITICAL FIX: For triple draft, timer should NOT reset during phase transitions
       // The timer continues from the same round_start_time for both phases
-      if (remaining <= 0 && !isProcessingRound) {
+      if (remaining <= 0 && !isProcessingRoundRef.current) {
         handleTimeUp()
       }
     }
@@ -291,7 +298,7 @@ const Room = () => {
       setSelectedCard(null)
       setIsSelectionLocked(false)
       setShowReveal(false)
-      setIsProcessingRound(false)
+      isProcessingRoundRef.current = false
       
       if (backgroundAutoSelectTimeout) {
         clearTimeout(backgroundAutoSelectTimeout)
@@ -1101,7 +1108,7 @@ const Room = () => {
 
   const processRoundEnd = async () => {
     console.log('🔄 PROCESS ROUND END CALLED')
-    console.log('Room:', room?.id, 'Round:', room?.current_round, 'User Role:', userRole, 'Is Processing:', isProcessingRound)
+    console.log('Room:', room?.id, 'Round:', room?.current_round, 'User Role:', userRole, 'Is Processing:', isProcessingRoundRef.current)
     
     if (!room || !roomId) {
       console.log('❌ Process round end blocked - missing data')
@@ -1115,12 +1122,12 @@ const Room = () => {
     }
 
     // ADDITIONAL SAFEGUARD: Double-check if we're already processing
-    if (isProcessingRound) {
+    if (isProcessingRoundRef.current) {
       console.log('❌ Process round end blocked - race condition detected')
       return
     }
 
-    setIsProcessingRound(true)
+    isProcessingRoundRef.current = true
     console.log('🟡 Setting isProcessingRound to true')
     
     await extendSession()
@@ -1165,7 +1172,7 @@ const Room = () => {
       // Both players must have selected before proceeding
       if (!creatorSelected || !joinerSelected) {
         console.log(`⏳ Waiting for selections - Creator: ${creatorSelected ? '✅' : '❌'}, Joiner: ${joinerSelected ? '✅' : '❌'}`)
-        setIsProcessingRound(false)
+        isProcessingRoundRef.current = false
         return
       }
 
@@ -1317,7 +1324,7 @@ const Room = () => {
       console.error('❌ Error processing round end:', error)
     } finally {
       console.log('🟢 Setting isProcessingRound to false')
-      setIsProcessingRound(false)
+      isProcessingRoundRef.current = false
     }
   }
 
@@ -1333,13 +1340,13 @@ const Room = () => {
     }
     
     // CRITICAL FIX: Both players can trigger phase transitions, but use a lock to prevent duplicates
-    if (isProcessingRound) {
+    if (isProcessingRoundRef.current) {
       console.log('🔷 TRIPLE PHASE END: ⏳ Already processing, skipping (lock active)')
       return
     }
     
     console.log('🔷 TRIPLE PHASE END: 🔒 Setting processing lock')
-    setIsProcessingRound(true)
+    isProcessingRoundRef.current = true
     
     // Add a small delay to ensure card updates have been processed
     console.log('🔷 TRIPLE PHASE END: ⏳ Waiting 200ms for card updates...')
@@ -1640,7 +1647,7 @@ const Room = () => {
     } catch (error) {
       console.error('🔷 TRIPLE: Error in phase end:', error)
     } finally {
-      setIsProcessingRound(false)
+      isProcessingRoundRef.current = false
     }
   }
 
@@ -1820,9 +1827,9 @@ const Room = () => {
         setIsSelectionLocked(true)
         setShowReveal(true)
         
-        if (userRole === 'creator' && !isProcessingRound) {
+        if (userRole === 'creator' && !isProcessingRoundRef.current) {
           setTimeout(() => {
-            if (!isProcessingRound) {
+            if (!isProcessingRoundRef.current) {
               processRoundEnd()
             }
           }, 1500) // Shorter delay for mega draft

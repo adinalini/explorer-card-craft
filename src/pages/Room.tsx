@@ -439,6 +439,20 @@ const Room = () => {
                   setSelectedCard(null)
                   fetchRoomCards()
                   fetchPlayerDecks()
+                  
+                  // CRITICAL FIX: Set round_start_time after reveal for new rounds
+                  const newRoundStartTime = new Date().toISOString()
+                  console.log('🔷 TRIPLE ROOM UPDATE: 🕐 Setting new round start time after reveal:', newRoundStartTime)
+                  
+                  // Update local room state immediately to ensure timer uses new start time
+                  setRoom(prev => ({ ...prev, round_start_time: newRoundStartTime }))
+                  
+                  supabase
+                    .from('rooms')
+                    .update({ round_start_time: newRoundStartTime })
+                    .eq('id', roomId)
+                    .then(() => { console.log('🔷 TRIPLE ROOM UPDATE: ✅ New round timer started after reveal') })
+                    .catch((error) => { console.error('🔷 TRIPLE ROOM UPDATE: ❌ Error setting new round start time:', error) })
                 }, 2100)
               }
               // Case 3: Other updates to room state (e.g., selection locked/unlocked, but not a phase/round transition)
@@ -1526,7 +1540,7 @@ const Room = () => {
         
         // Move to phase 2 immediately without additional reveal
         // CRITICAL FIX: Don't update round_start_time immediately to prevent timer from starting during reveal
-        console.log('🔷 TRIPLE PHASE END: 🕐 Keeping existing round start time to prevent timer from starting during reveal')
+
         
         const { data: phaseUpdateResult, error: phaseUpdateError } = await supabaseWithToken
           .from('rooms')
@@ -1641,7 +1655,6 @@ const Room = () => {
               .update({ 
                 current_round: nextRound,
                 triple_draft_phase: 1,
-                round_start_time: new Date().toISOString(),
                 triple_draft_first_pick: room.triple_draft_first_pick === 'creator' ? 'joiner' : 'creator' // Alternate first pick
               })
               .eq('id', roomId)

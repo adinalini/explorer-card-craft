@@ -172,43 +172,42 @@ const Room = () => {
       )
       const selectedCards = currentRoundCards.filter(card => card.selected_by)
       
-      // CRITICAL FIX: Only trigger auto-selection in Phase 1, never in Phase 2
-      // Phase 2 should only be triggered by manual selections or handleTriplePhaseEnd
-      if (currentPhase === 1) {
-        // Add 0.5s delay to prevent double selection for triple draft
-        setTimeout(async () => {
-          // Check if user has made a manual selection after delay
-          const freshRoundCards = roomCards.filter(card => 
-            card.round_number === room.current_round
-          )
-          const freshSelectedCards = freshRoundCards.filter(card => card.selected_by)
-          const hasManualSelection = selectedCard || freshSelectedCards.some(card => card.selected_by === userRole)
-          
-          let autoSelectTriggered = false
-          
-          // Only auto-select if no manual selection exists and it's Phase 1
-          if (!hasManualSelection && isMyTurn && freshSelectedCards.length === 0) {
+      // CRITICAL FIX: Restore auto-selection for both Phase 1 and Phase 2
+      // Both phases should have 8-second timers with auto-selection fallback
+      setTimeout(async () => {
+        // Check if user has made a manual selection after delay
+        const freshRoundCards = roomCards.filter(card => 
+          card.round_number === room.current_round
+        )
+        const freshSelectedCards = freshRoundCards.filter(card => card.selected_by)
+        const hasManualSelection = selectedCard || freshSelectedCards.some(card => card.selected_by === userRole)
+        
+        let autoSelectTriggered = false
+        
+        // Auto-select logic for both phases
+        if (!hasManualSelection) {
+          if (currentPhase === 1 && isMyTurn && freshSelectedCards.length === 0) {
             await autoSelectRandomCard()
             autoSelectTriggered = true
-          } else {
-            console.log('🔷 TRIPLE: Auto-select skipped - manual selection detected after 0.5s delay')
+          } else if (currentPhase === 2) {
+            const mySelection = freshSelectedCards.find(card => card.selected_by === userRole)
+            if (isMyTurn && freshSelectedCards.length === 1 && !mySelection) {
+              await autoSelectRandomCard()
+              autoSelectTriggered = true
+            }
           }
-          
-          // Only trigger phase end check if auto-select was NOT triggered
-          // This prevents duplicate calls to handleTriplePhaseEnd
-          if (!autoSelectTriggered) {
-            setTimeout(() => {
-              handleTriplePhaseEnd()
-            }, 500)
-          }
-        }, 500)
-      } else {
-        // For Phase 2, only trigger phase end check, never auto-selection
-        console.log('🔷 TRIPLE: Phase 2 timer expired - checking phase end without auto-selection')
-        setTimeout(() => {
-          handleTriplePhaseEnd()
-        }, 500)
-      }
+        } else {
+          console.log('🔷 TRIPLE: Auto-select skipped - manual selection detected after 0.5s delay')
+        }
+        
+        // Only trigger phase end check if auto-select was NOT triggered
+        // This prevents duplicate calls to handleTriplePhaseEnd
+        if (!autoSelectTriggered) {
+          setTimeout(() => {
+            handleTriplePhaseEnd()
+          }, 500)
+        }
+      }, 500)
       return
     }
     
@@ -377,6 +376,9 @@ const Room = () => {
               console.log('🔧 ROOM SYNC: Ready states changed - forcing UI update')
               // Force a re-render by updating a state that triggers UI refresh
               setTimeRemaining(prev => prev) // This will trigger a re-render
+              
+              // Additional sync: Update room state immediately to ensure UI reflects changes
+              setRoom(updatedRoom)
             }
             
             // Handle triple draft phase transitions with debouncing

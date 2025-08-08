@@ -292,9 +292,9 @@ const Index = () => {
                           <RadioGroupItem value="triple" id="triple" />
                           <span className="text-lg text-primary font-semibold">Triple Draft</span>
                         </label>
-                        <label className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-accent/20 hover:scale-105 transition-all cursor-pointer">
-                          <RadioGroupItem value="mega" id="mega" />
-                          <span className="text-lg text-primary font-semibold">Mega Draft</span>
+                        <label className="flex items-center space-x-3 p-3 border rounded-lg opacity-60 cursor-not-allowed">
+                          <RadioGroupItem value="mega" id="mega" disabled />
+                          <span className="text-lg text-primary font-semibold">(Not Available) Mega Draft</span>
                         </label>
                      </RadioGroup>
                   </div>

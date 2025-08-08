@@ -130,6 +130,7 @@ const Room = () => {
   const [uiMirrorReveal, setUiMirrorReveal] = useState(false)
   const mirrorRevealTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const lastSelectionRef = useRef<{ round: number; count: number }>({ round: 0, count: 0 })
+  const selectionInFlightRef = useRef(false)
 
   useEffect(() => {
     if (!room || room.status !== 'drafting' || room.draft_type !== 'triple') return
@@ -155,6 +156,11 @@ const Room = () => {
       lastSelectionRef.current = { round, count: selectedCount }
     }
   }, [room?.status, room?.draft_type, room?.current_round, roomCards, isSelectionLocked, isRevealing])
+
+  // Reset in-flight guard on round/phase/status changes
+  useEffect(() => {
+    selectionInFlightRef.current = false
+  }, [room?.current_round, room?.triple_draft_phase, room?.status])
 
   const handleTimeUp = async () => {
     if (isSelectionLocked || isProcessingRound || isProcessingSelection) return
@@ -1613,6 +1619,14 @@ const Room = () => {
       console.log(`🔷 TRIPLE: Is My Turn: ${isMyTurn}`)
     }
     
+    // Prevent rapid double-clicks within same tick
+    if (selectionInFlightRef.current) {
+      if (room?.draft_type === 'triple') {
+        console.log('🔷 TRIPLE: Selection blocked - in-flight')
+      }
+      return
+    }
+    
     if (isSelectionLocked || userRole === 'spectator' || isProcessingSelection) {
       if (room?.draft_type === 'triple') {
         console.log('🔷 TRIPLE: Selection blocked - locked, spectator, or processing')
@@ -1665,6 +1679,7 @@ const Room = () => {
       console.log('🔷 TRIPLE: Setting new selection')
     }
     // Set processing flag to prevent race conditions with timer
+    selectionInFlightRef.current = true
     setIsProcessingSelection(true)
     
     // Update selected card immediately for instant UI feedback
@@ -1763,6 +1778,7 @@ const Room = () => {
         console.log('🔷 TRIPLE: Error in handleCardSelect:', error)
       }
       setSelectedCard(null) // Reset on error
+      selectionInFlightRef.current = false
     } finally {
       // Always clear the processing flag
       setIsProcessingSelection(false)

@@ -392,64 +392,64 @@ const Room = () => {
             // Handle triple draft phase transitions with debouncing
             if (updatedRoom.draft_type === 'triple' && updatedRoom.status === 'drafting') {
               const isPhaseTransition = room && updatedRoom.triple_draft_phase !== room.triple_draft_phase
-              const isPhase2Locked = updatedRoom.triple_draft_phase === 2 && isSelectionLocked
-              const isInitialPhase2Load = !room && updatedRoom.triple_draft_phase === 2
+              const isRoundTransition = room && updatedRoom.current_round !== room.current_round
               
-              // Phase 1 → 2: unlock selections (but never interrupt active reveal)
-              if ((isPhaseTransition && updatedRoom.triple_draft_phase === 2) || isPhase2Locked || isInitialPhase2Load) {
-                if (!isRevealing) {
+              // Case 1: Transition from Phase 1 to Phase 2 (always involves a reveal)
+              if (isPhaseTransition && updatedRoom.triple_draft_phase === 2) {
+                console.log('🔷 TRIPLE ROOM UPDATE: Phase 1 -> 2 transition detected. Deferring unlock and timer start.')
+                // Always show reveal for 2.1s, then hide it and start timer
+                setShowReveal(true)
+                setTimeout(() => {
                   setIsSelectionLocked(false)
                   setShowReveal(false)
-                  // Fetch fresh card data to ensure we have updated state
-                  setTimeout(() => {
-                    fetchRoomCards()
-                  }, 100)
-                } else {
-                  // Defer unlocking until reveal window ends so both UIs show cross/tick + paused timer
-                  setTimeout(() => {
-                    setIsSelectionLocked(false)
-                    setShowReveal(false)
-                    fetchRoomCards()
-                    
-                    // CRITICAL FIX: Update round_start_time after reveal phase completes for Phase 2
-                    if (updatedRoom.triple_draft_phase === 2) {
-                      const phase2StartTime = new Date().toISOString()
-                      console.log('🔷 TRIPLE PHASE END: 🕐 Setting Phase 2 start time after reveal:', phase2StartTime)
-                      
-                      supabase
-                        .from('rooms')
-                        .update({ 
-                          round_start_time: phase2StartTime
-                        })
-                        .eq('id', roomId)
-                        .then(() => {
-                          console.log('🔷 TRIPLE PHASE END: ✅ Phase 2 timer started after reveal')
-                        })
-                        .catch((error) => {
-                          console.error('🔷 TRIPLE PHASE END: ❌ Error setting Phase 2 start time:', error)
-                        })
-                    }
-                  }, 2100)
-                }
+                  fetchRoomCards()
+                  
+                  // CRITICAL FIX: Update round_start_time after reveal phase completes for Phase 2
+                  const phase2StartTime = new Date().toISOString()
+                  console.log('🔷 TRIPLE PHASE END: 🕐 Setting Phase 2 start time after reveal:', phase2StartTime)
+                  
+                  supabase
+                    .from('rooms')
+                    .update({ 
+                      round_start_time: phase2StartTime
+                    })
+                    .eq('id', roomId)
+                    .then(() => {
+                      console.log('🔷 TRIPLE PHASE END: ✅ Phase 2 timer started after reveal')
+                    })
+                    .catch((error) => {
+                      console.error('🔷 TRIPLE PHASE END: ❌ Error setting Phase 2 start time:', error)
+                    })
+                }, 2100)
               }
-              // Moving to next round: unlock and reset (also defer if reveal is active)
-              else if (isPhaseTransition && updatedRoom.current_round !== room.current_round) {
-                if (!isRevealing) {
+              // Case 2: Transition to next round (always involves a reveal)
+              else if (isRoundTransition) {
+                console.log('🔷 TRIPLE ROOM UPDATE: Round transition detected. Deferring unlock and reset.')
+                setShowReveal(true)
+                setTimeout(() => {
                   setIsSelectionLocked(false)
                   setShowReveal(false)
                   setSelectedCard(null)
-                  // Fetch fresh data for new round
+                  fetchRoomCards()
+                  fetchPlayerDecks()
+                  // For round transitions, round_start_time is already updated by processRoundEnd
+                }, 2100)
+              }
+              // Case 3: Other updates to room state (e.g., selection locked/unlocked, but not a phase/round transition)
+              else {
+                // If there's no active reveal, just update states immediately
+                if (!isRevealing) {
+                  setIsSelectionLocked(false)
+                  setShowReveal(false)
                   setTimeout(() => {
                     fetchRoomCards()
-                    fetchPlayerDecks()
                   }, 100)
                 } else {
+                  // If there's an active reveal, defer other state updates until it finishes
                   setTimeout(() => {
                     setIsSelectionLocked(false)
                     setShowReveal(false)
-                    setSelectedCard(null)
                     fetchRoomCards()
-                    fetchPlayerDecks()
                   }, 2100)
                 }
               }

@@ -291,7 +291,7 @@ const Room = () => {
         timerIntervalRef.current = null
       }
     }
-  }, [room?.status, room?.current_round, room?.draft_type, room?.round_start_time, room?.triple_draft_phase, isSelectionLocked])
+  }, [room?.status, room?.current_round, room?.draft_type, room?.round_start_time, isSelectionLocked])
 
   useEffect(() => {
     if (room?.current_round && room?.status === 'drafting' && userRole !== 'spectator') {
@@ -379,6 +379,14 @@ const Room = () => {
               
               // Additional sync: Update room state immediately to ensure UI reflects changes
               setRoom(updatedRoom)
+              
+              // CRITICAL FIX: Add a more robust sync mechanism
+              // Force a complete UI refresh by updating multiple state variables
+              setTimeout(() => {
+                console.log('🔧 ROOM SYNC: Forcing complete UI refresh')
+                setTimeRemaining(prev => prev + 0.001) // Minimal change to trigger re-render
+                setRoom(prev => ({ ...prev, ...updatedRoom })) // Force room state update
+              }, 100)
             }
             
             // Handle triple draft phase transitions with debouncing
@@ -1496,14 +1504,15 @@ const Room = () => {
         }
         
         // Move to phase 2 immediately without additional reveal
-        // CRITICAL FIX: Don't update round_start_time to prevent timer reset
-        console.log('🔷 TRIPLE PHASE END: 🕐 Keeping existing round start time to prevent timer reset')
+        // CRITICAL FIX: Set a proper Phase 2 start time to fix timer calculation
+        const phase2StartTime = new Date().toISOString()
+        console.log('🔷 TRIPLE PHASE END: 🕐 Setting Phase 2 start time:', phase2StartTime)
         
         const { data: phaseUpdateResult, error: phaseUpdateError } = await supabaseWithToken
           .from('rooms')
           .update({ 
-            triple_draft_phase: 2
-            // Removed round_start_time update to prevent timer reset
+            triple_draft_phase: 2,
+            round_start_time: phase2StartTime // CRITICAL FIX: Update start time for Phase 2
           })
           .eq('id', roomId)
           .select()

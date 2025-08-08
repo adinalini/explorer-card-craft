@@ -258,13 +258,22 @@ const Room = () => {
 
   // Centralized timer effect for all draft types
   useEffect(() => {
+    console.log('🔷 TIMER USEFFECT: Timer useEffect triggered')
+    console.log('🔷 TIMER USEFFECT: Room:', room?.id)
+    console.log('🔷 TIMER USEFFECT: Room status:', room?.status)
+    console.log('🔷 TIMER USEFFECT: Room round_start_time:', room?.round_start_time)
+    console.log('🔷 TIMER USEFFECT: Room draft_type:', room?.draft_type)
+    console.log('🔷 TIMER USEFFECT: Is revealing:', isRevealing)
+    
     if (!room || room.status !== 'drafting' || !room.round_start_time) {
+      console.log('🔷 TIMER USEFFECT: Early return - missing room data')
       setTimeRemaining(0)
       return
     }
 
     // CRITICAL FIX: Don't start timer during reveal phase for triple draft
     if (room.draft_type === 'triple' && isRevealing) {
+      console.log('🔷 TIMER USEFFECT: Early return - revealing phase')
       setTimeRemaining(0)
       return
     }
@@ -281,7 +290,20 @@ const Room = () => {
       const remaining = Math.max(0, roundDuration - elapsed)
       const displayTime = Math.floor(remaining)
       
-
+      // DEBUG: Add detailed timer debugging for triple draft
+      if (room.draft_type === 'triple') {
+        console.log('🔷 TIMER DEBUG:')
+        console.log('🔷 TIMER DEBUG:   - Round start time:', room.round_start_time)
+        console.log('🔷 TIMER DEBUG:   - Round start time parsed:', roundStart.toISOString())
+        console.log('🔷 TIMER DEBUG:   - Current time:', now.toISOString())
+        console.log('🔷 TIMER DEBUG:   - Elapsed seconds:', elapsed.toFixed(2))
+        console.log('🔷 TIMER DEBUG:   - Remaining seconds:', remaining.toFixed(2))
+        console.log('🔷 TIMER DEBUG:   - Display time:', displayTime)
+        console.log('🔷 TIMER DEBUG:   - Current round:', room.current_round)
+        console.log('🔷 TIMER DEBUG:   - Current phase:', room.triple_draft_phase)
+        console.log('🔷 TIMER DEBUG:   - Is revealing:', isRevealing)
+        console.log('🔷 TIMER DEBUG:   - Room ID:', room.id)
+      }
       
       setTimeRemaining(displayTime)
       
@@ -400,8 +422,13 @@ const Room = () => {
             
             // Handle triple draft phase transitions with debouncing
             if (updatedRoom.draft_type === 'triple' && updatedRoom.status === 'drafting') {
+              console.log('🔷 TRIPLE ROOM UPDATE: Checking for transitions')
+              console.log('🔷 TRIPLE ROOM UPDATE: roomRef.current:', roomRef.current)
+              console.log('🔷 TRIPLE ROOM UPDATE: updatedRoom:', updatedRoom)
               const isPhaseTransition = roomRef.current && updatedRoom.triple_draft_phase !== roomRef.current.triple_draft_phase
               const isRoundTransition = roomRef.current && updatedRoom.current_round !== roomRef.current.current_round
+              console.log('🔷 TRIPLE ROOM UPDATE: isPhaseTransition:', isPhaseTransition)
+              console.log('🔷 TRIPLE ROOM UPDATE: isRoundTransition:', isRoundTransition)
               
               // Case 1: Transition from Phase 1 to Phase 2 (always involves a reveal)
               if (isPhaseTransition && updatedRoom.triple_draft_phase === 2) {
@@ -430,6 +457,33 @@ const Room = () => {
               // Case 2: Transition to next round (always involves a reveal)
               else if (isRoundTransition) {
                 console.log('🔷 TRIPLE ROOM UPDATE: Round transition detected. Deferring unlock and reset.')
+                console.log('🔷 TRIPLE ROOM UPDATE: Previous round:', roomRef.current?.current_round, '-> New round:', updatedRoom.current_round)
+                console.log('🔷 TRIPLE ROOM UPDATE: Previous round_start_time:', roomRef.current?.round_start_time)
+                
+                // CRITICAL FIX: Set round_start_time immediately for new rounds to prevent timer issues
+                const newRoundStartTime = new Date().toISOString()
+                console.log('🔷 TRIPLE ROOM UPDATE: 🕐 Setting new round start time immediately:', newRoundStartTime)
+                
+                // Update local room state immediately to ensure timer uses new start time
+                console.log('🔷 TRIPLE ROOM UPDATE: About to update local room state with new round_start_time:', newRoundStartTime)
+                setRoom(prev => {
+                  const updated = { ...prev, round_start_time: newRoundStartTime }
+                  console.log('🔷 TRIPLE ROOM UPDATE: Updated local room state:', updated)
+                  console.log('🔷 TRIPLE ROOM UPDATE: Previous state was:', prev)
+                  return updated
+                })
+                
+                // Update database immediately
+                supabase
+                  .from('rooms')
+                  .update({ round_start_time: newRoundStartTime })
+                  .eq('id', roomId)
+                  .then(() => { 
+                    console.log('🔷 TRIPLE ROOM UPDATE: ✅ New round timer started immediately')
+                    console.log('🔷 TRIPLE ROOM UPDATE: Database updated with new round_start_time:', newRoundStartTime)
+                  })
+                  .catch((error) => { console.error('🔷 TRIPLE ROOM UPDATE: ❌ Error setting new round start time:', error) })
+                
                 setIsRevealing(true) // CRITICAL FIX: Set isRevealing true immediately
                 setShowReveal(true)
                 setTimeout(() => {
@@ -439,20 +493,6 @@ const Room = () => {
                   setSelectedCard(null)
                   fetchRoomCards()
                   fetchPlayerDecks()
-                  
-                  // CRITICAL FIX: Set round_start_time after reveal for new rounds
-                  const newRoundStartTime = new Date().toISOString()
-                  console.log('🔷 TRIPLE ROOM UPDATE: 🕐 Setting new round start time after reveal:', newRoundStartTime)
-                  
-                  // Update local room state immediately to ensure timer uses new start time
-                  setRoom(prev => ({ ...prev, round_start_time: newRoundStartTime }))
-                  
-                  supabase
-                    .from('rooms')
-                    .update({ round_start_time: newRoundStartTime })
-                    .eq('id', roomId)
-                    .then(() => { console.log('🔷 TRIPLE ROOM UPDATE: ✅ New round timer started after reveal') })
-                    .catch((error) => { console.error('🔷 TRIPLE ROOM UPDATE: ❌ Error setting new round start time:', error) })
                 }, 2100)
               }
               // Case 3: Other updates to room state (e.g., selection locked/unlocked, but not a phase/round transition)

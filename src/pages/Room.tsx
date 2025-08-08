@@ -86,6 +86,7 @@ const Room = () => {
   const { roomId } = useParams<{ roomId: string }>()
   const navigate = useNavigate()
   const [room, setRoom] = useState<Room | null>(null)
+  const roomRef = useRef<Room | null>(null)
   const [isReady, setIsReady] = useState(false)
   const [loading, setLoading] = useState(true)
   const [roomCards, setRoomCards] = useState<RoomCard[]>([])
@@ -156,6 +157,11 @@ const Room = () => {
       lastSelectionRef.current = { round, count: selectedCount }
     }
   }, [room?.status, room?.draft_type, room?.current_round, roomCards, isSelectionLocked, isRevealing])
+
+  // Keep roomRef in sync with room state
+  useEffect(() => {
+    roomRef.current = room
+  }, [room])
 
   // Reset in-flight guard on round/phase/status changes
   useEffect(() => {
@@ -372,7 +378,7 @@ const Room = () => {
             setUserRole(role)
             
             // CRITICAL FIX: Force a re-render when ready states change to ensure UI sync
-            if (room && (room.creator_ready !== updatedRoom.creator_ready || room.joiner_ready !== updatedRoom.joiner_ready)) {
+            if (roomRef.current && (roomRef.current.creator_ready !== updatedRoom.creator_ready || roomRef.current.joiner_ready !== updatedRoom.joiner_ready)) {
               console.log('🔧 ROOM SYNC: Ready states changed - forcing UI update')
               // Force a re-render by updating a state that triggers UI refresh
               setTimeRemaining(prev => prev) // This will trigger a re-render
@@ -391,8 +397,8 @@ const Room = () => {
             
             // Handle triple draft phase transitions with debouncing
             if (updatedRoom.draft_type === 'triple' && updatedRoom.status === 'drafting') {
-              const isPhaseTransition = room && updatedRoom.triple_draft_phase !== room.triple_draft_phase
-              const isRoundTransition = room && updatedRoom.current_round !== room.current_round
+              const isPhaseTransition = roomRef.current && updatedRoom.triple_draft_phase !== roomRef.current.triple_draft_phase
+              const isRoundTransition = roomRef.current && updatedRoom.current_round !== roomRef.current.current_round
               
               // Case 1: Transition from Phase 1 to Phase 2 (always involves a reveal)
               if (isPhaseTransition && updatedRoom.triple_draft_phase === 2) {

@@ -172,42 +172,43 @@ const Room = () => {
       )
       const selectedCards = currentRoundCards.filter(card => card.selected_by)
       
-      // Add 0.5s delay to prevent double selection for triple draft
-      setTimeout(async () => {
-        // Check if user has made a manual selection after delay
-        const freshRoundCards = roomCards.filter(card => 
-          card.round_number === room.current_round
-        )
-        const freshSelectedCards = freshRoundCards.filter(card => card.selected_by)
-        const hasManualSelection = selectedCard || freshSelectedCards.some(card => card.selected_by === userRole)
-        
-        let autoSelectTriggered = false
-        
-        // Only auto-select if no manual selection exists
-        if (!hasManualSelection) {
-          // Phase-specific auto-selection logic
-          if (currentPhase === 1 && isMyTurn && freshSelectedCards.length === 0) {
+      // CRITICAL FIX: Only trigger auto-selection in Phase 1, never in Phase 2
+      // Phase 2 should only be triggered by manual selections or handleTriplePhaseEnd
+      if (currentPhase === 1) {
+        // Add 0.5s delay to prevent double selection for triple draft
+        setTimeout(async () => {
+          // Check if user has made a manual selection after delay
+          const freshRoundCards = roomCards.filter(card => 
+            card.round_number === room.current_round
+          )
+          const freshSelectedCards = freshRoundCards.filter(card => card.selected_by)
+          const hasManualSelection = selectedCard || freshSelectedCards.some(card => card.selected_by === userRole)
+          
+          let autoSelectTriggered = false
+          
+          // Only auto-select if no manual selection exists and it's Phase 1
+          if (!hasManualSelection && isMyTurn && freshSelectedCards.length === 0) {
             await autoSelectRandomCard()
             autoSelectTriggered = true
-          } else if (currentPhase === 2) {
-            const mySelection = freshSelectedCards.find(card => card.selected_by === userRole)
-            if (isMyTurn && freshSelectedCards.length === 1 && !mySelection) {
-              await autoSelectRandomCard()
-              autoSelectTriggered = true
-            }
+          } else {
+            console.log('🔷 TRIPLE: Auto-select skipped - manual selection detected after 0.5s delay')
           }
-        } else {
-          console.log('🔷 TRIPLE: Auto-select skipped - manual selection detected after 0.5s delay')
-        }
-        
-        // Only trigger phase end check if auto-select was NOT triggered
-        // This prevents duplicate calls to handleTriplePhaseEnd
-        if (!autoSelectTriggered) {
-          setTimeout(() => {
-            handleTriplePhaseEnd()
-          }, 500)
-        }
-      }, 500)
+          
+          // Only trigger phase end check if auto-select was NOT triggered
+          // This prevents duplicate calls to handleTriplePhaseEnd
+          if (!autoSelectTriggered) {
+            setTimeout(() => {
+              handleTriplePhaseEnd()
+            }, 500)
+          }
+        }, 500)
+      } else {
+        // For Phase 2, only trigger phase end check, never auto-selection
+        console.log('🔷 TRIPLE: Phase 2 timer expired - checking phase end without auto-selection')
+        setTimeout(() => {
+          handleTriplePhaseEnd()
+        }, 500)
+      }
       return
     }
     
@@ -327,6 +328,14 @@ const Room = () => {
     fetchRoom()
     fetchRoomCards()
     fetchPlayerDecks()
+    
+    // CRITICAL FIX: Add a retry mechanism for room data to ensure ready buttons sync properly
+    const roomDataRetry = setTimeout(() => {
+      if (!room || (room.creator_ready === undefined && room.joiner_ready === undefined)) {
+        console.log('🔧 ROOM SYNC: Retrying room data fetch to ensure ready state sync')
+        fetchRoom()
+      }
+    }, 1000) // Retry after 1 second if room data is incomplete
 
     // Add failsafe cleanup for stuck draft starting states
     const stuckStateCleanup = setInterval(() => {
@@ -362,6 +371,13 @@ const Room = () => {
             
             const role = getUserRole(updatedRoom, userSessionId)
             setUserRole(role)
+            
+            // CRITICAL FIX: Force a re-render when ready states change to ensure UI sync
+            if (room && (room.creator_ready !== updatedRoom.creator_ready || room.joiner_ready !== updatedRoom.joiner_ready)) {
+              console.log('🔧 ROOM SYNC: Ready states changed - forcing UI update')
+              // Force a re-render by updating a state that triggers UI refresh
+              setTimeRemaining(prev => prev) // This will trigger a re-render
+            }
             
             // Handle triple draft phase transitions with debouncing
             if (updatedRoom.draft_type === 'triple' && updatedRoom.status === 'drafting') {
@@ -530,6 +546,7 @@ const Room = () => {
       supabase.removeChannel(cardsChannel)
       supabase.removeChannel(decksChannel)
       clearInterval(stuckStateCleanup)
+      clearTimeout(roomDataRetry)
       if (backgroundAutoSelectTimeout) {
         clearTimeout(backgroundAutoSelectTimeout)
       }

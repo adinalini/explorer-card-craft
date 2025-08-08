@@ -243,60 +243,45 @@ const Room = () => {
     }
   }
 
-  // Centralized timer effect
+  // Centralized timer effect for all draft types
   useEffect(() => {
-    
-    if (room?.status === 'drafting' && room.round_start_time) {
+    if (!room || room.status !== 'drafting' || !room.round_start_time) {
+      setTimeRemaining(0)
+      return
+    }
 
-      const updateTimer = () => {
-        const now = new Date()
-        const roundStart = new Date(room.round_start_time!)
-        const elapsed = (now.getTime() - roundStart.getTime()) / 1000
-        
-        // Get duration based on draft type
-        let roundDuration = room.round_duration_seconds || 15
-        if (room.draft_type === 'mega') roundDuration = 10
-        if (room.draft_type === 'triple') roundDuration = 8 // 8 seconds total for the round (both phases)
-        
-        const remaining = Math.max(0, roundDuration - elapsed)
-        setTimeRemaining(remaining)
-        
-        // Only trigger handleTimeUp if timer expires AND not already locked
-        if (remaining <= 0 && !isSelectionLocked) {
-          setIsSelectionLocked(true)
-          handleTimeUp()
-        } else if (remaining <= 0 && isSelectionLocked) {
-          // Stop the timer when it reaches 0 and is locked
-          if (timerIntervalRef.current) {
-            clearInterval(timerIntervalRef.current)
-            timerIntervalRef.current = null
-          }
-        }
-        
-        // For triple draft, prevent timer from resetting when auto-select happens near the end
-        if (room.draft_type === 'triple' && remaining <= 1 && isSelectionLocked) {
-          // If timer is at 1 second or less and selection is locked, stop the timer
-          if (timerIntervalRef.current) {
-            clearInterval(timerIntervalRef.current)
-            timerIntervalRef.current = null
-          }
-        }
-      }
-
-      // Update immediately
-      updateTimer()
+    const updateTimer = () => {
+      const now = new Date()
+      const roundStart = new Date(room.round_start_time)
+      const elapsed = (now.getTime() - roundStart.getTime()) / 1000
       
-      // Set up interval
+      let roundDuration = room.round_duration_seconds || 15
+      if (room.draft_type === 'mega') roundDuration = 10
+      if (room.draft_type === 'triple') roundDuration = 8 // 8 seconds total for the round (both phases)
+      
+      const remaining = Math.max(0, roundDuration - elapsed)
+      setTimeRemaining(Math.ceil(remaining))
+      
+      // CRITICAL FIX: For triple draft, timer should NOT reset during phase transitions
+      // The timer continues from the same round_start_time for both phases
+      if (remaining <= 0 && !isProcessingRound) {
+        handleTimeUp()
+      }
+    }
+
+    // Initial calculation
+    updateTimer()
+
+    // Set up interval
+    if (timerIntervalRef.current) {
+      clearInterval(timerIntervalRef.current)
+    }
+    timerIntervalRef.current = setInterval(updateTimer, 1000)
+
+    return () => {
       if (timerIntervalRef.current) {
         clearInterval(timerIntervalRef.current)
-      }
-      timerIntervalRef.current = setInterval(updateTimer, 1000)
-
-      return () => {
-        if (timerIntervalRef.current) {
-          clearInterval(timerIntervalRef.current)
-          timerIntervalRef.current = null
-        }
+        timerIntervalRef.current = null
       }
     }
   }, [room?.status, room?.current_round, room?.draft_type, room?.round_start_time, room?.triple_draft_phase, isSelectionLocked])
@@ -1408,6 +1393,19 @@ const Room = () => {
         console.log('🔷 TRIPLE PHASE END: ✅ PHASE 1 → 2 TRANSITION TRIGGERED')
         console.log('🔷 TRIPLE PHASE END: 🎯 Phase 1 complete - transitioning to phase 2')
         
+        // CRITICAL FIX: Check for multiple selections in Phase 1
+        if (selectedCards.length > 1) {
+          console.log('🔷 TRIPLE PHASE END: 🚨 WARNING: Multiple cards selected in Phase 1!')
+          console.log('🔷 TRIPLE PHASE END: 📋 Multiple selections details:')
+          selectedCards.forEach((card, i) => {
+            console.log(`🔷 TRIPLE PHASE END:   ${i+1}. ${card.card_id} (${card.card_name}) by ${card.selected_by}`)
+          })
+          
+          // Keep only the first selection to prevent issues
+          const firstSelection = selectedCards[0]
+          console.log('🔷 TRIPLE PHASE END: 🎯 Using first selection:', firstSelection.card_id, 'by', firstSelection.selected_by)
+        }
+        
         // Add phase 1 selected card to player deck immediately
         const phase1Card = selectedCards[0]
         console.log('🔷 TRIPLE PHASE END: 📦 Adding phase 1 card to deck:', phase1Card.card_id, 'by', phase1Card.selected_by)
@@ -1472,7 +1470,7 @@ const Room = () => {
         }
         
         // Move to phase 2 immediately without additional reveal
-        // Don't update round_start_time to prevent timer reset
+        // CRITICAL FIX: Don't update round_start_time to prevent timer reset
         console.log('🔷 TRIPLE PHASE END: 🕐 Keeping existing round start time to prevent timer reset')
         
         const { data: phaseUpdateResult, error: phaseUpdateError } = await supabaseWithToken
@@ -1677,6 +1675,25 @@ const Room = () => {
       if (!isMyTurn) {
         console.log('🔷 TRIPLE: Selection blocked - not user\'s turn in triple draft')
         return
+      }
+      
+      // CRITICAL FIX: Check if user has already selected a card in Phase 1
+      if (room.triple_draft_phase === 1) {
+        const currentRoundCards = roomCards.filter(card => 
+          card.round_number === room.current_round
+        )
+        const userSelectedCard = currentRoundCards.find(card => card.selected_by === userRole)
+        if (userSelectedCard) {
+          console.log('🔷 TRIPLE: Selection blocked - user already selected card in Phase 1:', userSelectedCard.card_id)
+          return
+        }
+        
+        // Also check if any card has been selected by anyone in Phase 1
+        const anySelectedCard = currentRoundCards.find(card => card.selected_by)
+        if (anySelectedCard) {
+          console.log('🔷 TRIPLE: Selection blocked - card already selected in Phase 1:', anySelectedCard.card_id, 'by', anySelectedCard.selected_by)
+          return
+        }
       }
     }
 

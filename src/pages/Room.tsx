@@ -1124,8 +1124,6 @@ const Room = () => {
           console.log('🔷 TRIPLE AUTO-SELECT: Reveal ended, checking phase advancement')
           setShowReveal(false)
           setIsRevealing(false)
-          // Set timer to 8 seconds for next phase after auto-select
-          setTimeRemaining(8)
           handleTriplePhaseEnd()
         }, 2000)
       }

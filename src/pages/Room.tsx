@@ -299,27 +299,44 @@ const Room = () => {
               const isPhase2Locked = updatedRoom.triple_draft_phase === 2 && isSelectionLocked
               const isInitialPhase2Load = !room && updatedRoom.triple_draft_phase === 2
               
-              // Phase 1 → 2: unlock selections
+              // Phase 1 → 2: unlock selections (but never interrupt active reveal)
               if ((isPhaseTransition && updatedRoom.triple_draft_phase === 2) || isPhase2Locked || isInitialPhase2Load) {
-                setIsSelectionLocked(false)
-                setShowReveal(false)
-                
-                // Fetch fresh card data to ensure we have updated state
-                setTimeout(() => {
-                  fetchRoomCards()
-                }, 100)
+                if (!isRevealing) {
+                  setIsSelectionLocked(false)
+                  setShowReveal(false)
+                  // Fetch fresh card data to ensure we have updated state
+                  setTimeout(() => {
+                    fetchRoomCards()
+                  }, 100)
+                } else {
+                  // Defer unlocking until reveal window ends so both UIs show cross/tick + paused timer
+                  setTimeout(() => {
+                    setIsSelectionLocked(false)
+                    setShowReveal(false)
+                    fetchRoomCards()
+                  }, 2100)
+                }
               }
-              // Moving to next round: unlock and reset
+              // Moving to next round: unlock and reset (also defer if reveal is active)
               else if (isPhaseTransition && updatedRoom.current_round !== room.current_round) {
-                setIsSelectionLocked(false)
-                setShowReveal(false)
-                setSelectedCard(null)
-                
-                // Fetch fresh data for new round
-                setTimeout(() => {
-                  fetchRoomCards()
-                  fetchPlayerDecks()
-                }, 100)
+                if (!isRevealing) {
+                  setIsSelectionLocked(false)
+                  setShowReveal(false)
+                  setSelectedCard(null)
+                  // Fetch fresh data for new round
+                  setTimeout(() => {
+                    fetchRoomCards()
+                    fetchPlayerDecks()
+                  }, 100)
+                } else {
+                  setTimeout(() => {
+                    setIsSelectionLocked(false)
+                    setShowReveal(false)
+                    setSelectedCard(null)
+                    fetchRoomCards()
+                    fetchPlayerDecks()
+                  }, 2100)
+                }
               }
             }
              
@@ -2010,7 +2027,7 @@ const Room = () => {
                       </div>
                     </div>
                     
-                    {!isSelectionLocked ? (
+                    {!(isSelectionLocked || isRevealing) ? (
                       <div className="text-2xl font-bold text-primary">
                         {Math.ceil(timeRemaining)}s remaining
                       </div>

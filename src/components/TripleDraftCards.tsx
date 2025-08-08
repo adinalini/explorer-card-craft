@@ -32,7 +32,7 @@ export function TripleDraftCards({
 
   return (
     <div className="flex justify-center">
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-3 gap-4 max-w-lg">
         {displayCards.map((card, index) => {
           const isCardSelected = !!card.selected_by
           const isMySelection = card.selected_by === userRole

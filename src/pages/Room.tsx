@@ -86,7 +86,6 @@ const Room = () => {
   const { roomId } = useParams<{ roomId: string }>()
   const navigate = useNavigate()
   const [room, setRoom] = useState<Room | null>(null)
-  const roomRef = useRef<Room | null>(null)
   const [isReady, setIsReady] = useState(false)
   const [loading, setLoading] = useState(true)
   const [roomCards, setRoomCards] = useState<RoomCard[]>([])
@@ -98,7 +97,7 @@ const Room = () => {
   const [isStartingDraft, setIsStartingDraft] = useState(false)
   const [draftStartTimeout, setDraftStartTimeout] = useState<NodeJS.Timeout | null>(null)
   const [backgroundAutoSelectTimeout, setBackgroundAutoSelectTimeout] = useState<NodeJS.Timeout | null>(null)
-  const isProcessingRoundRef = useRef(false)
+  const [isProcessingRound, setIsProcessingRound] = useState(false)
   const [isProcessingSelection, setIsProcessingSelection] = useState<boolean>(false)
   const [megaDraftCards, setMegaDraftCards] = useState<any[]>([])
   const [megaDraftTurnSequence, setMegaDraftTurnSequence] = useState<string[]>([])
@@ -158,18 +157,13 @@ const Room = () => {
     }
   }, [room?.status, room?.draft_type, room?.current_round, roomCards, isSelectionLocked, isRevealing])
 
-  // Keep roomRef in sync with room state
-  useEffect(() => {
-    roomRef.current = room
-  }, [room])
-
   // Reset in-flight guard on round/phase/status changes
   useEffect(() => {
     selectionInFlightRef.current = false
   }, [room?.current_round, room?.triple_draft_phase, room?.status])
 
   const handleTimeUp = async () => {
-    if (isSelectionLocked || isProcessingRoundRef.current || isProcessingSelection) return
+    if (isSelectionLocked || isProcessingRound || isProcessingSelection) return
     
     if (room?.draft_type === 'triple') {
       const currentPhase = room.triple_draft_phase || 1
@@ -178,8 +172,7 @@ const Room = () => {
       )
       const selectedCards = currentRoundCards.filter(card => card.selected_by)
       
-      // CRITICAL FIX: Restore auto-selection for both Phase 1 and Phase 2
-      // Both phases should have 8-second timers with auto-selection fallback
+      // Add 0.5s delay to prevent double selection for triple draft
       setTimeout(async () => {
         // Check if user has made a manual selection after delay
         const freshRoundCards = roomCards.filter(card => 
@@ -188,31 +181,25 @@ const Room = () => {
         const freshSelectedCards = freshRoundCards.filter(card => card.selected_by)
         const hasManualSelection = selectedCard || freshSelectedCards.some(card => card.selected_by === userRole)
         
-        let autoSelectTriggered = false
-        
-        // Auto-select logic for both phases
+        // Only auto-select if no manual selection exists
         if (!hasManualSelection) {
+          // Phase-specific auto-selection logic
           if (currentPhase === 1 && isMyTurn && freshSelectedCards.length === 0) {
             await autoSelectRandomCard()
-            autoSelectTriggered = true
           } else if (currentPhase === 2) {
             const mySelection = freshSelectedCards.find(card => card.selected_by === userRole)
             if (isMyTurn && freshSelectedCards.length === 1 && !mySelection) {
               await autoSelectRandomCard()
-              autoSelectTriggered = true
             }
           }
         } else {
           console.log('🔷 TRIPLE: Auto-select skipped - manual selection detected after 0.5s delay')
         }
         
-        // Only trigger phase end check if auto-select was NOT triggered
-        // This prevents duplicate calls to handleTriplePhaseEnd
-        if (!autoSelectTriggered) {
-          setTimeout(() => {
-            handleTriplePhaseEnd()
-          }, 500)
-        }
+        // Always trigger phase end check after timeout
+        setTimeout(() => {
+          handleTriplePhaseEnd()
+        }, 500)
       }, 500)
       return
     }
@@ -247,9 +234,9 @@ const Room = () => {
     }, 500)
     
     // For default draft only, processRoundEnd is handled by timer
-    if (userRole === 'creator' && !isProcessingRoundRef.current && room?.draft_type === 'default') {
+    if (userRole === 'creator' && !isProcessingRound && room?.draft_type === 'default') {
       setTimeout(() => {
-        if (!isProcessingRoundRef.current) {
+        if (!isProcessingRound) {
           processRoundEnd()
         }
       }, 3000)
@@ -258,45 +245,26 @@ const Room = () => {
 
   // Centralized timer effect for all draft types
   useEffect(() => {
-    console.log('🔷 TIMER USEFFECT: Timer useEffect triggered')
-    console.log('🔷 TIMER USEFFECT: Room:', room?.id)
-    console.log('🔷 TIMER USEFFECT: Room status:', room?.status)
-    console.log('🔷 TIMER USEFFECT: Room round_start_time:', room?.round_start_time)
-    console.log('🔷 TIMER USEFFECT: Room draft_type:', room?.draft_type)
-    console.log('🔷 TIMER USEFFECT: Is revealing:', isRevealing)
-    
     if (!room || room.status !== 'drafting' || !room.round_start_time) {
-      console.log('🔷 TIMER USEFFECT: Early return - missing room data')
-      setTimeRemaining(0)
-      return
-    }
-
-    // CRITICAL FIX: Don't start timer during reveal phase for triple draft
-    if (room.draft_type === 'triple' && isRevealing) {
-      console.log('🔷 TIMER USEFFECT: Early return - revealing phase')
       setTimeRemaining(0)
       return
     }
 
     const updateTimer = () => {
       const now = new Date()
-      const roundStart = new Date(roomRef.current?.round_start_time || '')
+      const roundStart = new Date(room.round_start_time)
       const elapsed = (now.getTime() - roundStart.getTime()) / 1000
       
-      let roundDuration = roomRef.current?.round_duration_seconds || 15
-      if (roomRef.current?.draft_type === 'mega') roundDuration = 10
-      if (roomRef.current?.draft_type === 'triple') roundDuration = 8 // 8 seconds total for the round (both phases)
+      let roundDuration = room.round_duration_seconds || 15
+      if (room.draft_type === 'mega') roundDuration = 10
+      if (room.draft_type === 'triple') roundDuration = 8 // 8 seconds total for the round (both phases)
       
       const remaining = Math.max(0, roundDuration - elapsed)
-      const displayTime = Math.floor(remaining)
-      
-
-      
-      setTimeRemaining(displayTime)
+      setTimeRemaining(Math.ceil(remaining))
       
       // CRITICAL FIX: For triple draft, timer should NOT reset during phase transitions
       // The timer continues from the same round_start_time for both phases
-      if (remaining <= 0 && !isProcessingRoundRef.current) {
+      if (remaining <= 0 && !isProcessingRound) {
         handleTimeUp()
       }
     }
@@ -310,21 +278,20 @@ const Room = () => {
     }
     timerIntervalRef.current = setInterval(updateTimer, 1000)
 
-        // CRITICAL FIX: Clear interval on cleanup
     return () => {
       if (timerIntervalRef.current) {
         clearInterval(timerIntervalRef.current)
         timerIntervalRef.current = null
       }
     }
-  }, [room?.round_start_time, room?.status, room?.draft_type, room?.triple_draft_phase, isRevealing])
+  }, [room?.status, room?.current_round, room?.draft_type, room?.round_start_time, room?.triple_draft_phase, isSelectionLocked])
 
   useEffect(() => {
     if (room?.current_round && room?.status === 'drafting' && userRole !== 'spectator') {
       setSelectedCard(null)
       setIsSelectionLocked(false)
       setShowReveal(false)
-      isProcessingRoundRef.current = false
+      setIsProcessingRound(false)
       
       if (backgroundAutoSelectTimeout) {
         clearTimeout(backgroundAutoSelectTimeout)
@@ -353,21 +320,15 @@ const Room = () => {
     fetchRoom()
     fetchRoomCards()
     fetchPlayerDecks()
-    
-    // CRITICAL FIX: Add a retry mechanism for room data to ensure ready buttons sync properly
-    const roomDataRetry = setTimeout(() => {
-      if (!room || (room.creator_ready === undefined && room.joiner_ready === undefined)) {
-        console.log('🔧 ROOM SYNC: Retrying room data fetch to ensure ready state sync')
-        fetchRoom()
-      }
-    }, 1000) // Retry after 1 second if room data is incomplete
 
     // Add failsafe cleanup for stuck draft starting states
     const stuckStateCleanup = setInterval(() => {
       if (isStartingDraft && room?.status === 'drafting') {
+        console.log('🔧 FAILSAFE: Clearing stuck isStartingDraft state')
         setIsStartingDraft(false)
       }
       if (isDraftStarting && room?.status === 'drafting') {
+        console.log('🔧 FAILSAFE: Clearing stuck isDraftStarting state')  
         setIsDraftStarting(false)
       }
     }, 5000) // Check every 5 seconds
@@ -395,104 +356,48 @@ const Room = () => {
             const role = getUserRole(updatedRoom, userSessionId)
             setUserRole(role)
             
-            // CRITICAL FIX: Force a re-render when ready states change to ensure UI sync
-            if (room && (room.creator_ready !== updatedRoom.creator_ready || room.joiner_ready !== updatedRoom.joiner_ready)) {
-              // Additional sync: Update room state immediately to ensure UI reflects changes
-              setRoom(updatedRoom)
-              
-              // CRITICAL FIX: Add a more robust sync mechanism
-              // Force a complete UI refresh by updating room state
-              setTimeout(() => {
-                setRoom(prev => ({ ...prev, ...updatedRoom })) // Force room state update
-              }, 100)
-            }
-            
             // Handle triple draft phase transitions with debouncing
             if (updatedRoom.draft_type === 'triple' && updatedRoom.status === 'drafting') {
-              console.log('🔷 TRIPLE ROOM UPDATE: Checking for transitions')
-              console.log('🔷 TRIPLE ROOM UPDATE: roomRef.current:', roomRef.current)
-              console.log('🔷 TRIPLE ROOM UPDATE: updatedRoom:', updatedRoom)
-              const isPhaseTransition = roomRef.current && updatedRoom.triple_draft_phase !== roomRef.current.triple_draft_phase
-              const isRoundTransition = roomRef.current && updatedRoom.current_round !== roomRef.current.current_round
-              console.log('🔷 TRIPLE ROOM UPDATE: isPhaseTransition:', isPhaseTransition)
-              console.log('🔷 TRIPLE ROOM UPDATE: isRoundTransition:', isRoundTransition)
+              const isPhaseTransition = room && updatedRoom.triple_draft_phase !== room.triple_draft_phase
+              const isPhase2Locked = updatedRoom.triple_draft_phase === 2 && isSelectionLocked
+              const isInitialPhase2Load = !room && updatedRoom.triple_draft_phase === 2
               
-              // Case 1: Transition from Phase 1 to Phase 2 (always involves a reveal)
-              if (isPhaseTransition && updatedRoom.triple_draft_phase === 2) {
-                console.log('🔷 TRIPLE ROOM UPDATE: Phase 1 -> 2 transition detected. Deferring unlock and timer start.')
-                setIsRevealing(true) // CRITICAL FIX: Set isRevealing true immediately
-                setShowReveal(true)
-                setTimeout(() => {
-                  setIsSelectionLocked(false)
-                  setShowReveal(false)
-                  setIsRevealing(false) // CRITICAL FIX: Set isRevealing false after timeout
-                  fetchRoomCards()
-                  const phase2StartTime = new Date().toISOString()
-                  console.log('🔷 TRIPLE PHASE END: 🕐 Setting Phase 2 start time after reveal:', phase2StartTime)
-                  
-                  // CRITICAL FIX: Update local room state immediately to ensure timer uses new start time
-                  setRoom(prev => ({ ...prev, round_start_time: phase2StartTime }))
-                  
-                  supabase
-                    .from('rooms')
-                    .update({ round_start_time: phase2StartTime })
-                    .eq('id', roomId)
-                    .then(() => { console.log('🔷 TRIPLE PHASE END: ✅ Phase 2 timer started after reveal') })
-                    .catch((error) => { console.error('🔷 TRIPLE PHASE END: ❌ Error setting Phase 2 start time:', error) })
-                }, 2100)
-              }
-              // Case 2: Transition to next round (always involves a reveal)
-              else if (isRoundTransition) {
-                console.log('🔷 TRIPLE ROOM UPDATE: Round transition detected. Deferring unlock and reset.')
-                console.log('🔷 TRIPLE ROOM UPDATE: Previous round:', roomRef.current?.current_round, '-> New round:', updatedRoom.current_round)
-                console.log('🔷 TRIPLE ROOM UPDATE: Previous round_start_time:', roomRef.current?.round_start_time)
-                
-                setIsRevealing(true) // CRITICAL FIX: Set isRevealing true immediately
-                setShowReveal(true)
-                setTimeout(() => {
-                  setIsSelectionLocked(false)
-                  setShowReveal(false)
-                  setIsRevealing(false) // CRITICAL FIX: Set isRevealing false after timeout
-                  setSelectedCard(null)
-                  fetchRoomCards()
-                  fetchPlayerDecks()
-                  
-                  // CRITICAL FIX: Set round_start_time after reveal for new rounds
-                  const newRoundStartTime = new Date().toISOString()
-                  console.log('🔷 TRIPLE ROOM UPDATE: 🕐 Setting new round start time after reveal:', newRoundStartTime)
-                  console.log('🔷 TRIPLE ROOM UPDATE: Current room state before update:', roomRef.current)
-                  
-                  // Update local room state immediately to ensure timer uses new start time
-                  console.log('🔷 TRIPLE ROOM UPDATE: About to update local room state with new round_start_time:', newRoundStartTime)
-                  setRoom(prev => {
-                    const updated = { ...prev, round_start_time: newRoundStartTime }
-                    console.log('🔷 TRIPLE ROOM UPDATE: Updated local room state:', updated)
-                    console.log('🔷 TRIPLE ROOM UPDATE: Previous state was:', prev)
-                    return updated
-                  })
-                  
-                  supabase
-                    .from('rooms')
-                    .update({ round_start_time: newRoundStartTime })
-                    .eq('id', roomId)
-                    .then(() => { 
-                      console.log('🔷 TRIPLE ROOM UPDATE: ✅ New round timer started after reveal')
-                      console.log('🔷 TRIPLE ROOM UPDATE: Database updated with new round_start_time:', newRoundStartTime)
-                    })
-                    .catch((error) => { console.error('🔷 TRIPLE ROOM UPDATE: ❌ Error setting new round start time:', error) })
-                }, 2100)
-              }
-              // Case 3: Other updates to room state (e.g., selection locked/unlocked, but not a phase/round transition)
-              else {
+              // Phase 1 → 2: unlock selections (but never interrupt active reveal)
+              if ((isPhaseTransition && updatedRoom.triple_draft_phase === 2) || isPhase2Locked || isInitialPhase2Load) {
                 if (!isRevealing) {
                   setIsSelectionLocked(false)
                   setShowReveal(false)
-                  setTimeout(() => { fetchRoomCards() }, 100)
+                  // Fetch fresh card data to ensure we have updated state
+                  setTimeout(() => {
+                    fetchRoomCards()
+                  }, 100)
                 } else {
+                  // Defer unlocking until reveal window ends so both UIs show cross/tick + paused timer
                   setTimeout(() => {
                     setIsSelectionLocked(false)
                     setShowReveal(false)
                     fetchRoomCards()
+                  }, 2100)
+                }
+              }
+              // Moving to next round: unlock and reset (also defer if reveal is active)
+              else if (isPhaseTransition && updatedRoom.current_round !== room.current_round) {
+                if (!isRevealing) {
+                  setIsSelectionLocked(false)
+                  setShowReveal(false)
+                  setSelectedCard(null)
+                  // Fetch fresh data for new round
+                  setTimeout(() => {
+                    fetchRoomCards()
+                    fetchPlayerDecks()
+                  }, 100)
+                } else {
+                  setTimeout(() => {
+                    setIsSelectionLocked(false)
+                    setShowReveal(false)
+                    setSelectedCard(null)
+                    fetchRoomCards()
+                    fetchPlayerDecks()
                   }, 2100)
                 }
               }
@@ -618,7 +523,6 @@ const Room = () => {
       supabase.removeChannel(cardsChannel)
       supabase.removeChannel(decksChannel)
       clearInterval(stuckStateCleanup)
-      clearTimeout(roomDataRetry)
       if (backgroundAutoSelectTimeout) {
         clearTimeout(backgroundAutoSelectTimeout)
       }
@@ -1197,7 +1101,7 @@ const Room = () => {
 
   const processRoundEnd = async () => {
     console.log('🔄 PROCESS ROUND END CALLED')
-    console.log('Room:', room?.id, 'Round:', room?.current_round, 'User Role:', userRole, 'Is Processing:', isProcessingRoundRef.current)
+    console.log('Room:', room?.id, 'Round:', room?.current_round, 'User Role:', userRole, 'Is Processing:', isProcessingRound)
     
     if (!room || !roomId) {
       console.log('❌ Process round end blocked - missing data')
@@ -1211,12 +1115,12 @@ const Room = () => {
     }
 
     // ADDITIONAL SAFEGUARD: Double-check if we're already processing
-    if (isProcessingRoundRef.current) {
+    if (isProcessingRound) {
       console.log('❌ Process round end blocked - race condition detected')
       return
     }
 
-    isProcessingRoundRef.current = true
+    setIsProcessingRound(true)
     console.log('🟡 Setting isProcessingRound to true')
     
     await extendSession()
@@ -1261,7 +1165,7 @@ const Room = () => {
       // Both players must have selected before proceeding
       if (!creatorSelected || !joinerSelected) {
         console.log(`⏳ Waiting for selections - Creator: ${creatorSelected ? '✅' : '❌'}, Joiner: ${joinerSelected ? '✅' : '❌'}`)
-        isProcessingRoundRef.current = false
+        setIsProcessingRound(false)
         return
       }
 
@@ -1413,7 +1317,7 @@ const Room = () => {
       console.error('❌ Error processing round end:', error)
     } finally {
       console.log('🟢 Setting isProcessingRound to false')
-      isProcessingRoundRef.current = false
+      setIsProcessingRound(false)
     }
   }
 
@@ -1429,13 +1333,13 @@ const Room = () => {
     }
     
     // CRITICAL FIX: Both players can trigger phase transitions, but use a lock to prevent duplicates
-    if (isProcessingRoundRef.current) {
+    if (isProcessingRound) {
       console.log('🔷 TRIPLE PHASE END: ⏳ Already processing, skipping (lock active)')
       return
     }
     
     console.log('🔷 TRIPLE PHASE END: 🔒 Setting processing lock')
-    isProcessingRoundRef.current = true
+    setIsProcessingRound(true)
     
     // Add a small delay to ensure card updates have been processed
     console.log('🔷 TRIPLE PHASE END: ⏳ Waiting 200ms for card updates...')
@@ -1566,14 +1470,14 @@ const Room = () => {
         }
         
         // Move to phase 2 immediately without additional reveal
-        // CRITICAL FIX: Don't update round_start_time immediately to prevent timer from starting during reveal
-
+        // CRITICAL FIX: Don't update round_start_time to prevent timer reset
+        console.log('🔷 TRIPLE PHASE END: 🕐 Keeping existing round start time to prevent timer reset')
         
         const { data: phaseUpdateResult, error: phaseUpdateError } = await supabaseWithToken
           .from('rooms')
           .update({ 
             triple_draft_phase: 2
-            // CRITICAL FIX: Don't update round_start_time here - it will be updated after reveal phase
+            // Removed round_start_time update to prevent timer reset
           })
           .eq('id', roomId)
           .select()
@@ -1586,7 +1490,15 @@ const Room = () => {
         console.log('🔷 TRIPLE PHASE END: ✅ Successfully moved to phase 2')
         console.log('🔷 TRIPLE PHASE END: 📊 Phase update result:', phaseUpdateResult)
         
-        // Note: Verification logs removed to avoid confusion with stale state
+        // Verify the phase change took effect
+        const { data: verifyRoom } = await supabaseWithToken
+          .from('rooms')
+          .select('triple_draft_phase, round_start_time')
+          .eq('id', roomId)
+          .single()
+        
+        console.log('🔷 TRIPLE PHASE END: 🔍 Verification - Room phase is now:', verifyRoom?.triple_draft_phase)
+        console.log('🔷 TRIPLE PHASE END: 🔍 Verification - Round start time:', verifyRoom?.round_start_time)
       } else if (currentPhase === 2 && selectedCards.length >= 2) {
         console.log('🔷 TRIPLE: Phase 2 complete - moving to next round')
         
@@ -1682,6 +1594,7 @@ const Room = () => {
               .update({ 
                 current_round: nextRound,
                 triple_draft_phase: 1,
+                round_start_time: new Date().toISOString(),
                 triple_draft_first_pick: room.triple_draft_first_pick === 'creator' ? 'joiner' : 'creator' // Alternate first pick
               })
               .eq('id', roomId)
@@ -1727,7 +1640,7 @@ const Room = () => {
     } catch (error) {
       console.error('🔷 TRIPLE: Error in phase end:', error)
     } finally {
-      isProcessingRoundRef.current = false
+      setIsProcessingRound(false)
     }
   }
 
@@ -1907,9 +1820,9 @@ const Room = () => {
         setIsSelectionLocked(true)
         setShowReveal(true)
         
-        if (userRole === 'creator' && !isProcessingRoundRef.current) {
+        if (userRole === 'creator' && !isProcessingRound) {
           setTimeout(() => {
-            if (!isProcessingRoundRef.current) {
+            if (!isProcessingRound) {
               processRoundEnd()
             }
           }, 1500) // Shorter delay for mega draft
@@ -2275,7 +2188,7 @@ const Room = () => {
                     
                       {!(isSelectionLocked || isRevealing || uiMirrorReveal || uiRevealActive) ? (
                         <div className="text-2xl font-bold text-primary">
-                          {Math.floor(timeRemaining)}s remaining
+                          {Math.ceil(timeRemaining)}s remaining
                         </div>
                       ) : (
                         <p className="text-lg text-black">Revealing selection...</p>

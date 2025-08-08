@@ -462,36 +462,6 @@ const Room = () => {
             // Always refresh cards on updates
             fetchRoomCards()
 
-            // For triple draft: instantly enter reveal on any selection update so both clients sync
-            try {
-              const updated = (payload as any).new as RoomCard
-              const prev = (payload as any).old as RoomCard | undefined
-
-              if (
-                room?.draft_type === 'triple' &&
-                room?.status === 'drafting' &&
-                updated?.round_number === room?.current_round &&
-                !isSelectionLocked &&
-                // selection changed from null → player or between players
-                updated?.selected_by && updated?.selected_by !== prev?.selected_by
-              ) {
-                setIsSelectionLocked(true)
-                setShowReveal(true)
-                setIsRevealing(true)
-
-                // Short delay to ensure we render updated ticks/crosses
-                setTimeout(() => {
-                  fetchRoomCards()
-                }, 100)
-
-                // After reveal, advance phase if eligible
-                setTimeout(() => {
-                  setShowReveal(false)
-                  setIsRevealing(false)
-                  handleTriplePhaseEnd()
-                }, 2000)
-              }
-            } catch {}
           } else {
             fetchRoomCards()
           }
@@ -603,36 +573,6 @@ const Room = () => {
       if (error) throw error
       setRoomCards(data || [])
 
-      // Ensure reveal state reflects latest selections even if realtime event ordering varies
-      if (
-        room &&
-        room.status === 'drafting' &&
-        room.draft_type === 'triple' &&
-        !isSelectionLocked &&
-        !isRevealing &&
-        room.current_round > 0
-      ) {
-        const currentRoundCards = (data || []).filter(c => c.round_number === room.current_round)
-        const selectedCount = currentRoundCards.filter(c => c.selected_by).length
-        const expectedSelections = (room.triple_draft_phase || 1)
-        // Phase 1 => expect 1 selection, Phase 2 => expect 2 selections before advancing
-        if (selectedCount === expectedSelections && (expectedSelections === 1 || expectedSelections === 2)) {
-          // Enter reveal locally so the countdown pauses and tick/cross show for both clients
-          setIsSelectionLocked(true)
-          setShowReveal(true)
-          setIsRevealing(true)
-          // Small delay to ensure visuals reflect server state
-          setTimeout(() => {
-            fetchRoomCards()
-          }, 100)
-          // End reveal after 2s and check phase advancement (idempotent)
-          setTimeout(() => {
-            setShowReveal(false)
-            setIsRevealing(false)
-            handleTriplePhaseEnd()
-          }, 2000)
-        }
-      }
     } catch (error) {
       console.error('🚨 FETCH CARDS: Complete failure:', error)
     }

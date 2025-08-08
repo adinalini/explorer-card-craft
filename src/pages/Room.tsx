@@ -305,13 +305,14 @@ const Room = () => {
     }
     timerIntervalRef.current = setInterval(updateTimer, 1000)
 
+        // CRITICAL FIX: Clear interval on cleanup
     return () => {
       if (timerIntervalRef.current) {
         clearInterval(timerIntervalRef.current)
         timerIntervalRef.current = null
       }
     }
-  }, [room?.status, room?.current_round, room?.draft_type, room?.round_start_time, isSelectionLocked, isRevealing])
+  }, [room?.round_start_time, room?.status, room?.draft_type, room?.triple_draft_phase, isRevealing])
 
   useEffect(() => {
     if (room?.current_round && room?.status === 'drafting' && userRole !== 'spectator') {
@@ -426,6 +427,10 @@ const Room = () => {
                   fetchRoomCards()
                   const phase2StartTime = new Date().toISOString()
                   console.log('🔷 TRIPLE PHASE END: 🕐 Setting Phase 2 start time after reveal:', phase2StartTime)
+                  
+                  // CRITICAL FIX: Update local room state immediately to ensure timer uses new start time
+                  setRoom(prev => ({ ...prev, round_start_time: phase2StartTime }))
+                  
                   supabase
                     .from('rooms')
                     .update({ round_start_time: phase2StartTime })

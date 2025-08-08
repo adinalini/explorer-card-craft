@@ -13,6 +13,8 @@ import { generateMegaDraftCards } from "@/utils/megaDraftCards"
 import { TripleDraftCards } from "@/components/TripleDraftCards"
 import { MegaDraftGrid } from "@/components/MegaDraftGrid"
 import { ArrowLeft } from "lucide-react"
+import { cardImages } from "@/components/CardImage"
+import { useImagePreloader } from "@/hooks/use-image-preloader"
 
 // Helper functions for secure session management
 const generateSessionToken = () => {
@@ -101,6 +103,8 @@ const Room = () => {
   const [megaDraftTurnSequence, setMegaDraftTurnSequence] = useState<string[]>([])
   const [currentTurnIndex, setCurrentTurnIndex] = useState(0)
   const [isRevealing, setIsRevealing] = useState(false)
+  const [nextRoundImageUrls, setNextRoundImageUrls] = useState<string[]>([])
+  useImagePreloader(nextRoundImageUrls, nextRoundImageUrls.length > 0)
 
   const extendSession = async () => {
     const sessionId = sessionStorage.getItem('userSessionId')
@@ -151,7 +155,6 @@ const Room = () => {
       lastSelectionRef.current = { round, count: selectedCount }
     }
   }, [room?.status, room?.draft_type, room?.current_round, roomCards, isSelectionLocked, isRevealing])
-
 
   const handleTimeUp = async () => {
     if (isSelectionLocked || isProcessingRound || isProcessingSelection) return
@@ -280,6 +283,19 @@ const Room = () => {
       }
     }
   }, [room?.current_round, room?.status, userRole])
+
+  // Preload next round card images to reduce perceived latency
+  useEffect(() => {
+    if (!room || room.status !== 'drafting') return
+    const nextRound = room.draft_type === 'mega' ? 1 : ((room.current_round || 0) + 1)
+    const relevant = roomCards.filter(c => 
+      c.round_number === nextRound && (room.draft_type === 'default' ? c.side === userRole : true)
+    )
+    const urls = relevant
+      .map(c => cardImages[c.card_id])
+      .filter(Boolean) as string[]
+    setNextRoundImageUrls(urls)
+  }, [room?.current_round, room?.status, room?.draft_type, roomCards, userRole])
 
   useEffect(() => {
     if (!roomId) return

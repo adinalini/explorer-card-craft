@@ -280,7 +280,14 @@ const Room = () => {
       if (room.draft_type === 'triple') roundDuration = 8 // 8 seconds total for the round (both phases)
       
       const remaining = Math.max(0, roundDuration - elapsed)
-      setTimeRemaining(Math.floor(remaining))
+      const displayTime = Math.floor(remaining)
+      
+      // DETAILED TIMER DEBUGGING
+      if (room.draft_type === 'triple') {
+        console.log(`🔷 TIMER DEBUG: round_start_time=${room.round_start_time}, now=${now.toISOString()}, elapsed=${elapsed.toFixed(2)}s, remaining=${remaining.toFixed(2)}s, display=${displayTime}s, phase=${room.triple_draft_phase}, isRevealing=${isRevealing}`)
+      }
+      
+      setTimeRemaining(displayTime)
       
       // CRITICAL FIX: For triple draft, timer should NOT reset during phase transitions
       // The timer continues from the same round_start_time for both phases
@@ -1545,15 +1552,7 @@ const Room = () => {
         console.log('🔷 TRIPLE PHASE END: ✅ Successfully moved to phase 2')
         console.log('🔷 TRIPLE PHASE END: 📊 Phase update result:', phaseUpdateResult)
         
-        // Verify the phase change took effect
-        const { data: verifyRoom } = await supabaseWithToken
-          .from('rooms')
-          .select('triple_draft_phase, round_start_time')
-          .eq('id', roomId)
-          .single()
-        
-        console.log('🔷 TRIPLE PHASE END: 🔍 Verification - Room phase is now:', verifyRoom?.triple_draft_phase)
-        console.log('🔷 TRIPLE PHASE END: 🔍 Verification - Round start time:', verifyRoom?.round_start_time)
+        // Note: Verification logs removed to avoid confusion with stale state
       } else if (currentPhase === 2 && selectedCards.length >= 2) {
         console.log('🔷 TRIPLE: Phase 2 complete - moving to next round')
         

@@ -265,7 +265,6 @@ const Room = () => {
 
     // CRITICAL FIX: Don't start timer during reveal phase for triple draft
     if (room.draft_type === 'triple' && isRevealing) {
-      console.log('🔷 TIMER: Skipping timer update during reveal phase')
       setTimeRemaining(0)
       return
     }
@@ -282,10 +281,7 @@ const Room = () => {
       const remaining = Math.max(0, roundDuration - elapsed)
       const displayTime = Math.floor(remaining)
       
-      // DETAILED TIMER DEBUGGING
-      if (room.draft_type === 'triple') {
-        console.log(`🔷 TIMER DEBUG: round_start_time=${room.round_start_time}, now=${now.toISOString()}, elapsed=${elapsed.toFixed(2)}s, remaining=${remaining.toFixed(2)}s, display=${displayTime}s, phase=${room.triple_draft_phase}, isRevealing=${isRevealing}`)
-      }
+
       
       setTimeRemaining(displayTime)
       
@@ -360,11 +356,9 @@ const Room = () => {
     // Add failsafe cleanup for stuck draft starting states
     const stuckStateCleanup = setInterval(() => {
       if (isStartingDraft && room?.status === 'drafting') {
-        console.log('🔧 FAILSAFE: Clearing stuck isStartingDraft state')
         setIsStartingDraft(false)
       }
       if (isDraftStarting && room?.status === 'drafting') {
-        console.log('🔧 FAILSAFE: Clearing stuck isDraftStarting state')  
         setIsDraftStarting(false)
       }
     }, 5000) // Check every 5 seconds
@@ -394,18 +388,12 @@ const Room = () => {
             
             // CRITICAL FIX: Force a re-render when ready states change to ensure UI sync
             if (room && (room.creator_ready !== updatedRoom.creator_ready || room.joiner_ready !== updatedRoom.joiner_ready)) {
-              console.log('🔧 ROOM SYNC: Ready states changed - forcing UI update')
-              // Force a re-render by updating a state that triggers UI refresh
-              setTimeRemaining(prev => prev) // This will trigger a re-render
-              
               // Additional sync: Update room state immediately to ensure UI reflects changes
               setRoom(updatedRoom)
               
               // CRITICAL FIX: Add a more robust sync mechanism
-              // Force a complete UI refresh by updating multiple state variables
+              // Force a complete UI refresh by updating room state
               setTimeout(() => {
-                console.log('🔧 ROOM SYNC: Forcing complete UI refresh')
-                setTimeRemaining(prev => prev + 0.001) // Minimal change to trigger re-render
                 setRoom(prev => ({ ...prev, ...updatedRoom })) // Force room state update
               }, 100)
             }

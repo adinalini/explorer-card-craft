@@ -121,6 +121,37 @@ const Room = () => {
   const fetchCardsTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   const [showReveal, setShowReveal] = useState(false)
+  
+  // UI-only mirror reveal for manual selections (no backend change)
+  const [uiMirrorReveal, setUiMirrorReveal] = useState(false)
+  const mirrorRevealTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const lastSelectionRef = useRef<{ round: number; count: number }>({ round: 0, count: 0 })
+
+  useEffect(() => {
+    if (!room || room.status !== 'drafting' || room.draft_type !== 'triple') return
+    if (!room.current_round) return
+
+    const round = room.current_round
+    const selectedCount = roomCards.filter(c => c.round_number === round && c.selected_by).length
+
+    const prev = lastSelectionRef.current
+    const countIncreased = round !== prev.round || selectedCount > prev.count
+
+    if (countIncreased) {
+      // Trigger a 2s reveal-only UI when a new selection appears and we're not already revealing
+      if (selectedCount > 0 && !isSelectionLocked && !isRevealing) {
+        if (mirrorRevealTimeoutRef.current) {
+          clearTimeout(mirrorRevealTimeoutRef.current)
+        }
+        setUiMirrorReveal(true)
+        mirrorRevealTimeoutRef.current = setTimeout(() => {
+          setUiMirrorReveal(false)
+        }, 2000)
+      }
+      lastSelectionRef.current = { round, count: selectedCount }
+    }
+  }, [room?.status, room?.draft_type, room?.current_round, roomCards, isSelectionLocked, isRevealing])
+
 
   const handleTimeUp = async () => {
     if (isSelectionLocked || isProcessingRound || isProcessingSelection) return
@@ -1864,7 +1895,19 @@ const Room = () => {
       return firstPick === 'creator' ? 'joiner' : 'creator'
     }
     
-    return null
+  return null
+  })()
+
+  // UI-only reveal state for manual selections (mirror auto-select)
+  const uiRevealActive = (() => {
+    if (!room || room.status !== 'drafting' || room.draft_type !== 'triple') return false
+    if (isSelectionLocked || isRevealing) return false
+    if (!room.current_round) return false
+    const roundCards = roomCards.filter(card => card.round_number === room.current_round)
+    const selectedCount = roundCards.filter(card => card.selected_by).length
+    const phase = room.triple_draft_phase || 1
+    const expected = phase === 1 ? 1 : 2
+    return selectedCount === expected
   })()
 
   // For triple draft, show cards for "both" side, for others filter by user role
@@ -2116,13 +2159,13 @@ const Room = () => {
                       </div>
                     </div>
                     
-                    {!(isSelectionLocked || isRevealing) ? (
-                      <div className="text-2xl font-bold text-primary">
-                        {Math.ceil(timeRemaining)}s remaining
-                      </div>
-                    ) : (
-                      <p className="text-lg text-black">Revealing selection...</p>
-                    )}
+                      {!(isSelectionLocked || isRevealing || uiMirrorReveal || uiRevealActive) ? (
+                        <div className="text-2xl font-bold text-primary">
+                          {Math.ceil(timeRemaining)}s remaining
+                        </div>
+                      ) : (
+                        <p className="text-lg text-black">Revealing selection...</p>
+                      )}
                   </div>
                 </div>
 
@@ -2131,7 +2174,7 @@ const Room = () => {
                   cards={roomCards.filter(card => card.round_number === room.current_round)}
                   selectedCard={selectedCard}
                   userRole={userRole}
-                  isSelectionLocked={isSelectionLocked}
+                  isSelectionLocked={isSelectionLocked || uiMirrorReveal || uiRevealActive}
                   isMyTurn={isMyTurn}
                   onCardSelect={handleCardSelect}
                   currentPhase={(room.triple_draft_phase || 1) as 1 | 2}

@@ -86,6 +86,7 @@ const Room = () => {
   const { roomId } = useParams<{ roomId: string }>()
   const navigate = useNavigate()
   const [room, setRoom] = useState<Room | null>(null)
+  const roomRef = useRef<Room | null>(null)
   const [isReady, setIsReady] = useState(false)
   const [loading, setLoading] = useState(true)
   const [roomCards, setRoomCards] = useState<RoomCard[]>([])
@@ -105,6 +106,11 @@ const Room = () => {
   const [isRevealing, setIsRevealing] = useState(false)
   const [nextRoundImageUrls, setNextRoundImageUrls] = useState<string[]>([])
   useImagePreloader(nextRoundImageUrls, nextRoundImageUrls.length > 0)
+
+  // CRITICAL FIX: Keep roomRef in sync with room state
+  useEffect(() => {
+    roomRef.current = room
+  }, [room])
 
   const extendSession = async () => {
     const sessionId = sessionStorage.getItem('userSessionId')
@@ -252,19 +258,27 @@ const Room = () => {
 
   // Centralized timer effect for all draft types
   useEffect(() => {
-    if (!room || room.status !== 'drafting' || !room.round_start_time) {
-      setTimeRemaining(0)
-      return
-    }
-
     const updateTimer = () => {
       const now = new Date()
-      const roundStart = new Date(room.round_start_time)
+      // CRITICAL FIX: Use roomRef.current to prevent stale closure issues
+      const currentRoom = roomRef.current
+      if (!currentRoom || !currentRoom.round_start_time) {
+        setTimeRemaining(0)
+        return
+      }
+      
+      // CRITICAL FIX: Don't show timer during reveal phases for triple draft
+      if (currentRoom.draft_type === 'triple' && isRevealing) {
+        setTimeRemaining(0)
+        return
+      }
+      
+      const roundStart = new Date(currentRoom.round_start_time)
       const elapsed = (now.getTime() - roundStart.getTime()) / 1000
       
-      let roundDuration = room.round_duration_seconds || 15
-      if (room.draft_type === 'mega') roundDuration = 10
-      if (room.draft_type === 'triple') roundDuration = 8 // 8 seconds total for the round (both phases)
+      let roundDuration = currentRoom.round_duration_seconds || 15
+      if (currentRoom.draft_type === 'mega') roundDuration = 10
+      if (currentRoom.draft_type === 'triple') roundDuration = 8 // 8 seconds total for the round (both phases)
       
       const remaining = Math.max(0, roundDuration - elapsed)
       setTimeRemaining(Math.floor(remaining))
@@ -291,7 +305,7 @@ const Room = () => {
         timerIntervalRef.current = null
       }
     }
-  }, [room?.status, room?.current_round, room?.draft_type, room?.round_start_time, isSelectionLocked])
+  }, [room?.status, room?.current_round, room?.draft_type, room?.round_start_time, isSelectionLocked, isRevealing])
 
   useEffect(() => {
     if (room?.current_round && room?.status === 'drafting' && userRole !== 'spectator') {
@@ -394,6 +408,33 @@ const Room = () => {
               const isPhaseTransition = room && updatedRoom.triple_draft_phase !== room.triple_draft_phase
               const isPhase2Locked = updatedRoom.triple_draft_phase === 2 && isSelectionLocked
               const isInitialPhase2Load = !room && updatedRoom.triple_draft_phase === 2
+              
+              // CRITICAL FIX: Handle auto-select phase transitions
+              // Check if both players have selected cards and trigger phase end if needed
+              if (!isPhaseTransition && !isRevealing && !isProcessingRoundRef.current) {
+                // Check if we need to trigger phase end for auto-selects
+                const currentRoundCards = roomCards.filter(card => 
+                  card.round_number === updatedRoom.current_round
+                )
+                const selectedCards = currentRoundCards.filter(card => card.selected_by)
+                const currentPhase = updatedRoom.triple_draft_phase || 1
+                
+                const phase1Ready = currentPhase === 1 && selectedCards.length >= 1
+                const phase2Ready = currentPhase === 2 && selectedCards.length >= 2
+                
+                if (phase1Ready || phase2Ready) {
+                  console.log('🔷 TRIPLE ROOM UPDATE: Auto-select phase transition detected')
+                  console.log('🔷 TRIPLE ROOM UPDATE: Phase:', currentPhase, 'Selected cards:', selectedCards.length)
+                  
+                  // Trigger phase end after a short delay to ensure all updates are processed
+                  setTimeout(() => {
+                    if (!isProcessingRoundRef.current) {
+                      console.log('🔷 TRIPLE ROOM UPDATE: Triggering handleTriplePhaseEnd for auto-select')
+                      handleTriplePhaseEnd()
+                    }
+                  }, 500)
+                }
+              }
               
               // Phase 1 → 2: unlock selections (but never interrupt active reveal)
               if ((isPhaseTransition && updatedRoom.triple_draft_phase === 2) || isPhase2Locked || isInitialPhase2Load) {
@@ -1113,18 +1154,19 @@ const Room = () => {
         console.log('🔷 AUTO-SELECT: First Pick Player:', room.triple_draft_first_pick)
         console.log('🔷 AUTO-SELECT: Selection Locked:', isSelectionLocked)
         
-        // For triple draft, trigger reveal phase for auto-selection
+        // CRITICAL FIX: For auto-selects, only trigger reveal phase, don't call handleTriplePhaseEnd
+        // Let the roomChannel subscription handle phase transitions to prevent timer issues
         console.log('🔷 TRIPLE AUTO-SELECT: Starting reveal phase...')
         setIsSelectionLocked(true)
         setShowReveal(true)
         setIsRevealing(true)
         
-        // After 2 seconds, trigger phase end check
+        // After 2 seconds, just end the reveal - don't trigger phase end check
         setTimeout(() => {
-          console.log('🔷 TRIPLE AUTO-SELECT: Reveal ended, checking phase advancement')
+          console.log('🔷 TRIPLE AUTO-SELECT: Reveal ended, not triggering phase advancement')
           setShowReveal(false)
           setIsRevealing(false)
-          handleTriplePhaseEnd()
+          // CRITICAL FIX: Don't call handleTriplePhaseEnd here - let roomChannel handle it
         }, 2000)
       }
       
@@ -1445,74 +1487,42 @@ const Room = () => {
         console.log('🔷 TRIPLE PHASE END: 📦 Adding phase 1 card to deck:', phase1Card.card_id, 'by', phase1Card.selected_by)
         
         try {
-          // Check if card already exists in deck to prevent duplicates
-          const { data: existingDeck } = await supabaseWithToken
+          // CRITICAL FIX: Use upsert to prevent duplicates and ensure card is always added
+          const { data: upsertResult, error: upsertError } = await supabaseWithToken
             .from('player_decks')
-            .select('card_id')
-            .eq('room_id', roomId)
-            .eq('card_id', phase1Card.card_id)
-            .eq('player_side', phase1Card.selected_by)
-            .eq('selection_order', currentRound)
+            .upsert({
+              room_id: roomId,
+              card_id: phase1Card.card_id,
+              card_name: phase1Card.card_name,
+              player_side: phase1Card.selected_by as 'creator' | 'joiner',
+              selection_order: currentRound,
+              is_legendary: phase1Card.is_legendary,
+              card_image: phase1Card.card_image
+            }, {
+              onConflict: 'room_id,card_id,player_side,selection_order'
+            })
           
-          if (!existingDeck || existingDeck.length === 0) {
-            await supabaseWithToken
-              .from('player_decks')
-              .insert({
-                room_id: roomId,
-                card_id: phase1Card.card_id,
-                card_name: phase1Card.card_name,
-                player_side: phase1Card.selected_by as 'creator' | 'joiner',
-                selection_order: currentRound,
-                is_legendary: phase1Card.is_legendary,
-                card_image: phase1Card.card_image
-              })
-            console.log('🔷 TRIPLE: Phase 1 card added to deck successfully')
+          if (upsertError) {
+            console.error('🔷 TRIPLE: Error upserting phase 1 card:', upsertError)
           } else {
-            console.log('🔷 TRIPLE: Phase 1 card already in deck, skipping duplicate')
-          }
-
-          // Verify deck entry exists, retry once if missing (idempotent safety)
-          try {
-            const { data: verifyDeck } = await supabaseWithToken
-              .from('player_decks')
-              .select('id')
-              .eq('room_id', roomId)
-              .eq('card_id', phase1Card.card_id)
-              .eq('player_side', phase1Card.selected_by)
-              .eq('selection_order', currentRound)
-              .maybeSingle()
-            if (!verifyDeck) {
-              console.log('🔁 TRIPLE: Phase 1 deck entry missing, retrying insert...')
-              await supabaseWithToken
-                .from('player_decks')
-                .insert({
-                  room_id: roomId,
-                  card_id: phase1Card.card_id,
-                  card_name: phase1Card.card_name,
-                  player_side: phase1Card.selected_by as 'creator' | 'joiner',
-                  selection_order: currentRound,
-                  is_legendary: phase1Card.is_legendary,
-                  card_image: phase1Card.card_image
-                })
-              console.log('🔁 TRIPLE: Phase 1 retry insert completed')
-            }
-          } catch (e) {
-            console.error('🔁 TRIPLE: Phase 1 verification/ retry failed:', e)
+            console.log('🔷 TRIPLE: Phase 1 card added to deck successfully via upsert')
           }
         } catch (error) {
           console.error('🔷 TRIPLE: Error adding phase 1 card to deck:', error)
         }
         
         // Move to phase 2 immediately without additional reveal
-        // CRITICAL FIX: Set a proper Phase 2 start time to fix timer calculation
+        // CRITICAL FIX: Only update round_start_time for manual selections, not auto-selects
+        // This prevents timer issues during auto-selects
         const phase2StartTime = new Date().toISOString()
         console.log('🔷 TRIPLE PHASE END: 🕐 Setting Phase 2 start time:', phase2StartTime)
         
         const { data: phaseUpdateResult, error: phaseUpdateError } = await supabaseWithToken
           .from('rooms')
           .update({ 
-            triple_draft_phase: 2,
-            round_start_time: phase2StartTime // CRITICAL FIX: Update start time for Phase 2
+            triple_draft_phase: 2
+            // CRITICAL FIX: Don't update round_start_time here to prevent timer issues
+            // The timer should continue from the original round_start_time for both phases
           })
           .eq('id', roomId)
           .select()
@@ -1543,59 +1553,25 @@ const Room = () => {
           console.log('🔷 TRIPLE: Adding phase 2 card to deck:', phase2Card.card_id, 'by', phase2Card.selected_by)
           
           try {
-            // Check if card already exists in deck to prevent duplicates
-            const { data: existingDeck } = await supabaseWithToken
+            // CRITICAL FIX: Use upsert to prevent duplicates and ensure card is always added
+            const { data: upsertResult, error: upsertError } = await supabaseWithToken
               .from('player_decks')
-              .select('card_id')
-              .eq('room_id', roomId)
-              .eq('card_id', phase2Card.card_id)
-              .eq('player_side', phase2Card.selected_by)
-              .eq('selection_order', currentRound)
+              .upsert({
+                room_id: roomId,
+                card_id: phase2Card.card_id,
+                card_name: phase2Card.card_name,
+                player_side: phase2Card.selected_by as 'creator' | 'joiner',
+                selection_order: currentRound,
+                is_legendary: phase2Card.is_legendary,
+                card_image: phase2Card.card_image
+              }, {
+                onConflict: 'room_id,card_id,player_side,selection_order'
+              })
             
-            if (!existingDeck || existingDeck.length === 0) {
-              await supabaseWithToken
-                .from('player_decks')
-                .insert({
-                  room_id: roomId,
-                  card_id: phase2Card.card_id,
-                  card_name: phase2Card.card_name,
-                  player_side: phase2Card.selected_by as 'creator' | 'joiner',
-                  selection_order: currentRound,
-                  is_legendary: phase2Card.is_legendary,
-                  card_image: phase2Card.card_image
-                })
-              console.log('🔷 TRIPLE: Phase 2 card added to deck successfully')
+            if (upsertError) {
+              console.error('🔷 TRIPLE: Error upserting phase 2 card:', upsertError)
             } else {
-              console.log('🔷 TRIPLE: Phase 2 card already in deck, skipping duplicate')
-            }
-
-            // Verify deck entry exists, retry once if missing (idempotent safety)
-            try {
-              const { data: verifyDeck } = await supabaseWithToken
-                .from('player_decks')
-                .select('id')
-                .eq('room_id', roomId)
-                .eq('card_id', phase2Card.card_id)
-                .eq('player_side', phase2Card.selected_by)
-                .eq('selection_order', currentRound)
-                .maybeSingle()
-              if (!verifyDeck) {
-                console.log('🔁 TRIPLE: Phase 2 deck entry missing, retrying insert...')
-                await supabaseWithToken
-                  .from('player_decks')
-                  .insert({
-                    room_id: roomId,
-                    card_id: phase2Card.card_id,
-                    card_name: phase2Card.card_name,
-                    player_side: phase2Card.selected_by as 'creator' | 'joiner',
-                    selection_order: currentRound,
-                    is_legendary: phase2Card.is_legendary,
-                    card_image: phase2Card.card_image
-                  })
-                console.log('🔁 TRIPLE: Phase 2 retry insert completed')
-              }
-            } catch (e) {
-              console.error('🔁 TRIPLE: Phase 2 verification/ retry failed:', e)
+              console.log('🔷 TRIPLE: Phase 2 card added to deck successfully via upsert')
             }
           } catch (error) {
             console.error('🔷 TRIPLE: Error adding phase 2 card to deck:', error)

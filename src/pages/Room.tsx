@@ -571,6 +571,37 @@ const Room = () => {
 
       if (error) throw error
       setRoomCards(data || [])
+
+      // Ensure reveal state reflects latest selections even if realtime event ordering varies
+      if (
+        room &&
+        room.status === 'drafting' &&
+        room.draft_type === 'triple' &&
+        !isSelectionLocked &&
+        !isRevealing &&
+        room.current_round > 0
+      ) {
+        const currentRoundCards = (data || []).filter(c => c.round_number === room.current_round)
+        const selectedCount = currentRoundCards.filter(c => c.selected_by).length
+        const expectedSelections = (room.triple_draft_phase || 1)
+        // Phase 1 => expect 1 selection, Phase 2 => expect 2 selections before advancing
+        if (selectedCount === expectedSelections && (expectedSelections === 1 || expectedSelections === 2)) {
+          // Enter reveal locally so the countdown pauses and tick/cross show for both clients
+          setIsSelectionLocked(true)
+          setShowReveal(true)
+          setIsRevealing(true)
+          // Small delay to ensure visuals reflect server state
+          setTimeout(() => {
+            fetchRoomCards()
+          }, 100)
+          // End reveal after 2s and check phase advancement (idempotent)
+          setTimeout(() => {
+            setShowReveal(false)
+            setIsRevealing(false)
+            handleTriplePhaseEnd()
+          }, 2000)
+        }
+      }
     } catch (error) {
       console.error('🚨 FETCH CARDS: Complete failure:', error)
     }
@@ -1376,6 +1407,35 @@ const Room = () => {
           } else {
             console.log('🔷 TRIPLE: Phase 1 card already in deck, skipping duplicate')
           }
+
+          // Verify deck entry exists, retry once if missing (idempotent safety)
+          try {
+            const { data: verifyDeck } = await supabaseWithToken
+              .from('player_decks')
+              .select('id')
+              .eq('room_id', roomId)
+              .eq('card_id', phase1Card.card_id)
+              .eq('player_side', phase1Card.selected_by)
+              .eq('selection_order', currentRound)
+              .maybeSingle()
+            if (!verifyDeck) {
+              console.log('🔁 TRIPLE: Phase 1 deck entry missing, retrying insert...')
+              await supabaseWithToken
+                .from('player_decks')
+                .insert({
+                  room_id: roomId,
+                  card_id: phase1Card.card_id,
+                  card_name: phase1Card.card_name,
+                  player_side: phase1Card.selected_by as 'creator' | 'joiner',
+                  selection_order: currentRound,
+                  is_legendary: phase1Card.is_legendary,
+                  card_image: phase1Card.card_image
+                })
+              console.log('🔁 TRIPLE: Phase 1 retry insert completed')
+            }
+          } catch (e) {
+            console.error('🔁 TRIPLE: Phase 1 verification/ retry failed:', e)
+          }
         } catch (error) {
           console.error('🔷 TRIPLE: Error adding phase 1 card to deck:', error)
         }
@@ -1443,6 +1503,35 @@ const Room = () => {
               console.log('🔷 TRIPLE: Phase 2 card added to deck successfully')
             } else {
               console.log('🔷 TRIPLE: Phase 2 card already in deck, skipping duplicate')
+            }
+
+            // Verify deck entry exists, retry once if missing (idempotent safety)
+            try {
+              const { data: verifyDeck } = await supabaseWithToken
+                .from('player_decks')
+                .select('id')
+                .eq('room_id', roomId)
+                .eq('card_id', phase2Card.card_id)
+                .eq('player_side', phase2Card.selected_by)
+                .eq('selection_order', currentRound)
+                .maybeSingle()
+              if (!verifyDeck) {
+                console.log('🔁 TRIPLE: Phase 2 deck entry missing, retrying insert...')
+                await supabaseWithToken
+                  .from('player_decks')
+                  .insert({
+                    room_id: roomId,
+                    card_id: phase2Card.card_id,
+                    card_name: phase2Card.card_name,
+                    player_side: phase2Card.selected_by as 'creator' | 'joiner',
+                    selection_order: currentRound,
+                    is_legendary: phase2Card.is_legendary,
+                    card_image: phase2Card.card_image
+                  })
+                console.log('🔁 TRIPLE: Phase 2 retry insert completed')
+              }
+            } catch (e) {
+              console.error('🔁 TRIPLE: Phase 2 verification/ retry failed:', e)
             }
           } catch (error) {
             console.error('🔷 TRIPLE: Error adding phase 2 card to deck:', error)

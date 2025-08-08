@@ -294,7 +294,7 @@ const Index = () => {
                         </label>
                         <label className="flex items-center space-x-3 p-3 border rounded-lg opacity-60 cursor-not-allowed">
                           <RadioGroupItem value="mega" id="mega" disabled />
-                          <span className="text-lg text-primary font-semibold">(Not Available) Mega Draft</span>
+                          <span className="text-lg text-primary font-semibold">Mega Draft (Not Available)</span>
                         </label>
                      </RadioGroup>
                   </div>

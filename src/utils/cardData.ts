@@ -3,7 +3,7 @@ const cardImports = {
   'ali_baba': () => import('@/assets/cards/ali_baba.png'),
   'alice': () => import('@/assets/cards/alice.png'),
   'axe_throw': () => import('@/assets/cards/axe_throw.png'),
-  'baloo': () => import('@/assets/cards/baloo.png'),
+  
   'bandersnatch': () => import('@/assets/cards/bandersnatch.png'),
   'banshee': () => import('@/assets/cards/banshee.png'),
   'beast': () => import('@/assets/cards/beast.png'),
@@ -123,7 +123,7 @@ export interface Card {
 
 // Card database with cost, spell status, and legendary information
 export const cardDatabase: Card[] = [
-  { id: 'baloo', name: 'Baloo', image: '/src/assets/cards/baloo.png', isLegendary: false, cost: 5, isSpell: false },
+  
   { id: 'bandersnatch', name: 'Bandersnatch', image: '/src/assets/cards/bandersnatch.png', isLegendary: false, cost: 8, isSpell: false },
   { id: 'blow_the_house_down', name: 'Blow the House Down', image: '/src/assets/cards/blow_the_house_down.png', isLegendary: false, cost: 7, isSpell: true },
   { id: 'death', name: 'Death', image: '/src/assets/cards/death.png', isLegendary: true, cost: 5, isSpell: false },

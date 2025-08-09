@@ -511,10 +511,10 @@ Deno.serve(async (req) => {
       { type: 'cost', cost: 3, description: 'Cost 3' },
       { type: 'cost', cost: 4, description: 'Cost 4' },
       { type: 'cost', cost: 5, description: 'Cost 5' },
-      { type: 'pool', description: 'Cost Pool (2,2,2,2,3,3,3,4,4)' },
-      { type: 'pool', description: 'Cost Pool (2,2,2,2,3,3,3,4,4)' },
-      { type: 'pool', description: 'Cost Pool (2,2,2,2,3,3,3,4,4)' },
-      { type: 'pool', description: 'Cost Pool (2,2,2,2,3,3,3,4,4)' },
+      { type: 'pool', description: 'Cost Pool (2,2,2,3,3,3,4,4)' },
+      { type: 'pool', description: 'Cost Pool (2,2,2,3,3,3,4,4)' },
+      { type: 'pool', description: 'Cost Pool (2,2,2,3,3,3,4,4)' },
+      { type: 'pool', description: 'Cost Pool (2,2,2,3,3,3,4,4)' },
       { type: 'range', range: [5, 6], description: 'Range (5-6)' },
       { type: 'range', range: [6, 10], description: 'Range (6-10)' }
     ]
@@ -570,8 +570,8 @@ Deno.serve(async (req) => {
         }
         
       } else if (structure.type === 'pool') {
-        // Select 4 cards from cost pool [2,2,2,2,3,3,3,4,4] (including spells, but not legendaries)
-        const costPool = [2, 2, 2, 2, 3, 3, 3, 4, 4]
+        // Select 4 cards from cost pool [2,2,2,3,3,3,4,4] (including spells, but not legendaries)
+        const costPool = [2, 2, 2, 3, 3, 3, 4, 4]
         const shuffledPool = [...costPool].sort(() => Math.random() - 0.5)
         
         for (let i = 0; i < 4; i++) {
@@ -790,7 +790,7 @@ Deno.serve(async (req) => {
       }
       
       // Assign costs to pool rounds
-      const costPool = [2, 2, 2, 2, 3, 3, 3, 4, 4]
+      const costPool = [2, 2, 2, 3, 3, 3, 4, 4]
       const shuffledCostPool = [...costPool].sort(() => Math.random() - 0.5)
       let poolCostIndex = 0
       

@@ -279,8 +279,8 @@ export const generateAllDraftChoices = (usedCardIds: string[]): Card[][] => {
     }
   }
 
-  // 4. Random choices from specific cost distribution: 2,2,2,2,3,3,3,4,4 (4 choices)
-  const randomCostPool = [2, 2, 2, 2, 3, 3, 3, 4, 4]
+  // 4. Random choices from specific cost distribution: 2,2,2,3,3,3,4,4 (4 choices)
+  const randomCostPool = [2, 2, 2, 3, 3, 3, 4, 4]
   const shuffledCostPool = [...randomCostPool].sort(() => Math.random() - 0.5)
   
   let addedRandomChoices = 0

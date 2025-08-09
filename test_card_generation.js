@@ -42,7 +42,7 @@ const testCardGeneration = () => {
 const allCards = [
   { id: 'ali_baba', name: 'Ali Baba' },
   { id: 'alice', name: 'Alice' },
-  { id: 'baloo', name: 'Baloo' },
+  
   { id: 'bandersnatch', name: 'Bandersnatch' },
   { id: 'banshee', name: 'Banshee' },
   { id: 'beast', name: 'Beast' },

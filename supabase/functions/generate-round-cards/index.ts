@@ -424,7 +424,7 @@ Deno.serve(async (req) => {
       { id: "dorothy", name: "Dorothy", image: "dorothy.png", cost: 5, isLegendary: true },
       
       // Cost 5 cards
-      { id: "baloo", name: "Baloo", image: "baloo.png", cost: 5 },
+      
       { id: "bridge_troll", name: "Bridge Troll", image: "bridge_troll.png", cost: 5 },
       { id: "death", name: "Death", image: "death.png", cost: 5, isLegendary: true },
       { id: "fairy_godmother", name: "Fairy Godmother", image: "fairy_godmother.png", cost: 5 },

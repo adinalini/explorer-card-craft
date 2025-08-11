@@ -1454,10 +1454,14 @@ const Room = () => {
           console.log('🔷 TRIPLE PHASE END: 🎯 Using first selection:', firstSelection.card_id, 'by', firstSelection.selected_by)
         }
         
-        // Add phase 1 selected card to player deck immediately
-        const phase1Card = selectedCards[0]
+        // Add phase 1 selected card to player deck: must be the first pick player's selection
+        const firstPickPlayer = (room.triple_draft_first_pick as 'creator' | 'joiner')
+        const phase1Card = selectedCards.find(c => c.selected_by === firstPickPlayer)
+        if (!phase1Card) {
+          console.warn('🔷 TRIPLE PHASE END: ⚠️ No phase 1 card found for first pick player, aborting deck insert')
+          return
+        }
         console.log('🔷 TRIPLE PHASE END: 📦 Adding phase 1 card to deck:', phase1Card.card_id, 'by', phase1Card.selected_by)
-        
         try {
           // Check if card already exists in deck to prevent duplicates
           const { data: existingDeck } = await supabaseWithToken
@@ -1551,8 +1555,10 @@ const Room = () => {
       } else if (currentPhase === 2 && selectedCards.length >= 2) {
         console.log('🔷 TRIPLE: Phase 2 complete - moving to next round')
         
-        // Add phase 2 selected card to player deck
-        const phase2Card = selectedCards.find(card => card.selected_by !== selectedCards[0].selected_by)
+        // Add phase 2 selected card to player deck: must be the second pick player's selection
+        const firstPickPlayer = (room.triple_draft_first_pick as 'creator' | 'joiner')
+        const secondPickPlayer = firstPickPlayer === 'creator' ? 'joiner' : 'creator'
+        const phase2Card = selectedCards.find(card => card.selected_by === secondPickPlayer)
         if (phase2Card) {
           console.log('🔷 TRIPLE: Adding phase 2 card to deck:', phase2Card.card_id, 'by', phase2Card.selected_by)
           

@@ -6,6 +6,7 @@ const cardImports = {
   
   'bandersnatch': () => import('@/assets/cards/bandersnatch.png'),
   'banshee': () => import('@/assets/cards/banshee.png'),
+  'baloo': () => import('@/assets/cards/baloo.png'),
   'beast': () => import('@/assets/cards/beast.png'),
   'beautiful_swan': () => import('@/assets/cards/beautiful_swan.png'),
   'big_bad_wolf': () => import('@/assets/cards/big_bad_wolf.png'),
@@ -138,6 +139,7 @@ export const cardDatabase: Card[] = [
   { id: 'snow_white', name: 'Snow White', image: '/src/assets/cards/snow_white.png', isLegendary: true, cost: 7, isSpell: false },
   { id: 'the_green_knight', name: 'The Green Knight', image: '/src/assets/cards/the_green_knight.png', isLegendary: false, cost: 5, isSpell: false },
   { id: 'three_musketeers', name: 'Three Musketeers', image: '/src/assets/cards/three_musketeers.png', isLegendary: false, cost: 5, isSpell: false },
+  { id: 'baloo', name: 'Baloo', image: '/src/assets/cards/baloo.png', isLegendary: false, cost: 5, isSpell: false },
   { id: 'beast', name: 'Beast', image: '/src/assets/cards/beast.png', isLegendary: false, cost: 4, isSpell: false },
   { id: 'bridge_troll', name: 'Bridge Troll', image: '/src/assets/cards/bridge_troll.png', isLegendary: false, cost: 5, isSpell: false },
   { id: 'cheshire', name: 'Cheshire Cat', image: '/src/assets/cards/cheshire.png', isLegendary: false, cost: 4, isSpell: false },

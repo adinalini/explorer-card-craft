@@ -4,6 +4,7 @@ import { useState } from 'react'
 import alibabaImg from '@/assets/cards/ali_baba.png'
 import aliceImg from '@/assets/cards/alice.png'
 import axethrowImg from '@/assets/cards/axe_throw.png'
+import balooImg from '@/assets/cards/baloo.png'
 
 import bandersnatchImg from '@/assets/cards/bandersnatch.png'
 import bansheeImg from '@/assets/cards/banshee.png'
@@ -116,6 +117,7 @@ const cardImages: Record<string, string> = {
   'ali_baba': alibabaImg,
   'alice': aliceImg,
   'axe_throw': axethrowImg,
+  'baloo': balooImg,
   
   'bandersnatch': bandersnatchImg,
   'banshee': bansheeImg,

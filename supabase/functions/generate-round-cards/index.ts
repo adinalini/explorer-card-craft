@@ -433,6 +433,7 @@ Deno.serve(async (req) => {
       { id: "headless_horseman", name: "Headless Horseman", image: "headless_horseman.png", cost: 5 },
       { id: "the_green_knight", name: "The Green Knight", image: "the_green_knight.png", cost: 5 },
       { id: "three_musketeers", name: "Three Musketeers", image: "three_musketeers.png", cost: 5 },
+      { id: "baloo", name: "Baloo", image: "baloo.png", cost: 5 },
       { id: "robin_hood", name: "Robin Hood", image: "robin_hood.png", cost: 5, isLegendary: true },
       
       // Cost 6 cards

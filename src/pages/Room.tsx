@@ -1119,40 +1119,7 @@ const Room = () => {
         // If auto-select completes Phase 1, start Phase 2 timer immediately and add to deck now
         const currentPhase = room?.triple_draft_phase || 1
         if (currentPhase === 1) {
-          try {
-            // Add phase 1 card to deck idempotently
-            const { data: existingDeck } = await supabaseWithToken
-              .from('player_decks')
-              .select('id')
-              .eq('room_id', roomId)
-              .eq('card_id', card.card_id)
-              .eq('player_side', userRole)
-              .eq('selection_order', room?.current_round)
-            if (!existingDeck || existingDeck.length === 0) {
-              await supabaseWithToken.from('player_decks').insert({
-                room_id: roomId,
-                card_id: card.card_id,
-                card_name: card.card_name,
-                player_side: userRole as 'creator' | 'joiner',
-                selection_order: room?.current_round || 0,
-                is_legendary: card.is_legendary,
-                card_image: card.card_image
-              })
-              console.log('🔷 TRIPLE AUTO-SELECT: Phase 1 card added to deck immediately')
-            }
-          } catch (e) {
-            console.error('🔷 TRIPLE AUTO-SELECT: Error adding phase 1 card to deck immediately', e)
-          }
-          try {
-            const phase2Start = new Date().toISOString()
-            await supabaseWithToken
-              .from('rooms')
-              .update({ triple_draft_phase: 2, round_start_time: phase2Start })
-              .eq('id', roomId)
-            console.log('🔷 TRIPLE AUTO-SELECT: Phase 2 started with timer reset at', phase2Start)
-          } catch (e) {
-            console.error('🔷 TRIPLE AUTO-SELECT: Error starting phase 2 timer', e)
-          }
+          console.log('🔷 TRIPLE AUTO-SELECT: Phase 1 complete, deferring transition to creator (no timer reset, no deck insert here).')
         }
         
         setIsSelectionLocked(true)
@@ -1414,6 +1381,13 @@ const Room = () => {
     
     console.log('🔷 TRIPLE PHASE END: 🔒 Setting processing lock')
     isProcessingRoundRef.current = true
+
+    // Only the creator should perform phase transitions and DB writes
+    if (userRole !== 'creator') {
+      console.log('🔷 TRIPLE PHASE END: Non-creator client - deferring to creator and exiting.')
+      isProcessingRoundRef.current = false
+      return
+    }
     
     // Add a small delay to ensure card updates have been processed
     console.log('🔷 TRIPLE PHASE END: ⏳ Waiting 200ms for card updates...')

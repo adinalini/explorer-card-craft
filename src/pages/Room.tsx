@@ -1230,6 +1230,10 @@ const Room = () => {
         const cardKey = `${card.card_id}_${card.selected_by}`
         
         if (!existingKeys.has(cardKey)) {
+          const selectionOrder = room.draft_type === 'mega' 
+            ? (room.mega_draft_turn_count || 0) + 1 
+            : currentRound
+          
           const { error: deckError } = await supabaseWithToken
             .from('player_decks')
             .insert({
@@ -1239,48 +1243,27 @@ const Room = () => {
               card_name: card.card_name,
               card_image: card.card_image,
               is_legendary: card.is_legendary,
-              selection_order: currentRound
+              selection_order: selectionOrder
             })
           
           if (deckError) {
             console.error('❌ Error adding card to deck:', deckError)
           } else {
-            console.log(`✅ Added ${card.card_id} to ${card.selected_by} deck`)
+            console.log(`✅ Added ${card.card_id} to ${card.selected_by} deck with order ${selectionOrder}`)
           }
         }
       }
 
       // Handle different draft types
       if (room.draft_type === 'mega') {
-        // Mega draft: advance turn count, add to deck, and check completion
+        // Mega draft: advance turn count and check completion
         const newTurnCount = (room.mega_draft_turn_count || 0) + 1;
         const isComplete = newTurnCount >= 26; // 13 picks each player (26 total)
 
         console.log(`🎯 Mega draft turn ${newTurnCount}/26`)
         
-        // Add selected card to player deck immediately
-        if (selectedCard) {
-          const cardToAdd = roomCards.find(card => card.card_id === selectedCard)
-          if (cardToAdd) {
-            try {
-              await supabaseWithToken
-                .from('player_decks')
-                .insert({
-                  room_id: roomId,
-                  card_id: cardToAdd.card_id,
-                  card_name: cardToAdd.card_name,
-                  player_side: userRole as 'creator' | 'joiner',
-                  selection_order: newTurnCount,
-                  is_legendary: cardToAdd.is_legendary,
-                  card_image: cardToAdd.card_image
-                })
-              console.log(`✅ Added card ${cardToAdd.card_name} to ${userRole} deck`)
-            } catch (error) {
-              console.error('❌ Error adding card to deck:', error)
-            }
-          }
-        }
-        
+        // For mega draft, cards are added to deck already in the for loop above
+        // Just update the turn count and timer
         if (isComplete) {
           console.log('🏁 Mega draft complete - setting status to completed')
           await supabaseWithToken
@@ -2100,7 +2083,7 @@ const Room = () => {
                     variant={room.creator_ready ? "secondary" : "default"}
                     size="lg"
                     className="px-8 py-4 text-lg"
-                    disabled={userRole !== 'creator' || (room.creator_ready && room.joiner_ready)}
+                    disabled={userRole !== 'creator' || isStartingDraft || isDraftStarting}
                   >
                     {room.creator_ready ? "Ready ✓" : "Ready?"}
                   </Button>
@@ -2118,7 +2101,7 @@ const Room = () => {
                     variant={room.joiner_ready ? "secondary" : "default"}
                     size="lg"
                     className="px-8 py-4 text-lg"
-                    disabled={userRole !== 'joiner' || (room.creator_ready && room.joiner_ready)}
+                    disabled={userRole !== 'joiner' || isStartingDraft || isDraftStarting}
                   >
                     {room.joiner_ready ? "Ready ✓" : "Ready?"}
                   </Button>

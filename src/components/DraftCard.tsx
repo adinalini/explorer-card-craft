@@ -74,7 +74,7 @@ export function DraftCard({
           </div>
         )}
         {showSelectedTick && (
-          <div className="absolute inset-0 bg-green-500 bg-opacity-60 flex items-center justify-center">
+          <div className="absolute inset-0 bg-green-500 bg-opacity-20 flex items-center justify-center">
             <div className="text-white text-6xl font-bold">✓</div>
           </div>
         )}

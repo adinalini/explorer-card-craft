@@ -230,6 +230,11 @@ const Room = () => {
         currentRoundCards = roomCards.filter(card => 
           card.round_number === 1
         )
+        
+        // For mega draft, also check if it's our turn and auto-select
+        if (isMyTurn) {
+          autoSelectRandomCard()
+        }
       }
       
       const hasManualSelection = selectedCard || currentRoundCards.some(card => card.selected_by === userRole)
@@ -1247,20 +1252,45 @@ const Room = () => {
 
       // Handle different draft types
       if (room.draft_type === 'mega') {
-        // Mega draft: advance turn count and check completion
+        // Mega draft: advance turn count, add to deck, and check completion
         const newTurnCount = (room.mega_draft_turn_count || 0) + 1;
-        const isComplete = newTurnCount >= 24; // 12 picks each
+        const isComplete = newTurnCount >= 26; // 13 picks each player (26 total)
 
-        console.log(`🎯 Mega draft turn ${newTurnCount}/24`)
+        console.log(`🎯 Mega draft turn ${newTurnCount}/26`)
+        
+        // Add selected card to player deck immediately
+        if (selectedCard) {
+          const cardToAdd = roomCards.find(card => card.card_id === selectedCard)
+          if (cardToAdd) {
+            try {
+              await supabaseWithToken
+                .from('player_decks')
+                .insert({
+                  room_id: roomId,
+                  card_id: cardToAdd.card_id,
+                  card_name: cardToAdd.card_name,
+                  player_side: userRole as 'creator' | 'joiner',
+                  selection_order: newTurnCount,
+                  is_legendary: cardToAdd.is_legendary,
+                  card_image: cardToAdd.card_image
+                })
+              console.log(`✅ Added card ${cardToAdd.card_name} to ${userRole} deck`)
+            } catch (error) {
+              console.error('❌ Error adding card to deck:', error)
+            }
+          }
+        }
         
         if (isComplete) {
           console.log('🏁 Mega draft complete - setting status to completed')
           await supabaseWithToken
             .from('rooms')
-            .update({ status: 'completed' })
+            .update({ 
+              status: 'completed',
+              mega_draft_turn_count: newTurnCount
+            })
             .eq('id', roomId)
         } else {
-          // Continue mega draft
           const nextRoundStartTime = new Date().toISOString()
           const { error: updateError } = await supabaseWithToken
             .from('rooms')
@@ -1936,9 +1966,21 @@ const Room = () => {
     }
   }
 
-  // Determine current turn for triple draft
+  // Determine current turn for all draft types
   const isMyTurn = (() => {
     if (!room || room.status !== 'drafting') return false
+    
+    if (room.draft_type === 'mega') {
+      // For mega draft, determine turn based on first_pick_player and turn count
+      const firstPickPlayer = room.first_pick_player || 'creator'
+      const turnCount = room.mega_draft_turn_count || 0
+      
+      // Alternating picks: first player starts, then alternates each turn
+      // Turn 0: first pick player, Turn 1: other player, Turn 2: first pick player, etc.
+      const currentTurnPlayer = (turnCount % 2 === 0) ? firstPickPlayer : (firstPickPlayer === 'creator' ? 'joiner' : 'creator')
+      return currentTurnPlayer === userRole
+    }
+    
     if (room.draft_type !== 'triple') return true
     
     const currentPhase = room.triple_draft_phase || 1
@@ -2272,7 +2314,7 @@ const Room = () => {
                   <div className="flex justify-between items-center max-w-4xl mx-auto">
                     <h2 className="text-2xl font-bold text-black">Mega Draft</h2>
                     <div className="text-lg font-semibold text-primary">
-                      Progress: {Math.min((room.mega_draft_turn_count || 0) + 1, 23)}/23 cards selected
+                      Progress: {Math.min((room.mega_draft_turn_count || 0), 26)}/26 cards selected
                     </div>
                   </div>
                   <div className="space-y-4">

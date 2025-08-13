@@ -29,6 +29,8 @@ export function MegaDraftGrid({
           disabled={!isMyTurn || !!card.selected_by}
           isRevealing={!!card.selected_by} // Show reveal state if already selected
           showUnselectedOverlay={!isMyTurn && !card.selected_by} // Show overlay when not user's turn
+          showSelectedCross={card.selected_by && card.selected_by !== userRole}
+          showSelectedTick={card.selected_by === userRole}
         />
       ))}
     </div>

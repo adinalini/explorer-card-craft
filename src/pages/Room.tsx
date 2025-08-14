@@ -272,9 +272,9 @@ const Room = () => {
       
       // Handle different timer durations for different phases
       if (room.draft_type === 'triple') {
-        roundDuration = room.triple_draft_phase === 2 ? 2 : 20 // 2 seconds for reveal, 20 for selection
+        roundDuration = room.triple_draft_phase === 2 ? 2 : 10 // 2 seconds for reveal, 10 for selection
       } else if (room.draft_type === 'mega') {
-        roundDuration = room.mega_draft_phase === 2 ? 2 : 20 // 2 seconds for reveal, 20 for selection
+        roundDuration = room.mega_draft_phase === 2 ? 2 : 10 // 2 seconds for reveal, 10 for selection
       }
       
       const remaining = Math.max(0, roundDuration - elapsed)
@@ -1214,11 +1214,26 @@ const Room = () => {
         console.log('🔍 ROUND 6 DEBUG - Joiner selected:', joinerSelected?.card_id || 'NONE')
       }
 
-      // Both players must have selected before proceeding
-      if (!creatorSelected || !joinerSelected) {
-        console.log(`⏳ Waiting for selections - Creator: ${creatorSelected ? '✅' : '❌'}, Joiner: ${joinerSelected ? '✅' : '❌'}`)
-        isProcessingRoundRef.current = false
-        return
+      // For mega draft, check if current player has selected (only one player selects per turn)
+      if (room.draft_type === 'mega') {
+        const turnCount = room.mega_draft_turn_count || 0;
+        const firstPickPlayer = room.first_pick_player || 'creator';
+        const currentTurnPlayer = (turnCount % 2 === 0) ? firstPickPlayer : (firstPickPlayer === 'creator' ? 'joiner' : 'creator');
+        const currentPlayerSelected = selectedCards.find(card => card.selected_by === currentTurnPlayer);
+        
+        if (!currentPlayerSelected) {
+          console.log(`⏳ MEGA: Waiting for ${currentTurnPlayer} to select - Turn ${turnCount}`);
+          isProcessingRoundRef.current = false;
+          return;
+        }
+      } else {
+        // For other draft types, both players must have selected before proceeding  
+        if (!creatorSelected || !joinerSelected) {
+          console.log(`⏳ Waiting for selections - Creator: ${creatorSelected ? '✅' : '❌'}, Joiner: ${joinerSelected ? '✅' : '❌'}`)
+          isProcessingRoundRef.current = false
+          console.log('🟢 Setting isProcessingRound to false')
+          return
+        }
       }
 
       const { data: existingDeckCards } = await supabaseWithToken
@@ -1231,8 +1246,18 @@ const Room = () => {
         existingDeckCards?.map(c => `${c.card_id}_${c.player_side}`) || []
       )
 
-      console.log(`💾 Adding ${selectedCards.length} cards to player decks...`)
-      for (const card of selectedCards) {
+      // For mega draft, only add the current turn player's card
+      let cardsToAdd = selectedCards;
+      if (room.draft_type === 'mega') {
+        const turnCount = room.mega_draft_turn_count || 0;
+        const firstPickPlayer = room.first_pick_player || 'creator';
+        const currentTurnPlayer = (turnCount % 2 === 0) ? firstPickPlayer : (firstPickPlayer === 'creator' ? 'joiner' : 'creator');
+        cardsToAdd = selectedCards.filter(card => card.selected_by === currentTurnPlayer);
+        console.log(`🎯 MEGA: Adding only ${currentTurnPlayer}'s card to deck (turn ${turnCount})`);
+      }
+
+      console.log(`💾 Adding ${cardsToAdd.length} cards to player decks...`)
+      for (const card of cardsToAdd) {
         const cardKey = `${card.card_id}_${card.selected_by}`
         
         if (!existingKeys.has(cardKey)) {
@@ -1905,17 +1930,27 @@ const Room = () => {
           handleTriplePhaseEnd()
         }, 2000)
       } else if (room?.draft_type === 'mega') {
-        // For mega draft, immediately lock and start reveal phase
+        // For mega draft, immediately lock and start reveal phase like triple draft
+        console.log('🔷 MEGA: Card selected, starting reveal phase')
         setIsSelectionLocked(true)
         setShowReveal(true)
+        setIsRevealing(true)
         
-        if (userRole === 'creator' && !isProcessingRoundRef.current) {
-          setTimeout(() => {
-            if (!isProcessingRoundRef.current) {
-              processRoundEnd()
-            }
-          }, 1500) // Shorter delay for mega draft
-        }
+        // Force immediate card data refresh to show correct tick/cross
+        setTimeout(() => {
+          fetchRoomCards()
+        }, 100)
+        
+        // After 2 seconds, trigger mega draft phase progression
+        setTimeout(() => {
+          console.log('🔷 MEGA: Reveal ended, checking phase advancement')
+          setShowReveal(false)
+          setIsRevealing(false)
+          // For mega draft, use similar phase progression to triple draft
+          if (userRole === 'creator' && !isProcessingRoundRef.current) {
+            processRoundEnd()
+          }
+        }, 2000)
       }
     } catch (error) {
       if (room?.draft_type === 'triple') {

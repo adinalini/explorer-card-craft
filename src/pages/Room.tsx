@@ -1040,12 +1040,7 @@ const Room = () => {
 
   const performAutoSelect = async (card: RoomCard) => {
     try {
-      console.log('🔄 AUTO-SELECT: Starting auto-select process')
-      console.log('🔄 AUTO-SELECT: Card:', card.card_id, card.card_name)
-      console.log('🔄 AUTO-SELECT: User Role:', userRole)
-      console.log('🔄 AUTO-SELECT: Current Round:', room?.current_round)
-      console.log('🔄 AUTO-SELECT: Draft Type:', room?.draft_type)
-      console.log('🔄 AUTO-SELECT: Triple Phase:', room?.triple_draft_phase)
+      console.log(`🔄 AUTO-SELECT: ${card.card_name} for ${userRole} in ${room?.draft_type} draft`)
       
       const supabaseWithToken = getSupabaseWithSession()
       
@@ -1109,12 +1104,8 @@ const Room = () => {
         .eq('round_number', room?.current_round)
         .not('selected_by', 'is', null)
       
-      console.log('🔄 AUTO-SELECT: All current selections:', allSelections)
-      
       setSelectedCard(card.card_id)
-      console.log('✅ AUTO-SELECT: Process completed successfully')
-      console.log('✅ AUTO-SELECT: Selected card:', card.card_name)
-      console.log('✅ AUTO-SELECT: Total selections now:', allSelections?.length || 0)
+      console.log(`✅ AUTO-SELECT: ${card.card_name} selected (${allSelections?.length || 0} total)`)
       
       // For triple draft, add additional logging about phase state
       if (room?.draft_type === 'triple') {
@@ -1287,52 +1278,50 @@ const Room = () => {
 
       // Handle different draft types
       if (room.draft_type === 'mega') {
-        // Mega draft: PHASE SYSTEM like triple draft
-        const currentPhase = room.mega_draft_phase || 1;
-        const turnCount = room.mega_draft_turn_count || 0;
+        const currentTurn = room.mega_draft_turn_count || 0;
+        const newTurnCount = currentTurn + 1;
+        const isComplete = newTurnCount >= 26; // 13 picks each player (26 total)
         
-        console.log(`🎯 Mega draft - Phase: ${currentPhase}, Turn: ${turnCount}/26`)
+        console.log(`🎯 MEGA: Processing turn ${currentTurn} -> ${newTurnCount}/26`)
         
-        if (currentPhase === 1) {
-          // Phase 1: Show reveal for 2 seconds, then move to phase 2
-          console.log('🔷 MEGA: Phase 1 complete - entering 2 second reveal phase')
+        if (isComplete) {
+          console.log('🏁 MEGA: All turns completed, finishing draft')
+          const { error: finishError } = await supabaseWithToken
+            .from('rooms')
+            .update({ status: 'completed' })
+            .eq('id', roomId)
+            
+          if (finishError) {
+            console.error('❌ MEGA: Error finishing draft:', finishError)
+          }
+        } else {
+          console.log(`🔄 MEGA: Advancing to turn ${newTurnCount}`)
           
-          // Set reveal phase
-          await supabaseWithToken
+          // Clear selections for next turn
+          const { error: clearError } = await supabaseWithToken
+            .from('room_cards')
+            .update({ selected_by: null })
+            .eq('room_id', roomId)
+            .eq('round_number', 1)
+            
+          if (clearError) {
+            console.error('❌ MEGA: Error clearing selections:', clearError)
+          }
+          
+          // Update room to next turn
+          const { error: updateError } = await supabaseWithToken
             .from('rooms')
             .update({ 
-              mega_draft_phase: 2, // Reveal phase
-              round_start_time: new Date().toISOString() // 2 second timer for reveal
+              mega_draft_turn_count: newTurnCount,
+              mega_draft_phase: 1,
+              round_start_time: new Date().toISOString()
             })
             .eq('id', roomId)
             
-        } else if (currentPhase === 2) {
-          // Phase 2: Reveal complete, advance turn and go to next selection
-          const newTurnCount = turnCount + 1;
-          const isComplete = newTurnCount >= 26; // 13 picks each player (26 total)
-
-          console.log(`🔷 MEGA: Phase 2 complete - advancing to turn ${newTurnCount}/26`)
-          
-          if (isComplete) {
-            console.log('🏁 Mega draft complete - setting status to completed')
-            await supabaseWithToken
-              .from('rooms')
-              .update({ 
-                status: 'completed'
-              })
-              .eq('id', roomId)
+          if (updateError) {
+            console.error('❌ MEGA: Error updating room:', updateError)
           } else {
-            // Advance turn and go back to phase 1 for next pick
-            await supabaseWithToken
-              .from('rooms')
-              .update({ 
-                mega_draft_turn_count: newTurnCount,
-                mega_draft_phase: 1, // Back to selection phase
-                round_start_time: new Date().toISOString() // Reset timer for next pick
-              })
-              .eq('id', roomId)
-            
-            console.log(`🔄 Updated mega draft to turn ${newTurnCount}, phase 1, timer reset`)
+            console.log(`✅ MEGA: Successfully advanced to turn ${newTurnCount}`)
           }
         }
       } else if (room.draft_type === 'triple') {
@@ -1930,23 +1919,16 @@ const Room = () => {
           handleTriplePhaseEnd()
         }, 2000)
       } else if (room?.draft_type === 'mega') {
-        // For mega draft, immediately lock and start reveal phase like triple draft
-        console.log('🔷 MEGA: Card selected, starting reveal phase')
+        // For mega draft, show reveal then process turn end
+        console.log('🔷 MEGA: Card selected, processing turn')
         setIsSelectionLocked(true)
         setShowReveal(true)
         setIsRevealing(true)
         
-        // Force immediate card data refresh to show correct tick/cross
+        // After 2 seconds, process the turn end
         setTimeout(() => {
-          fetchRoomCards()
-        }, 100)
-        
-        // After 2 seconds, trigger mega draft phase progression
-        setTimeout(() => {
-          console.log('🔷 MEGA: Reveal ended, checking phase advancement')
           setShowReveal(false)
           setIsRevealing(false)
-          // For mega draft, use similar phase progression to triple draft
           if (userRole === 'creator' && !isProcessingRoundRef.current) {
             processRoundEnd()
           }

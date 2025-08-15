@@ -791,6 +791,12 @@ const Room = () => {
           updateData.triple_draft_phase = 1
           updateData.triple_draft_first_pick = firstPick
           console.log(`🔷 TRIPLE: Starting with first pick: ${firstPick}`)
+        } else if (currentRoom.draft_type === 'mega') {
+          const firstPick = response?.firstPickPlayer || 'creator' // Use edge function result
+          updateData.mega_draft_phase = 1
+          updateData.first_pick_player = firstPick
+          updateData.mega_draft_turn_count = 0
+          console.log(`🔶 MEGA: Starting with first pick: ${firstPick}`)
         }
 
         console.log('🚀 START DRAFT: Updating room status to drafting')
@@ -818,6 +824,9 @@ const Room = () => {
         if (currentRoom.draft_type === 'triple') {
           const firstPick = response?.firstPickPlayer || 'creator'
           console.log(`🔷 TRIPLE: Starting with first pick: ${firstPick}`)
+        } else if (currentRoom.draft_type === 'mega') {
+          const firstPick = response?.firstPickPlayer || 'creator'
+          console.log(`🔶 MEGA: Starting with first pick: ${firstPick}`)
         }
       }
       
@@ -1502,6 +1511,62 @@ const Room = () => {
           console.log('🔷 TRIPLE PHASE END: 🎯 Using first selection:', firstSelection.card_id, 'by', firstSelection.selected_by)
         }
         
+        // Handle mega draft differently - add only current turn player's card and advance turn
+        if (room.draft_type === 'mega') {
+          const firstPickPlayer = room.first_pick_player || 'creator'
+          const turnCount = room.mega_draft_turn_count || 0
+          const currentTurnPlayer = (turnCount % 2 === 0) ? firstPickPlayer : (firstPickPlayer === 'creator' ? 'joiner' : 'creator')
+          const currentPlayerCard = selectedCards.find(c => c.selected_by === currentTurnPlayer)
+          
+          if (currentPlayerCard) {
+            console.log('🔶 MEGA: Adding current turn card to deck:', currentPlayerCard.card_id, 'by', currentPlayerCard.selected_by)
+            
+            // Add card to deck
+            try {
+              const { data: existingDeck } = await supabaseWithToken
+                .from('player_decks')
+                .select('card_id')
+                .eq('room_id', roomId)
+                .eq('card_id', currentPlayerCard.card_id)
+                .eq('player_side', currentPlayerCard.selected_by)
+                .eq('selection_order', turnCount + 1)
+              
+              if (!existingDeck || existingDeck.length === 0) {
+                await supabaseWithToken
+                  .from('player_decks')
+                  .insert({
+                    room_id: roomId,
+                    card_id: currentPlayerCard.card_id,
+                    card_name: currentPlayerCard.card_name,
+                    player_side: currentPlayerCard.selected_by as 'creator' | 'joiner',
+                    selection_order: turnCount + 1,
+                    is_legendary: currentPlayerCard.is_legendary,
+                    card_image: currentPlayerCard.card_image
+                  })
+                console.log('🔶 MEGA: Card added to deck successfully')
+              }
+            } catch (error) {
+              console.error('🔶 MEGA: Error adding card to deck:', error)
+            }
+            
+            // Advance turn count and update database
+            const nextTurnCount = turnCount + 1
+            const nextPhase = nextTurnCount >= 26 ? 2 : 1 // Switch to reveal phase after 26 cards
+            
+            await supabaseWithToken
+              .from('rooms')
+              .update({
+                mega_draft_turn_count: nextTurnCount,
+                mega_draft_phase: nextPhase,
+                round_start_time: new Date().toISOString()
+              })
+              .eq('id', roomId)
+            
+            console.log(`🔶 MEGA: Turn advanced to ${nextTurnCount}, phase ${nextPhase}`)
+          }
+          return
+        }
+
         // Add phase 1 selected card to player deck: must be the first pick player's selection
         const firstPickPlayer = (room.triple_draft_first_pick as 'creator' | 'joiner')
         const phase1Card = selectedCards.find(c => c.selected_by === firstPickPlayer)

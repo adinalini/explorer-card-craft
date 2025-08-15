@@ -793,7 +793,7 @@ const Room = () => {
           console.log(`🔷 TRIPLE: Starting with first pick: ${firstPick}`)
         } else if (currentRoom.draft_type === 'mega') {
           const firstPick = response?.firstPickPlayer || 'creator' // Use edge function result
-          updateData.mega_draft_phase = 1
+          updateData.triple_draft_phase = 1
           updateData.first_pick_player = firstPick
           updateData.mega_draft_turn_count = 0
           console.log(`🔶 MEGA: Starting with first pick: ${firstPick}`)
@@ -1557,7 +1557,7 @@ const Room = () => {
               .from('rooms')
               .update({
                 mega_draft_turn_count: nextTurnCount,
-                mega_draft_phase: nextPhase,
+                triple_draft_phase: nextPhase,
                 round_start_time: new Date().toISOString()
               })
               .eq('id', roomId)

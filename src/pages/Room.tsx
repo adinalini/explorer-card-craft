@@ -95,6 +95,7 @@ const Room = () => {
   const [userSessionId] = useState(getUserSessionId())
   const [userRole, setUserRole] = useState<'creator' | 'joiner' | 'spectator'>('spectator')
   const [isStartingDraft, setIsStartingDraft] = useState(false)
+  const [isDraftStarting, setIsDraftStarting] = useState(false)
   const [draftStartTimeout, setDraftStartTimeout] = useState<NodeJS.Timeout | null>(null)
   const [backgroundAutoSelectTimeout, setBackgroundAutoSelectTimeout] = useState<NodeJS.Timeout | null>(null)
   const isProcessingRoundRef = useRef(false)
@@ -131,6 +132,24 @@ const Room = () => {
   const mirrorRevealTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const lastSelectionRef = useRef<{ round: number; count: number }>({ round: 0, count: 0 })
   const selectionInFlightRef = useRef(false)
+
+  // Refs to track current state values for realtime callbacks
+  const isStartingDraftRef = useRef(false)
+  const isDraftStartingRef = useRef(false)
+  const draftStartTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  
+  // Keep refs in sync with state
+  useEffect(() => {
+    isStartingDraftRef.current = isStartingDraft
+  }, [isStartingDraft])
+  
+  useEffect(() => {
+    isDraftStartingRef.current = isDraftStarting
+  }, [isDraftStarting])
+  
+  useEffect(() => {
+    draftStartTimeoutRef.current = draftStartTimeout
+  }, [draftStartTimeout])
 
   useEffect(() => {
     if (!room || room.status !== 'drafting' || room.draft_type !== 'triple') return
@@ -480,17 +499,17 @@ const Room = () => {
             if (updatedRoom.creator_ready && 
                 updatedRoom.joiner_ready && 
                 updatedRoom.status === 'waiting' && 
-                !isStartingDraft && 
-                !isDraftStarting && 
+                !isStartingDraftRef.current && 
+                !isDraftStartingRef.current && 
                 !isDraftAlreadyActive && 
-                !draftStartTimeout) {
+                !draftStartTimeoutRef.current) {
               
     console.log('🚀 ROOM UPDATE: Both players ready, starting draft countdown')
               
               // Cancel any existing draft start timeout to prevent race conditions
-              if (draftStartTimeout) {
+              if (draftStartTimeoutRef.current) {
                 console.log('🚀 ROOM UPDATE: Cancelling existing draft start timeout')
-                clearTimeout(draftStartTimeout)
+                clearTimeout(draftStartTimeoutRef.current)
                 setDraftStartTimeout(null)
               }
               
@@ -523,16 +542,16 @@ const Room = () => {
             } else if (isDraftAlreadyActive) {
               console.log('🚀 ROOM UPDATE: Draft already active, skipping countdown')
               // Clear any stale flags if draft is already active
-              if (isStartingDraft || isDraftStarting) {
+              if (isStartingDraftRef.current || isDraftStartingRef.current) {
                 setIsStartingDraft(false)
-                if (draftStartTimeout) {
-                  clearTimeout(draftStartTimeout)
+                if (draftStartTimeoutRef.current) {
+                  clearTimeout(draftStartTimeoutRef.current)
                   setDraftStartTimeout(null)
                 }
               }
-            } else if (isStartingDraft || isDraftStarting) {
+            } else if (isStartingDraftRef.current || isDraftStartingRef.current) {
               console.log('🚀 ROOM UPDATE: Draft start already in progress, ignoring duplicate trigger')
-            } else if (draftStartTimeout) {
+            } else if (draftStartTimeoutRef.current) {
               console.log('🚀 ROOM UPDATE: Draft timeout already running, ignoring duplicate trigger')
             }
           }
@@ -779,9 +798,6 @@ const Room = () => {
       })
     }
   }
-
-  // Add a state to prevent multiple simultaneous draft starts
-  const [isDraftStarting, setIsDraftStarting] = useState(false)
 
   const startDraft = async (roomData?: Room) => {
     const currentRoom = roomData || room

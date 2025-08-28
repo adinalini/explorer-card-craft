@@ -54,7 +54,6 @@ interface Room {
   mega_draft_cards?: string[]
   first_pick_player?: string | null
   mega_draft_turn_count?: number
-  mega_draft_phase?: number | null
   current_phase?: string
   triple_draft_phase?: number | null
   triple_draft_first_pick?: string | null
@@ -274,7 +273,7 @@ const Room = () => {
       if (room.draft_type === 'triple') {
         roundDuration = room.triple_draft_phase === 2 ? 2 : 10 // 2 seconds for reveal, 10 for selection
       } else if (room.draft_type === 'mega') {
-        roundDuration = room.mega_draft_phase === 2 ? 2 : 10 // 2 seconds for reveal, 10 for selection
+        roundDuration = room.triple_draft_phase === 2 ? 2 : 10 // 2 seconds for reveal, 10 for selection
       }
       
       const remaining = Math.max(0, roundDuration - elapsed)
@@ -400,15 +399,15 @@ const Room = () => {
                }, 100)
              }
              
-             // CRITICAL FIX: Force a re-render when joiner joins to show ready buttons
-             if (room && !room.joiner_name && updatedRoom.joiner_name) {
-               console.log('🔧 ROOM SYNC: Joiner joined - forcing UI update to show ready buttons')
-               // Force state update to trigger re-render
-               setTimeout(() => {
-                 setRoom(prev => ({ ...prev, ...updatedRoom }))
-                 setTimeRemaining(prev => prev + 0.001) // Trigger re-render
-               }, 50)
-             }
+              // CRITICAL FIX: Force a re-render when joiner joins to show ready buttons
+              if (room && !room.joiner_name && updatedRoom.joiner_name) {
+                console.log('🔧 ROOM SYNC: Joiner joined - forcing UI update to show ready buttons')
+                // Force immediate state update and trigger re-render
+                setRoom({ ...updatedRoom })
+                // Also force a component re-render by updating loading state briefly
+                setLoading(true)
+                setTimeout(() => setLoading(false), 10)
+              }
             
             // Handle triple draft phase transitions with debouncing
             if (updatedRoom.draft_type === 'triple' && updatedRoom.status === 'drafting') {
@@ -1332,7 +1331,7 @@ const Room = () => {
             .from('rooms')
             .update({ 
               mega_draft_turn_count: newTurnCount,
-              mega_draft_phase: 1,
+              triple_draft_phase: 1,
               round_start_time: new Date().toISOString()
             })
             .eq('id', roomId)
@@ -2068,7 +2067,7 @@ const Room = () => {
     
     if (room.draft_type === 'mega') {
       // For mega draft, only allow picking in phase 1 (selection phase)
-      const currentPhase = room.mega_draft_phase || 1
+      const currentPhase = room.triple_draft_phase || 1
       if (currentPhase !== 1) return false // Phase 2 is reveal only
       
       // Determine turn based on first_pick_player and turn count
@@ -2465,7 +2464,7 @@ const Room = () => {
                   selectedCard={selectedCard}
                   userRole={userRole}
                   isMyTurn={isMyTurn}
-                  isRevealPhase={room.mega_draft_phase === 2}
+                  isRevealPhase={room.triple_draft_phase === 2}
                   onCardSelect={handleCardSelect}
                 />
               </div>

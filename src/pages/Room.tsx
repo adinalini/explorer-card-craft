@@ -538,7 +538,13 @@ const Room = () => {
           }
         }
       )
-      .subscribe()
+      .subscribe((status) => {
+        if (status === 'CHANNEL_ERROR') {
+          console.warn('🔧 REALTIME: Channel error detected, falling back to polling')
+        } else if (status === 'SUBSCRIBED') {
+          console.log('🔧 REALTIME: Successfully subscribed to room changes')
+        }
+      })
 
     // Subscribe to room cards changes
     const cardsChannel = supabase

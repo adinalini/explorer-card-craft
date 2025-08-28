@@ -392,13 +392,23 @@ const Room = () => {
               setRoom(updatedRoom)
               
               // CRITICAL FIX: Add a more robust sync mechanism
-              // Force a complete UI refresh by updating multiple state variables
-              setTimeout(() => {
-                console.log('🔧 ROOM SYNC: Forcing complete UI refresh')
-                setTimeRemaining(prev => prev + 0.001) // Minimal change to trigger re-render
-                setRoom(prev => ({ ...prev, ...updatedRoom })) // Force room state update
-              }, 100)
-            }
+               // Force a complete UI refresh by updating multiple state variables
+               setTimeout(() => {
+                 console.log('🔧 ROOM SYNC: Forcing complete UI refresh')
+                 setTimeRemaining(prev => prev + 0.001) // Minimal change to trigger re-render
+                 setRoom(prev => ({ ...prev, ...updatedRoom })) // Force room state update
+               }, 100)
+             }
+             
+             // CRITICAL FIX: Force a re-render when joiner joins to show ready buttons
+             if (room && !room.joiner_name && updatedRoom.joiner_name) {
+               console.log('🔧 ROOM SYNC: Joiner joined - forcing UI update to show ready buttons')
+               // Force state update to trigger re-render
+               setTimeout(() => {
+                 setRoom(prev => ({ ...prev, ...updatedRoom }))
+                 setTimeRemaining(prev => prev + 0.001) // Trigger re-render
+               }, 50)
+             }
             
             // Handle triple draft phase transitions with debouncing
             if (updatedRoom.draft_type === 'triple' && updatedRoom.status === 'drafting') {

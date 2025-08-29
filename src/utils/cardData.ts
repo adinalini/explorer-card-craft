@@ -111,6 +111,15 @@ const cardImports = {
   'white_rabbit': () => import('@/assets/cards/white_rabbit.png'),
   'wicked_witch_of_the_west': () => import('@/assets/cards/wicked_witch_of_the_west.png'),
   'zorro': () => import('@/assets/cards/zorro.png'),
+  'tin_soldier': () => import('@/assets/cards/tin_soldier.png'),
+  'hansel_gretel': () => import('@/assets/cards/hansel_gretel.png'),
+  'beauty': () => import('@/assets/cards/beauty.png'),
+  'wendy': () => import('@/assets/cards/wendy.png'),
+  'baba_yaga': () => import('@/assets/cards/baba_yaga.png'),
+  'christopher': () => import('@/assets/cards/christopher.png'),
+  'wukong': () => import('@/assets/cards/wukong.png'),
+  'genie': () => import('@/assets/cards/genie.png'),
+  'paul_bunyan': () => import('@/assets/cards/paul_bunyan.png'),
 }
 
 export interface Card {
@@ -157,7 +166,7 @@ export const cardDatabase: Card[] = [
   { id: 'moby', name: 'Moby Dick', image: '/src/assets/cards/moby.png', isLegendary: false, cost: 4, isSpell: false },
   { id: 'phantom_coachman', name: 'Phantom Coachman', image: '/src/assets/cards/phantom_coachman.png', isLegendary: false, cost: 10, isSpell: false },
   { id: 'queen_guinevere', name: 'Queen Guinevere', image: '/src/assets/cards/queen_guinevere.png', isLegendary: false, cost: 4, isSpell: false },
-  { id: 'the_kraken', name: 'The Kraken', image: '/src/assets/cards/the_kraken.png', isLegendary: false, cost: 8, isSpell: false },
+  { id: 'the_kraken', name: 'The Kraken', image: '/src/assets/cards/the_kraken.png', isLegendary: true, cost: 8, isSpell: false },
   { id: 'three_not_so_little_pigs', name: 'Three Not So Little Pigs', image: '/src/assets/cards/three_not_so_little_pigs.png', isLegendary: true, cost: 7, isSpell: false },
   { id: 'tin_woodman', name: 'Tin Woodman', image: '/src/assets/cards/tin_woodman.png', isLegendary: false, cost: 4, isSpell: false },
   { id: 'trojan_horse', name: 'Trojan Horse', image: '/src/assets/cards/trojan_horse.png', isLegendary: false, cost: 4, isSpell: false },
@@ -227,6 +236,16 @@ export const cardDatabase: Card[] = [
   { id: 'ugly_duckling', name: 'Ugly Duckling', image: '/src/assets/cards/ugly_duckling.png', isLegendary: false, cost: 1, isSpell: false },
   { id: 'underworld_flare', name: 'Underworld Flare', image: '/src/assets/cards/underworld_flare.png', isLegendary: false, cost: 2, isSpell: true },
   { id: 'white_rabbit', name: 'White Rabbit', image: '/src/assets/cards/white_rabbit.png', isLegendary: false, cost: 1, isSpell: false },
+  // New cards
+  { id: 'tin_soldier', name: 'Tin Soldier', image: '/src/assets/cards/tin_soldier.png', isLegendary: false, cost: 1, isSpell: false },
+  { id: 'hansel_gretel', name: 'Hansel & Gretel', image: '/src/assets/cards/hansel_gretel.png', isLegendary: false, cost: 2, isSpell: false },
+  { id: 'beauty', name: 'Beauty', image: '/src/assets/cards/beauty.png', isLegendary: false, cost: 3, isSpell: false },
+  { id: 'wendy', name: 'Wendy', image: '/src/assets/cards/wendy.png', isLegendary: false, cost: 3, isSpell: false },
+  { id: 'baba_yaga', name: 'Baba Yaga', image: '/src/assets/cards/baba_yaga.png', isLegendary: false, cost: 4, isSpell: false },
+  { id: 'christopher', name: 'Christopher Robin', image: '/src/assets/cards/christopher.png', isLegendary: false, cost: 4, isSpell: false },
+  { id: 'wukong', name: 'Sun Wukong', image: '/src/assets/cards/wukong.png', isLegendary: true, cost: 4, isSpell: false },
+  { id: 'genie', name: 'Genie', image: '/src/assets/cards/genie.png', isLegendary: false, cost: 5, isSpell: false },
+  { id: 'paul_bunyan', name: 'Paul Bunyan', image: '/src/assets/cards/paul_bunyan.png', isLegendary: false, cost: 7, isSpell: false },
 ]
 
 // Generate all 13 draft choices with the specified logic

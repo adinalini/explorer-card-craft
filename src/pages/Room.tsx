@@ -95,7 +95,6 @@ const Room = () => {
   const [userSessionId] = useState(getUserSessionId())
   const [userRole, setUserRole] = useState<'creator' | 'joiner' | 'spectator'>('spectator')
   const [isStartingDraft, setIsStartingDraft] = useState(false)
-  const [isDraftStarting, setIsDraftStarting] = useState(false)
   const [draftStartTimeout, setDraftStartTimeout] = useState<NodeJS.Timeout | null>(null)
   const [backgroundAutoSelectTimeout, setBackgroundAutoSelectTimeout] = useState<NodeJS.Timeout | null>(null)
   const isProcessingRoundRef = useRef(false)
@@ -132,24 +131,6 @@ const Room = () => {
   const mirrorRevealTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const lastSelectionRef = useRef<{ round: number; count: number }>({ round: 0, count: 0 })
   const selectionInFlightRef = useRef(false)
-
-  // Refs to track current state values for realtime callbacks
-  const isStartingDraftRef = useRef(false)
-  const isDraftStartingRef = useRef(false)
-  const draftStartTimeoutRef = useRef<NodeJS.Timeout | null>(null)
-  
-  // Keep refs in sync with state
-  useEffect(() => {
-    isStartingDraftRef.current = isStartingDraft
-  }, [isStartingDraft])
-  
-  useEffect(() => {
-    isDraftStartingRef.current = isDraftStarting
-  }, [isDraftStarting])
-  
-  useEffect(() => {
-    draftStartTimeoutRef.current = draftStartTimeout
-  }, [draftStartTimeout])
 
   useEffect(() => {
     if (!room || room.status !== 'drafting' || room.draft_type !== 'triple') return
@@ -249,11 +230,6 @@ const Room = () => {
         currentRoundCards = roomCards.filter(card => 
           card.round_number === 1
         )
-        
-        // For mega draft, also check if it's our turn and auto-select
-        if (isMyTurn) {
-          autoSelectRandomCard()
-        }
       }
       
       const hasManualSelection = selectedCard || currentRoundCards.some(card => card.selected_by === userRole)
@@ -287,13 +263,8 @@ const Room = () => {
       const elapsed = (now.getTime() - roundStart.getTime()) / 1000
       
       let roundDuration = room.round_duration_seconds || 15
-      
-      // Handle different timer durations for different phases
-      if (room.draft_type === 'triple') {
-        roundDuration = room.triple_draft_phase === 2 ? 2 : 8 // 2 seconds for reveal, 8 for selection
-      } else if (room.draft_type === 'mega') {
-        roundDuration = room.triple_draft_phase === 2 ? 2 : 10 // 2 seconds for reveal, 10 for selection
-      }
+      if (room.draft_type === 'mega') roundDuration = 10
+      if (room.draft_type === 'triple') roundDuration = 8 // 8 seconds total for the round (both phases)
       
       const remaining = Math.max(0, roundDuration - elapsed)
       setTimeRemaining(Math.floor(remaining))
@@ -364,21 +335,6 @@ const Room = () => {
         fetchRoom()
       }
     }, 1000) // Retry after 1 second if room data is incomplete
-    
-    // Short polling window so creator promptly sees joiner and ready UI
-    const start = Date.now()
-    const pollInterval = setInterval(async () => {
-      const elapsed = Date.now() - start
-      if (elapsed > 10000) {
-        clearInterval(pollInterval)
-        return
-      }
-      if (!room || !room.joiner_name) {
-        await fetchRoom()
-      } else {
-        clearInterval(pollInterval)
-      }
-    }, 1000)
 
     // Add failsafe cleanup for stuck draft starting states
     const stuckStateCleanup = setInterval(() => {
@@ -415,12 +371,23 @@ const Room = () => {
             const role = getUserRole(updatedRoom, userSessionId)
             setUserRole(role)
             
-            // Simply log the update - React will handle re-renders automatically
-            console.log('🔧 ROOM UPDATE: Room data updated', {
-              joinerJoined: !room?.joiner_name && updatedRoom.joiner_name,
-              creatorReady: updatedRoom.creator_ready,
-              joinerReady: updatedRoom.joiner_ready
-            })
+            // CRITICAL FIX: Force a re-render when ready states change to ensure UI sync
+            if (room && (room.creator_ready !== updatedRoom.creator_ready || room.joiner_ready !== updatedRoom.joiner_ready)) {
+              console.log('🔧 ROOM SYNC: Ready states changed - forcing UI update')
+              // Force a re-render by updating a state that triggers UI refresh
+              setTimeRemaining(prev => prev) // This will trigger a re-render
+              
+              // Additional sync: Update room state immediately to ensure UI reflects changes
+              setRoom(updatedRoom)
+              
+              // CRITICAL FIX: Add a more robust sync mechanism
+              // Force a complete UI refresh by updating multiple state variables
+              setTimeout(() => {
+                console.log('🔧 ROOM SYNC: Forcing complete UI refresh')
+                setTimeRemaining(prev => prev + 0.001) // Minimal change to trigger re-render
+                setRoom(prev => ({ ...prev, ...updatedRoom })) // Force room state update
+              }, 100)
+            }
             
             // Handle triple draft phase transitions with debouncing
             if (updatedRoom.draft_type === 'triple' && updatedRoom.status === 'drafting') {
@@ -478,17 +445,17 @@ const Room = () => {
             if (updatedRoom.creator_ready && 
                 updatedRoom.joiner_ready && 
                 updatedRoom.status === 'waiting' && 
-                !isStartingDraftRef.current && 
-                !isDraftStartingRef.current && 
+                !isStartingDraft && 
+                !isDraftStarting && 
                 !isDraftAlreadyActive && 
-                !draftStartTimeoutRef.current) {
+                !draftStartTimeout) {
               
     console.log('🚀 ROOM UPDATE: Both players ready, starting draft countdown')
               
               // Cancel any existing draft start timeout to prevent race conditions
-              if (draftStartTimeoutRef.current) {
+              if (draftStartTimeout) {
                 console.log('🚀 ROOM UPDATE: Cancelling existing draft start timeout')
-                clearTimeout(draftStartTimeoutRef.current)
+                clearTimeout(draftStartTimeout)
                 setDraftStartTimeout(null)
               }
               
@@ -521,28 +488,22 @@ const Room = () => {
             } else if (isDraftAlreadyActive) {
               console.log('🚀 ROOM UPDATE: Draft already active, skipping countdown')
               // Clear any stale flags if draft is already active
-              if (isStartingDraftRef.current || isDraftStartingRef.current) {
+              if (isStartingDraft || isDraftStarting) {
                 setIsStartingDraft(false)
-                if (draftStartTimeoutRef.current) {
-                  clearTimeout(draftStartTimeoutRef.current)
+                if (draftStartTimeout) {
+                  clearTimeout(draftStartTimeout)
                   setDraftStartTimeout(null)
                 }
               }
-            } else if (isStartingDraftRef.current || isDraftStartingRef.current) {
+            } else if (isStartingDraft || isDraftStarting) {
               console.log('🚀 ROOM UPDATE: Draft start already in progress, ignoring duplicate trigger')
-            } else if (draftStartTimeoutRef.current) {
+            } else if (draftStartTimeout) {
               console.log('🚀 ROOM UPDATE: Draft timeout already running, ignoring duplicate trigger')
             }
           }
         }
       )
-      .subscribe((status) => {
-        if (status === 'CHANNEL_ERROR') {
-          console.warn('🔧 REALTIME: Channel error detected, falling back to polling')
-        } else if (status === 'SUBSCRIBED') {
-          console.log('🔧 REALTIME: Successfully subscribed to room changes')
-        }
-      })
+      .subscribe()
 
     // Subscribe to room cards changes
     const cardsChannel = supabase
@@ -596,7 +557,6 @@ const Room = () => {
       supabase.removeChannel(decksChannel)
       clearInterval(stuckStateCleanup)
       clearTimeout(roomDataRetry)
-      clearInterval(pollInterval)
       if (backgroundAutoSelectTimeout) {
         clearTimeout(backgroundAutoSelectTimeout)
       }
@@ -708,9 +668,9 @@ const Room = () => {
     console.log('🔘 READY: Current ready states - Creator:', room.creator_ready, 'Joiner:', room.joiner_ready)
     console.log('🔘 READY: User role:', userRole, 'Room status:', room.status)
     
-    // Prevent interaction if draft is already starting/active or room is not waiting
-    if (room.status !== 'waiting' || isStartingDraft || isDraftStarting) {
-      console.log('🔘 READY: Interaction blocked - draft starting or room not waiting')
+    // Prevent interaction once both are ready or if draft is already starting/active
+    if ((room.creator_ready && room.joiner_ready) || room.status !== 'waiting' || isStartingDraft || isDraftStarting) {
+      console.log('🔘 READY: Interaction blocked - both ready or draft active')
       return
     }
 
@@ -718,8 +678,6 @@ const Room = () => {
     const currentValue = userRole === 'creator' ? room.creator_ready : room.joiner_ready
     
     try {
-      // Proactively extend session to avoid a race with short expirations
-      await extendSession()
       console.log('🔘 READY: Updating ready status to:', !currentValue)
       
       // Create authenticated client to bypass RLS restrictions
@@ -734,32 +692,17 @@ const Room = () => {
         .maybeSingle()
 
       if (!existingSession) {
-        console.warn('🔘 READY: No valid session found for this role; attempting safe fallback update')
+        throw new Error(`No valid session found. Please refresh and try again.`)
       }
 
-      let updateError: any = null
-      let updateData: any = null
-      // Prefer session-bound client, but fall back to public client if validation failed
-      if (existingSession) {
-        const { data, error } = await supabaseWithToken
-          .from('rooms')
-          .update({ [updateField]: !currentValue })
-          .eq('id', roomId!)
-          .select()
-        updateData = data
-        updateError = error
-      } else {
-        const { data, error } = await supabase
-          .from('rooms')
-          .update({ [updateField]: !currentValue })
-          .eq('id', roomId!)
-          .select()
-        updateData = data
-        updateError = error
-      }
+      const { data: updateData, error } = await supabaseWithToken
+        .from('rooms')
+        .update({ [updateField]: !currentValue })
+        .eq('id', roomId!)
+        .select()
 
-      if (updateError) {
-        throw updateError
+      if (error) {
+        throw error
       }
       
       if (updateData && updateData.length === 0) {
@@ -777,6 +720,9 @@ const Room = () => {
       })
     }
   }
+
+  // Add a state to prevent multiple simultaneous draft starts
+  const [isDraftStarting, setIsDraftStarting] = useState(false)
 
   const startDraft = async (roomData?: Room) => {
     const currentRoom = roomData || room
@@ -834,12 +780,6 @@ const Room = () => {
           updateData.triple_draft_phase = 1
           updateData.triple_draft_first_pick = firstPick
           console.log(`🔷 TRIPLE: Starting with first pick: ${firstPick}`)
-        } else if (currentRoom.draft_type === 'mega') {
-          const firstPick = response?.firstPickPlayer || 'creator' // Use edge function result
-          updateData.triple_draft_phase = 1
-          updateData.first_pick_player = firstPick
-          updateData.mega_draft_turn_count = 0
-          console.log(`🔶 MEGA: Starting with first pick: ${firstPick}`)
         }
 
         console.log('🚀 START DRAFT: Updating room status to drafting')
@@ -867,9 +807,6 @@ const Room = () => {
         if (currentRoom.draft_type === 'triple') {
           const firstPick = response?.firstPickPlayer || 'creator'
           console.log(`🔷 TRIPLE: Starting with first pick: ${firstPick}`)
-        } else if (currentRoom.draft_type === 'mega') {
-          const firstPick = response?.firstPickPlayer || 'creator'
-          console.log(`🔶 MEGA: Starting with first pick: ${firstPick}`)
         }
       }
       
@@ -898,9 +835,9 @@ const Room = () => {
       return
     }
 
-    // For triple and mega draft, only auto-select if it's actually my turn
-    if ((room.draft_type === 'triple' || room.draft_type === 'mega') && !isMyTurn) {
-      console.log('🔹 DRAFT: Auto-select skipped - not my turn')
+    // For triple draft, only auto-select if it's actually my turn
+    if (room.draft_type === 'triple' && !isMyTurn) {
+      console.log('🔹 TRIPLE: Auto-select skipped - not my turn')
       return
     }
 
@@ -1092,7 +1029,12 @@ const Room = () => {
 
   const performAutoSelect = async (card: RoomCard) => {
     try {
-      console.log(`🔄 AUTO-SELECT: ${card.card_name} for ${userRole} in ${room?.draft_type} draft`)
+      console.log('🔄 AUTO-SELECT: Starting auto-select process')
+      console.log('🔄 AUTO-SELECT: Card:', card.card_id, card.card_name)
+      console.log('🔄 AUTO-SELECT: User Role:', userRole)
+      console.log('🔄 AUTO-SELECT: Current Round:', room?.current_round)
+      console.log('🔄 AUTO-SELECT: Draft Type:', room?.draft_type)
+      console.log('🔄 AUTO-SELECT: Triple Phase:', room?.triple_draft_phase)
       
       const supabaseWithToken = getSupabaseWithSession()
       
@@ -1156,8 +1098,12 @@ const Room = () => {
         .eq('round_number', room?.current_round)
         .not('selected_by', 'is', null)
       
+      console.log('🔄 AUTO-SELECT: All current selections:', allSelections)
+      
       setSelectedCard(card.card_id)
-      console.log(`✅ AUTO-SELECT: ${card.card_name} selected (${allSelections?.length || 0} total)`)
+      console.log('✅ AUTO-SELECT: Process completed successfully')
+      console.log('✅ AUTO-SELECT: Selected card:', card.card_name)
+      console.log('✅ AUTO-SELECT: Total selections now:', allSelections?.length || 0)
       
       // For triple draft, add additional logging about phase state
       if (room?.draft_type === 'triple') {
@@ -1257,26 +1203,11 @@ const Room = () => {
         console.log('🔍 ROUND 6 DEBUG - Joiner selected:', joinerSelected?.card_id || 'NONE')
       }
 
-      // For mega draft, check if current player has selected (only one player selects per turn)
-      if (room.draft_type === 'mega') {
-        const turnCount = room.mega_draft_turn_count || 0;
-        const firstPickPlayer = room.first_pick_player || 'creator';
-        const currentTurnPlayer = (turnCount % 2 === 0) ? firstPickPlayer : (firstPickPlayer === 'creator' ? 'joiner' : 'creator');
-        const currentPlayerSelected = selectedCards.find(card => card.selected_by === currentTurnPlayer);
-        
-        if (!currentPlayerSelected) {
-          console.log(`⏳ MEGA: Waiting for ${currentTurnPlayer} to select - Turn ${turnCount}`);
-          isProcessingRoundRef.current = false;
-          return;
-        }
-      } else {
-        // For other draft types, both players must have selected before proceeding  
-        if (!creatorSelected || !joinerSelected) {
-          console.log(`⏳ Waiting for selections - Creator: ${creatorSelected ? '✅' : '❌'}, Joiner: ${joinerSelected ? '✅' : '❌'}`)
-          isProcessingRoundRef.current = false
-          console.log('🟢 Setting isProcessingRound to false')
-          return
-        }
+      // Both players must have selected before proceeding
+      if (!creatorSelected || !joinerSelected) {
+        console.log(`⏳ Waiting for selections - Creator: ${creatorSelected ? '✅' : '❌'}, Joiner: ${joinerSelected ? '✅' : '❌'}`)
+        isProcessingRoundRef.current = false
+        return
       }
 
       const { data: existingDeckCards } = await supabaseWithToken
@@ -1289,25 +1220,11 @@ const Room = () => {
         existingDeckCards?.map(c => `${c.card_id}_${c.player_side}`) || []
       )
 
-      // For mega draft, only add the current turn player's card
-      let cardsToAdd = selectedCards;
-      if (room.draft_type === 'mega') {
-        const turnCount = room.mega_draft_turn_count || 0;
-        const firstPickPlayer = room.first_pick_player || 'creator';
-        const currentTurnPlayer = (turnCount % 2 === 0) ? firstPickPlayer : (firstPickPlayer === 'creator' ? 'joiner' : 'creator');
-        cardsToAdd = selectedCards.filter(card => card.selected_by === currentTurnPlayer);
-        console.log(`🎯 MEGA: Adding only ${currentTurnPlayer}'s card to deck (turn ${turnCount})`);
-      }
-
-      console.log(`💾 Adding ${cardsToAdd.length} cards to player decks...`)
-      for (const card of cardsToAdd) {
+      console.log(`💾 Adding ${selectedCards.length} cards to player decks...`)
+      for (const card of selectedCards) {
         const cardKey = `${card.card_id}_${card.selected_by}`
         
         if (!existingKeys.has(cardKey)) {
-          const selectionOrder = room.draft_type === 'mega' 
-            ? (room.mega_draft_turn_count || 0) + 1 
-            : currentRound
-          
           const { error: deckError } = await supabaseWithToken
             .from('player_decks')
             .insert({
@@ -1317,63 +1234,46 @@ const Room = () => {
               card_name: card.card_name,
               card_image: card.card_image,
               is_legendary: card.is_legendary,
-              selection_order: selectionOrder
+              selection_order: currentRound
             })
           
           if (deckError) {
             console.error('❌ Error adding card to deck:', deckError)
           } else {
-            console.log(`✅ Added ${card.card_id} to ${card.selected_by} deck with order ${selectionOrder}`)
+            console.log(`✅ Added ${card.card_id} to ${card.selected_by} deck`)
           }
         }
       }
 
       // Handle different draft types
       if (room.draft_type === 'mega') {
-        const currentTurn = room.mega_draft_turn_count || 0;
-        const newTurnCount = currentTurn + 1;
-        const isComplete = newTurnCount >= 26; // 13 picks each player (26 total)
-        
-        console.log(`🎯 MEGA: Processing turn ${currentTurn} -> ${newTurnCount}/26`)
+        // Mega draft: advance turn count and check completion
+        const newTurnCount = (room.mega_draft_turn_count || 0) + 1;
+        const isComplete = newTurnCount >= 24; // 12 picks each
+
+        console.log(`🎯 Mega draft turn ${newTurnCount}/24`)
         
         if (isComplete) {
-          console.log('🏁 MEGA: All turns completed, finishing draft')
-          const { error: finishError } = await supabaseWithToken
+          console.log('🏁 Mega draft complete - setting status to completed')
+          await supabaseWithToken
             .from('rooms')
             .update({ status: 'completed' })
             .eq('id', roomId)
-            
-          if (finishError) {
-            console.error('❌ MEGA: Error finishing draft:', finishError)
-          }
         } else {
-          console.log(`🔄 MEGA: Advancing to turn ${newTurnCount}`)
-          
-          // Clear selections for next turn
-          const { error: clearError } = await supabaseWithToken
-            .from('room_cards')
-            .update({ selected_by: null })
-            .eq('room_id', roomId)
-            .eq('round_number', 1)
-            
-          if (clearError) {
-            console.error('❌ MEGA: Error clearing selections:', clearError)
-          }
-          
-          // Update room to next turn
+          // Continue mega draft
+          const nextRoundStartTime = new Date().toISOString()
           const { error: updateError } = await supabaseWithToken
             .from('rooms')
             .update({ 
               mega_draft_turn_count: newTurnCount,
-              triple_draft_phase: 1,
-              round_start_time: new Date().toISOString()
+              round_start_time: nextRoundStartTime
             })
             .eq('id', roomId)
-            
+          
           if (updateError) {
-            console.error('❌ MEGA: Error updating room:', updateError)
+            console.error('❌ Error updating mega draft turn:', updateError)
           } else {
-            console.log(`✅ MEGA: Successfully advanced to turn ${newTurnCount}`)
+            console.log(`✅ Successfully advanced to mega draft turn ${newTurnCount}`)
           }
         }
       } else if (room.draft_type === 'triple') {
@@ -1554,62 +1454,6 @@ const Room = () => {
           console.log('🔷 TRIPLE PHASE END: 🎯 Using first selection:', firstSelection.card_id, 'by', firstSelection.selected_by)
         }
         
-        // Handle mega draft differently - add only current turn player's card and advance turn
-        if (room.draft_type === 'mega') {
-          const firstPickPlayer = room.first_pick_player || 'creator'
-          const turnCount = room.mega_draft_turn_count || 0
-          const currentTurnPlayer = (turnCount % 2 === 0) ? firstPickPlayer : (firstPickPlayer === 'creator' ? 'joiner' : 'creator')
-          const currentPlayerCard = selectedCards.find(c => c.selected_by === currentTurnPlayer)
-          
-          if (currentPlayerCard) {
-            console.log('🔶 MEGA: Adding current turn card to deck:', currentPlayerCard.card_id, 'by', currentPlayerCard.selected_by)
-            
-            // Add card to deck
-            try {
-              const { data: existingDeck } = await supabaseWithToken
-                .from('player_decks')
-                .select('card_id')
-                .eq('room_id', roomId)
-                .eq('card_id', currentPlayerCard.card_id)
-                .eq('player_side', currentPlayerCard.selected_by)
-                .eq('selection_order', turnCount + 1)
-              
-              if (!existingDeck || existingDeck.length === 0) {
-                await supabaseWithToken
-                  .from('player_decks')
-                  .insert({
-                    room_id: roomId,
-                    card_id: currentPlayerCard.card_id,
-                    card_name: currentPlayerCard.card_name,
-                    player_side: currentPlayerCard.selected_by as 'creator' | 'joiner',
-                    selection_order: turnCount + 1,
-                    is_legendary: currentPlayerCard.is_legendary,
-                    card_image: currentPlayerCard.card_image
-                  })
-                console.log('🔶 MEGA: Card added to deck successfully')
-              }
-            } catch (error) {
-              console.error('🔶 MEGA: Error adding card to deck:', error)
-            }
-            
-            // Advance turn count and update database
-            const nextTurnCount = turnCount + 1
-            const nextPhase = nextTurnCount >= 26 ? 2 : 1 // Switch to reveal phase after 26 cards
-            
-            await supabaseWithToken
-              .from('rooms')
-              .update({
-                mega_draft_turn_count: nextTurnCount,
-                triple_draft_phase: nextPhase,
-                round_start_time: new Date().toISOString()
-              })
-              .eq('id', roomId)
-            
-            console.log(`🔶 MEGA: Turn advanced to ${nextTurnCount}, phase ${nextPhase}`)
-          }
-          return
-        }
-
         // Add phase 1 selected card to player deck: must be the first pick player's selection
         const firstPickPlayer = (room.triple_draft_first_pick as 'creator' | 'joiner')
         const phase1Card = selectedCards.find(c => c.selected_by === firstPickPlayer)
@@ -1677,15 +1521,16 @@ const Room = () => {
           console.error('🔷 TRIPLE: Error adding phase 1 card to deck:', error)
         }
         
-        // CRITICAL FIX: DO NOT reset round_start_time for Phase 2
-        // Keep using the same round start time so the total round time is consistent
-        console.log('🔷 TRIPLE PHASE END: 📋 Moving to Phase 2 without resetting timer')
+        // Move to phase 2 immediately without additional reveal
+        // CRITICAL FIX: Set a proper Phase 2 start time to fix timer calculation
+        const phase2StartTime = new Date().toISOString()
+        console.log('🔷 TRIPLE PHASE END: 🕐 Setting Phase 2 start time:', phase2StartTime)
         
         const { data: phaseUpdateResult, error: phaseUpdateError } = await supabaseWithToken
           .from('rooms')
           .update({ 
-            triple_draft_phase: 2
-            // DO NOT update round_start_time - keep the original time
+            triple_draft_phase: 2,
+            round_start_time: phase2StartTime // CRITICAL FIX: Update start time for Phase 2
           })
           .eq('id', roomId)
           .select()
@@ -2026,20 +1871,17 @@ const Room = () => {
           handleTriplePhaseEnd()
         }, 2000)
       } else if (room?.draft_type === 'mega') {
-        // For mega draft, show reveal then process turn end
-        console.log('🔷 MEGA: Card selected, processing turn')
+        // For mega draft, immediately lock and start reveal phase
         setIsSelectionLocked(true)
         setShowReveal(true)
-        setIsRevealing(true)
         
-        // After 2 seconds, process the turn end
-        setTimeout(() => {
-          setShowReveal(false)
-          setIsRevealing(false)
-          if (userRole === 'creator' && !isProcessingRoundRef.current) {
-            processRoundEnd()
-          }
-        }, 2000)
+        if (userRole === 'creator' && !isProcessingRoundRef.current) {
+          setTimeout(() => {
+            if (!isProcessingRoundRef.current) {
+              processRoundEnd()
+            }
+          }, 1500) // Shorter delay for mega draft
+        }
       }
     } catch (error) {
       if (room?.draft_type === 'triple') {
@@ -2094,25 +1936,9 @@ const Room = () => {
     }
   }
 
-  // Determine current turn for all draft types
+  // Determine current turn for triple draft
   const isMyTurn = (() => {
     if (!room || room.status !== 'drafting') return false
-    
-    if (room.draft_type === 'mega') {
-      // For mega draft, only allow picking in phase 1 (selection phase)
-      const currentPhase = room.triple_draft_phase || 1
-      if (currentPhase !== 1) return false // Phase 2 is reveal only
-      
-      // Determine turn based on first_pick_player and turn count
-      const firstPickPlayer = room.first_pick_player || 'creator'
-      const turnCount = room.mega_draft_turn_count || 0
-      
-      // Alternating picks: first player starts, then alternates each turn
-      // Turn 0: first pick player, Turn 1: other player, Turn 2: first pick player, etc.
-      const currentTurnPlayer = (turnCount % 2 === 0) ? firstPickPlayer : (firstPickPlayer === 'creator' ? 'joiner' : 'creator')
-      return currentTurnPlayer === userRole
-    }
-    
     if (room.draft_type !== 'triple') return true
     
     const currentPhase = room.triple_draft_phase || 1
@@ -2232,7 +2058,7 @@ const Room = () => {
                     variant={room.creator_ready ? "secondary" : "default"}
                     size="lg"
                     className="px-8 py-4 text-lg"
-                    disabled={userRole !== 'creator' || room.status !== 'waiting' || isStartingDraft || isDraftStarting}
+                    disabled={userRole !== 'creator' || (room.creator_ready && room.joiner_ready)}
                   >
                     {room.creator_ready ? "Ready ✓" : "Ready?"}
                   </Button>
@@ -2250,7 +2076,7 @@ const Room = () => {
                     variant={room.joiner_ready ? "secondary" : "default"}
                     size="lg"
                     className="px-8 py-4 text-lg"
-                    disabled={userRole !== 'joiner' || room.status !== 'waiting' || isStartingDraft || isDraftStarting}
+                    disabled={userRole !== 'joiner' || (room.creator_ready && room.joiner_ready)}
                   >
                     {room.joiner_ready ? "Ready ✓" : "Ready?"}
                   </Button>
@@ -2446,7 +2272,7 @@ const Room = () => {
                   <div className="flex justify-between items-center max-w-4xl mx-auto">
                     <h2 className="text-2xl font-bold text-black">Mega Draft</h2>
                     <div className="text-lg font-semibold text-primary">
-                      Progress: {Math.min((room.mega_draft_turn_count || 0), 26)}/26 cards selected
+                      Progress: {Math.min((room.mega_draft_turn_count || 0) + 1, 23)}/23 cards selected
                     </div>
                   </div>
                   <div className="space-y-4">
@@ -2497,7 +2323,6 @@ const Room = () => {
                   selectedCard={selectedCard}
                   userRole={userRole}
                   isMyTurn={isMyTurn}
-                  isRevealPhase={room.triple_draft_phase === 2}
                   onCardSelect={handleCardSelect}
                 />
               </div>

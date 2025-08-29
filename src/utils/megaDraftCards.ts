@@ -93,14 +93,6 @@ export const generateMegaDraftCards = (usedCardIds: string[]): Card[] => {
     return a.name.localeCompare(b.name)
   })
   
-  // Sort legendary cards by cost then name
-  legendaries.sort((a, b) => {
-    if (a.cost !== b.cost) {
-      return (a.cost || 0) - (b.cost || 0)
-    }
-    return a.name.localeCompare(b.name)
-  })
-  
   // Return array with non-legendaries first (33 cards) then legendaries (3 cards) at the end
   return [...nonLegendaryCards, ...legendaries]
 }

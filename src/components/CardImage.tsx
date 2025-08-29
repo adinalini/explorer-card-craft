@@ -113,17 +113,6 @@ import whiterabbitImg from '@/assets/cards/white_rabbit.png'
 import wickedwitchofthewestImg from '@/assets/cards/wicked_witch_of_the_west.png'
 import zorroImg from '@/assets/cards/zorro.png'
 
-// Import new cards
-import tinsoldierImg from '@/assets/cards/tin_soldier.png'
-import hanselgretelImg from '@/assets/cards/hansel_gretel.png'
-import beautyImg from '@/assets/cards/beauty.png'
-import wendyImg from '@/assets/cards/wendy.png'
-import babayagaImg from '@/assets/cards/baba_yaga.png'
-import christopherImg from '@/assets/cards/christopher.png'
-import wukongImg from '@/assets/cards/wukong.png'
-import genieImg from '@/assets/cards/genie.png'
-import paulbunyanImg from '@/assets/cards/paul_bunyan.png'
-
 const cardImages: Record<string, string> = {
   'ali_baba': alibabaImg,
   'alice': aliceImg,
@@ -236,16 +225,6 @@ const cardImages: Record<string, string> = {
   'white_rabbit': whiterabbitImg,
   'wicked_witch_of_the_west': wickedwitchofthewestImg,
   'zorro': zorroImg,
-  // Add new cards to mapping
-  'tin_soldier': tinsoldierImg,
-  'hansel_gretel': hanselgretelImg,
-  'beauty': beautyImg,
-  'wendy': wendyImg,
-  'baba_yaga': babayagaImg,
-  'christopher': christopherImg,
-  'wukong': wukongImg,
-  'genie': genieImg,
-  'paul_bunyan': paulbunyanImg,
 }
 
 interface CardImageProps {

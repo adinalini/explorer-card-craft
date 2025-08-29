@@ -415,33 +415,12 @@ const Room = () => {
             const role = getUserRole(updatedRoom, userSessionId)
             setUserRole(role)
             
-            // CRITICAL FIX: Force a re-render when ready states change to ensure UI sync
-            if (room && (room.creator_ready !== updatedRoom.creator_ready || room.joiner_ready !== updatedRoom.joiner_ready)) {
-              console.log('🔧 ROOM SYNC: Ready states changed - forcing UI update')
-              // Force a re-render by updating a state that triggers UI refresh
-              setTimeRemaining(prev => prev) // This will trigger a re-render
-              
-              // Additional sync: Update room state immediately to ensure UI reflects changes
-              setRoom(updatedRoom)
-              
-              // CRITICAL FIX: Add a more robust sync mechanism
-               // Force a complete UI refresh by updating multiple state variables
-               setTimeout(() => {
-                 console.log('🔧 ROOM SYNC: Forcing complete UI refresh')
-                 setTimeRemaining(prev => prev + 0.001) // Minimal change to trigger re-render
-                 setRoom(prev => ({ ...prev, ...updatedRoom })) // Force room state update
-               }, 100)
-             }
-             
-              // CRITICAL FIX: Force a re-render when joiner joins to show ready buttons
-              if (room && !room.joiner_name && updatedRoom.joiner_name) {
-                console.log('🔧 ROOM SYNC: Joiner joined - forcing UI update to show ready buttons')
-                // Force immediate state update and trigger re-render
-                setRoom({ ...updatedRoom })
-                // Also force a component re-render by updating loading state briefly
-                setLoading(true)
-                setTimeout(() => setLoading(false), 10)
-              }
+            // Simply log the update - React will handle re-renders automatically
+            console.log('🔧 ROOM UPDATE: Room data updated', {
+              joinerJoined: !room?.joiner_name && updatedRoom.joiner_name,
+              creatorReady: updatedRoom.creator_ready,
+              joinerReady: updatedRoom.joiner_ready
+            })
             
             // Handle triple draft phase transitions with debouncing
             if (updatedRoom.draft_type === 'triple' && updatedRoom.status === 'drafting') {
@@ -729,9 +708,9 @@ const Room = () => {
     console.log('🔘 READY: Current ready states - Creator:', room.creator_ready, 'Joiner:', room.joiner_ready)
     console.log('🔘 READY: User role:', userRole, 'Room status:', room.status)
     
-    // Prevent interaction once both are ready or if draft is already starting/active
-    if ((room.creator_ready && room.joiner_ready) || room.status !== 'waiting' || isStartingDraft || isDraftStarting) {
-      console.log('🔘 READY: Interaction blocked - both ready or draft active')
+    // Prevent interaction if draft is already starting/active or room is not waiting
+    if (room.status !== 'waiting' || isStartingDraft || isDraftStarting) {
+      console.log('🔘 READY: Interaction blocked - draft starting or room not waiting')
       return
     }
 
@@ -2254,7 +2233,7 @@ const Room = () => {
                     variant={room.creator_ready ? "secondary" : "default"}
                     size="lg"
                     className="px-8 py-4 text-lg"
-                    disabled={userRole !== 'creator' || isStartingDraft || isDraftStarting}
+                    disabled={userRole !== 'creator' || room.status !== 'waiting' || isStartingDraft || isDraftStarting}
                   >
                     {room.creator_ready ? "Ready ✓" : "Ready?"}
                   </Button>
@@ -2272,7 +2251,7 @@ const Room = () => {
                     variant={room.joiner_ready ? "secondary" : "default"}
                     size="lg"
                     className="px-8 py-4 text-lg"
-                    disabled={userRole !== 'joiner' || isStartingDraft || isDraftStarting}
+                    disabled={userRole !== 'joiner' || room.status !== 'waiting' || isStartingDraft || isDraftStarting}
                   >
                     {room.joiner_ready ? "Ready ✓" : "Ready?"}
                   </Button>

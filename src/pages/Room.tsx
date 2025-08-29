@@ -290,7 +290,7 @@ const Room = () => {
       
       // Handle different timer durations for different phases
       if (room.draft_type === 'triple') {
-        roundDuration = room.triple_draft_phase === 2 ? 2 : 10 // 2 seconds for reveal, 10 for selection
+        roundDuration = room.triple_draft_phase === 2 ? 2 : 8 // 2 seconds for reveal, 8 for selection
       } else if (room.draft_type === 'mega') {
         roundDuration = room.triple_draft_phase === 2 ? 2 : 10 // 2 seconds for reveal, 10 for selection
       }
@@ -1677,16 +1677,15 @@ const Room = () => {
           console.error('🔷 TRIPLE: Error adding phase 1 card to deck:', error)
         }
         
-        // Move to phase 2 immediately without additional reveal
-        // CRITICAL FIX: Set a proper Phase 2 start time to fix timer calculation
-        const phase2StartTime = new Date().toISOString()
-        console.log('🔷 TRIPLE PHASE END: 🕐 Setting Phase 2 start time:', phase2StartTime)
+        // CRITICAL FIX: DO NOT reset round_start_time for Phase 2
+        // Keep using the same round start time so the total round time is consistent
+        console.log('🔷 TRIPLE PHASE END: 📋 Moving to Phase 2 without resetting timer')
         
         const { data: phaseUpdateResult, error: phaseUpdateError } = await supabaseWithToken
           .from('rooms')
           .update({ 
-            triple_draft_phase: 2,
-            round_start_time: phase2StartTime // CRITICAL FIX: Update start time for Phase 2
+            triple_draft_phase: 2
+            // DO NOT update round_start_time - keep the original time
           })
           .eq('id', roomId)
           .select()

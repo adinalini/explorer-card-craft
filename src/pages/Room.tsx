@@ -2,8 +2,7 @@ import { useState, useEffect, useRef } from "react"
 import { useParams, useNavigate } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import { WaveDivider } from "@/components/ui/wave-divider"
-import { supabase, getSupabaseWithSession } from "@/integrations/supabase/client"
-import { createClient } from '@supabase/supabase-js'
+import { supabase, getSupabaseWithSession, extendSessionExpiry, recoverStuckRoom } from "@/integrations/supabase/client"
 import { toast } from "@/hooks/use-toast"
 import { DraftCard } from "@/components/DraftCard"
 import { DeckDisplay } from "@/components/DeckDisplay"
@@ -106,23 +105,52 @@ const Room = () => {
   const [nextRoundImageUrls, setNextRoundImageUrls] = useState<string[]>([])
   useImagePreloader(nextRoundImageUrls, nextRoundImageUrls.length > 0)
 
+  // Enhanced session management with heartbeat and recovery
   const extendSession = async () => {
     const sessionId = sessionStorage.getItem('userSessionId')
     if (!sessionId) return
     
     try {
-      const supabaseWithToken = getSupabaseWithSession()
-      await supabaseWithToken.rpc('extend_session_expiry', { 
-        session_token_param: sessionId 
-      })
+      await extendSessionExpiry()
+      console.log('🔄 Session extended via heartbeat')
     } catch (error) {
-      console.error('Failed to extend session:', error)
+      console.error('🔴 Failed to extend session:', error)
+      
+      // If session extension fails, attempt room recovery
+      if (roomId && room?.status === 'drafting') {
+        console.log('🔧 Attempting room recovery due to session failure')
+        const recovery = await recoverStuckRoom(roomId)
+        if (recovery.recovered) {
+          toast({
+            title: "Room Recovered",
+            description: "The room was recovered from a stuck state",
+          })
+          // Refetch room data after recovery
+          fetchRoom()
+        }
+      }
     }
   }
+
+  // Heartbeat mechanism - extends session every 2 minutes during active gameplay
+  useEffect(() => {
+    if (!room || room.status !== 'drafting') return
+
+    const heartbeatInterval = setInterval(async () => {
+      console.log('💓 Session heartbeat - extending during active gameplay')
+      await extendSession()
+    }, 120000) // Every 2 minutes
+
+    return () => {
+      clearInterval(heartbeatInterval)
+    }
+  }, [room?.status, roomId])
+
   const [timeRemaining, setTimeRemaining] = useState<number>(0)
   
   const timerIntervalRef = useRef<NodeJS.Timeout | null>(null)
   const fetchCardsTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const timeUpProcessingRef = useRef(false) // Prevent multiple time-up calls
 
   const [showReveal, setShowReveal] = useState(false)
   
@@ -250,7 +278,7 @@ const Room = () => {
     }
   }
 
-  // Centralized timer effect for all draft types
+  // Enhanced centralized timer effect with error recovery and race condition prevention
   useEffect(() => {
     if (!room || room.status !== 'drafting' || !room.round_start_time) {
       setTimeRemaining(0)
@@ -258,37 +286,83 @@ const Room = () => {
     }
 
     const updateTimer = () => {
-      const now = new Date()
-      const roundStart = new Date(room.round_start_time)
-      const elapsed = (now.getTime() - roundStart.getTime()) / 1000
-      
-      let roundDuration = room.round_duration_seconds || 15
-      if (room.draft_type === 'mega') roundDuration = 10
-      if (room.draft_type === 'triple') roundDuration = 8 // 8 seconds total for the round (both phases)
-      
-      const remaining = Math.max(0, roundDuration - elapsed)
-      setTimeRemaining(Math.floor(remaining))
-      
-      // CRITICAL FIX: For triple draft, timer should NOT reset during phase transitions
-      // The timer continues from the same round_start_time for both phases
-      if (remaining <= 0 && !isProcessingRoundRef.current) {
-        handleTimeUp()
+      try {
+        const now = new Date()
+        const roundStart = new Date(room.round_start_time)
+        
+        // Validate date objects
+        if (isNaN(roundStart.getTime())) {
+          console.error('🔴 Invalid round start time:', room.round_start_time)
+          return
+        }
+        
+        const elapsed = (now.getTime() - roundStart.getTime()) / 1000
+        
+        let roundDuration = room.round_duration_seconds || 15
+        if (room.draft_type === 'mega') roundDuration = 10
+        if (room.draft_type === 'triple') roundDuration = 8 // 8 seconds total for the round (both phases)
+        
+        const remaining = Math.max(0, roundDuration - elapsed)
+        setTimeRemaining(Math.floor(remaining))
+        
+        // Enhanced time-up handling with race condition prevention
+        if (remaining <= 0 && !isProcessingRoundRef.current) {
+          // Add debounce mechanism to prevent multiple time-up calls
+          if (!timeUpProcessingRef.current) {
+            timeUpProcessingRef.current = true
+            console.log('⏰ Timer expired - handling time up with debounce')
+            
+            setTimeout(() => {
+              if (!isProcessingRoundRef.current) {
+                handleTimeUp()
+              }
+              timeUpProcessingRef.current = false
+            }, 100) // Small delay to prevent race conditions
+          }
+        }
+      } catch (error) {
+        console.error('🔴 Timer update error:', error)
+        // Attempt to recover by refetching room data
+        if (roomId) {
+          console.log('🔧 Attempting timer recovery by refetching room data')
+          fetchRoom()
+        }
       }
     }
 
-    // Initial calculation
-    updateTimer()
+    // Initial calculation with error handling
+    try {
+      updateTimer()
+    } catch (error) {
+      console.error('🔴 Initial timer calculation failed:', error)
+    }
 
-    // Set up interval
+    // Set up interval with enhanced error recovery
     if (timerIntervalRef.current) {
       clearInterval(timerIntervalRef.current)
     }
-    timerIntervalRef.current = setInterval(updateTimer, 1000)
+    
+    timerIntervalRef.current = setInterval(() => {
+      try {
+        updateTimer()
+      } catch (error) {
+        console.error('🔴 Timer interval error:', error)
+        // Clear broken interval and attempt reconnection
+        if (timerIntervalRef.current) {
+          clearInterval(timerIntervalRef.current)
+          timerIntervalRef.current = null
+        }
+      }
+    }, 1000)
 
     return () => {
       if (timerIntervalRef.current) {
         clearInterval(timerIntervalRef.current)
         timerIntervalRef.current = null
+      }
+      // Clear debounce flag
+      if (timeUpProcessingRef.current) {
+        timeUpProcessingRef.current = false
       }
     }
   }, [room?.status, room?.current_round, room?.draft_type, room?.round_start_time, isSelectionLocked])

@@ -5,92 +5,45 @@ import type { Database } from './types';
 const SUPABASE_URL = "https://ophgbcyhxvwljfztlvyu.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9waGdiY3loeHZ3bGpmenRsdnl1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQzMzU4NzYsImV4cCI6MjA2OTkxMTg3Nn0.iiiRP6WtGtwI_jJDnAJUqmEZcoNUbYT3HiBl3VuBnKs";
 
-// Main Supabase client - handles auth and general operations
+// Import the supabase client like this:
+// import { supabase } from "@/integrations/supabase/client";
+
 export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
   auth: {
     storage: localStorage,
     persistSession: true,
     autoRefreshToken: true,
     detectSessionInUrl: false, // Suppress GoTrueClient warnings
-    storageKey: 'supabase.auth.token', // Unique storage key
   }
 });
 
-// Session-aware client for game operations - uses different storage key to prevent conflicts
-let sessionClient: ReturnType<typeof createClient<Database>> | null = null;
+// Cached client instance with session headers
+let supabaseWithSessionClient: ReturnType<typeof createClient<Database>> | null = null;
 let currentSessionToken = '';
 
+// Helper function to create a supabase client with session token headers
 export const getSupabaseWithSession = () => {
+  // Get current session token
   const sessionToken = typeof window !== 'undefined' ? sessionStorage.getItem('userSessionId') || '' : '';
   
-  // Create new client only if session token changed or no client exists
-  if (!sessionClient || currentSessionToken !== sessionToken) {
+  // Only create new client if session token changed or no client exists
+  if (!supabaseWithSessionClient || currentSessionToken !== sessionToken) {
     currentSessionToken = sessionToken;
     
-    sessionClient = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+    supabaseWithSessionClient = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
       auth: {
-        storage: {
-          // Use a different storage implementation to prevent conflicts
-          getItem: () => null,
-          setItem: () => {},
-          removeItem: () => {},
-        },
-        persistSession: false,
-        autoRefreshToken: false,
-        detectSessionInUrl: false,
-        storageKey: 'supabase.session.token', // Different storage key
+        storage: localStorage,
+        persistSession: false, // Disable session persistence to avoid conflicts
+        autoRefreshToken: false, // Disable auto refresh to avoid conflicts
+        detectSessionInUrl: false, // Suppress GoTrueClient warnings
       },
       global: {
-        headers: sessionToken ? {
+        headers: {
           'x-session-token': sessionToken
-        } : {}
+        }
       }
     });
   }
   
-  return sessionClient;
-};
-
-// Helper for extending session expiry during active gameplay
-export const extendSessionExpiry = async () => {
-  const sessionToken = typeof window !== 'undefined' ? sessionStorage.getItem('userSessionId') || '' : '';
-  if (!sessionToken) return;
-
-  try {
-    await supabase.rpc('extend_session_expiry', { session_token_param: sessionToken });
-    console.log('🔄 Session extended successfully');
-  } catch (error) {
-    console.error('🔴 Failed to extend session:', error);
-  }
-};
-
-// Room recovery function to handle stuck rooms with expired sessions
-export const recoverStuckRoom = async (roomId: string) => {
-  try {
-    console.log('🔧 Attempting room recovery for:', roomId);
-    
-    // Check if room has any active sessions
-    const { data: sessions } = await supabase
-      .from('game_sessions')
-      .select('*')
-      .eq('room_id', roomId)
-      .gt('expires_at', new Date().toISOString());
-
-    if (!sessions || sessions.length === 0) {
-      console.log('🚨 Room has no active sessions, marking as abandoned');
-      
-      // Update room status to completed if no active sessions
-      await supabase
-        .from('rooms')
-        .update({ status: 'completed' })
-        .eq('id', roomId);
-        
-      return { recovered: true, reason: 'No active sessions' };
-    }
-    
-    return { recovered: false, reason: 'Room has active sessions' };
-  } catch (error) {
-    console.error('🔴 Room recovery failed:', error);
-    return { recovered: false, reason: 'Recovery failed', error };
-  }
+  return supabaseWithSessionClient;
 };

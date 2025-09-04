@@ -61,7 +61,7 @@ export function DeckCodeDisplay({ cardIds, className = "" }: DeckCodeDisplayProp
 
   if (generating) {
     return (
-      <Button disabled size="sm" variant="outline" className={`shrink-0 ${className}`}>
+      <Button disabled size="sm" variant="ghost" className={`shrink-0 text-muted-foreground hover:text-muted-foreground/80 ${className}`}>
         <Copy className="h-4 w-4" />
       </Button>
     )
@@ -75,8 +75,8 @@ export function DeckCodeDisplay({ cardIds, className = "" }: DeckCodeDisplayProp
     <Button 
       onClick={handleCopy}
       size="sm" 
-      variant="outline"
-      className={`shrink-0 ${className}`}
+      variant="ghost"
+      className={`shrink-0 text-muted-foreground hover:text-muted-foreground/80 ${className}`}
       title="Copy deck code"
     >
       {copied ? (

@@ -50,15 +50,7 @@ export function DeckDisplay({ cards, playerName, isOwn, isDraftComplete = false 
         {/* Deck List - Left side for creator, Right side for opponent */}
         {isOwn && (
           <div className={`space-y-1 ${isDraftComplete ? 'w-40' : 'w-32'}`}>
-            <div className="flex items-center justify-between mb-2">
-              <h4 className={`font-semibold text-muted-foreground ${isDraftComplete ? 'text-base' : 'text-sm'}`}>Deck List</h4>
-              {isDraftComplete && cards.length > 0 && (
-                <DeckCodeDisplay 
-                  cardIds={cards.map(card => card.card_id)} 
-                  className="ml-2"
-                />
-              )}
-            </div>
+            <h4 className={`font-semibold text-muted-foreground mb-2 ${isDraftComplete ? 'text-base' : 'text-sm'}`}>Deck List</h4>
             <div className={`space-y-0.5 ${isDraftComplete ? 'h-[calc(8.4rem+28.8rem)] max-h-[37.2rem]' : 'h-[calc(7rem+24rem)] max-h-[31rem]'}`}>
               {legendaryCard && (
                 <div className={`text-yellow-600 font-medium border-l-2 border-yellow-500 pl-2 py-0.5 leading-tight ${isDraftComplete ? 'text-xs' : 'text-[10px]'}`}>
@@ -70,39 +62,49 @@ export function DeckDisplay({ cards, playerName, isOwn, isDraftComplete = false 
                     {card.card_name}
                   </div>
                 ))}
-                {/* Empty slots */}
-                {Array.from({ length: 12 - normalCards.length }).map((_, index) => (
-                  <div key={`empty-${index}`} className={`text-muted/50 border-l-2 border-dashed border-muted/50 pl-2 py-0.5 leading-tight ${isDraftComplete ? 'text-xs' : 'text-[10px]'}`}>
-                    —
-                  </div>
-                ))}
-            </div>
-          </div>
-        )}
+                 {/* Empty slots */}
+                 {Array.from({ length: 12 - normalCards.length }).map((_, index) => (
+                   <div key={`empty-${index}`} className={`text-muted/50 border-l-2 border-dashed border-muted/50 pl-2 py-0.5 leading-tight ${isDraftComplete ? 'text-xs' : 'text-[10px]'}`}>
+                     —
+                   </div>
+                 ))}
+               </div>
+               
+               {/* Deck Code Section */}
+               {isDraftComplete && cards.length > 0 && (
+                 <div className="mt-3 space-y-1">
+                   <h5 className={`font-semibold text-muted-foreground ${isDraftComplete ? 'text-sm' : 'text-xs'}`}>Deck Code</h5>
+                   <DeckCodeDisplay 
+                     cardIds={cards.map(card => card.card_id)} 
+                   />
+                 </div>
+               )}
+             </div>
+           )}
 
-        {/* Deck List - Left side for opponent (when viewing opponent) */}
-        {!isOwn && (
-          <div className={`space-y-1 ${isDraftComplete ? 'w-40' : 'w-32'}`}>
-            <h4 className={`font-semibold text-muted-foreground mb-2 ${isDraftComplete ? 'text-base' : 'text-sm'}`}>Deck List</h4>
-            <div className={`space-y-0.5 ${isDraftComplete ? 'h-[calc(8.4rem+28.8rem)] max-h-[37.2rem]' : 'h-[calc(7rem+24rem)] max-h-[31rem]'}`}>
-              {legendaryCard && (
-                <div className={`text-yellow-600 font-medium border-l-2 border-yellow-500 pl-2 py-0.5 leading-tight ${isDraftComplete ? 'text-xs' : 'text-[10px]'}`}>
-                  {legendaryCard.card_name}
-                </div>
-              )}
-               {normalCards.map((card, index) => (
-                  <div key={index} className={`text-muted-foreground border-l-2 border-muted pl-2 py-0.5 leading-tight ${isDraftComplete ? 'text-xs' : 'text-[10px]'}`}>
-                    {card.card_name}
-                  </div>
-                ))}
-                {/* Empty slots */}
-                {Array.from({ length: 12 - normalCards.length }).map((_, index) => (
-                  <div key={`empty-${index}`} className={`text-muted/50 border-l-2 border-dashed border-muted/50 pl-2 py-0.5 leading-tight ${isDraftComplete ? 'text-xs' : 'text-[10px]'}`}>
-                    —
-                  </div>
-                ))}
-            </div>
-          </div>
+           {/* Deck List - Left side for opponent (when viewing opponent) */}
+           {!isOwn && (
+             <div className={`space-y-1 ${isDraftComplete ? 'w-40' : 'w-32'}`}>
+               <h4 className={`font-semibold text-muted-foreground mb-2 ${isDraftComplete ? 'text-base' : 'text-sm'}`}>Deck List</h4>
+               <div className={`space-y-0.5 ${isDraftComplete ? 'h-[calc(8.4rem+28.8rem)] max-h-[37.2rem]' : 'h-[calc(7rem+24rem)] max-h-[31rem]'}`}>
+                 {legendaryCard && (
+                   <div className={`text-yellow-600 font-medium border-l-2 border-yellow-500 pl-2 py-0.5 leading-tight ${isDraftComplete ? 'text-xs' : 'text-[10px]'}`}>
+                     {legendaryCard.card_name}
+                   </div>
+                 )}
+                  {normalCards.map((card, index) => (
+                     <div key={index} className={`text-muted-foreground border-l-2 border-muted pl-2 py-0.5 leading-tight ${isDraftComplete ? 'text-xs' : 'text-[10px]'}`}>
+                       {card.card_name}
+                     </div>
+                   ))}
+                   {/* Empty slots */}
+                   {Array.from({ length: 12 - normalCards.length }).map((_, index) => (
+                     <div key={`empty-${index}`} className={`text-muted/50 border-l-2 border-dashed border-muted/50 pl-2 py-0.5 leading-tight ${isDraftComplete ? 'text-xs' : 'text-[10px]'}`}>
+                       —
+                     </div>
+                   ))}
+                 </div>
+               </div>
         )}
 
         {/* Deck Visual */}

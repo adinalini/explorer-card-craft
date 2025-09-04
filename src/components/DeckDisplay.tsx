@@ -63,7 +63,7 @@ export function DeckDisplay({ cards, playerName, isOwn, isDraftComplete = false 
                   </div>
                 ))}
                 {isOwn && isDraftComplete && cards.length > 0 && (
-                  <div className={`absolute bottom-0 left-0 flex items-center gap-2 text-muted-foreground pl-2 py-0.5 leading-tight ${isDraftComplete ? 'text-xs' : 'text-[10px]'}`}>
+                  <div className={`absolute bottom-[25%] left-0 flex items-center gap-2 text-muted-foreground pl-2 py-0.5 leading-tight ${isDraftComplete ? 'text-xs' : 'text-[10px]'}`}>
                     <span className="font-semibold">Deck Code</span>
                     <DeckCodeDisplay 
                       cardIds={cards.map(card => card.card_id)} 
@@ -103,7 +103,7 @@ export function DeckDisplay({ cards, playerName, isOwn, isDraftComplete = false 
                      </div>
                    ))}
                    {isDraftComplete && cards.length > 0 && (
-                     <div className={`absolute bottom-0 left-0 flex items-center gap-2 text-muted-foreground pl-2 py-0.5 leading-tight ${isDraftComplete ? 'text-xs' : 'text-[10px]'}`}>
+                     <div className={`absolute bottom-[25%] left-0 flex items-center gap-2 text-muted-foreground pl-2 py-0.5 leading-tight ${isDraftComplete ? 'text-xs' : 'text-[10px]'}`}>
                        <span className="font-semibold">Deck Code</span>
                        <DeckCodeDisplay 
                          cardIds={cards.map(card => card.card_id)} 

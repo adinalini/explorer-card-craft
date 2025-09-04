@@ -72,23 +72,18 @@ export function DeckCodeDisplay({ cardIds, className = "" }: DeckCodeDisplayProp
   }
 
   return (
-    <div className={`flex items-center gap-2 ${className}`}>
-      <span className="text-xs font-mono text-muted-foreground whitespace-nowrap overflow-hidden text-ellipsis max-w-[12rem]">
-        {deckCode}
-      </span>
-      <Button 
-        onClick={handleCopy}
-        size="sm" 
-        variant="ghost"
-        className="shrink-0 text-muted-foreground hover:text-muted-foreground/80"
-        title="Copy deck code"
-      >
-        {copied ? (
-          <Check className="h-4 w-4" />
-        ) : (
-          <Copy className="h-4 w-4" />
-        )}
-      </Button>
-    </div>
+    <Button 
+      onClick={handleCopy}
+      size="sm" 
+      variant="ghost"
+      className={`shrink-0 text-muted-foreground hover:text-muted-foreground/80 ${className}`}
+      title="Copy deck code"
+    >
+      {copied ? (
+        <Check className="h-4 w-4" />
+      ) : (
+        <Copy className="h-4 w-4" />
+      )}
+    </Button>
   )
 }

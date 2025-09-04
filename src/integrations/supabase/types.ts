@@ -232,6 +232,14 @@ export type Database = {
         Args: { session_token_param: string }
         Returns: undefined
       }
+      update_round_timer: {
+        Args: { room_id_param: string; session_token_param: string }
+        Returns: {
+          round_start_time: string
+          server_time: string
+          success: boolean
+        }[]
+      }
       validate_room_access: {
         Args: { room_id_param: string; session_token_param: string }
         Returns: {

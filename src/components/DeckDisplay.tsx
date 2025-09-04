@@ -1,5 +1,6 @@
 import { CardImage } from "@/components/CardImage"
 import { getCardById } from "@/utils/cardData"
+import { DeckCodeDisplay } from "@/components/DeckCodeDisplay"
 
 interface Card {
   card_id: string
@@ -146,6 +147,16 @@ export function DeckDisplay({ cards, playerName, isOwn, isDraftComplete = false 
           </div>
         </div>
       </div>
+      
+      {/* Deck Code Display - Only show for own deck when draft is complete */}
+      {isOwn && isDraftComplete && cards.length > 0 && (
+        <div className="mt-6 pt-4 border-t border-muted">
+          <DeckCodeDisplay 
+            cardIds={cards.map(card => card.card_id)} 
+            className="max-w-md mx-auto"
+          />
+        </div>
+      )}
     </div>
   )
 }

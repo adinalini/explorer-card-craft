@@ -73,6 +73,9 @@ export function DeckCodeDisplay({ cardIds, className = "" }: DeckCodeDisplayProp
 
   return (
     <div className={`flex items-center gap-2 ${className}`}>
+      <span className="text-xs font-mono text-muted-foreground whitespace-nowrap overflow-hidden text-ellipsis max-w-[12rem]">
+        {deckCode}
+      </span>
       <Button 
         onClick={handleCopy}
         size="sm" 
@@ -86,9 +89,6 @@ export function DeckCodeDisplay({ cardIds, className = "" }: DeckCodeDisplayProp
           <Copy className="h-4 w-4" />
         )}
       </Button>
-      <span className="text-xs font-mono text-muted-foreground whitespace-nowrap overflow-hidden text-ellipsis max-w-[12rem]">
-        {deckCode}
-      </span>
     </div>
   )
 }

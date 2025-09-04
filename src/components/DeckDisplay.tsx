@@ -62,6 +62,14 @@ export function DeckDisplay({ cards, playerName, isOwn, isDraftComplete = false 
                     {card.card_name}
                   </div>
                 ))}
+                {isOwn && isDraftComplete && cards.length > 0 && (
+                  <div className={`flex items-center gap-2 text-muted-foreground border-l-2 border-muted pl-2 py-0.5 leading-tight ${isDraftComplete ? 'text-xs' : 'text-[10px]'}`}>
+                    <span className="font-semibold">Deck Code:</span>
+                    <DeckCodeDisplay 
+                      cardIds={cards.map(card => card.card_id)} 
+                    />
+                  </div>
+                )}
                  {/* Empty slots */}
                  {Array.from({ length: 12 - normalCards.length }).map((_, index) => (
                    <div key={`empty-${index}`} className={`text-muted/50 border-l-2 border-dashed border-muted/50 pl-2 py-0.5 leading-tight ${isDraftComplete ? 'text-xs' : 'text-[10px]'}`}>
@@ -70,15 +78,6 @@ export function DeckDisplay({ cards, playerName, isOwn, isDraftComplete = false 
                  ))}
                </div>
                
-               {/* Deck Code Section */}
-               {isDraftComplete && cards.length > 0 && (
-                 <div className="mt-1 flex items-center gap-2">
-                   <DeckCodeDisplay 
-                     cardIds={cards.map(card => card.card_id)} 
-                   />
-                   <h5 className={`font-semibold text-muted-foreground ${isDraftComplete ? 'text-sm' : 'text-xs'}`}>Deck Code</h5>
-                 </div>
-               )}
              </div>
            )}
 

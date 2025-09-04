@@ -63,7 +63,7 @@ export function DeckDisplay({ cards, playerName, isOwn, isDraftComplete = false 
                   </div>
                 ))}
                 {isOwn && isDraftComplete && cards.length > 0 && (
-                  <div className={`absolute bottom-0 left-0 flex items-center gap-2 text-muted-foreground border-l-2 border-muted pl-2 py-0.5 leading-tight ${isDraftComplete ? 'text-xs' : 'text-[10px]'}`}>
+                  <div className={`absolute bottom-0 left-0 flex items-center gap-2 text-muted-foreground pl-2 py-0.5 leading-tight ${isDraftComplete ? 'text-xs' : 'text-[10px]'}`}>
                     <span className="font-semibold">Deck Code</span>
                     <DeckCodeDisplay 
                       cardIds={cards.map(card => card.card_id)} 
@@ -85,7 +85,7 @@ export function DeckDisplay({ cards, playerName, isOwn, isDraftComplete = false 
            {!isOwn && (
              <div className={`space-y-1 ${isDraftComplete ? 'w-40' : 'w-32'}`}>
                <h4 className={`font-semibold text-muted-foreground mb-2 ${isDraftComplete ? 'text-base' : 'text-sm'}`}>Deck List</h4>
-               <div className={`space-y-0.5 ${isDraftComplete ? 'h-[calc(8.4rem+28.8rem)] max-h-[37.2rem]' : 'h-[calc(7rem+24rem)] max-h-[31rem]'}`}>
+               <div className={`relative space-y-0.5 ${isDraftComplete ? 'h-[calc(8.4rem+28.8rem)] max-h-[37.2rem]' : 'h-[calc(7rem+24rem)] max-h-[31rem]'}`}>
                  {legendaryCard && (
                    <div className={`text-yellow-600 font-medium border-l-2 border-yellow-500 pl-2 py-0.5 leading-tight ${isDraftComplete ? 'text-xs' : 'text-[10px]'}`}>
                      {legendaryCard.card_name}
@@ -102,6 +102,14 @@ export function DeckDisplay({ cards, playerName, isOwn, isDraftComplete = false 
                        —
                      </div>
                    ))}
+                   {isDraftComplete && cards.length > 0 && (
+                     <div className={`absolute bottom-0 left-0 flex items-center gap-2 text-muted-foreground pl-2 py-0.5 leading-tight ${isDraftComplete ? 'text-xs' : 'text-[10px]'}`}>
+                       <span className="font-semibold">Deck Code</span>
+                       <DeckCodeDisplay 
+                         cardIds={cards.map(card => card.card_id)} 
+                       />
+                     </div>
+                   )}
                  </div>
                </div>
         )}

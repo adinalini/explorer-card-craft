@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import { Copy, Check } from "lucide-react"
 import { toast } from "@/hooks/use-toast"
 import { generateDeckCodeFromCardIds } from "@/utils/deckCode"
@@ -62,19 +61,9 @@ export function DeckCodeDisplay({ cardIds, className = "" }: DeckCodeDisplayProp
 
   if (generating) {
     return (
-      <div className={`space-y-2 ${className}`}>
-        <h3 className="text-sm font-medium text-muted-foreground">Deck Code</h3>
-        <div className="flex gap-2">
-          <Input 
-            value="Generating deck code..." 
-            readOnly 
-            className="text-xs font-mono"
-          />
-          <Button disabled size="sm" variant="outline">
-            <Copy className="h-4 w-4" />
-          </Button>
-        </div>
-      </div>
+      <Button disabled size="sm" variant="outline" className={`shrink-0 ${className}`}>
+        <Copy className="h-4 w-4" />
+      </Button>
     )
   }
 
@@ -83,30 +72,18 @@ export function DeckCodeDisplay({ cardIds, className = "" }: DeckCodeDisplayProp
   }
 
   return (
-    <div className={`space-y-2 ${className}`}>
-      <h3 className="text-sm font-medium text-muted-foreground">Deck Code</h3>
-      <div className="flex gap-2">
-        <Input 
-          value={deckCode} 
-          readOnly 
-          className="text-xs font-mono"
-        />
-        <Button 
-          onClick={handleCopy}
-          size="sm" 
-          variant="outline"
-          className="shrink-0"
-        >
-          {copied ? (
-            <Check className="h-4 w-4" />
-          ) : (
-            <Copy className="h-4 w-4" />
-          )}
-        </Button>
-      </div>
-      <p className="text-xs text-muted-foreground">
-        Use this code to import your deck into the game
-      </p>
-    </div>
+    <Button 
+      onClick={handleCopy}
+      size="sm" 
+      variant="outline"
+      className={`shrink-0 ${className}`}
+      title="Copy deck code"
+    >
+      {copied ? (
+        <Check className="h-4 w-4" />
+      ) : (
+        <Copy className="h-4 w-4" />
+      )}
+    </Button>
   )
 }

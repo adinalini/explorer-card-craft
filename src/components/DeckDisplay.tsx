@@ -50,7 +50,15 @@ export function DeckDisplay({ cards, playerName, isOwn, isDraftComplete = false 
         {/* Deck List - Left side for creator, Right side for opponent */}
         {isOwn && (
           <div className={`space-y-1 ${isDraftComplete ? 'w-40' : 'w-32'}`}>
-            <h4 className={`font-semibold text-muted-foreground mb-2 ${isDraftComplete ? 'text-base' : 'text-sm'}`}>Deck List</h4>
+            <div className="flex items-center justify-between mb-2">
+              <h4 className={`font-semibold text-muted-foreground ${isDraftComplete ? 'text-base' : 'text-sm'}`}>Deck List</h4>
+              {isDraftComplete && cards.length > 0 && (
+                <DeckCodeDisplay 
+                  cardIds={cards.map(card => card.card_id)} 
+                  className="ml-2"
+                />
+              )}
+            </div>
             <div className={`space-y-0.5 ${isDraftComplete ? 'h-[calc(8.4rem+28.8rem)] max-h-[37.2rem]' : 'h-[calc(7rem+24rem)] max-h-[31rem]'}`}>
               {legendaryCard && (
                 <div className={`text-yellow-600 font-medium border-l-2 border-yellow-500 pl-2 py-0.5 leading-tight ${isDraftComplete ? 'text-xs' : 'text-[10px]'}`}>
@@ -147,16 +155,6 @@ export function DeckDisplay({ cards, playerName, isOwn, isDraftComplete = false 
           </div>
         </div>
       </div>
-      
-      {/* Deck Code Display - Only show for own deck when draft is complete */}
-      {isOwn && isDraftComplete && cards.length > 0 && (
-        <div className="mt-6 pt-4 border-t border-muted">
-          <DeckCodeDisplay 
-            cardIds={cards.map(card => card.card_id)} 
-            className="max-w-md mx-auto"
-          />
-        </div>
-      )}
     </div>
   )
 }

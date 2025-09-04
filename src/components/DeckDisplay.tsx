@@ -72,11 +72,11 @@ export function DeckDisplay({ cards, playerName, isOwn, isDraftComplete = false 
                
                {/* Deck Code Section */}
                {isDraftComplete && cards.length > 0 && (
-                 <div className="mt-3 space-y-1">
-                   <h5 className={`font-semibold text-muted-foreground ${isDraftComplete ? 'text-sm' : 'text-xs'}`}>Deck Code</h5>
+                 <div className="mt-1 flex items-center gap-2">
                    <DeckCodeDisplay 
                      cardIds={cards.map(card => card.card_id)} 
                    />
+                   <h5 className={`font-semibold text-muted-foreground ${isDraftComplete ? 'text-sm' : 'text-xs'}`}>Deck Code</h5>
                  </div>
                )}
              </div>

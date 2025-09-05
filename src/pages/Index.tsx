@@ -4,7 +4,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { Blob } from "@/components/ui/blob"
+
 import { WaveDivider } from "@/components/ui/wave-divider"
 import { useNavigate } from "react-router-dom"
 import { supabase } from "@/integrations/supabase/client"
@@ -231,12 +231,6 @@ const Index = () => {
 
   return (
     <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-[hsl(var(--background-start))] to-[hsl(var(--background-end))]">
-      {/* Abstract Blobs */}
-      <Blob variant="pink" size="lg" className="top-20 left-10 animate-bounce" style={{ animationDelay: '0s', animationDuration: '6s' }} />
-      <Blob variant="yellow" size="md" className="top-32 right-20 animate-bounce" style={{ animationDelay: '2s', animationDuration: '8s' }} />
-      <Blob variant="orange" size="sm" className="bottom-40 left-32 animate-bounce" style={{ animationDelay: '4s', animationDuration: '7s' }} />
-      <Blob variant="pink" size="md" className="bottom-20 right-16 animate-bounce" style={{ animationDelay: '1s', animationDuration: '9s' }} />
-      
       {/* Main Content */}
       <div className="relative z-10 min-h-screen flex flex-col items-center justify-center px-4">
         <div className="text-center space-y-12">

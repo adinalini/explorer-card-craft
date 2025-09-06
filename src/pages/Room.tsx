@@ -801,6 +801,18 @@ const Room = () => {
         }
         
         console.log('🚀 START DRAFT: Room update successful:', roomUpdateData)
+        
+        // CRITICAL FIX: Update local room state immediately after successful database update
+        if (roomUpdateData && roomUpdateData[0]) {
+          console.log('🚀 START DRAFT: Updating local room state with:', roomUpdateData[0])
+          setRoom(roomUpdateData[0])
+          
+          // Also fetch fresh room cards since we're starting the draft
+          setTimeout(() => {
+            fetchRoomCards()
+            fetchPlayerDecks()
+          }, 500)
+        }
       } else {
         console.log('🚀 START DRAFT: Cards already exist, skipping room update to prevent timer reset')
         
@@ -809,6 +821,13 @@ const Room = () => {
           const firstPick = response?.firstPickPlayer || 'creator'
           console.log(`🔷 TRIPLE: Starting with first pick: ${firstPick}`)
         }
+        
+        // CRITICAL FIX: Even if we skip room update, we still need to fetch current room state
+        setTimeout(() => {
+          fetchRoom()
+          fetchRoomCards()
+          fetchPlayerDecks()
+        }, 500)
       }
       
       // SUCCESS: Draft start completed without room update errors

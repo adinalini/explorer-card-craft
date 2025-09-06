@@ -121,15 +121,14 @@ const Index = () => {
     try {
       console.log('Attempting to join room:', { roomId: roomId.toUpperCase(), joinerName: joinerName.trim() })
       
-      const { data: room, error: fetchError } = await supabase
-        .from('rooms')
-        .select('*')
-        .eq('id', roomId.toUpperCase())
+      // SECURE: Use validation function instead of direct room query to prevent data exposure
+      const { data: roomValidation, error: fetchError } = await supabase
+        .rpc('validate_room_for_joining', { room_id_param: roomId.toUpperCase() })
         .single()
 
-      console.log('Fetched room data:', { room, fetchError })
+      console.log('Room validation result:', { roomValidation, fetchError })
 
-      if (fetchError || !room) {
+      if (fetchError || !roomValidation?.room_exists) {
         toast({
           title: "Room Not Found",
           description: "The room ID you entered doesn't exist.",
@@ -138,7 +137,7 @@ const Index = () => {
         return
       }
 
-      if (room.joiner_name) {
+      if (roomValidation.room_full) {
         toast({
           title: "Draft has already begun",
           description: "This room already has two players.",
@@ -147,10 +146,10 @@ const Index = () => {
         return
       }
 
-      if (room.status === 'active' || room.status === 'completed') {
+      if (!roomValidation.is_available) {
         toast({
-          title: "Draft has already begun",
-          description: "This room's draft is already in progress.",
+          title: "Room Unavailable", 
+          description: "This room is no longer accepting new players.",
           variant: "destructive"
         })
         return

@@ -248,6 +248,14 @@ export type Database = {
           player_role: string
         }[]
       }
+      validate_room_for_joining: {
+        Args: { room_id_param: string }
+        Returns: {
+          is_available: boolean
+          room_exists: boolean
+          room_full: boolean
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never

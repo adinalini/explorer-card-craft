@@ -571,10 +571,11 @@ const Room = () => {
     if (room?.status === 'completed') {
       const expireTimer = setTimeout(async () => {
         try {
-          await supabase.from('rooms').delete().eq('id', roomId)
-          await supabase.from('room_cards').delete().eq('room_id', roomId)
-          await supabase.from('player_decks').delete().eq('room_id', roomId)
-          await supabase.from('game_sessions').delete().eq('room_id', roomId)
+          const supabaseWithSession = getSupabaseWithSession()
+          await supabaseWithSession.from('rooms').delete().eq('id', roomId)
+          await supabaseWithSession.from('room_cards').delete().eq('room_id', roomId)
+          await supabaseWithSession.from('player_decks').delete().eq('room_id', roomId)
+          await supabaseWithSession.from('game_sessions').delete().eq('room_id', roomId)
           navigate('/')
         } catch (error) {
           console.error('Error expiring room:', error)
@@ -592,7 +593,8 @@ const Room = () => {
     console.log('🔍 FETCH ROOM: Room ID:', roomId)
 
     try {
-      const { data, error } = await supabase
+      const supabaseWithSession = getSupabaseWithSession()
+      const { data, error } = await supabaseWithSession
         .from('rooms')
         .select('*')
         .eq('id', roomId)
@@ -627,10 +629,9 @@ const Room = () => {
   const fetchRoomCards = async () => {
     if (!roomId) return
 
-    if (!roomId) return
-
     try {
-      const { data, error } = await supabase
+      const supabaseWithSession = getSupabaseWithSession()
+      const { data, error } = await supabaseWithSession
         .from('room_cards')
         .select('*')
         .eq('room_id', roomId)
@@ -1901,9 +1902,10 @@ const Room = () => {
 
     try {
       // Delete room and associated data
-      await supabase.from('player_decks').delete().eq('room_id', roomId)
-      await supabase.from('room_cards').delete().eq('room_id', roomId)
-      await supabase.from('rooms').delete().eq('id', roomId)
+      const supabaseWithSession = getSupabaseWithSession()
+      await supabaseWithSession.from('player_decks').delete().eq('room_id', roomId)
+      await supabaseWithSession.from('room_cards').delete().eq('room_id', roomId)
+      await supabaseWithSession.from('rooms').delete().eq('id', roomId)
 
       navigate('/')
     } catch (error) {

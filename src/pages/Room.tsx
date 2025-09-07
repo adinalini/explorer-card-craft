@@ -8,6 +8,7 @@ import { toast } from "@/hooks/use-toast"
 import { Copy, Check } from "lucide-react"
 import { DraftCard } from "@/components/DraftCard"
 import { DeckDisplay } from "@/components/DeckDisplay"
+import { ThemeToggle } from "@/components/ui/theme-toggle"
 import { getRandomCards, getCardById } from "@/utils/cardData"
 import { generateTripleDraftChoice } from "@/utils/tripleDraftCards"
 import { generateMegaDraftCards } from "@/utils/megaDraftCards"
@@ -2061,7 +2062,9 @@ const Room = () => {
               <h1 className="text-xl md:text-2xl font-bold mb-1">Project O Draft Battle</h1>
               <p className="text-sm md:text-base">Draft Type: {getDraftTypeDisplay(room.draft_type)}</p>
             </div>
-            <div className="w-24"></div> {/* Spacer for centering */}
+            <div className="flex items-center gap-2">
+              <ThemeToggle className="text-white dark:text-foreground hover:bg-white/10 dark:hover:bg-accent" />
+            </div>
           </div>
         </div>
       </div>

@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Blob } from "@/components/ui/blob"
 import { WaveDivider } from "@/components/ui/wave-divider"
+import { ThemeToggle } from "@/components/ui/theme-toggle"
 import { useNavigate } from "react-router-dom"
 import { supabase } from "@/integrations/supabase/client"
 import { createClient } from '@supabase/supabase-js'
@@ -237,10 +238,15 @@ const Index = () => {
       <Blob variant="orange" size="sm" className="bottom-40 left-32 animate-bounce" style={{ animationDelay: '4s', animationDuration: '7s' }} />
       <Blob variant="pink" size="md" className="bottom-20 right-16 animate-bounce" style={{ animationDelay: '1s', animationDuration: '9s' }} />
       
+      {/* Theme Toggle in top right */}
+      <div className="absolute top-4 right-4 z-20">
+        <ThemeToggle className="text-white dark:text-foreground hover:bg-white/10 dark:hover:bg-accent" />
+      </div>
+
       {/* Main Content */}
       <div className="relative z-10 min-h-screen flex flex-col items-center justify-center px-4">
         <div className="text-center space-y-12">
-          <h1 className="text-6xl md:text-8xl font-bold text-white mb-16 drop-shadow-2xl">
+          <h1 className="text-6xl md:text-8xl font-bold text-foreground mb-16 drop-shadow-2xl">
             Project O Draft Battler
           </h1>
           
@@ -254,7 +260,7 @@ const Index = () => {
                   Create Room
                 </Button>
               </DialogTrigger>
-              <DialogContent className="bg-white">
+              <DialogContent className="bg-card text-card-foreground">
                 <div className="relative mb-4">
                   <svg
                     viewBox="0 0 1200 120"
@@ -275,8 +281,8 @@ const Index = () => {
                   </svg>
                 </div>
                 <DialogHeader className="relative z-10 pt-6">
-                  <DialogTitle className="text-2xl text-center text-white">Create New Room</DialogTitle>
-                  <DialogDescription className="text-center text-white/80">
+                  <DialogTitle className="text-2xl text-center text-primary">Create New Room</DialogTitle>
+                  <DialogDescription className="text-center text-muted-foreground">
                     Set up a new drafting room and invite players to join
                   </DialogDescription>
                 </DialogHeader>
@@ -324,14 +330,14 @@ const Index = () => {
             <Dialog open={joinDialogOpen} onOpenChange={setJoinDialogOpen}>
               <DialogTrigger asChild>
                 <Button 
-                  variant="outline" 
-                  size="lg"
-                  className="border-2 border-white text-white hover:bg-white hover:text-primary px-12 py-6 text-xl font-semibold rounded-2xl shadow-2xl transform transition-all duration-200 hover:scale-105 bg-transparent"
+                      variant="outline" 
+                      size="lg"
+                      className="border-2 border-foreground text-foreground hover:bg-foreground hover:text-background px-12 py-6 text-xl font-semibold rounded-2xl shadow-2xl transform transition-all duration-200 hover:scale-105 bg-transparent"
                 >
                   Join Room
                 </Button>
               </DialogTrigger>
-              <DialogContent className="bg-white">
+              <DialogContent className="bg-card text-card-foreground">
                 <div className="relative mb-4">
                   <svg
                     viewBox="0 0 1200 120"
@@ -352,8 +358,8 @@ const Index = () => {
                   </svg>
                 </div>
                 <DialogHeader className="relative z-10 pt-6">
-                  <DialogTitle className="text-2xl text-center text-white">Join Room</DialogTitle>
-                  <DialogDescription className="text-center text-white/80">
+                  <DialogTitle className="text-2xl text-center text-primary">Join Room</DialogTitle>
+                  <DialogDescription className="text-center text-muted-foreground">
                     Enter the room ID to join an existing draft
                   </DialogDescription>
                 </DialogHeader>

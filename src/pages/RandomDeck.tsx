@@ -2,6 +2,7 @@ import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import { DeckDisplay } from "@/components/DeckDisplay"
+import { ThemeToggle } from "@/components/ui/theme-toggle"
 import { getRandomCards, getCardById } from "@/utils/cardData"
 import { ArrowLeft } from "lucide-react"
 
@@ -148,11 +149,12 @@ const RandomDeck = () => {
             <Button
               variant="ghost"
               onClick={() => navigate('/')}
-              className="text-white hover:bg-white/10 flex items-center gap-2"
+              className="text-foreground hover:bg-accent flex items-center gap-2"
             >
               <ArrowLeft className="w-4 h-4" />
               Back to Home
             </Button>
+            <ThemeToggle className="text-foreground hover:bg-accent" />
           </div>
 
           {/* Title */}
@@ -168,7 +170,7 @@ const RandomDeck = () => {
       </div>
 
       {/* White background for the rest - flex-1 to take remaining space with overflow */}
-      <div className="bg-white flex-1 flex flex-col overflow-auto">
+      <div className="bg-background flex-1 flex flex-col overflow-auto">
         <div className="max-w-4xl mx-auto w-full h-full flex flex-col px-4 py-4">
           {/* Deck Display - takes available space with mobile scaling */}
           <div className="flex justify-center">
@@ -181,7 +183,7 @@ const RandomDeck = () => {
                   isDraftComplete={true}
                 />
               ) : (
-                <div className="text-center text-gray-600">
+                <div className="text-center text-muted-foreground">
                   Generating random deck...
                 </div>
               )}
@@ -191,7 +193,7 @@ const RandomDeck = () => {
       </div>
 
       {/* Fixed button at bottom - always visible */}
-      <div className="bg-white border-t border-gray-200 p-4 flex-shrink-0">
+      <div className="bg-background border-t border-border p-4 flex-shrink-0">
         <div className="max-w-4xl mx-auto flex justify-center">
           <Button
             onClick={generateRandomDeck}

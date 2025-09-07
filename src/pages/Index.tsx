@@ -274,8 +274,8 @@ const Index = () => {
                     />
                     <defs>
                       <linearGradient id="gradient-create" x1="0%" y1="0%" x2="100%" y2="0%">
-                        <stop offset="0%" stopColor="hsl(var(--primary))" />
-                        <stop offset="100%" stopColor="hsl(var(--secondary))" />
+                        <stop offset="0%" stopColor="hsl(320 100% 60%)" />
+                        <stop offset="100%" stopColor="hsl(30 100% 60%)" />
                       </linearGradient>
                     </defs>
                   </svg>
@@ -351,8 +351,8 @@ const Index = () => {
                     />
                     <defs>
                       <linearGradient id="gradient-join" x1="0%" y1="0%" x2="100%" y2="0%">
-                        <stop offset="0%" stopColor="hsl(var(--primary))" />
-                        <stop offset="100%" stopColor="hsl(var(--secondary))" />
+                        <stop offset="0%" stopColor="hsl(320 100% 60%)" />
+                        <stop offset="100%" stopColor="hsl(30 100% 60%)" />
                       </linearGradient>
                     </defs>
                   </svg>

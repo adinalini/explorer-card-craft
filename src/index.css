@@ -39,9 +39,9 @@ All colors MUST be HSL.
     --input: 214.3 31.8% 91.4%;
     --ring: 320 100% 50%;
     
-    /* Light Mode Wave colors - Pink to Navy gradient */
-    --wave-light: 320 100% 50%;
-    --wave-dark: 240 60% 20%;
+    /* Light Mode Wave colors - Should match dark mode background */
+    --wave-light: 260 90% 10%;
+    --wave-dark: 290 95% 5%;
     
     /* Light Mode Chart colors */
     --chart-1: 320 100% 50%;
@@ -112,8 +112,8 @@ All colors MUST be HSL.
     --input: 260 30% 18%;
     --ring: 320 100% 75%;
     
-    --wave-light: 320 100% 75%;
-    --wave-dark: 240 60% 15%;
+    --wave-light: 240 10% 85%;
+    --wave-dark: 260 15% 80%;
     
     /* Dark Mode Gaming Chart colors */
     --chart-1: 320 100% 75%;

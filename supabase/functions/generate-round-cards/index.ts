@@ -341,6 +341,7 @@ Deno.serve(async (req) => {
       // Cost 1 cards
       { id: "ali_baba", name: "Ali Baba", image: "ali_baba.png", cost: 1 },
       { id: "friar_tuck", name: "Friar Tuck", image: "friar_tuck.png", cost: 1 },
+      { id: "tin_soldier", name: "Tin Soldier", image: "tin_soldier.png", cost: 1 },
       { id: "ugly_duckling", name: "Ugly Duckling", image: "ugly_duckling.png", cost: 1 },
       { id: "white_rabbit", name: "White Rabbit", image: "white_rabbit.png", cost: 1 },
       { id: "defense_matrix", name: "Defense Matrix", image: "defense_matrix.png", cost: 1, isSpell: true },
@@ -356,6 +357,7 @@ Deno.serve(async (req) => {
       { id: "don_quixote", name: "Don Quixote", image: "don_quixote.png", cost: 2 },
       { id: "dr_frank", name: "Dr. Frank", image: "dr_frank.png", cost: 2 },
       { id: "guy_of_gisborne", name: "Guy of Gisborne", image: "guy_of_gisborne.png", cost: 2 },
+      { id: "hansel_gretel", name: "Hansel & Gretel", image: "hansel_gretel.png", cost: 2 },
       { id: "huntsman", name: "Huntsman", image: "huntsman.png", cost: 2 },
       { id: "mad_hatter", name: "Mad Hatter", image: "mad_hatter.png", cost: 2 },
       { id: "morgiana", name: "Morgiana", image: "morgiana.png", cost: 2 },
@@ -376,6 +378,7 @@ Deno.serve(async (req) => {
       
       // Cost 3 cards
       { id: "alice", name: "Alice", image: "alice.png", cost: 3 },
+      { id: "beauty", name: "Beauty", image: "beauty.png", cost: 3 },
       { id: "big_bad_wolf", name: "Big Bad Wolf", image: "big_bad_wolf.png", cost: 3 },
       { id: "black_knight", name: "Black Knight", image: "black_knight.png", cost: 3 },
       { id: "cowardly_lion", name: "Cowardly Lion", image: "cowardly_lion.png", cost: 3 },
@@ -394,6 +397,7 @@ Deno.serve(async (req) => {
       { id: "shield_maiden", name: "Shield Maiden", image: "shield_maiden.png", cost: 3 },
       { id: "siren", name: "Siren", image: "siren.png", cost: 3 },
       { id: "striga", name: "Striga", image: "striga.png", cost: 3 },
+      { id: "wendy", name: "Wendy", image: "wendy.png", cost: 3 },
       { id: "zorro", name: "Zorro", image: "zorro.png", cost: 3 },
       { id: "axe_throw", name: "Axe Throw", image: "axe_throw.png", cost: 3, isSpell: true },
       { id: "en_passant", name: "En Passant", image: "en_passant.png", cost: 3, isSpell: true },
@@ -402,8 +406,10 @@ Deno.serve(async (req) => {
       { id: "red", name: "Red", image: "red.png", cost: 3, isLegendary: true },
       
       // Cost 4 cards
+      { id: "baba_yaga", name: "Baba Yaga", image: "baba_yaga.png", cost: 4 },
       { id: "beast", name: "Beast", image: "beast.png", cost: 4 },
       { id: "cheshire", name: "Cheshire", image: "cheshire.png", cost: 4 },
+      { id: "christopher", name: "Christopher Robin", image: "christopher.png", cost: 4 },
       { id: "dracula", name: "Dracula", image: "dracula.png", cost: 4, isLegendary: true },
       { id: "glinda", name: "Glinda", image: "glinda.png", cost: 4 },
       { id: "goldilocks", name: "Goldilocks", image: "goldilocks.png", cost: 4 },
@@ -419,6 +425,7 @@ Deno.serve(async (req) => {
       { id: "tin_woodman", name: "Tin Woodman", image: "tin_woodman.png", cost: 4 },
       { id: "trojan_horse", name: "Trojan Horse", image: "trojan_horse.png", cost: 4 },
       { id: "wicked_witch_of_the_west", name: "Wicked Witch of the West", image: "wicked_witch_of_the_west.png", cost: 4 },
+      { id: "wukong", name: "Sun Wukong", image: "wukong.png", cost: 4, isLegendary: true },
       { id: "dark_omen", name: "Dark Omen", image: "dark_omen.png", cost: 4, isSpell: true },
       { id: "rain_of_arrows", name: "Rain of Arrows", image: "rain_of_arrows.png", cost: 4, isSpell: true },
       { id: "dorothy", name: "Dorothy", image: "dorothy.png", cost: 5, isLegendary: true },
@@ -429,6 +436,7 @@ Deno.serve(async (req) => {
       { id: "death", name: "Death", image: "death.png", cost: 5, isLegendary: true },
       { id: "fairy_godmother", name: "Fairy Godmother", image: "fairy_godmother.png", cost: 5 },
       { id: "galahad", name: "Galahad", image: "galahad.png", cost: 5 },
+      { id: "genie", name: "Genie", image: "genie.png", cost: 5 },
       { id: "grendel", name: "Grendel", image: "grendel.png", cost: 5 },
       { id: "headless_horseman", name: "Headless Horseman", image: "headless_horseman.png", cost: 5 },
       { id: "the_green_knight", name: "The Green Knight", image: "the_green_knight.png", cost: 5 },
@@ -448,11 +456,12 @@ Deno.serve(async (req) => {
       { id: "blow_the_house_down", name: "Blow the House Down", image: "blow_the_house_down.png", cost: 7, isSpell: true },
       { id: "king_arthur", name: "King Arthur", image: "king_arthur.png", cost: 7, isLegendary: true },
       { id: "legion_of_the_dead", name: "Legion of the Dead", image: "legion_of_the_dead.png", cost: 7, isLegendary: true },
+      { id: "paul_bunyan", name: "Paul Bunyan", image: "paul_bunyan.png", cost: 7 },
       { id: "snow_white", name: "Snow White", image: "snow_white.png", cost: 7, isLegendary: true },
       
       // Cost 8+ cards
       { id: "bandersnatch", name: "Bandersnatch", image: "bandersnatch.png", cost: 8 },
-      { id: "the_kraken", name: "The Kraken", image: "the_kraken.png", cost: 8 },
+      { id: "the_kraken", name: "The Kraken", image: "the_kraken.png", cost: 8, isLegendary: true },
       
       // Cost 10+ cards
       { id: "phantom_coachman", name: "Phantom Coachman", image: "phantom_coachman.png", cost: 10 }

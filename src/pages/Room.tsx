@@ -102,6 +102,7 @@ const Room = () => {
   const [isUpdatingReady, setIsUpdatingReady] = useState(false)
   const [roomCodeCopied, setRoomCodeCopied] = useState(false)
   const isProcessingRoundRef = useRef(false)
+  const isProcessingTriplePhaseRef = useRef(false) // Specific lock for triple phase transitions
   const [isProcessingSelection, setIsProcessingSelection] = useState<boolean>(false)
   const [megaDraftCards, setMegaDraftCards] = useState<any[]>([])
   const [megaDraftTurnSequence, setMegaDraftTurnSequence] = useState<string[]>([])
@@ -303,6 +304,7 @@ const Room = () => {
       setIsSelectionLocked(false)
       setShowReveal(false)
       isProcessingRoundRef.current = false
+      isProcessingTriplePhaseRef.current = false // Reset triple phase lock too
       
       if (backgroundAutoSelectTimeout) {
         clearTimeout(backgroundAutoSelectTimeout)
@@ -1444,18 +1446,26 @@ const Room = () => {
       return
     }
     
-    // CRITICAL FIX: Both players can trigger phase transitions, but use a lock to prevent duplicates
-    if (isProcessingRoundRef.current) {
-      console.log('🔷 TRIPLE PHASE END: ⏳ Already processing, skipping (lock active)')
+    // CRITICAL FIX: Use specific lock for triple phase transitions to prevent duplicate calls
+    if (isProcessingTriplePhaseRef.current) {
+      console.log('🔷 TRIPLE PHASE END: ⏳ Already processing triple phase, skipping (triple lock active)')
       return
     }
     
-    console.log('🔷 TRIPLE PHASE END: 🔒 Setting processing lock')
+    // Also check the general processing lock
+    if (isProcessingRoundRef.current) {
+      console.log('🔷 TRIPLE PHASE END: ⏳ Already processing round, skipping (round lock active)')
+      return
+    }
+    
+    console.log('🔷 TRIPLE PHASE END: 🔒 Setting triple phase processing locks')
+    isProcessingTriplePhaseRef.current = true
     isProcessingRoundRef.current = true
 
     // Only the creator should perform phase transitions and DB writes
     if (userRole !== 'creator') {
       console.log('🔷 TRIPLE PHASE END: Non-creator client - deferring to creator and exiting.')
+      isProcessingTriplePhaseRef.current = false
       isProcessingRoundRef.current = false
       return
     }
@@ -1534,16 +1544,16 @@ const Room = () => {
         }
         console.log('🔷 TRIPLE PHASE END: 📦 Adding phase 1 card to deck:', phase1Card.card_id, 'by', phase1Card.selected_by)
         try {
-          // Check if card already exists in deck to prevent duplicates
-          const { data: existingDeck } = await supabaseWithToken
-            .from('player_decks')
-            .select('card_id')
-            .eq('room_id', roomId)
-            .eq('card_id', phase1Card.card_id)
-            .eq('player_side', phase1Card.selected_by)
-            .eq('selection_order', currentRound)
-          
-          if (!existingDeck || existingDeck.length === 0) {
+        // ENHANCED DUPLICATE CHECK: Check by card_id AND player_side AND selection_order
+        const { data: existingDeck } = await supabaseWithToken
+          .from('player_decks')
+          .select('id, card_id, player_side, selection_order')
+          .eq('room_id', roomId)
+          .eq('card_id', phase1Card.card_id)
+          .eq('player_side', phase1Card.selected_by)
+          .eq('selection_order', currentRound)
+        
+        if (!existingDeck || existingDeck.length === 0) {
             await supabaseWithToken
               .from('player_decks')
               .insert({
@@ -1558,36 +1568,10 @@ const Room = () => {
             console.log('🔷 TRIPLE: Phase 1 card added to deck successfully')
           } else {
             console.log('🔷 TRIPLE: Phase 1 card already in deck, skipping duplicate')
+            console.log('🔷 TRIPLE: Existing deck entries:', existingDeck.length)
           }
 
-          // Verify deck entry exists, retry once if missing (idempotent safety)
-          try {
-            const { data: verifyDeck } = await supabaseWithToken
-              .from('player_decks')
-              .select('id')
-              .eq('room_id', roomId)
-              .eq('card_id', phase1Card.card_id)
-              .eq('player_side', phase1Card.selected_by)
-              .eq('selection_order', currentRound)
-              .maybeSingle()
-            if (!verifyDeck) {
-              console.log('🔁 TRIPLE: Phase 1 deck entry missing, retrying insert...')
-              await supabaseWithToken
-                .from('player_decks')
-                .insert({
-                  room_id: roomId,
-                  card_id: phase1Card.card_id,
-                  card_name: phase1Card.card_name,
-                  player_side: phase1Card.selected_by as 'creator' | 'joiner',
-                  selection_order: currentRound,
-                  is_legendary: phase1Card.is_legendary,
-                  card_image: phase1Card.card_image
-                })
-              console.log('🔁 TRIPLE: Phase 1 retry insert completed')
-            }
-          } catch (e) {
-            console.error('🔁 TRIPLE: Phase 1 verification/ retry failed:', e)
-          }
+          // REMOVED RETRY LOGIC to prevent duplicate insertions
         } catch (error) {
           console.error('🔷 TRIPLE: Error adding phase 1 card to deck:', error)
         }
@@ -1634,10 +1618,10 @@ const Room = () => {
           console.log('🔷 TRIPLE: Adding phase 2 card to deck:', phase2Card.card_id, 'by', phase2Card.selected_by)
           
           try {
-            // Check if card already exists in deck to prevent duplicates
+            // ENHANCED DUPLICATE CHECK: Check by card_id AND player_side AND selection_order
             const { data: existingDeck } = await supabaseWithToken
               .from('player_decks')
-              .select('card_id')
+              .select('id, card_id, player_side, selection_order')
               .eq('room_id', roomId)
               .eq('card_id', phase2Card.card_id)
               .eq('player_side', phase2Card.selected_by)
@@ -1658,36 +1642,10 @@ const Room = () => {
               console.log('🔷 TRIPLE: Phase 2 card added to deck successfully')
             } else {
               console.log('🔷 TRIPLE: Phase 2 card already in deck, skipping duplicate')
+              console.log('🔷 TRIPLE: Existing deck entries:', existingDeck.length)
             }
 
-            // Verify deck entry exists, retry once if missing (idempotent safety)
-            try {
-              const { data: verifyDeck } = await supabaseWithToken
-                .from('player_decks')
-                .select('id')
-                .eq('room_id', roomId)
-                .eq('card_id', phase2Card.card_id)
-                .eq('player_side', phase2Card.selected_by)
-                .eq('selection_order', currentRound)
-                .maybeSingle()
-              if (!verifyDeck) {
-                console.log('🔁 TRIPLE: Phase 2 deck entry missing, retrying insert...')
-                await supabaseWithToken
-                  .from('player_decks')
-                  .insert({
-                    room_id: roomId,
-                    card_id: phase2Card.card_id,
-                    card_name: phase2Card.card_name,
-                    player_side: phase2Card.selected_by as 'creator' | 'joiner',
-                    selection_order: currentRound,
-                    is_legendary: phase2Card.is_legendary,
-                    card_image: phase2Card.card_image
-                  })
-                console.log('🔁 TRIPLE: Phase 2 retry insert completed')
-              }
-            } catch (e) {
-              console.error('🔁 TRIPLE: Phase 2 verification/ retry failed:', e)
-            }
+            // REMOVED RETRY LOGIC to prevent duplicate insertions
           } catch (error) {
             console.error('🔷 TRIPLE: Error adding phase 2 card to deck:', error)
           }
@@ -1766,6 +1724,8 @@ const Room = () => {
     } catch (error) {
       console.error('🔷 TRIPLE: Error in phase end:', error)
     } finally {
+      console.log('🔷 TRIPLE PHASE END: 🔓 Releasing locks')
+      isProcessingTriplePhaseRef.current = false
       isProcessingRoundRef.current = false
     }
   }

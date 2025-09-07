@@ -8,10 +8,10 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    /* Light Mode - Lighter backgrounds for better contrast */
-    --background-start: 240 20% 95%;
-    --background-end: 260 25% 90%;
-    --background: 0 0% 100%;
+    /* Light Mode - Darker, duller backgrounds */
+    --background-start: 240 10% 85%;
+    --background-end: 260 15% 80%;
+    --background: 0 0% 92%;
     --foreground: 240 10% 3.9%;
     
     /* Light Mode Primary Colors */
@@ -39,9 +39,9 @@ All colors MUST be HSL.
     --input: 214.3 31.8% 91.4%;
     --ring: 320 100% 50%;
     
-    /* Light Mode Wave colors */
-    --wave-light: 180 100% 40%;
-    --wave-dark: 240 20% 95%;
+    /* Light Mode Wave colors - Pink to Navy gradient */
+    --wave-light: 320 100% 50%;
+    --wave-dark: 240 60% 20%;
     
     /* Light Mode Chart colors */
     --chart-1: 320 100% 50%;
@@ -62,8 +62,8 @@ All colors MUST be HSL.
     /* Light Mode Gradients */
     --gradient-primary: linear-gradient(135deg, hsl(320 100% 50%), hsl(290 90% 45%));
     --gradient-secondary: linear-gradient(135deg, hsl(180 100% 40%), hsl(120 100% 35%));
-    --gradient-fantasy: linear-gradient(135deg, hsl(240 20% 95%), hsl(260 25% 90%));
-    --gradient-card: linear-gradient(135deg, hsl(0 0% 100%), hsl(210 40% 98%));
+    --gradient-fantasy: linear-gradient(135deg, hsl(240 10% 85%), hsl(260 15% 80%));
+    --gradient-card: linear-gradient(135deg, hsl(0 0% 92%), hsl(210 40% 88%));
     
     /* Light Mode Shadows and Glows */
     --shadow-neon-pink: 0 0 20px hsl(320 100% 50% / 0.3);
@@ -112,8 +112,8 @@ All colors MUST be HSL.
     --input: 260 30% 18%;
     --ring: 320 100% 75%;
     
-    --wave-light: 180 100% 75%;
-    --wave-dark: 260 90% 10%;
+    --wave-light: 320 100% 75%;
+    --wave-dark: 240 60% 15%;
     
     /* Dark Mode Gaming Chart colors */
     --chart-1: 320 100% 75%;
@@ -164,6 +164,12 @@ All colors MUST be HSL.
     @apply bg-background text-foreground;
     background: var(--gradient-fantasy);
     background-attachment: fixed;
+  }
+  
+  .dark body {
+    background: var(--gradient-fantasy);
+    background-attachment: fixed;
+    opacity: 0.95;
   }
 }
 

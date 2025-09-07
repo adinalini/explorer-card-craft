@@ -39,29 +39,15 @@ export function DeckCodeDisplay({ cards }: DeckCodeDisplayProps) {
     const deckCode = generateDeckCode()
     
     if (!deckCode) {
-      toast({
-        title: "Error",
-        description: "Unable to generate deck code. Some cards are missing keys.",
-        variant: "destructive"
-      })
       return
     }
 
     try {
       await navigator.clipboard.writeText(deckCode)
       setCopied(true)
-      toast({
-        title: "Copied!",
-        description: "Deck code copied to clipboard",
-      })
-      
       setTimeout(() => setCopied(false), 2000)
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to copy deck code to clipboard",
-        variant: "destructive"
-      })
+      // Silent fail
     }
   }
 
@@ -72,12 +58,13 @@ export function DeckCodeDisplay({ cards }: DeckCodeDisplayProps) {
   }
 
   return (
-    <div className="flex justify-center">
+    <div className="flex items-center gap-2" style={{ marginTop: '20px' }}>
+      <span className="text-sm font-semibold text-muted-foreground">Deck Code</span>
       <Button
         variant="ghost"
         size="sm"
         onClick={handleCopyDeckCode}
-        className="text-muted-foreground hover:text-muted-foreground/80 hover:bg-muted/20"
+        className="text-muted-foreground hover:text-muted-foreground/80 hover:bg-muted/20 p-1"
       >
         {copied ? (
           <Check className="h-4 w-4" />

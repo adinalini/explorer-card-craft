@@ -57,18 +57,21 @@ export function DeckDisplay({ cards, playerName, isOwn, isDraftComplete = false 
                   {legendaryCard.card_name}
                 </div>
               )}
-                 {normalCards.map((card, index) => (
-                  <div key={index} className={`text-muted-foreground border-l-2 border-muted pl-2 py-0.5 leading-tight ${isDraftComplete ? 'text-xs' : 'text-[10px]'}`}>
-                    {card.card_name}
-                  </div>
-                ))}
-                {/* Empty slots */}
-                {Array.from({ length: 12 - normalCards.length }).map((_, index) => (
-                  <div key={`empty-${index}`} className={`text-muted/50 border-l-2 border-dashed border-muted/50 pl-2 py-0.5 leading-tight ${isDraftComplete ? 'text-xs' : 'text-[10px]'}`}>
-                    —
-                  </div>
-                ))}
+               {normalCards.map((card, index) => (
+                <div key={index} className={`text-muted-foreground border-l-2 border-muted pl-2 py-0.5 leading-tight ${isDraftComplete ? 'text-xs' : 'text-[10px]'}`}>
+                  {card.card_name}
+                </div>
+              ))}
+              {/* Empty slots */}
+              {Array.from({ length: 12 - normalCards.length }).map((_, index) => (
+                <div key={`empty-${index}`} className={`text-muted/50 border-l-2 border-dashed border-muted/50 pl-2 py-0.5 leading-tight ${isDraftComplete ? 'text-xs' : 'text-[10px]'}`}>
+                  —
+                </div>
+              ))}
             </div>
+            {isDraftComplete && (
+              <DeckCodeDisplay cards={cards} />
+            )}
           </div>
         )}
 
@@ -83,17 +86,20 @@ export function DeckDisplay({ cards, playerName, isOwn, isDraftComplete = false 
                 </div>
               )}
                {normalCards.map((card, index) => (
-                  <div key={index} className={`text-muted-foreground border-l-2 border-muted pl-2 py-0.5 leading-tight ${isDraftComplete ? 'text-xs' : 'text-[10px]'}`}>
-                    {card.card_name}
-                  </div>
-                ))}
-                {/* Empty slots */}
-                {Array.from({ length: 12 - normalCards.length }).map((_, index) => (
-                  <div key={`empty-${index}`} className={`text-muted/50 border-l-2 border-dashed border-muted/50 pl-2 py-0.5 leading-tight ${isDraftComplete ? 'text-xs' : 'text-[10px]'}`}>
-                    —
-                  </div>
-                ))}
+                <div key={index} className={`text-muted-foreground border-l-2 border-muted pl-2 py-0.5 leading-tight ${isDraftComplete ? 'text-xs' : 'text-[10px]'}`}>
+                  {card.card_name}
+                </div>
+              ))}
+              {/* Empty slots */}
+              {Array.from({ length: 12 - normalCards.length }).map((_, index) => (
+                <div key={`empty-${index}`} className={`text-muted/50 border-l-2 border-dashed border-muted/50 pl-2 py-0.5 leading-tight ${isDraftComplete ? 'text-xs' : 'text-[10px]'}`}>
+                  —
+                </div>
+              ))}
             </div>
+            {isDraftComplete && (
+              <DeckCodeDisplay cards={cards} />
+            )}
           </div>
         )}
 
@@ -147,13 +153,6 @@ export function DeckDisplay({ cards, playerName, isOwn, isDraftComplete = false 
           </div>
         </div>
       </div>
-      
-      {/* Deck Code button below all cards */}
-      {isDraftComplete && (
-        <div className="mt-4">
-          <DeckCodeDisplay cards={cards} />
-        </div>
-      )}
     </div>
   )
 }

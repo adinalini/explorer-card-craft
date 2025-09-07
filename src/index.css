@@ -169,7 +169,6 @@ All colors MUST be HSL.
   .dark body {
     background: var(--gradient-fantasy);
     background-attachment: fixed;
-    opacity: 0.95;
   }
 }
 
@@ -229,14 +228,26 @@ All colors MUST be HSL.
 
   /* Room Background */
   .room-background {
+    position: relative;
     background: var(--gradient-fantasy);
     background-attachment: fixed;
   }
   
-  .dark .room-background {
+  .dark .room-background::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
     background: var(--gradient-fantasy);
     background-attachment: fixed;
-    opacity: 0.7; /* Lighter for dark mode */
+    opacity: 0.7;
+    z-index: -1;
+  }
+  
+  .dark .room-background {
+    background: transparent;
   }
   
   /* Gaming Glow Animation */

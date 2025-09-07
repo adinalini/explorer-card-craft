@@ -362,8 +362,17 @@ const Room = () => {
           filter: `id=eq.${roomId}`
         },
         (payload) => {
+          console.log('🔴 REALTIME: Room update received:', payload.eventType, payload)
+          
           if (payload.eventType === 'UPDATE') {
             const updatedRoom = payload.new as Room
+            
+            console.log('🔴 REALTIME: Updated room data:', {
+              creator_ready: updatedRoom.creator_ready,
+              joiner_ready: updatedRoom.joiner_ready,
+              joiner_name: updatedRoom.joiner_name,
+              status: updatedRoom.status
+            })
             
             // CRITICAL FIX: Check if draft has already been started for this room
             const isDraftAlreadyActive = updatedRoom.status === 'drafting' || updatedRoom.current_round > 0
@@ -505,7 +514,22 @@ const Room = () => {
           }
         }
       )
-      .subscribe()
+      .subscribe((status) => {
+        console.log('🔴 REALTIME: Room subscription status:', status)
+        if (status === 'SUBSCRIBED') {
+          console.log('🔴 REALTIME: Successfully subscribed to room updates')
+        } else if (status === 'CHANNEL_ERROR') {
+          console.error('🔴 REALTIME: Room subscription error, falling back to polling')
+          // Fallback to polling if realtime fails
+          const pollInterval = setInterval(() => {
+            console.log('🔄 POLLING: Fetching room data due to realtime failure')
+            fetchRoom()
+          }, 3000)
+          
+          // Cleanup polling when component unmounts
+          return () => clearInterval(pollInterval)
+        }
+      })
 
     // Subscribe to room cards changes
     const cardsChannel = supabase
@@ -519,6 +543,7 @@ const Room = () => {
           filter: `room_id=eq.${roomId}`
         },
         (payload) => {
+          console.log('🔴 REALTIME: Cards update received:', payload.eventType)
           if (payload.eventType === 'INSERT') {
             // Debounce multiple INSERT events to prevent excessive API calls
             clearTimeout(fetchCardsTimeoutRef.current)
@@ -534,7 +559,9 @@ const Room = () => {
           }
         }
       )
-      .subscribe()
+      .subscribe((status) => {
+        console.log('🔴 REALTIME: Cards subscription status:', status)
+      })
 
     // Subscribe to player decks changes
     const decksChannel = supabase
@@ -547,13 +574,17 @@ const Room = () => {
           table: 'player_decks',
           filter: `room_id=eq.${roomId}`
         },
-        () => {
+        (payload) => {
+          console.log('🔴 REALTIME: Decks update received:', payload.eventType)
           fetchPlayerDecks()
         }
       )
-      .subscribe()
+      .subscribe((status) => {
+        console.log('🔴 REALTIME: Decks subscription status:', status)
+      })
 
     return () => {
+      console.log('🔴 REALTIME: Cleaning up subscriptions for room:', roomId)
       supabase.removeChannel(roomChannel)
       supabase.removeChannel(cardsChannel)
       supabase.removeChannel(decksChannel)
@@ -565,6 +596,7 @@ const Room = () => {
       if (draftStartTimeout) {
         clearTimeout(draftStartTimeout)
       }
+      console.log('🔴 REALTIME: Cleanup completed')
     }
   }, [roomId, userSessionId])
 

@@ -2099,7 +2099,7 @@ const Room = () => {
               {/* Creator Side */}
               <div className="flex flex-col items-center justify-center border-b-2 md:border-b-0 md:border-r-2 border-muted pb-8 md:pb-0 md:pr-8">
                 <div className="text-center space-y-6">
-                  <h2 className="text-2xl font-bold text-black">{room.creator_name}</h2>
+                  <h2 className="text-2xl font-bold text-[hsl(var(--background-start))] dark:text-[hsl(var(--background-start))]">{room.creator_name}</h2>
                   <div className="text-lg text-muted-foreground">Room Creator</div>
                   
                   <Button
@@ -2117,7 +2117,7 @@ const Room = () => {
               {/* Joiner Side */}
               <div className="flex flex-col items-center justify-center pt-8 md:pt-0 md:pl-8">
                 <div className="text-center space-y-6">
-                  <h2 className="text-2xl font-bold text-black">{room.joiner_name}</h2>
+                  <h2 className="text-2xl font-bold text-[hsl(var(--background-start))] dark:text-[hsl(var(--background-start))]">{room.joiner_name}</h2>
                   <div className="text-lg text-muted-foreground">Joined Player</div>
                   
                   <Button
@@ -2141,11 +2141,11 @@ const Room = () => {
               <div className="flex flex-col sm:flex-row justify-center gap-4 sm:gap-8">
                 <div className="flex items-center justify-center gap-2">
                   <span className={`w-4 h-4 rounded-full ${room.creator_ready ? 'bg-green-500' : 'bg-gray-300'}`}></span>
-                  <span className="text-black">{room.creator_name}</span>
+                  <span className="text-[hsl(var(--background-start))] dark:text-[hsl(var(--background-start))]">{room.creator_name}</span>
                 </div>
                 <div className="flex items-center justify-center gap-2">
                   <span className={`w-4 h-4 rounded-full ${room.joiner_ready ? 'bg-green-500' : 'bg-gray-300'}`}></span>
-                  <span className="text-black">{room.joiner_name}</span>
+                  <span className="text-[hsl(var(--background-start))] dark:text-[hsl(var(--background-start))]">{room.joiner_name}</span>
                 </div>
               </div>
               
@@ -2164,18 +2164,18 @@ const Room = () => {
               <div className="space-y-8">
                 {/* Draft Status */}
                 <div className="text-center space-y-4">
-                  <h2 className="text-2xl font-bold text-black">
+                  <h2 className="text-2xl font-bold text-[hsl(var(--background-start))] dark:text-[hsl(var(--background-start))]">
                     Round {room.current_round} of 13
                   </h2>
                   {!isSelectionLocked ? (
                     <div className="space-y-2">
-                      <p className="text-lg text-black">Choose your card!</p>
+                      <p className="text-lg text-[hsl(var(--background-start))] dark:text-[hsl(var(--background-start))]">Choose your card!</p>
                       <div className="text-2xl font-bold text-primary">
                         {Math.ceil(timeRemaining)}s remaining
                       </div>
                     </div>
                   ) : (
-                    <p className="text-lg text-black">Revealing selections...</p>
+                    <p className="text-lg text-[hsl(var(--background-start))] dark:text-[hsl(var(--background-start))]">Revealing selections...</p>
                   )}
                 </div>
 
@@ -2185,7 +2185,7 @@ const Room = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     {/* Creator's cards */}
                     <div className="space-y-4">
-                      <h3 className="text-xl font-semibold text-center text-black">
+                      <h3 className="text-xl font-semibold text-center text-[hsl(var(--background-start))] dark:text-[hsl(var(--background-start))]">
                         {room.creator_name}'s Cards
                       </h3>
                       <div className="grid grid-cols-2 gap-4">
@@ -2218,7 +2218,7 @@ const Room = () => {
 
                     {/* Joiner's cards */}
                     <div className="space-y-4">
-                      <h3 className="text-xl font-semibold text-center text-black">
+                      <h3 className="text-xl font-semibold text-center text-[hsl(var(--background-start))] dark:text-[hsl(var(--background-start))]">
                         {room.joiner_name}'s Cards
                       </h3>
                       <div className="grid grid-cols-2 gap-4">
@@ -2256,14 +2256,14 @@ const Room = () => {
               <div className="space-y-8">
                 {/* Draft Status */}
                 <div className="text-center space-y-4">
-                  <h2 className="text-2xl font-bold text-black">
+                  <h2 className="text-2xl font-bold text-[hsl(var(--background-start))] dark:text-[hsl(var(--background-start))]">
                     Round {room.current_round} of 13
                   </h2>
                   <div className="space-y-4">
                     {/* Player Names with Turn Arrow */}
                     <div className="flex items-center justify-center gap-4 max-w-2xl mx-auto">
                       <div className="text-center flex-1">
-                        <div className="text-lg font-semibold text-black">
+                        <div className="text-lg font-semibold text-[hsl(var(--background-start))] dark:text-[hsl(var(--background-start))]">
                           {room.creator_name} {room.triple_draft_first_pick === 'creator' ? '(First Pick)' : ''}
                         </div>
                       </div>
@@ -2285,7 +2285,7 @@ const Room = () => {
                        </div>
                       
                       <div className="text-center flex-1">
-                        <div className="text-lg font-semibold text-black">
+                        <div className="text-lg font-semibold text-[hsl(var(--background-start))] dark:text-[hsl(var(--background-start))]">
                           {room.joiner_name} {room.triple_draft_first_pick === 'joiner' ? '(First Pick)' : ''}
                         </div>
                       </div>
@@ -2296,7 +2296,7 @@ const Room = () => {
                           {Math.ceil(timeRemaining)}s remaining
                         </div>
                       ) : (
-                        <p className="text-lg text-black">Revealing selection...</p>
+                        <p className="text-lg text-[hsl(var(--background-start))] dark:text-[hsl(var(--background-start))]">Revealing selection...</p>
                       )}
                   </div>
                 </div>
@@ -2319,7 +2319,7 @@ const Room = () => {
                 {/* Draft Status */}
                 <div className="text-center space-y-4">
                   <div className="flex justify-between items-center max-w-4xl mx-auto">
-                    <h2 className="text-2xl font-bold text-black">Mega Draft</h2>
+                    <h2 className="text-2xl font-bold text-[hsl(var(--background-start))] dark:text-[hsl(var(--background-start))]">Mega Draft</h2>
                     <div className="text-lg font-semibold text-primary">
                       Progress: {Math.min((room.mega_draft_turn_count || 0) + 1, 23)}/23 cards selected
                     </div>
@@ -2328,7 +2328,7 @@ const Room = () => {
                     {/* Player Names with Turn Arrow */}
                     <div className="flex items-center justify-center gap-4 max-w-2xl mx-auto">
                       <div className="text-center flex-1">
-                        <div className="text-lg font-semibold text-black">
+                        <div className="text-lg font-semibold text-[hsl(var(--background-start))] dark:text-[hsl(var(--background-start))]">
                           {room.creator_name} {room.first_pick_player === 'creator' ? '(First Pick)' : ''}
                         </div>
                       </div>
@@ -2350,7 +2350,7 @@ const Room = () => {
                       </div>
                       
                       <div className="text-center flex-1">
-                        <div className="text-lg font-semibold text-black">
+                        <div className="text-lg font-semibold text-[hsl(var(--background-start))] dark:text-[hsl(var(--background-start))]">
                           {room.joiner_name} {room.first_pick_player === 'joiner' ? '(First Pick)' : ''}
                         </div>
                       </div>
@@ -2361,7 +2361,7 @@ const Room = () => {
                         {Math.ceil(timeRemaining)}s remaining
                       </div>
                     ) : (
-                      <p className="text-lg text-black">Processing selection...</p>
+                      <p className="text-lg text-[hsl(var(--background-start))] dark:text-[hsl(var(--background-start))]">Processing selection...</p>
                     )}
                   </div>
                 </div>
@@ -2410,7 +2410,7 @@ const Room = () => {
               <h2 className="text-2xl lg:text-3xl font-bold text-primary mb-4">
                 Draft Complete!
               </h2>
-              <p className="text-lg lg:text-xl text-black">Good luck, have fun!</p>
+              <p className="text-lg lg:text-xl text-[hsl(var(--background-start))] dark:text-[hsl(var(--background-start))]">Good luck, have fun!</p>
             </div>
 
             {/* Final Decks - Responsive layout */}

@@ -1041,6 +1041,11 @@ const Room = () => {
     // Get available cards for this user to select
     let availableCards = currentRoundCards.filter(card => !card.selected_by)
     
+    // For default draft, filter by player side
+    if (room.draft_type === 'default') {
+      availableCards = availableCards.filter(card => card.side === userRole)
+    }
+    
     // For triple draft, further filter based on phase and turn
     if (room.draft_type === 'triple') {
       const currentPhase = room.triple_draft_phase || 1

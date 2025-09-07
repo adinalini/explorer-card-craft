@@ -630,18 +630,9 @@ const Room = () => {
     try {
       await navigator.clipboard.writeText(room.id)
       setRoomCodeCopied(true)
-      toast({
-        title: "Copied!",
-        description: "Room code copied to clipboard",
-      })
-      
       setTimeout(() => setRoomCodeCopied(false), 2000)
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to copy room code to clipboard",
-        variant: "destructive"
-      })
+      console.error('Failed to copy room code to clipboard', error)
     }
   }
 
@@ -2044,10 +2035,10 @@ const Room = () => {
   const joinerDeck = playerDecks.filter(card => card.player_side === 'joiner')
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen room-background">
       {/* Header with gradient wave */}
       <div className="relative">
-        <div className="bg-gradient-to-r from-[hsl(var(--primary))] to-[hsl(var(--secondary))] py-3 px-4">
+        <div className="bg-gradient-to-r from-[hsl(320_100%_60%)] to-[hsl(30_100%_60%)] py-3 px-4">
           <div className="flex items-center justify-between max-w-6xl mx-auto">
             <Button
               onClick={handleBackToHome}

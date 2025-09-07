@@ -20,7 +20,7 @@ export function ThemeToggle({ className }: ThemeToggleProps) {
       className={cn(
         "relative h-9 w-9 rounded-md p-0 border border-border/50 transition-colors",
         theme === "light" 
-          ? "text-foreground bg-card/20 hover:bg-card/80 hover:text-foreground" 
+          ? "text-foreground bg-card/80 hover:bg-card/20 hover:text-foreground" 
           : "text-foreground bg-card/80 hover:bg-accent hover:text-accent-foreground",
         className
       )}

@@ -227,13 +227,16 @@ All colors MUST be HSL.
     image-rendering: -moz-crisp-edges;
   }
 
-  /* Gaming Gradient Overlays */
-  .overlay-gaming {
-    background: linear-gradient(45deg, 
-      hsl(var(--primary) / 0.1), 
-      hsl(var(--accent) / 0.1), 
-      hsl(var(--secondary) / 0.1)
-    );
+  /* Room Background */
+  .room-background {
+    background: var(--gradient-fantasy);
+    background-attachment: fixed;
+  }
+  
+  .dark .room-background {
+    background: var(--gradient-fantasy);
+    background-attachment: fixed;
+    opacity: 0.7; /* Lighter for dark mode */
   }
   
   /* Gaming Glow Animation */

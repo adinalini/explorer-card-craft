@@ -50,10 +50,12 @@ const Index = () => {
       return
     }
 
+    console.log('Starting room creation process...')
     setIsCreating(true)
     const newRoomId = generateRoomId()
 
     try {
+      console.log('Step 1: Creating room with ID:', newRoomId)
       // First create the room
       const { error } = await supabase
         .from('rooms')
@@ -64,8 +66,10 @@ const Index = () => {
           status: 'waiting'
         }])
 
+      console.log('Step 1 result:', { error })
       if (error) throw error
 
+      console.log('Step 2: Creating game session...')
       // Then create a game session for the creator - create new session to avoid conflicts
       const sessionId = 'session_' + Math.random().toString(36).substr(2, 16) + Date.now().toString(36)
       console.log('Creating game session for creator:', { roomId: newRoomId, sessionId, creatorName: creatorName.trim() })
@@ -79,7 +83,7 @@ const Index = () => {
           player_name: creatorName.trim()
         })
       
-      console.log('Creator game session creation result:', { sessionError })
+      console.log('Step 2 result - Creator game session creation result:', { sessionError })
       
       // Update sessionStorage to match the database session
       sessionStorage.setItem('userSessionId', sessionId)
@@ -89,11 +93,14 @@ const Index = () => {
         // Don't throw here, just log it
       }
 
+      console.log('Step 3: Setting up session and navigating...')
       // Set session flag to indicate this user created this room
       localStorage.setItem(`room_${newRoomId}_creator`, sessionId)
       console.log('Creator session set:', { roomId: newRoomId, sessionId })
       setCreateDialogOpen(false)
+      console.log('About to navigate to room:', `/room/${newRoomId}`)
       navigate(`/room/${newRoomId}`)
+      console.log('Navigation completed')
     } catch (error) {
       console.error('Error creating room:', error)
       toast({
@@ -102,6 +109,7 @@ const Index = () => {
         variant: "destructive"
       })
     } finally {
+      console.log('Cleaning up - setting isCreating to false')
       setIsCreating(false)
     }
   }

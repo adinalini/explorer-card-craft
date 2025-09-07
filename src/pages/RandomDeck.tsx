@@ -159,10 +159,10 @@ const RandomDeck = () => {
 
           {/* Title */}
           <div className="text-center space-y-2 pb-4">
-            <h1 className="text-4xl md:text-6xl font-bold text-white drop-shadow-2xl">
+            <h1 className="text-4xl md:text-6xl font-bold text-[hsl(var(--background))] dark:text-white drop-shadow-2xl">
               Random Deck
             </h1>
-            <p className="text-xl text-white/80">
+            <p className="text-xl text-[hsl(var(--background))] dark:text-white/80">
               Good luck have fun!
             </p>
           </div>

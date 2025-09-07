@@ -7,7 +7,7 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instantiate createClient with right options
+  // Allows to automatically instanciate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "12.2.12 (cd3cf9e)"
@@ -232,28 +232,12 @@ export type Database = {
         Args: { session_token_param: string }
         Returns: undefined
       }
-      update_round_timer: {
-        Args: { room_id_param: string; session_token_param: string }
-        Returns: {
-          round_start_time: string
-          server_time: string
-          success: boolean
-        }[]
-      }
       validate_room_access: {
         Args: { room_id_param: string; session_token_param: string }
         Returns: {
           can_interact: boolean
-          player_name: string
           player_role: string
-        }[]
-      }
-      validate_room_for_joining: {
-        Args: { room_id_param: string }
-        Returns: {
-          is_available: boolean
-          room_exists: boolean
-          room_full: boolean
+          player_name: string
         }[]
       }
     }

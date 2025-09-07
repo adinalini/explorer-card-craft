@@ -366,37 +366,27 @@ const Room = () => {
             // CRITICAL FIX: Check if draft has already been started for this room
             const isDraftAlreadyActive = updatedRoom.status === 'drafting' || updatedRoom.current_round > 0
             
-            console.log('🔄 REALTIME: Room update received:', updatedRoom)
-            console.log('🔄 REALTIME: Ready states - Creator:', updatedRoom.creator_ready, 'Joiner:', updatedRoom.joiner_ready)
-            
             setRoom(updatedRoom)
             
             const role = getUserRole(updatedRoom, userSessionId)
             setUserRole(role)
             
-            // CRITICAL FIX: Force complete UI refresh when ready states change
+            // CRITICAL FIX: Force a re-render when ready states change to ensure UI sync
             if (room && (room.creator_ready !== updatedRoom.creator_ready || room.joiner_ready !== updatedRoom.joiner_ready)) {
-              console.log('🔄 REALTIME: Ready states changed - forcing complete UI refresh')
+              console.log('🔧 ROOM SYNC: Ready states changed - forcing UI update')
+              // Force a re-render by updating a state that triggers UI refresh
+              setTimeRemaining(prev => prev) // This will trigger a re-render
               
-              // Force multiple re-renders to ensure UI updates properly
-              setTimeout(() => {
-                setRoom({ ...updatedRoom })
-                setTimeRemaining(prev => prev)
-              }, 50)
+              // Additional sync: Update room state immediately to ensure UI reflects changes
+              setRoom(updatedRoom)
               
+              // CRITICAL FIX: Add a more robust sync mechanism
+              // Force a complete UI refresh by updating multiple state variables
               setTimeout(() => {
-                setRoom({ ...updatedRoom }) 
+                console.log('🔧 ROOM SYNC: Forcing complete UI refresh')
+                setTimeRemaining(prev => prev + 0.001) // Minimal change to trigger re-render
+                setRoom(prev => ({ ...prev, ...updatedRoom })) // Force room state update
               }, 100)
-            }
-            
-            // CRITICAL FIX: Force refresh when joiner joins room
-            if (room && !room.joiner_name && updatedRoom.joiner_name) {
-              console.log('🔄 REALTIME: Joiner joined - forcing complete refresh')
-              setTimeout(() => {
-                fetchRoom()
-                fetchRoomCards()
-                fetchPlayerDecks()
-              }, 200)
             }
             
             // Handle triple draft phase transitions with debouncing
@@ -581,11 +571,10 @@ const Room = () => {
     if (room?.status === 'completed') {
       const expireTimer = setTimeout(async () => {
         try {
-          const supabaseWithSession = getSupabaseWithSession()
-          await supabaseWithSession.from('rooms').delete().eq('id', roomId)
-          await supabaseWithSession.from('room_cards').delete().eq('room_id', roomId)
-          await supabaseWithSession.from('player_decks').delete().eq('room_id', roomId)
-          await supabaseWithSession.from('game_sessions').delete().eq('room_id', roomId)
+          await supabase.from('rooms').delete().eq('id', roomId)
+          await supabase.from('room_cards').delete().eq('room_id', roomId)
+          await supabase.from('player_decks').delete().eq('room_id', roomId)
+          await supabase.from('game_sessions').delete().eq('room_id', roomId)
           navigate('/')
         } catch (error) {
           console.error('Error expiring room:', error)
@@ -603,27 +592,15 @@ const Room = () => {
     console.log('🔍 FETCH ROOM: Room ID:', roomId)
 
     try {
-      const supabaseWithSession = getSupabaseWithSession()
-      const { data, error } = await supabaseWithSession
+      const { data, error } = await supabase
         .from('rooms')
         .select('*')
         .eq('id', roomId)
-        .maybeSingle() // CRITICAL FIX: Use maybeSingle to prevent errors when room doesn't exist
+        .single()
 
       if (error) {
         console.error('🚨 FETCH ROOM: Error fetching room:', error)
         throw error
-      }
-      
-      if (!data) {
-        console.error('🚨 FETCH ROOM: Room not found')
-        toast({
-          title: "Room Not Found",
-          description: "This room no longer exists.",
-          variant: "destructive"
-        })
-        navigate('/')
-        return
       }
       
       console.log('🔍 FETCH ROOM: Successfully fetched room data:', data)
@@ -639,17 +616,21 @@ const Room = () => {
       console.error('🚨 FETCH ROOM: Complete failure:', error)
       toast({
         title: "Error",
-        description: "Failed to fetch room data. Please refresh the page.",
+        description: "Failed to load room data.",
         variant: "destructive"
       })
+    } finally {
+      setLoading(false)
     }
   }
+
   const fetchRoomCards = async () => {
     if (!roomId) return
 
+    if (!roomId) return
+
     try {
-      const supabaseWithSession = getSupabaseWithSession()
-      const { data, error } = await supabaseWithSession
+      const { data, error } = await supabase
         .from('room_cards')
         .select('*')
         .eq('room_id', roomId)
@@ -695,13 +676,9 @@ const Room = () => {
 
     const updateField = userRole === 'creator' ? 'creator_ready' : 'joiner_ready'
     const currentValue = userRole === 'creator' ? room.creator_ready : room.joiner_ready
-    const newValue = !currentValue
-    
-    // CRITICAL FIX: Optimistically update UI immediately for responsiveness  
-    setRoom(prev => ({ ...prev, [updateField]: newValue }))
     
     try {
-      console.log('🔘 READY: Updating ready status to:', newValue)
+      console.log('🔘 READY: Updating ready status to:', !currentValue)
       
       // Create authenticated client to bypass RLS restrictions
       const supabaseWithToken = getSupabaseWithSession()
@@ -720,7 +697,7 @@ const Room = () => {
 
       const { data: updateData, error } = await supabaseWithToken
         .from('rooms')
-        .update({ [updateField]: newValue })
+        .update({ [updateField]: !currentValue })
         .eq('id', roomId!)
         .select()
 
@@ -733,26 +710,17 @@ const Room = () => {
       }
       
       console.log('🔘 READY: Ready status updated successfully')
-      setIsReady(newValue)
-      
-      // Force a re-fetch to ensure everything is in sync
-      setTimeout(() => {
-        fetchRoom()
-      }, 500)
-      
+      setIsReady(!currentValue)
     } catch (error) {
       console.error('🚨 READY: Error updating ready status:', error)
-      
-      // CRITICAL FIX: Revert optimistic update on failure
-      setRoom(prev => ({ ...prev, [updateField]: currentValue }))
-      
       toast({
         title: "Error",
-        description: "Failed to update ready status. Please try again.",
+        description: "Failed to update ready status.",
         variant: "destructive"
       })
     }
   }
+
   // Add a state to prevent multiple simultaneous draft starts
   const [isDraftStarting, setIsDraftStarting] = useState(false)
 
@@ -832,18 +800,6 @@ const Room = () => {
         }
         
         console.log('🚀 START DRAFT: Room update successful:', roomUpdateData)
-        
-        // CRITICAL FIX: Update local room state immediately after successful database update
-        if (roomUpdateData && roomUpdateData[0]) {
-          console.log('🚀 START DRAFT: Updating local room state with:', roomUpdateData[0])
-          setRoom(roomUpdateData[0])
-          
-          // Also fetch fresh room cards since we're starting the draft
-          setTimeout(() => {
-            fetchRoomCards()
-            fetchPlayerDecks()
-          }, 500)
-        }
       } else {
         console.log('🚀 START DRAFT: Cards already exist, skipping room update to prevent timer reset')
         
@@ -852,13 +808,6 @@ const Room = () => {
           const firstPick = response?.firstPickPlayer || 'creator'
           console.log(`🔷 TRIPLE: Starting with first pick: ${firstPick}`)
         }
-        
-        // CRITICAL FIX: Even if we skip room update, we still need to fetch current room state
-        setTimeout(() => {
-          fetchRoom()
-          fetchRoomCards()
-          fetchPlayerDecks()
-        }, 500)
       }
       
       // SUCCESS: Draft start completed without room update errors
@@ -1952,10 +1901,9 @@ const Room = () => {
 
     try {
       // Delete room and associated data
-      const supabaseWithSession = getSupabaseWithSession()
-      await supabaseWithSession.from('player_decks').delete().eq('room_id', roomId)
-      await supabaseWithSession.from('room_cards').delete().eq('room_id', roomId)
-      await supabaseWithSession.from('rooms').delete().eq('id', roomId)
+      await supabase.from('player_decks').delete().eq('room_id', roomId)
+      await supabase.from('room_cards').delete().eq('room_id', roomId)
+      await supabase.from('rooms').delete().eq('id', roomId)
 
       navigate('/')
     } catch (error) {

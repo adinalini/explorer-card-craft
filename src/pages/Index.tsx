@@ -4,7 +4,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-
+import { Blob } from "@/components/ui/blob"
 import { WaveDivider } from "@/components/ui/wave-divider"
 import { useNavigate } from "react-router-dom"
 import { supabase } from "@/integrations/supabase/client"
@@ -50,12 +50,10 @@ const Index = () => {
       return
     }
 
-    console.log('Starting room creation process...')
     setIsCreating(true)
     const newRoomId = generateRoomId()
 
     try {
-      console.log('Step 1: Creating room with ID:', newRoomId)
       // First create the room
       const { error } = await supabase
         .from('rooms')
@@ -66,10 +64,8 @@ const Index = () => {
           status: 'waiting'
         }])
 
-      console.log('Step 1 result:', { error })
       if (error) throw error
 
-      console.log('Step 2: Creating game session...')
       // Then create a game session for the creator - create new session to avoid conflicts
       const sessionId = 'session_' + Math.random().toString(36).substr(2, 16) + Date.now().toString(36)
       console.log('Creating game session for creator:', { roomId: newRoomId, sessionId, creatorName: creatorName.trim() })
@@ -83,7 +79,7 @@ const Index = () => {
           player_name: creatorName.trim()
         })
       
-      console.log('Step 2 result - Creator game session creation result:', { sessionError })
+      console.log('Creator game session creation result:', { sessionError })
       
       // Update sessionStorage to match the database session
       sessionStorage.setItem('userSessionId', sessionId)
@@ -93,14 +89,11 @@ const Index = () => {
         // Don't throw here, just log it
       }
 
-      console.log('Step 3: Setting up session and navigating...')
       // Set session flag to indicate this user created this room
       localStorage.setItem(`room_${newRoomId}_creator`, sessionId)
       console.log('Creator session set:', { roomId: newRoomId, sessionId })
       setCreateDialogOpen(false)
-      console.log('About to navigate to room:', `/room/${newRoomId}`)
       navigate(`/room/${newRoomId}`)
-      console.log('Navigation completed')
     } catch (error) {
       console.error('Error creating room:', error)
       toast({
@@ -109,7 +102,6 @@ const Index = () => {
         variant: "destructive"
       })
     } finally {
-      console.log('Cleaning up - setting isCreating to false')
       setIsCreating(false)
     }
   }
@@ -129,14 +121,15 @@ const Index = () => {
     try {
       console.log('Attempting to join room:', { roomId: roomId.toUpperCase(), joinerName: joinerName.trim() })
       
-      // SECURE: Use validation function instead of direct room query to prevent data exposure
-      const { data: roomValidation, error: fetchError } = await supabase
-        .rpc('validate_room_for_joining', { room_id_param: roomId.toUpperCase() })
+      const { data: room, error: fetchError } = await supabase
+        .from('rooms')
+        .select('*')
+        .eq('id', roomId.toUpperCase())
         .single()
 
-      console.log('Room validation result:', { roomValidation, fetchError })
+      console.log('Fetched room data:', { room, fetchError })
 
-      if (fetchError || !roomValidation?.room_exists) {
+      if (fetchError || !room) {
         toast({
           title: "Room Not Found",
           description: "The room ID you entered doesn't exist.",
@@ -145,7 +138,7 @@ const Index = () => {
         return
       }
 
-      if (roomValidation.room_full) {
+      if (room.joiner_name) {
         toast({
           title: "Draft has already begun",
           description: "This room already has two players.",
@@ -154,10 +147,10 @@ const Index = () => {
         return
       }
 
-      if (!roomValidation.is_available) {
+      if (room.status === 'active' || room.status === 'completed') {
         toast({
-          title: "Room Unavailable", 
-          description: "This room is no longer accepting new players.",
+          title: "Draft has already begun",
+          description: "This room's draft is already in progress.",
           variant: "destructive"
         })
         return
@@ -238,6 +231,12 @@ const Index = () => {
 
   return (
     <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-[hsl(var(--background-start))] to-[hsl(var(--background-end))]">
+      {/* Abstract Blobs */}
+      <Blob variant="pink" size="lg" className="top-20 left-10 animate-bounce" style={{ animationDelay: '0s', animationDuration: '6s' }} />
+      <Blob variant="yellow" size="md" className="top-32 right-20 animate-bounce" style={{ animationDelay: '2s', animationDuration: '8s' }} />
+      <Blob variant="orange" size="sm" className="bottom-40 left-32 animate-bounce" style={{ animationDelay: '4s', animationDuration: '7s' }} />
+      <Blob variant="pink" size="md" className="bottom-20 right-16 animate-bounce" style={{ animationDelay: '1s', animationDuration: '9s' }} />
+      
       {/* Main Content */}
       <div className="relative z-10 min-h-screen flex flex-col items-center justify-center px-4">
         <div className="text-center space-y-12">

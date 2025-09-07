@@ -5,8 +5,10 @@ import { WaveDivider } from "@/components/ui/wave-divider"
 import { supabase, getSupabaseWithSession } from "@/integrations/supabase/client"
 import { createClient } from '@supabase/supabase-js'
 import { toast } from "@/hooks/use-toast"
+import { Copy, Check } from "lucide-react"
 import { DraftCard } from "@/components/DraftCard"
 import { DeckDisplay } from "@/components/DeckDisplay"
+import { DeckCodeDisplay } from "@/components/DeckCodeDisplay"
 import { getRandomCards, getCardById } from "@/utils/cardData"
 import { generateTripleDraftChoice } from "@/utils/tripleDraftCards"
 import { generateMegaDraftCards } from "@/utils/megaDraftCards"
@@ -99,6 +101,7 @@ const Room = () => {
   const [draftStartTimeout, setDraftStartTimeout] = useState<NodeJS.Timeout | null>(null)
   const [backgroundAutoSelectTimeout, setBackgroundAutoSelectTimeout] = useState<NodeJS.Timeout | null>(null)
   const [isUpdatingReady, setIsUpdatingReady] = useState(false)
+  const [roomCodeCopied, setRoomCodeCopied] = useState(false)
   const isProcessingRoundRef = useRef(false)
   const [isProcessingSelection, setIsProcessingSelection] = useState<boolean>(false)
   const [megaDraftCards, setMegaDraftCards] = useState<any[]>([])
@@ -618,6 +621,27 @@ const Room = () => {
       return () => clearTimeout(expireTimer)
     }
   }, [room?.status, roomId, navigate])
+
+  const handleCopyRoomCode = async () => {
+    if (!room?.id) return
+
+    try {
+      await navigator.clipboard.writeText(room.id)
+      setRoomCodeCopied(true)
+      toast({
+        title: "Copied!",
+        description: "Room code copied to clipboard",
+      })
+      
+      setTimeout(() => setRoomCodeCopied(false), 2000)
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to copy room code to clipboard",
+        variant: "destructive"
+      })
+    }
+  }
 
   const fetchRoom = async () => {
     if (!roomId) return
@@ -2086,8 +2110,27 @@ const Room = () => {
           <div className="text-2xl md:text-3xl text-primary font-semibold">
             Waiting for a player to join the room
           </div>
-          <div className="text-xl md:text-2xl text-muted-foreground">
-            Share this code: <span className="font-bold text-primary text-3xl tracking-wider">{room.id}</span>
+          <div className="text-xl md:text-2xl text-muted-foreground flex items-center justify-center gap-4">
+            Share this code: 
+            <span className="font-bold text-primary text-3xl tracking-wider">{room.id}</span>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleCopyRoomCode}
+              className="flex items-center gap-2"
+            >
+              {roomCodeCopied ? (
+                <>
+                  <Check className="h-4 w-4" />
+                  Copied!
+                </>
+              ) : (
+                <>
+                  <Copy className="h-4 w-4" />
+                  Copy
+                </>
+              )}
+            </Button>
           </div>
         </div>
       ) : room.status === 'waiting' ? (
@@ -2427,6 +2470,16 @@ const Room = () => {
                   isOwn={userRole === 'creator'}
                   isDraftComplete={true}
                 />
+                <DeckCodeDisplay
+                  cards={creatorDeck.map(card => ({
+                    card_id: card.card_id,
+                    card_name: card.card_name,
+                    card_image: card.card_image,
+                    is_legendary: card.is_legendary,
+                    selection_order: card.selection_order
+                  }))}
+                  playerName={room.creator_name}
+                />
               </div>
               <div className="space-y-4 lg:space-y-6">
                 <DeckDisplay
@@ -2440,6 +2493,16 @@ const Room = () => {
                   playerName={room.joiner_name}
                   isOwn={userRole === 'joiner'}
                   isDraftComplete={true}
+                />
+                <DeckCodeDisplay
+                  cards={joinerDeck.map(card => ({
+                    card_id: card.card_id,
+                    card_name: card.card_name,
+                    card_image: card.card_image,
+                    is_legendary: card.is_legendary,
+                    selection_order: card.selection_order
+                  }))}
+                  playerName={room.joiner_name}
                 />
               </div>
             </div>

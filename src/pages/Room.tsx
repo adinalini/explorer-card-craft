@@ -8,7 +8,6 @@ import { toast } from "@/hooks/use-toast"
 import { Copy, Check } from "lucide-react"
 import { DraftCard } from "@/components/DraftCard"
 import { DeckDisplay } from "@/components/DeckDisplay"
-import { DeckCodeDisplay } from "@/components/DeckCodeDisplay"
 import { getRandomCards, getCardById } from "@/utils/cardData"
 import { generateTripleDraftChoice } from "@/utils/tripleDraftCards"
 import { generateMegaDraftCards } from "@/utils/megaDraftCards"
@@ -2458,28 +2457,18 @@ const Room = () => {
             {/* Final Decks - Responsive layout */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-8">
               <div className="space-y-4 lg:space-y-6">
-                <DeckDisplay
-                  cards={creatorDeck.map(card => ({
-                    card_id: card.card_id,
-                    card_name: card.card_name,
-                    card_image: card.card_image,
-                    is_legendary: card.is_legendary,
-                    selection_order: card.selection_order
-                  }))}
-                  playerName={room.creator_name}
-                  isOwn={userRole === 'creator'}
-                  isDraftComplete={true}
-                />
-                <DeckCodeDisplay
-                  cards={creatorDeck.map(card => ({
-                    card_id: card.card_id,
-                    card_name: card.card_name,
-                    card_image: card.card_image,
-                    is_legendary: card.is_legendary,
-                    selection_order: card.selection_order
-                  }))}
-                  playerName={room.creator_name}
-                />
+                  <DeckDisplay
+                    cards={creatorDeck.map(card => ({
+                      card_id: card.card_id,
+                      card_name: card.card_name,
+                      card_image: card.card_image,
+                      is_legendary: card.is_legendary,
+                      selection_order: card.selection_order
+                    }))}
+                    playerName={room.creator_name}
+                    isOwn={userRole === 'creator'}
+                    isDraftComplete={true}
+                  />
               </div>
               <div className="space-y-4 lg:space-y-6">
                 <DeckDisplay
@@ -2493,16 +2482,6 @@ const Room = () => {
                   playerName={room.joiner_name}
                   isOwn={userRole === 'joiner'}
                   isDraftComplete={true}
-                />
-                <DeckCodeDisplay
-                  cards={joinerDeck.map(card => ({
-                    card_id: card.card_id,
-                    card_name: card.card_name,
-                    card_image: card.card_image,
-                    is_legendary: card.is_legendary,
-                    selection_order: card.selection_order
-                  }))}
-                  playerName={room.joiner_name}
                 />
               </div>
             </div>

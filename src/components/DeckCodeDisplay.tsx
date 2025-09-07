@@ -13,10 +13,9 @@ interface DeckCodeDisplayProps {
     is_legendary: boolean
     selection_order: number
   }>
-  playerName: string
 }
 
-export function DeckCodeDisplay({ cards, playerName }: DeckCodeDisplayProps) {
+export function DeckCodeDisplay({ cards }: DeckCodeDisplayProps) {
   const [copied, setCopied] = useState(false)
 
   const generateDeckCode = () => {
@@ -73,35 +72,26 @@ export function DeckCodeDisplay({ cards, playerName }: DeckCodeDisplayProps) {
   }
 
   return (
-    <div className="mt-4 p-4 bg-muted/30 rounded-lg border">
-      <div className="flex items-center justify-between gap-3">
-        <div className="flex-1 min-w-0">
-          <h4 className="text-sm font-semibold text-muted-foreground mb-1">
-            Deck Code for {playerName}
-          </h4>
-          <p className="text-xs text-muted-foreground font-mono break-all bg-background px-2 py-1 rounded">
-            {deckCode}
-          </p>
-        </div>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleCopyDeckCode}
-          className="flex-shrink-0"
-        >
-          {copied ? (
-            <>
-              <Check className="h-4 w-4 mr-1" />
-              Copied!
-            </>
-          ) : (
-            <>
-              <Copy className="h-4 w-4 mr-1" />
-              Copy
-            </>
-          )}
-        </Button>
-      </div>
+    <div className="space-y-2">
+      <h4 className="text-sm font-semibold text-muted-foreground">Deck Code</h4>
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={handleCopyDeckCode}
+        className="w-full bg-background text-foreground border-border hover:bg-accent hover:text-accent-foreground"
+      >
+        {copied ? (
+          <>
+            <Check className="h-4 w-4 mr-2" />
+            Copied!
+          </>
+        ) : (
+          <>
+            <Copy className="h-4 w-4 mr-2" />
+            Copy Deck Code
+          </>
+        )}
+      </Button>
     </div>
   )
 }

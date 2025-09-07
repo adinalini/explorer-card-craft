@@ -95,8 +95,10 @@ const Room = () => {
   const [userSessionId] = useState(getUserSessionId())
   const [userRole, setUserRole] = useState<'creator' | 'joiner' | 'spectator'>('spectator')
   const [isStartingDraft, setIsStartingDraft] = useState(false)
+  const [isDraftStarting, setIsDraftStarting] = useState(false)
   const [draftStartTimeout, setDraftStartTimeout] = useState<NodeJS.Timeout | null>(null)
   const [backgroundAutoSelectTimeout, setBackgroundAutoSelectTimeout] = useState<NodeJS.Timeout | null>(null)
+  const [isUpdatingReady, setIsUpdatingReady] = useState(false)
   const isProcessingRoundRef = useRef(false)
   const [isProcessingSelection, setIsProcessingSelection] = useState<boolean>(false)
   const [megaDraftCards, setMegaDraftCards] = useState<any[]>([])
@@ -662,7 +664,7 @@ const Room = () => {
   }
 
   const handleReady = async () => {
-    if (!room || userRole === 'spectator') return
+    if (!room || userRole === 'spectator' || isUpdatingReady) return
     
     console.log('🔘 READY: Handling ready state change')
     console.log('🔘 READY: Current ready states - Creator:', room.creator_ready, 'Joiner:', room.joiner_ready)
@@ -676,6 +678,8 @@ const Room = () => {
 
     const updateField = userRole === 'creator' ? 'creator_ready' : 'joiner_ready'
     const currentValue = userRole === 'creator' ? room.creator_ready : room.joiner_ready
+    
+    setIsUpdatingReady(true)
     
     try {
       console.log('🔘 READY: Updating ready status to:', !currentValue)
@@ -710,7 +714,20 @@ const Room = () => {
       }
       
       console.log('🔘 READY: Ready status updated successfully')
+      
+      // CRITICAL FIX: Update local room state immediately to prevent button spam
+      setRoom(prev => prev ? {
+        ...prev,
+        [updateField]: !currentValue
+      } : prev)
+      
       setIsReady(!currentValue)
+      
+      // Force refresh room data to ensure sync
+      setTimeout(() => {
+        fetchRoom()
+      }, 500)
+      
     } catch (error) {
       console.error('🚨 READY: Error updating ready status:', error)
       toast({
@@ -718,11 +735,10 @@ const Room = () => {
         description: "Failed to update ready status.",
         variant: "destructive"
       })
+    } finally {
+      setIsUpdatingReady(false)
     }
   }
-
-  // Add a state to prevent multiple simultaneous draft starts
-  const [isDraftStarting, setIsDraftStarting] = useState(false)
 
   const startDraft = async (roomData?: Room) => {
     const currentRoom = roomData || room
@@ -2058,9 +2074,9 @@ const Room = () => {
                     variant={room.creator_ready ? "secondary" : "default"}
                     size="lg"
                     className="px-8 py-4 text-lg"
-                    disabled={userRole !== 'creator' || (room.creator_ready && room.joiner_ready)}
+                    disabled={userRole !== 'creator' || room.creator_ready || isUpdatingReady || (room.creator_ready && room.joiner_ready)}
                   >
-                    {room.creator_ready ? "Ready ✓" : "Ready?"}
+                    {isUpdatingReady && userRole === 'creator' ? "Updating..." : room.creator_ready ? "Ready ✓" : "Ready?"}
                   </Button>
                 </div>
               </div>
@@ -2076,9 +2092,9 @@ const Room = () => {
                     variant={room.joiner_ready ? "secondary" : "default"}
                     size="lg"
                     className="px-8 py-4 text-lg"
-                    disabled={userRole !== 'joiner' || (room.creator_ready && room.joiner_ready)}
+                    disabled={userRole !== 'joiner' || room.joiner_ready || isUpdatingReady || (room.creator_ready && room.joiner_ready)}
                   >
-                    {room.joiner_ready ? "Ready ✓" : "Ready?"}
+                    {isUpdatingReady && userRole === 'joiner' ? "Updating..." : room.joiner_ready ? "Ready ✓" : "Ready?"}
                   </Button>
                 </div>
               </div>

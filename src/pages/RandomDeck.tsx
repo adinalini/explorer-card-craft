@@ -2,6 +2,7 @@ import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import { DeckDisplay } from "@/components/DeckDisplay"
+import { DeckCodeDisplay } from "@/components/DeckCodeDisplay"
 import { getRandomCards, getCardById } from "@/utils/cardData"
 import { ArrowLeft } from "lucide-react"
 
@@ -174,12 +175,18 @@ const RandomDeck = () => {
           <div className="flex justify-center">
             <div className="w-full max-w-2xl transform scale-80 md:scale-100 origin-top">
               {randomDeck.length > 0 ? (
-                <DeckDisplay
-                  cards={randomDeck}
-                  playerName="Random"
-                  isOwn={true}
-                  isDraftComplete={true}
-                />
+                <>
+                  <DeckDisplay
+                    cards={randomDeck}
+                    playerName="Random"
+                    isOwn={true}
+                    isDraftComplete={true}
+                  />
+                  <DeckCodeDisplay
+                    cards={randomDeck}
+                    playerName="Random"
+                  />
+                </>
               ) : (
                 <div className="text-center text-gray-600">
                   Generating random deck...

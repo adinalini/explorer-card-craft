@@ -1,8 +1,6 @@
 // Deck Code Generator - JavaScript port of the C# implementation
 // Copyright Notice: Based on code by Koin Games Inc.
 
-import { createHash } from 'crypto'
-
 const PREFIX_MARKER = 'KGBLDC'
 const VERSION_PREFIX = 'v1'
 const SEPARATOR = '|'
@@ -107,37 +105,22 @@ export function decodeDeck(input: string): { cardKeys: string[] | null, errorMes
 }
 
 /**
- * Computes a SHA256 checksum for the input string (first 4 bytes as hex)
+ * Computes a hash checksum for the input string (browser-compatible)
  */
 function computeChecksum(input: string): string {
-  // For browser environment, we'll use Web Crypto API
-  if (typeof window !== 'undefined' && window.crypto && window.crypto.subtle) {
-    // Note: This is async, but we need sync for this implementation
-    // We'll use a simpler hash for browser compatibility
-    return simpleHash(input)
-  }
-  
-  // For Node.js environment (if running server-side)
-  try {
-    const hash = createHash('sha256')
-    hash.update(input, 'utf8')
-    const fullHash = hash.digest('hex')
-    return fullHash.substring(0, 8) // First 4 bytes = 8 hex characters
-  } catch {
-    // Fallback to simple hash
-    return simpleHash(input)
-  }
+  return simpleHash(input)
 }
 
 /**
  * Simple hash function for browser compatibility
+ * Uses a variation of the djb2 hash algorithm for better distribution
  */
 function simpleHash(input: string): string {
-  let hash = 0
+  let hash = 5381 // djb2 initial value
   for (let i = 0; i < input.length; i++) {
     const char = input.charCodeAt(i)
-    hash = ((hash << 5) - hash) + char
-    hash = hash & hash // Convert to 32-bit integer
+    hash = ((hash << 5) + hash) + char // hash * 33 + char
+    hash = hash & 0xffffffff // Keep it 32-bit
   }
   
   // Convert to 8-character hex string

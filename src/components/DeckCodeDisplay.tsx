@@ -72,24 +72,17 @@ export function DeckCodeDisplay({ cards }: DeckCodeDisplayProps) {
   }
 
   return (
-    <div className="space-y-2">
-      <h4 className="text-sm font-semibold text-muted-foreground">Deck Code</h4>
+    <div className="flex justify-center">
       <Button
-        variant="outline"
+        variant="ghost"
         size="sm"
         onClick={handleCopyDeckCode}
-        className="w-full bg-background text-foreground border-border hover:bg-accent hover:text-accent-foreground"
+        className="text-muted-foreground hover:text-muted-foreground/80 hover:bg-muted/20"
       >
         {copied ? (
-          <>
-            <Check className="h-4 w-4 mr-2" />
-            Copied!
-          </>
+          <Check className="h-4 w-4" />
         ) : (
-          <>
-            <Copy className="h-4 w-4 mr-2" />
-            Copy Deck Code
-          </>
+          <Copy className="h-4 w-4" />
         )}
       </Button>
     </div>

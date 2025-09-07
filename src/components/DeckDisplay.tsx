@@ -51,9 +51,6 @@ export function DeckDisplay({ cards, playerName, isOwn, isDraftComplete = false 
         {isOwn && (
           <div className={`space-y-1 ${isDraftComplete ? 'w-40' : 'w-32'}`}>
             <h4 className={`font-semibold text-muted-foreground mb-2 ${isDraftComplete ? 'text-base' : 'text-sm'}`}>Deck List</h4>
-            {isDraftComplete && (
-              <DeckCodeDisplay cards={cards} />
-            )}
             <div className={`space-y-0.5 ${isDraftComplete ? 'h-[calc(8.4rem+28.8rem)] max-h-[37.2rem]' : 'h-[calc(7rem+24rem)] max-h-[31rem]'}`}>
               {legendaryCard && (
                 <div className={`text-yellow-600 font-medium border-l-2 border-yellow-500 pl-2 py-0.5 leading-tight ${isDraftComplete ? 'text-xs' : 'text-[10px]'}`}>
@@ -79,9 +76,6 @@ export function DeckDisplay({ cards, playerName, isOwn, isDraftComplete = false 
         {!isOwn && (
           <div className={`space-y-1 ${isDraftComplete ? 'w-40' : 'w-32'}`}>
             <h4 className={`font-semibold text-muted-foreground mb-2 ${isDraftComplete ? 'text-base' : 'text-sm'}`}>Deck List</h4>
-            {isDraftComplete && (
-              <DeckCodeDisplay cards={cards} />
-            )}
             <div className={`space-y-0.5 ${isDraftComplete ? 'h-[calc(8.4rem+28.8rem)] max-h-[37.2rem]' : 'h-[calc(7rem+24rem)] max-h-[31rem]'}`}>
               {legendaryCard && (
                 <div className={`text-yellow-600 font-medium border-l-2 border-yellow-500 pl-2 py-0.5 leading-tight ${isDraftComplete ? 'text-xs' : 'text-[10px]'}`}>
@@ -153,6 +147,13 @@ export function DeckDisplay({ cards, playerName, isOwn, isDraftComplete = false 
           </div>
         </div>
       </div>
+      
+      {/* Deck Code button below all cards */}
+      {isDraftComplete && (
+        <div className="mt-4">
+          <DeckCodeDisplay cards={cards} />
+        </div>
+      )}
     </div>
   )
 }

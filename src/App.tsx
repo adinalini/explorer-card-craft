@@ -7,6 +7,7 @@ import { ThemeProvider } from "next-themes";
 import Index from "./pages/Index";
 import Room from "./pages/Room";
 import RandomDeck from "./pages/RandomDeck";
+import Cards from "./pages/Cards";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -22,6 +23,7 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/room/:roomId" element={<Room />} />
             <Route path="/random" element={<RandomDeck />} />
+            <Route path="/cards" element={<Cards />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

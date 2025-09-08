@@ -238,6 +238,16 @@ const Index = () => {
       <Blob variant="orange" size="sm" className="bottom-40 left-32 animate-bounce" style={{ animationDelay: '4s', animationDuration: '7s' }} />
       <Blob variant="pink" size="md" className="bottom-20 right-16 animate-bounce" style={{ animationDelay: '1s', animationDuration: '9s' }} />
       
+      {/* Card Explorer Button in top left */}
+      <div className="absolute top-4 left-4 z-20">
+        <Button 
+          onClick={() => navigate('/cards')}
+          className="bg-[hsl(var(--wave-light))] dark:bg-[hsl(var(--wave-light))] text-white hover:bg-[hsl(var(--wave-dark))] dark:hover:bg-[hsl(var(--wave-dark))] font-semibold"
+        >
+          Card Explorer
+        </Button>
+      </div>
+
       {/* Theme Toggle in top right */}
       <div className="absolute top-4 right-4 z-20">
         <ThemeToggle className="text-white dark:text-foreground hover:bg-white/10 dark:hover:bg-accent" />

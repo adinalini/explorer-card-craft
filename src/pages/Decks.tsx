@@ -365,22 +365,28 @@ const Decks = () => {
                                {React.createElement(deckTypeIcons[deck.type], { className: "h-4 w-4 text-primary" })}
                                <span className="text-sm capitalize">{deck.type}</span>
                              </div>
-                             <div className="col-span-5">
-                               <div className="grid grid-cols-13 gap-1">
-                                 {deck.cards.map((card) => (
-                                   <div key={card.position} className="aspect-square">
-                                     <CardImage 
-                                       cardId={card.card_id}
-                                       cardName={card.card_name}
-                                       className="w-full h-full object-cover rounded border"
-                                     />
-                                   </div>
-                                 ))}
-                               </div>
-                             </div>
-                             <div className="col-span-2 text-sm text-muted-foreground">
-                               {deck.notes || 'N/A'}
-                             </div>
+                              <div className="col-span-4">
+                                <div className="grid grid-cols-13 gap-1">
+                                  {deck.cards.map((card) => (
+                                    <div key={card.position} className="aspect-square">
+                                      <CardImage 
+                                        cardId={card.card_id}
+                                        cardName={card.card_name}
+                                        className="w-full h-full object-cover rounded border"
+                                      />
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                              <div className="col-span-3 text-sm text-muted-foreground">
+                                {deck.notes ? (
+                                  <div className="space-y-1">
+                                    {deck.notes.split('\n').map((line, idx) => (
+                                      <div key={idx}>{line}</div>
+                                    ))}
+                                  </div>
+                                ) : 'N/A'}
+                              </div>
                              <div className="text-sm text-muted-foreground text-right">
                                {deck.author_name || 'N/A'}
                              </div>

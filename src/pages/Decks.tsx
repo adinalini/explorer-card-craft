@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { WaveDivider } from "@/components/ui/wave-divider";
 import { CardImage } from "@/components/CardImage";
 import { supabase } from "@/integrations/supabase/client";
-import { Star, Users, ArrowLeft, Flame, Droplet, Cloud, Bomb, Plus, CreditCard } from "lucide-react";
+import { Star, Users, ArrowLeft, Flame, Droplet, Cloud, Bomb, Plus, CreditCard, ChevronLeft, ChevronRight } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 
 interface Deck {
@@ -43,6 +43,8 @@ const Decks = () => {
   const [selectedType, setSelectedType] = useState<string>("all");
   const [decks, setDecks] = useState<Deck[]>([]);
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
 
   useEffect(() => {
     fetchDecks();
@@ -102,6 +104,70 @@ const Decks = () => {
   const featuredDecks = filteredDecks.filter(deck => deck.is_featured);
   const communityDecks = filteredDecks; // Show all decks in community section
 
+  // Pagination logic
+  const getPaginatedDecks = (deckList: Deck[]) => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    return deckList.slice(startIndex, endIndex);
+  };
+
+  const getTotalPages = (deckList: Deck[]) => {
+    return Math.ceil(deckList.length / itemsPerPage);
+  };
+
+  const paginatedFeaturedDecks = getPaginatedDecks(featuredDecks);
+  const paginatedCommunityDecks = getPaginatedDecks(communityDecks);
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, selectedType, itemsPerPage]);
+
+  const PaginationControls = ({ deckList }: { deckList: Deck[] }) => {
+    const totalPages = getTotalPages(deckList);
+    
+    if (totalPages <= 1) return null;
+
+    return (
+      <div className="flex items-center justify-center gap-2 mt-6">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+          disabled={currentPage === 1}
+        >
+          <ChevronLeft className="h-4 w-4" />
+        </Button>
+        
+        {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+          const pageNum = Math.max(1, Math.min(totalPages - 4, currentPage - 2)) + i;
+          if (pageNum > totalPages) return null;
+          
+          return (
+            <Button
+              key={pageNum}
+              variant={pageNum === currentPage ? "default" : "outline"}
+              size="sm"
+              onClick={() => setCurrentPage(pageNum)}
+              className="w-8"
+            >
+              {pageNum}
+            </Button>
+          );
+        })}
+        
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+          disabled={currentPage === totalPages}
+        >
+          <ChevronRight className="h-4 w-4" />
+        </Button>
+      </div>
+    );
+  };
+
   const DeckCard = ({ deck, showDescription = false }: { deck: Deck; showDescription?: boolean }) => {
     const TypeIcon = deckTypeIcons[deck.type];
     
@@ -150,177 +216,207 @@ const Decks = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[hsl(var(--background-start))] to-[hsl(var(--background-end))]">
-      <div className="container mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-4">
+    <div className="min-h-screen bg-gradient-to-br from-[hsl(var(--background-start))] to-[hsl(var(--background-end))] flex flex-col">
+      <div className="flex-1">
+        <div className="container mx-auto px-4 py-8">
+          {/* Header */}
+          <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center gap-4">
+              <Button
+                onClick={() => navigate('/')}
+                variant="ghost"
+                size="sm"
+                className="text-foreground hover:bg-accent"
+              >
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Back to Home
+              </Button>
+              <h1 className="text-4xl font-bold text-foreground">Deck Builder</h1>
+            </div>
+            
             <Button
-              onClick={() => navigate('/')}
-              variant="ghost"
-              size="sm"
-              className="text-foreground hover:bg-accent"
+              onClick={() => navigate('/deck-builder')}
+              className="bg-orange-500 hover:bg-orange-600 text-white font-semibold"
             >
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Home
+              <Plus className="h-4 w-4 mr-2" />
+              Create Deck
             </Button>
-            <h1 className="text-4xl font-bold text-foreground">Deck Builder</h1>
           </div>
-          
-          <Button
-            onClick={() => navigate('/deck-builder')}
-            className="bg-orange-500 hover:bg-orange-600 text-white font-semibold"
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            Create Deck
-          </Button>
-        </div>
 
-        {/* Search and Filters */}
-        <div className="mb-6 space-y-4">
-          <Input
-            placeholder="Search decks by name, creator, or card names..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="max-w-md"
-          />
-          
-          <div className="flex items-center gap-4">
-            <Label className="text-sm font-medium text-foreground">Deck Type:</Label>
-            <RadioGroup
-              value={selectedType}
-              onValueChange={setSelectedType}
-              className="flex gap-4"
-            >
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="all" id="all" />
-                <Label htmlFor="all" className="text-sm">All</Label>
+          {/* Search and Filters */}
+          <div className="mb-6 space-y-4">
+            <Input
+              placeholder="Search decks by name, creator, or card names..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="max-w-md"
+            />
+            
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <Label className="text-sm font-medium text-foreground">Deck Type:</Label>
+                <RadioGroup
+                  value={selectedType}
+                  onValueChange={setSelectedType}
+                  className="flex gap-4"
+                >
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="all" id="all" />
+                    <Label htmlFor="all" className="text-sm">All</Label>
+                  </div>
+                  {Object.entries(deckTypeIcons).map(([type, Icon]) => (
+                    <div key={type} className="flex items-center space-x-2">
+                      <RadioGroupItem value={type} id={type} />
+                      <Label htmlFor={type} className="text-sm flex items-center gap-1">
+                        <Icon className="h-3 w-3" />
+                        {type.charAt(0).toUpperCase() + type.slice(1)}
+                      </Label>
+                    </div>
+                  ))}
+                </RadioGroup>
               </div>
-              {Object.entries(deckTypeIcons).map(([type, Icon]) => (
-                <div key={type} className="flex items-center space-x-2">
-                  <RadioGroupItem value={type} id={type} />
-                  <Label htmlFor={type} className="text-sm flex items-center gap-1">
-                    <Icon className="h-3 w-3" />
-                    {type.charAt(0).toUpperCase() + type.slice(1)}
-                  </Label>
-                </div>
-              ))}
-            </RadioGroup>
+              
+              <div className="flex items-center gap-4">
+                <Label className="text-sm font-medium text-foreground">Decks per page:</Label>
+                <RadioGroup
+                  value={itemsPerPage.toString()}
+                  onValueChange={(value) => setItemsPerPage(parseInt(value))}
+                  className="flex gap-4"
+                >
+                  {[10, 20, 50].map(num => (
+                    <div key={num} className="flex items-center space-x-2">
+                      <RadioGroupItem value={num.toString()} id={`per-page-${num}`} />
+                      <Label htmlFor={`per-page-${num}`} className="text-sm">{num}</Label>
+                    </div>
+                  ))}
+                </RadioGroup>
+              </div>
+            </div>
           </div>
+
+          {/* Tabs */}
+          <Tabs defaultValue="featured" className="w-full">
+            <TabsList className="grid w-full grid-cols-2 max-w-md mb-6">
+              <TabsTrigger value="featured" className="flex items-center gap-2">
+                <Star className="h-4 w-4" />
+                Featured Decks
+              </TabsTrigger>
+              <TabsTrigger value="community" className="flex items-center gap-2">
+                <Users className="h-4 w-4" />
+                Community Decks
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="featured">
+              <div className="space-y-4">
+                {paginatedFeaturedDecks.length === 0 ? (
+                  <div className="text-center py-12">
+                    <p className="text-lg text-muted-foreground">No featured decks found.</p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {paginatedFeaturedDecks.map((deck, index) => (
+                      <div 
+                        key={deck.id} 
+                        className="bg-card border rounded-lg p-4 cursor-pointer hover:shadow-lg transition-all"
+                        onClick={() => navigate(`/deck/${deck.id}`)}
+                      >
+                        <div className="grid grid-cols-12 gap-4 items-center">
+                          <div className="text-sm font-mono text-muted-foreground">
+                            {(currentPage - 1) * itemsPerPage + index + 1}
+                          </div>
+                          <div className="col-span-2">
+                            <h3 className="font-semibold text-card-foreground">{deck.name}</h3>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            {React.createElement(deckTypeIcons[deck.type], { className: "h-4 w-4 text-primary" })}
+                            <span className="text-sm capitalize">{deck.type}</span>
+                          </div>
+                          <div className="col-span-5">
+                            <div className="grid grid-cols-13 gap-1">
+                              {deck.cards.map((card) => (
+                                <div key={card.position} className="aspect-square">
+                                  <CardImage 
+                                    cardId={card.card_id}
+                                    cardName={card.card_name}
+                                    className="w-full h-full object-cover rounded border"
+                                  />
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                          <div className="col-span-2 text-sm text-muted-foreground">
+                            {deck.notes || 'N/A'}
+                          </div>
+                          <div className="text-sm text-muted-foreground text-right">
+                            {deck.author_name || 'N/A'}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                <PaginationControls deckList={featuredDecks} />
+              </div>
+            </TabsContent>
+
+            <TabsContent value="community">
+              <div className="space-y-4">
+                {paginatedCommunityDecks.length === 0 ? (
+                  <div className="text-center py-12">
+                    <p className="text-lg text-muted-foreground">No community decks found.</p>
+                    <Button
+                      onClick={() => navigate('/deck-builder')}
+                      className="mt-4 bg-orange-500 hover:bg-orange-600 text-white"
+                    >
+                      Create the First Deck
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {paginatedCommunityDecks.map((deck, index) => (
+                      <div 
+                        key={deck.id} 
+                        className="bg-card border rounded-lg p-4 cursor-pointer hover:shadow-lg transition-all"
+                        onClick={() => navigate(`/deck/${deck.id}`)}
+                      >
+                        <div className="grid grid-cols-12 gap-4 items-center">
+                          <div className="text-sm font-mono text-muted-foreground">
+                            {(currentPage - 1) * itemsPerPage + index + 1}
+                          </div>
+                          <div className="col-span-2">
+                            <h3 className="font-semibold text-card-foreground">{deck.name}</h3>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            {React.createElement(deckTypeIcons[deck.type], { className: "h-4 w-4 text-primary" })}
+                            <span className="text-sm capitalize">{deck.type}</span>
+                          </div>
+                          <div className="col-span-6">
+                            <div className="grid grid-cols-13 gap-1">
+                              {deck.cards.map((card) => (
+                                <div key={card.position} className="aspect-square">
+                                  <CardImage 
+                                    cardId={card.card_id}
+                                    cardName={card.card_name}
+                                    className="w-full h-full object-cover rounded border"
+                                  />
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                          <div className="col-span-2 text-sm text-muted-foreground text-right">
+                            {deck.author_name || 'N/A'}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                <PaginationControls deckList={communityDecks} />
+              </div>
+            </TabsContent>
+          </Tabs>
         </div>
-
-        {/* Tabs */}
-        <Tabs defaultValue="featured" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 max-w-md mb-6">
-            <TabsTrigger value="featured" className="flex items-center gap-2">
-              <Star className="h-4 w-4" />
-              Featured Decks
-            </TabsTrigger>
-            <TabsTrigger value="community" className="flex items-center gap-2">
-              <Users className="h-4 w-4" />
-              Community Decks
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="featured">
-            <div className="space-y-4">
-              {featuredDecks.length === 0 ? (
-                <div className="text-center py-12">
-                  <p className="text-lg text-muted-foreground">No featured decks found.</p>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {featuredDecks.map((deck, index) => (
-                    <div key={deck.id} className="bg-card border rounded-lg p-4">
-                      <div className="grid grid-cols-12 gap-4 items-center">
-                        <div className="text-sm font-mono text-muted-foreground">
-                          {index + 1}
-                        </div>
-                        <div className="col-span-2">
-                          <h3 className="font-semibold text-card-foreground">{deck.name}</h3>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          {React.createElement(deckTypeIcons[deck.type], { className: "h-4 w-4 text-primary" })}
-                          <span className="text-sm capitalize">{deck.type}</span>
-                        </div>
-                        <div className="col-span-5">
-                          <div className="grid grid-cols-13 gap-1">
-                            {deck.cards.map((card) => (
-                              <div key={card.position} className="aspect-square">
-                                <CardImage 
-                                  cardId={card.card_id}
-                                  cardName={card.card_name}
-                                  className="w-full h-full object-cover rounded border"
-                                />
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                        <div className="col-span-2 text-sm text-muted-foreground">
-                          {deck.notes || 'N/A'}
-                        </div>
-                        <div className="text-sm text-muted-foreground text-right">
-                          {deck.author_name || 'N/A'}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </TabsContent>
-
-          <TabsContent value="community">
-            <div className="space-y-4">
-              {communityDecks.length === 0 ? (
-                <div className="text-center py-12">
-                  <p className="text-lg text-muted-foreground">No community decks found.</p>
-                  <Button
-                    onClick={() => navigate('/deck-builder')}
-                    className="mt-4 bg-orange-500 hover:bg-orange-600 text-white"
-                  >
-                    Create the First Deck
-                  </Button>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {communityDecks.map((deck, index) => (
-                    <div key={deck.id} className="bg-card border rounded-lg p-4">
-                      <div className="grid grid-cols-12 gap-4 items-center">
-                        <div className="text-sm font-mono text-muted-foreground">
-                          {index + 1}
-                        </div>
-                        <div className="col-span-2">
-                          <h3 className="font-semibold text-card-foreground">{deck.name}</h3>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          {React.createElement(deckTypeIcons[deck.type], { className: "h-4 w-4 text-primary" })}
-                          <span className="text-sm capitalize">{deck.type}</span>
-                        </div>
-                        <div className="col-span-6">
-                          <div className="grid grid-cols-13 gap-1">
-                            {deck.cards.map((card) => (
-                              <div key={card.position} className="aspect-square">
-                                <CardImage 
-                                  cardId={card.card_id}
-                                  cardName={card.card_name}
-                                  className="w-full h-full object-cover rounded border"
-                                />
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                        <div className="col-span-2 text-sm text-muted-foreground text-right">
-                          {deck.author_name || 'N/A'}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </TabsContent>
-        </Tabs>
       </div>
       
       <WaveDivider />

@@ -45,52 +45,27 @@ const Cards = () => {
 
   const downloadCardImage = async (card: any) => {
     try {
-      // Create a canvas to get the actual image data
-      const img = new Image()
-      img.crossOrigin = 'anonymous'
-      
-      // Use the card's image function to get the actual image URL
+      // Get the image URL from the dynamic import
       const imageModule = await card.image()
       const imageUrl = imageModule.default || imageModule
       
-      img.onload = () => {
-        const canvas = document.createElement('canvas')
-        const ctx = canvas.getContext('2d')
-        canvas.width = img.width
-        canvas.height = img.height
-        
-        ctx?.drawImage(img, 0, 0)
-        
-        // Convert to blob and download
-        canvas.toBlob((blob) => {
-          if (blob) {
-            const url = URL.createObjectURL(blob)
-            const link = document.createElement('a')
-            link.href = url
-            link.download = `${card.name.replace(/\s+/g, '_').toLowerCase()}.png`
-            document.body.appendChild(link)
-            link.click()
-            document.body.removeChild(link)
-            URL.revokeObjectURL(url)
-            
-            toast({
-              title: "Download Started",
-              description: `Downloading ${card.name} image...`,
-            })
-          }
-        }, 'image/png')
-      }
+      // Create a temporary link to download the image
+      const link = document.createElement('a')
+      link.href = imageUrl
+      link.download = `${card.name.replace(/\s+/g, '_').toLowerCase()}.png`
+      link.target = '_blank' // Open in new tab to avoid navigation issues
       
-      img.onerror = () => {
-        toast({
-          title: "Download Failed", 
-          description: "Failed to load card image. Please try again.",
-          variant: "destructive"
-        })
-      }
+      // Trigger download
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
       
-      img.src = imageUrl
+      toast({
+        title: "Download Started",
+        description: `Downloading ${card.name} image...`,
+      })
     } catch (error) {
+      console.error('Download error:', error)
       toast({
         title: "Download Failed",
         description: "Failed to download card image. Please try again.",

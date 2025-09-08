@@ -219,7 +219,6 @@ const DeckView = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Legendary Card */}
             <div className="flex flex-col items-center justify-center">
-              <h3 className="font-semibold mb-4 text-card-foreground">Legendary</h3>
               <div className="aspect-[3/4] max-w-sm">
                 {legendaryCard ? (
                   <CardImage
@@ -237,7 +236,10 @@ const DeckView = () => {
             
             {/* Normal Cards */}
             <div>
-              <h3 className="font-semibold mb-4 text-card-foreground">Cards (12)</h3>
+              <div className="flex items-center gap-6 mb-4">
+                <h3 className="font-semibold text-card-foreground">Legendary</h3>
+                <h3 className="font-semibold text-card-foreground">Cards (12)</h3>
+              </div>
               <div className="grid grid-cols-4 gap-3">
                 {normalCards.concat(Array(12 - normalCards.length).fill(null)).map((card, index) => (
                   <div key={index} className="aspect-[3/4]">

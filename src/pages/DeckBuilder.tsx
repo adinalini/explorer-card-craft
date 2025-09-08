@@ -271,90 +271,74 @@ const DeckBuilder = () => {
             </h2>
             
             <div className="space-y-4 min-h-[400px]">
-              {/* Top row - First card, Deck info, Legendary card */}
-              <div className="grid grid-cols-3 gap-4 h-24">
-                {/* First card */}
-                {selectedCards.filter(c => !c.is_legendary)[0] ? (
-                  <div className="relative group aspect-[3/4]">
-                    <CardImage 
-                      cardId={selectedCards.filter(c => !c.is_legendary)[0].card_id}
-                      cardName={selectedCards.filter(c => !c.is_legendary)[0].card_name}
-                      className="w-full h-full object-cover rounded border"
-                    />
-                    <button
-                      onClick={() => handleCardRemove(selectedCards.filter(c => !c.is_legendary)[0].card_id)}
-                      className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 text-xs opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
-                    >
-                      ×
-                    </button>
-                  </div>
-                ) : (
-                  <div className="aspect-[3/4] border border-dashed border-muted-foreground/30 rounded flex items-center justify-center">
-                    <span className="text-muted-foreground text-sm">Card 1</span>
-                  </div>
-                )}
-
-                {/* Deck info section */}
-                <div className="flex flex-col justify-center items-center bg-muted/20 rounded text-center p-2">
-                  <div className="text-sm font-semibold text-card-foreground truncate w-full">
-                    {deckName || "Deck Name"}
-                  </div>
-                  <div className="text-sm text-muted-foreground capitalize">
-                    {deckType || "Type"}
-                  </div>
-                  <div className="text-sm text-muted-foreground truncate w-full">
-                    {authorName || "Author"}
-                  </div>
+              {/* Deck Info Header */}
+              <div className="bg-muted/20 rounded-lg p-4 text-center">
+                <div className="text-lg font-bold text-card-foreground">
+                  {deckName || "Deck Name"}
                 </div>
-
-                {/* Legendary card */}
-                {selectedCards.find(c => c.is_legendary) ? (
-                  <div className="relative group aspect-[3/4]">
-                    <CardImage 
-                      cardId={selectedCards.find(c => c.is_legendary)!.card_id}
-                      cardName={selectedCards.find(c => c.is_legendary)!.card_name}
-                      className="w-full h-full object-cover rounded border-2 border-yellow-400"
-                    />
-                    <button
-                      onClick={() => handleCardRemove(selectedCards.find(c => c.is_legendary)!.card_id)}
-                      className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 text-xs opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
-                    >
-                      ×
-                    </button>
-                  </div>
-                ) : (
-                  <div className="aspect-[3/4] border-2 border-dashed border-yellow-400/30 rounded flex items-center justify-center">
-                    <span className="text-yellow-600 text-sm">Legendary</span>
-                  </div>
-                )}
+                <div className="text-sm text-muted-foreground capitalize">
+                  {deckType || "Type"}
+                </div>
+                <div className="text-sm text-muted-foreground">
+                  {authorName || "Author"}
+                </div>
               </div>
 
-              {/* Remaining cards grid */}
-              <div className="grid grid-cols-4 gap-4">
-                {Array.from({ length: 12 }, (_, i) => {
-                  const nonLegendaryCards = selectedCards.filter(c => !c.is_legendary);
-                  const card = nonLegendaryCards[i + 1]; // Skip first card (position 0)
-                  
-                  return card ? (
-                    <div key={i + 2} className="relative group aspect-[3/4]">
+              {/* Legendary Card Section */}
+              <div className="space-y-2">
+                <h3 className="text-sm font-medium text-card-foreground">Legendary Card</h3>
+                <div className="flex justify-center">
+                  {selectedCards.find(c => c.is_legendary) ? (
+                    <div className="relative group w-20 aspect-[3/4]">
                       <CardImage 
-                        cardId={card.card_id}
-                        cardName={card.card_name}
-                        className="w-full h-full object-cover rounded border"
+                        cardId={selectedCards.find(c => c.is_legendary)!.card_id}
+                        cardName={selectedCards.find(c => c.is_legendary)!.card_name}
+                        className="w-full h-full object-cover rounded border-2 border-yellow-400"
                       />
                       <button
-                        onClick={() => handleCardRemove(card.card_id)}
-                        className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 text-xs opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
+                        onClick={() => handleCardRemove(selectedCards.find(c => c.is_legendary)!.card_id)}
+                        className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-4 h-4 text-xs opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
                       >
                         ×
                       </button>
                     </div>
                   ) : (
-                    <div key={i + 2} className="aspect-[3/4] border border-dashed border-muted-foreground/30 rounded flex items-center justify-center">
-                      <span className="text-muted-foreground text-sm">{i + 2}</span>
+                    <div className="w-20 aspect-[3/4] border-2 border-dashed border-yellow-400/30 rounded flex items-center justify-center">
+                      <span className="text-yellow-600 text-xs">Legendary</span>
                     </div>
-                  );
-                })}
+                  )}
+                </div>
+              </div>
+
+              {/* Regular Cards Section */}
+              <div className="space-y-2">
+                <h3 className="text-sm font-medium text-card-foreground">Regular Cards (12)</h3>
+                <div className="grid grid-cols-4 gap-3">
+                  {Array.from({ length: 12 }, (_, i) => {
+                    const nonLegendaryCards = selectedCards.filter(c => !c.is_legendary);
+                    const card = nonLegendaryCards[i];
+                    
+                    return card ? (
+                      <div key={i + 1} className="relative group aspect-[3/4]">
+                        <CardImage 
+                          cardId={card.card_id}
+                          cardName={card.card_name}
+                          className="w-full h-full object-cover rounded border"
+                        />
+                        <button
+                          onClick={() => handleCardRemove(card.card_id)}
+                          className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-4 h-4 text-xs opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    ) : (
+                      <div key={i + 1} className="aspect-[3/4] border border-dashed border-muted-foreground/30 rounded flex items-center justify-center">
+                        <span className="text-muted-foreground text-xs">{i + 1}</span>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
             </div>
             

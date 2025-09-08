@@ -271,23 +271,10 @@ const DeckBuilder = () => {
             </h2>
             
             <div className="space-y-4 min-h-[400px]">
-              {/* Deck Info Header */}
-              <div className="bg-muted/20 rounded-lg p-4 text-center">
-                <div className="text-lg font-bold text-card-foreground">
-                  {deckName || "Deck Name"}
-                </div>
-                <div className="text-sm text-muted-foreground capitalize">
-                  {deckType || "Type"}
-                </div>
-                <div className="text-sm text-muted-foreground">
-                  {authorName || "Author"}
-                </div>
-              </div>
-
-              {/* Legendary Card Section */}
-              <div className="space-y-2">
-                <h3 className="text-sm font-medium text-card-foreground">Legendary Card</h3>
-                <div className="flex justify-center">
+              {/* Deck Info and Legendary Card Combined */}
+              <div className="bg-muted/20 rounded-lg p-4 flex items-center gap-4">
+                {/* Legendary Card on Left */}
+                <div className="flex-shrink-0">
                   {selectedCards.find(c => c.is_legendary) ? (
                     <div className="relative group w-20 aspect-[3/4]">
                       <CardImage 
@@ -307,6 +294,19 @@ const DeckBuilder = () => {
                       <span className="text-yellow-600 text-xs">Legendary</span>
                     </div>
                   )}
+                </div>
+                
+                {/* Deck Info on Right */}
+                <div className="flex-1 text-center">
+                  <div className="text-lg font-bold text-card-foreground">
+                    {deckName || "Deck Name"}
+                  </div>
+                  <div className="text-sm text-muted-foreground capitalize">
+                    {deckType || "Type"}
+                  </div>
+                  <div className="text-sm text-muted-foreground">
+                    {authorName || "Author"}
+                  </div>
                 </div>
               </div>
 

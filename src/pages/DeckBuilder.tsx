@@ -90,9 +90,16 @@ const DeckBuilder = () => {
           card_name: card.name,
           card_image: card.image,
           is_legendary: true,
-          position: existingLegendary.position
+          position: 0 // Will be recalculated
         });
-        setSelectedCards(newCards);
+        // Sort and update positions
+        const sortedCards = newCards.sort((a, b) => {
+          const cardA = cardDatabase.find(c => c.id === a.card_id)!;
+          const cardB = cardDatabase.find(c => c.id === b.card_id)!;
+          if (cardA.cost !== cardB.cost) return cardA.cost - cardB.cost;
+          return cardA.name.localeCompare(cardB.name);
+        }).map((card, index) => ({ ...card, position: index + 1 }));
+        setSelectedCards(sortedCards);
         return;
       }
     }
@@ -103,17 +110,31 @@ const DeckBuilder = () => {
       card_name: card.name,
       card_image: card.image,
       is_legendary: card.isLegendary,
-      position: selectedCards.length + 1
+      position: 0 // Will be recalculated
     };
 
-    setSelectedCards([...selectedCards, newCard]);
+    // Add card and sort by cost then name
+    const newCards = [...selectedCards, newCard];
+    const sortedCards = newCards.sort((a, b) => {
+      const cardA = cardDatabase.find(c => c.id === a.card_id)!;
+      const cardB = cardDatabase.find(c => c.id === b.card_id)!;
+      if (cardA.cost !== cardB.cost) return cardA.cost - cardB.cost;
+      return cardA.name.localeCompare(cardB.name);
+    }).map((card, index) => ({ ...card, position: index + 1 }));
+
+    setSelectedCards(sortedCards);
   };
 
   const handleCardRemove = (cardId: string) => {
-    const newCards = selectedCards
-      .filter(c => c.card_id !== cardId)
-      .map((card, index) => ({ ...card, position: index + 1 }));
-    setSelectedCards(newCards);
+    const newCards = selectedCards.filter(c => c.card_id !== cardId);
+    // Sort and update positions
+    const sortedCards = newCards.sort((a, b) => {
+      const cardA = cardDatabase.find(c => c.id === a.card_id)!;
+      const cardB = cardDatabase.find(c => c.id === b.card_id)!;
+      if (cardA.cost !== cardB.cost) return cardA.cost - cardB.cost;
+      return cardA.name.localeCompare(cardB.name);
+    }).map((card, index) => ({ ...card, position: index + 1 }));
+    setSelectedCards(sortedCards);
   };
 
   const isCardSelected = (cardId: string) => {

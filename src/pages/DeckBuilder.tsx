@@ -292,6 +292,19 @@ const DeckBuilder = () => {
                 </div>
               )}
 
+              {/* Deck info section */}
+              <div className="aspect-square flex flex-col justify-center items-center px-1 bg-muted/20 rounded text-center">
+                <div className="text-xs font-semibold text-card-foreground truncate w-full">
+                  {deckName || "Deck"}
+                </div>
+                <div className="text-xs text-muted-foreground capitalize">
+                  {deckType || "Type"}
+                </div>
+                <div className="text-xs text-muted-foreground truncate w-full">
+                  {authorName || "Author"}
+                </div>
+              </div>
+
               {/* Legendary card position */}
               {selectedCards.find(c => c.is_legendary) ? (
                 <div className="relative group aspect-square">
@@ -312,19 +325,6 @@ const DeckBuilder = () => {
                   <span className="text-yellow-600 text-xs text-center">L</span>
                 </div>
               )}
-
-              {/* Deck info section */}
-              <div className="aspect-square flex flex-col justify-center items-center px-1 bg-muted/20 rounded text-center">
-                <div className="text-xs font-semibold text-card-foreground truncate w-full">
-                  {deckName || "Deck"}
-                </div>
-                <div className="text-xs text-muted-foreground capitalize">
-                  {deckType || "Type"}
-                </div>
-                <div className="text-xs text-muted-foreground truncate w-full">
-                  {authorName || "Author"}
-                </div>
-              </div>
 
               {/* Remaining cards (positions 4-13) */}
               {Array.from({ length: 10 }, (_, i) => {

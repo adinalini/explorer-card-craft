@@ -8,8 +8,10 @@ import { Label } from "@/components/ui/label";
 import { WaveDivider } from "@/components/ui/wave-divider";
 import { CardImage } from "@/components/CardImage";
 import { supabase } from "@/integrations/supabase/client";
-import { Star, Users, ArrowLeft, Flame, Droplet, Cloud, Bomb, Plus, CreditCard, ChevronLeft, ChevronRight } from "lucide-react";
+import { Star, Users, ArrowLeft, Flame, Droplet, Cloud, Bomb, Plus, CreditCard, ChevronLeft, ChevronRight, Copy, Check } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import { encodeDeck } from "@/utils/deckCodeGenerator";
+import { getCardKey } from "@/utils/cardKeyMapping";
 
 interface Deck {
   id: string;
@@ -45,6 +47,7 @@ const Decks = () => {
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [copiedDeckId, setCopiedDeckId] = useState<string | null>(null);
 
   useEffect(() => {
     fetchDecks();
@@ -122,6 +125,53 @@ const Decks = () => {
   useEffect(() => {
     setCurrentPage(1);
   }, [searchQuery, selectedType, itemsPerPage]);
+
+  const handleCopyDeckCode = async (deck: Deck, event: React.MouseEvent) => {
+    event.stopPropagation(); // Prevent deck navigation
+    
+    const cardKeys: string[] = [];
+    for (const card of deck.cards) {
+      const cardKey = getCardKey(card.card_id);
+      if (cardKey) {
+        cardKeys.push(cardKey);
+      }
+    }
+
+    if (cardKeys.length === 0) {
+      toast({
+        title: "Error",
+        description: "No valid cards found in this deck.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const deckCode = encodeDeck(cardKeys);
+    if (!deckCode) {
+      toast({
+        title: "Error",
+        description: "Failed to generate deck code.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(deckCode);
+      setCopiedDeckId(deck.id);
+      setTimeout(() => setCopiedDeckId(null), 2000);
+      toast({
+        title: "Deck Code Copied",
+        description: "Deck code has been copied to clipboard!",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to copy deck code. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
 
   const PaginationControls = ({ deckList }: { deckList: Deck[] }) => {
     const totalPages = getTotalPages(deckList);
@@ -315,45 +365,58 @@ const Decks = () => {
                   </div>
                 ) : (
                   <div className="space-y-4">
-                    {paginatedFeaturedDecks.map((deck, index) => (
-                      <div 
-                        key={deck.id} 
-                        className="bg-card border rounded-lg p-4 cursor-pointer hover:shadow-lg transition-all"
-                        onClick={() => navigate(`/deck/${deck.id}`)}
-                      >
-                        <div className="grid grid-cols-12 gap-4 items-center">
-                          <div className="text-sm font-mono text-muted-foreground">
-                            {(currentPage - 1) * itemsPerPage + index + 1}
-                          </div>
-                          <div className="col-span-2">
-                            <h3 className="font-semibold text-card-foreground">{deck.name}</h3>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            {React.createElement(deckTypeIcons[deck.type], { className: "h-4 w-4 text-primary" })}
-                            <span className="text-sm capitalize">{deck.type}</span>
-                          </div>
-                          <div className="col-span-5">
-                            <div className="grid grid-cols-13 gap-1">
-                              {deck.cards.map((card) => (
-                                <div key={card.position} className="aspect-square">
-                                  <CardImage 
-                                    cardId={card.card_id}
-                                    cardName={card.card_name}
-                                    className="w-full h-full object-cover rounded border"
-                                  />
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                          <div className="col-span-2 text-sm text-muted-foreground">
-                            {deck.notes || 'N/A'}
-                          </div>
-                          <div className="text-sm text-muted-foreground text-right">
-                            {deck.author_name || 'N/A'}
-                          </div>
-                        </div>
-                      </div>
-                    ))}
+                     {paginatedFeaturedDecks.map((deck, index) => (
+                       <div key={deck.id} className="flex items-center gap-2">
+                         <Button
+                           variant="ghost"
+                           size="sm"
+                           onClick={(e) => handleCopyDeckCode(deck, e)}
+                           className="text-muted-foreground hover:text-muted-foreground/80 p-2"
+                         >
+                           {copiedDeckId === deck.id ? (
+                             <Check className="h-4 w-4" />
+                           ) : (
+                             <Copy className="h-4 w-4" />
+                           )}
+                         </Button>
+                         <div 
+                           className="flex-1 bg-card border rounded-lg p-4 cursor-pointer hover:shadow-lg transition-all"
+                           onClick={() => navigate(`/deck/${deck.id}`)}
+                         >
+                           <div className="grid grid-cols-12 gap-4 items-center">
+                             <div className="text-sm font-mono text-muted-foreground">
+                               {(currentPage - 1) * itemsPerPage + index + 1}
+                             </div>
+                             <div className="col-span-2">
+                               <h3 className="font-semibold text-card-foreground">{deck.name}</h3>
+                             </div>
+                             <div className="flex items-center gap-1">
+                               {React.createElement(deckTypeIcons[deck.type], { className: "h-4 w-4 text-primary" })}
+                               <span className="text-sm capitalize">{deck.type}</span>
+                             </div>
+                             <div className="col-span-5">
+                               <div className="grid grid-cols-13 gap-1">
+                                 {deck.cards.map((card) => (
+                                   <div key={card.position} className="aspect-square">
+                                     <CardImage 
+                                       cardId={card.card_id}
+                                       cardName={card.card_name}
+                                       className="w-full h-full object-cover rounded border"
+                                     />
+                                   </div>
+                                 ))}
+                               </div>
+                             </div>
+                             <div className="col-span-2 text-sm text-muted-foreground">
+                               {deck.notes || 'N/A'}
+                             </div>
+                             <div className="text-sm text-muted-foreground text-right">
+                               {deck.author_name || 'N/A'}
+                             </div>
+                           </div>
+                         </div>
+                       </div>
+                     ))}
                   </div>
                 )}
                 <PaginationControls deckList={featuredDecks} />
@@ -374,42 +437,55 @@ const Decks = () => {
                   </div>
                 ) : (
                   <div className="space-y-4">
-                    {paginatedCommunityDecks.map((deck, index) => (
-                      <div 
-                        key={deck.id} 
-                        className="bg-card border rounded-lg p-4 cursor-pointer hover:shadow-lg transition-all"
-                        onClick={() => navigate(`/deck/${deck.id}`)}
-                      >
-                        <div className="grid grid-cols-12 gap-4 items-center">
-                          <div className="text-sm font-mono text-muted-foreground">
-                            {(currentPage - 1) * itemsPerPage + index + 1}
-                          </div>
-                          <div className="col-span-2">
-                            <h3 className="font-semibold text-card-foreground">{deck.name}</h3>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            {React.createElement(deckTypeIcons[deck.type], { className: "h-4 w-4 text-primary" })}
-                            <span className="text-sm capitalize">{deck.type}</span>
-                          </div>
-                          <div className="col-span-6">
-                            <div className="grid grid-cols-13 gap-1">
-                              {deck.cards.map((card) => (
-                                <div key={card.position} className="aspect-square">
-                                  <CardImage 
-                                    cardId={card.card_id}
-                                    cardName={card.card_name}
-                                    className="w-full h-full object-cover rounded border"
-                                  />
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                          <div className="col-span-2 text-sm text-muted-foreground text-right">
-                            {deck.author_name || 'N/A'}
-                          </div>
-                        </div>
-                      </div>
-                    ))}
+                     {paginatedCommunityDecks.map((deck, index) => (
+                       <div key={deck.id} className="flex items-center gap-2">
+                         <Button
+                           variant="ghost"
+                           size="sm"
+                           onClick={(e) => handleCopyDeckCode(deck, e)}
+                           className="text-muted-foreground hover:text-muted-foreground/80 p-2"
+                         >
+                           {copiedDeckId === deck.id ? (
+                             <Check className="h-4 w-4" />
+                           ) : (
+                             <Copy className="h-4 w-4" />
+                           )}
+                         </Button>
+                         <div 
+                           className="flex-1 bg-card border rounded-lg p-4 cursor-pointer hover:shadow-lg transition-all"
+                           onClick={() => navigate(`/deck/${deck.id}`)}
+                         >
+                           <div className="grid grid-cols-12 gap-4 items-center">
+                             <div className="text-sm font-mono text-muted-foreground">
+                               {(currentPage - 1) * itemsPerPage + index + 1}
+                             </div>
+                             <div className="col-span-2">
+                               <h3 className="font-semibold text-card-foreground">{deck.name}</h3>
+                             </div>
+                             <div className="flex items-center gap-1">
+                               {React.createElement(deckTypeIcons[deck.type], { className: "h-4 w-4 text-primary" })}
+                               <span className="text-sm capitalize">{deck.type}</span>
+                             </div>
+                             <div className="col-span-6">
+                               <div className="grid grid-cols-13 gap-1">
+                                 {deck.cards.map((card) => (
+                                   <div key={card.position} className="aspect-square">
+                                     <CardImage 
+                                       cardId={card.card_id}
+                                       cardName={card.card_name}
+                                       className="w-full h-full object-cover rounded border"
+                                     />
+                                   </div>
+                                 ))}
+                               </div>
+                             </div>
+                             <div className="col-span-2 text-sm text-muted-foreground text-right">
+                               {deck.author_name || 'N/A'}
+                             </div>
+                           </div>
+                         </div>
+                       </div>
+                     ))}
                   </div>
                 )}
                 <PaginationControls deckList={communityDecks} />

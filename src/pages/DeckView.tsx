@@ -210,7 +210,7 @@ const DeckView = () => {
           
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Legendary Card */}
-            <div>
+            <div className="flex flex-col items-center">
               <h3 className="font-semibold mb-4 text-card-foreground">Legendary</h3>
               <div className="aspect-[3/4] max-w-sm">
                 {legendaryCard ? (

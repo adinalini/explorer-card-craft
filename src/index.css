@@ -54,6 +54,8 @@ All colors MUST be HSL.
     --success: 120 100% 35%;
     --warning: 60 100% 45%;
     --destructive: 0 84.2% 60.2%;
+    --orange: 20 95% 55%;
+    --orange-foreground: 0 0% 98%;
     
     /* Light Mode text for gaming aesthetic */
     --box-text: 240 10% 3.9%;
@@ -126,6 +128,8 @@ All colors MUST be HSL.
     --success: 120 100% 70%;
     --warning: 60 100% 70%;
     --destructive: 0 100% 70%;
+    --orange: 20 95% 65%;
+    --orange-foreground: 260 25% 5%;
     
     /* Dark Mode text for gaming aesthetic */
     --box-text: 180 100% 95%;

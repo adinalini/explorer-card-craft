@@ -242,7 +242,7 @@ const Index = () => {
       <div className="absolute top-4 left-4 z-20">
         <Button 
           onClick={() => navigate('/cards')}
-          className="bg-[hsl(var(--wave-light))] dark:bg-[hsl(var(--wave-dark))] text-[hsl(var(--background))] hover:opacity-90 transition-opacity font-semibold"
+          className="bg-[hsl(var(--wave-light))] dark:bg-[hsl(var(--wave-dark))] text-[hsl(var(--background))] hover:bg-[hsl(var(--wave-light))]/80 dark:hover:bg-[hsl(var(--wave-dark))]/80 transition-all font-semibold"
         >
           Card Explorer
         </Button>

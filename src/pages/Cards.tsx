@@ -15,40 +15,76 @@ import { toast } from "@/hooks/use-toast"
 const Cards = () => {
   const navigate = useNavigate()
   const [searchQuery, setSearchQuery] = useState("")
-  const [costRange, setCostRange] = useState([0, 10])
+  const [minCost, setMinCost] = useState(0)
+  const [maxCost, setMaxCost] = useState(10)
+  const [showUnits, setShowUnits] = useState(true)
   const [showLegendary, setShowLegendary] = useState(true)
-  const [showSpells, setShowSpells] = useState(true)
+  const [showSpells, setShowSpells] = useState(false)
   const [viewMode, setViewMode] = useState("5")
 
   // Filter cards based on search and filters
   const filteredCards = useMemo(() => {
     return cardDatabase.filter(card => {
       const matchesSearch = card.name.toLowerCase().includes(searchQuery.toLowerCase())
-      const matchesCost = card.cost >= costRange[0] && card.cost <= costRange[1]
-      const matchesLegendary = showLegendary || !card.isLegendary
-      const matchesSpells = showSpells || !card.isSpell
+      const matchesCost = card.cost >= minCost && card.cost <= maxCost
       
-      return matchesSearch && matchesCost && matchesLegendary && matchesSpells
+      // Card type filtering - must show at least one type
+      const isUnit = !card.isSpell && !card.isLegendary
+      const matchesType = (showUnits && isUnit) || 
+                         (showLegendary && card.isLegendary) || 
+                         (showSpells && card.isSpell)
+      
+      return matchesSearch && matchesCost && matchesType
     })
-  }, [searchQuery, costRange, showLegendary, showSpells])
+  }, [searchQuery, minCost, maxCost, showUnits, showLegendary, showSpells])
 
   const downloadCardImage = async (card: any) => {
     try {
-      // Get the image source from the card
-      const imageUrl = `/src/assets/cards/${card.id}.png`
+      // Create a canvas to get the actual image data
+      const img = new Image()
+      img.crossOrigin = 'anonymous'
       
-      // Create a link element and trigger download
-      const link = document.createElement('a')
-      link.href = imageUrl
-      link.download = `${card.name.replace(/\s+/g, '_').toLowerCase()}.png`
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
+      // Use the card's image function to get the actual image URL
+      const imageModule = await card.image()
+      const imageUrl = imageModule.default || imageModule
       
-      toast({
-        title: "Download Started",
-        description: `Downloading ${card.name} image...`,
-      })
+      img.onload = () => {
+        const canvas = document.createElement('canvas')
+        const ctx = canvas.getContext('2d')
+        canvas.width = img.width
+        canvas.height = img.height
+        
+        ctx?.drawImage(img, 0, 0)
+        
+        // Convert to blob and download
+        canvas.toBlob((blob) => {
+          if (blob) {
+            const url = URL.createObjectURL(blob)
+            const link = document.createElement('a')
+            link.href = url
+            link.download = `${card.name.replace(/\s+/g, '_').toLowerCase()}.png`
+            document.body.appendChild(link)
+            link.click()
+            document.body.removeChild(link)
+            URL.revokeObjectURL(url)
+            
+            toast({
+              title: "Download Started",
+              description: `Downloading ${card.name} image...`,
+            })
+          }
+        }, 'image/png')
+      }
+      
+      img.onerror = () => {
+        toast({
+          title: "Download Failed", 
+          description: "Failed to load card image. Please try again.",
+          variant: "destructive"
+        })
+      }
+      
+      img.src = imageUrl
     } catch (error) {
       toast({
         title: "Download Failed",
@@ -101,24 +137,38 @@ const Cards = () => {
                   placeholder="Enter card name..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10"
+                  className="pl-10 border-muted-foreground/30"
                 />
               </div>
             </div>
 
             {/* Cost Range */}
-            <div className="space-y-2">
-              <Label className="text-sm font-medium text-foreground">
-                Cost Range: {costRange[0]} - {costRange[1]}
-              </Label>
-              <Slider
-                value={costRange}
-                onValueChange={setCostRange}
-                max={10}
-                min={0}
-                step={1}
-                className="w-full"
-              />
+            <div className="space-y-3">
+              <Label className="text-sm font-medium text-foreground">Cost Range</Label>
+              <div className="space-y-3">
+                <div>
+                  <Label className="text-xs text-muted-foreground">Min Cost: {minCost}</Label>
+                  <Slider
+                    value={[minCost]}
+                    onValueChange={([value]) => setMinCost(Math.min(value, maxCost))}
+                    max={10}
+                    min={0}
+                    step={1}
+                    className="w-full"
+                  />
+                </div>
+                <div>
+                  <Label className="text-xs text-muted-foreground">Max Cost: {maxCost}</Label>
+                  <Slider
+                    value={[maxCost]}
+                    onValueChange={([value]) => setMaxCost(Math.max(value, minCost))}
+                    max={10}
+                    min={0}
+                    step={1}
+                    className="w-full"
+                  />
+                </div>
+              </div>
             </div>
 
             {/* Card Type Toggles */}
@@ -128,8 +178,27 @@ const Cards = () => {
                 <label className="flex items-center space-x-2 cursor-pointer">
                   <input
                     type="checkbox"
+                    checked={showUnits}
+                    onChange={(e) => {
+                      const newValue = e.target.checked
+                      // Ensure at least one type is selected
+                      if (!newValue && !showLegendary && !showSpells) return
+                      setShowUnits(newValue)
+                    }}
+                    className="rounded border-border"
+                  />
+                  <span className="text-sm text-foreground">Show Units</span>
+                </label>
+                <label className="flex items-center space-x-2 cursor-pointer">
+                  <input
+                    type="checkbox"
                     checked={showLegendary}
-                    onChange={(e) => setShowLegendary(e.target.checked)}
+                    onChange={(e) => {
+                      const newValue = e.target.checked
+                      // Ensure at least one type is selected
+                      if (!newValue && !showUnits && !showSpells) return
+                      setShowLegendary(newValue)
+                    }}
                     className="rounded border-border"
                   />
                   <span className="text-sm text-foreground">Show Legendary</span>
@@ -138,7 +207,12 @@ const Cards = () => {
                   <input
                     type="checkbox"
                     checked={showSpells}
-                    onChange={(e) => setShowSpells(e.target.checked)}
+                    onChange={(e) => {
+                      const newValue = e.target.checked
+                      // Ensure at least one type is selected
+                      if (!newValue && !showUnits && !showLegendary) return
+                      setShowSpells(newValue)
+                    }}
                     className="rounded border-border"
                   />
                   <span className="text-sm text-foreground">Show Spells</span>
@@ -168,7 +242,7 @@ const Cards = () => {
 
           {/* Results Summary */}
           <div className="mt-4 pt-4 border-t border-border/20">
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-muted-foreground border-muted-foreground/30">
               Showing {filteredCards.length} of {cardDatabase.length} cards
             </p>
           </div>

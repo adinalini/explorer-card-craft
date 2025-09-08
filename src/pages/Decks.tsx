@@ -354,17 +354,17 @@ const Decks = () => {
                            className="flex-1 bg-card border rounded-lg p-4 cursor-pointer hover:shadow-lg transition-all"
                            onClick={() => navigate(`/deck/${deck.id}`)}
                          >
-                           <div className="grid grid-cols-12 gap-4 items-center">
-                             <div className="text-sm font-mono text-muted-foreground">
-                               {(currentPage - 1) * itemsPerPage + index + 1}
-                             </div>
-                             <div className="col-span-2">
-                               <h3 className="font-semibold text-card-foreground">{deck.name}</h3>
-                             </div>
-                             <div className="flex items-center gap-1">
-                               {React.createElement(deckTypeIcons[deck.type], { className: "h-4 w-4 text-primary" })}
-                               <span className="text-sm capitalize">{deck.type}</span>
-                             </div>
+                            <div className="grid grid-cols-12 gap-6 items-center">
+                              <div className="text-sm font-mono text-muted-foreground">
+                                {(currentPage - 1) * itemsPerPage + index + 1}
+                              </div>
+                              <div className="col-span-2">
+                                <h3 className="font-semibold text-card-foreground">{deck.name}</h3>
+                              </div>
+                              <div className="col-span-2 flex items-center gap-1">
+                                {React.createElement(deckTypeIcons[deck.type], { className: "h-4 w-4 text-primary" })}
+                                <span className="text-sm capitalize">{deck.type}</span>
+                              </div>
                               <div className="col-span-4">
                                 <div className="grid grid-cols-13 gap-1">
                                   {deck.cards.map((card) => (
@@ -378,7 +378,7 @@ const Decks = () => {
                                   ))}
                                 </div>
                               </div>
-                              <div className="col-span-3 text-sm text-muted-foreground">
+                              <div className="col-span-2 text-sm text-muted-foreground">
                                 {deck.notes ? (
                                   <div className="space-y-1">
                                     {deck.notes.split('\n').map((line, idx) => (
@@ -387,10 +387,10 @@ const Decks = () => {
                                   </div>
                                 ) : 'N/A'}
                               </div>
-                             <div className="text-sm text-muted-foreground text-right">
-                               {deck.author_name || 'N/A'}
-                             </div>
-                           </div>
+                              <div className="text-sm text-muted-foreground text-right">
+                                {deck.author_name || 'N/A'}
+                              </div>
+                            </div>
                          </div>
                          <Button
                            variant="ghost"

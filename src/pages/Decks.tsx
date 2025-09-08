@@ -21,6 +21,7 @@ interface Deck {
   author_name?: string;
   is_featured: boolean;
   notes?: string;
+  patch: string;
   cards: Array<{
     card_id: string;
     card_name: string;

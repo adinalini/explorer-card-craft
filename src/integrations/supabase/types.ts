@@ -64,6 +64,7 @@ export type Database = {
           is_featured: boolean
           name: string
           notes: string | null
+          patch: string
           type: Database["public"]["Enums"]["deck_type"]
           updated_at: string
         }
@@ -75,6 +76,7 @@ export type Database = {
           is_featured?: boolean
           name: string
           notes?: string | null
+          patch?: string
           type: Database["public"]["Enums"]["deck_type"]
           updated_at?: string
         }
@@ -86,6 +88,7 @@ export type Database = {
           is_featured?: boolean
           name?: string
           notes?: string | null
+          patch?: string
           type?: Database["public"]["Enums"]["deck_type"]
           updated_at?: string
         }

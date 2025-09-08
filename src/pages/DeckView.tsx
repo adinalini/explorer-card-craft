@@ -16,6 +16,7 @@ interface Deck {
   author_name?: string;
   is_featured: boolean;
   notes?: string;
+  patch: string;
   created_at: string;
   cards: Array<{
     card_id: string;
@@ -163,7 +164,7 @@ const DeckView = () => {
             )}
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
             <div>
               <h3 className="font-semibold text-card-foreground mb-2">Description</h3>
               <p className="text-muted-foreground">
@@ -175,6 +176,13 @@ const DeckView = () => {
               <h3 className="font-semibold text-card-foreground mb-2">Author</h3>
               <p className="text-muted-foreground">
                 {deck.author_name || 'N/A'}
+              </p>
+            </div>
+            
+            <div>
+              <h3 className="font-semibold text-card-foreground mb-2">Patch</h3>
+              <p className="text-muted-foreground">
+                {deck.patch}
               </p>
             </div>
           </div>

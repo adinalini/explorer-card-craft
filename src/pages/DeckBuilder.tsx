@@ -275,9 +275,9 @@ const DeckBuilder = () => {
               <div className="col-span-4 h-32">
                 {selectedCards.find(c => c.is_legendary) ? (
                   <div className="relative group">
-                    <img
-                      src={selectedCards.find(c => c.is_legendary)?.card_image}
-                      alt={selectedCards.find(c => c.is_legendary)?.card_name}
+                    <CardImage 
+                      cardId={selectedCards.find(c => c.is_legendary)!.card_id}
+                      cardName={selectedCards.find(c => c.is_legendary)!.card_name}
                       className="w-full h-full object-cover rounded border-2 border-yellow-400"
                     />
                     <button
@@ -301,9 +301,9 @@ const DeckBuilder = () => {
                   <div key={i} className="aspect-[3/4]">
                     {card ? (
                       <div className="relative group">
-                        <img
-                          src={card.card_image}
-                          alt={card.card_name}
+                        <CardImage 
+                          cardId={card.card_id}
+                          cardName={card.card_name}
                           className="w-full h-full object-cover rounded border"
                         />
                         <button

@@ -6,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { WaveDivider } from "@/components/ui/wave-divider";
+import { CardImage } from "@/components/CardImage";
 import { supabase } from "@/integrations/supabase/client";
 import { Star, Users, ArrowLeft, Flame, Droplet, Cloud, Bomb, Plus, CreditCard } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
@@ -17,6 +18,7 @@ interface Deck {
   description?: string;
   author_name?: string;
   is_featured: boolean;
+  notes?: string;
   cards: Array<{
     card_id: string;
     card_name: string;
@@ -98,7 +100,7 @@ const Decks = () => {
   }, [decks, searchQuery, selectedType]);
 
   const featuredDecks = filteredDecks.filter(deck => deck.is_featured);
-  const communityDecks = filteredDecks.filter(deck => !deck.is_featured);
+  const communityDecks = filteredDecks; // Show all decks in community section
 
   const DeckCard = ({ deck, showDescription = false }: { deck: Deck; showDescription?: boolean }) => {
     const TypeIcon = deckTypeIcons[deck.type];
@@ -123,9 +125,9 @@ const Decks = () => {
         <div className="grid grid-cols-13 gap-1 mb-3">
           {deck.cards.map((card) => (
             <div key={card.position} className="aspect-square">
-              <img 
-                src={card.card_image} 
-                alt={card.card_name}
+              <CardImage 
+                cardId={card.card_id}
+                cardName={card.card_name}
                 className="w-full h-full object-cover rounded border"
               />
             </div>
@@ -227,9 +229,41 @@ const Decks = () => {
                   <p className="text-lg text-muted-foreground">No featured decks found.</p>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {featuredDecks.map(deck => (
-                    <DeckCard key={deck.id} deck={deck} showDescription={true} />
+                <div className="space-y-4">
+                  {featuredDecks.map((deck, index) => (
+                    <div key={deck.id} className="bg-card border rounded-lg p-4">
+                      <div className="grid grid-cols-12 gap-4 items-center">
+                        <div className="text-sm font-mono text-muted-foreground">
+                          {index + 1}
+                        </div>
+                        <div className="col-span-2">
+                          <h3 className="font-semibold text-card-foreground">{deck.name}</h3>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          {React.createElement(deckTypeIcons[deck.type], { className: "h-4 w-4 text-primary" })}
+                          <span className="text-sm capitalize">{deck.type}</span>
+                        </div>
+                        <div className="col-span-5">
+                          <div className="grid grid-cols-13 gap-1">
+                            {deck.cards.map((card) => (
+                              <div key={card.position} className="aspect-square">
+                                <CardImage 
+                                  cardId={card.card_id}
+                                  cardName={card.card_name}
+                                  className="w-full h-full object-cover rounded border"
+                                />
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                        <div className="col-span-2 text-sm text-muted-foreground">
+                          {deck.notes || 'N/A'}
+                        </div>
+                        <div className="text-sm text-muted-foreground text-right">
+                          {deck.author_name || 'N/A'}
+                        </div>
+                      </div>
+                    </div>
                   ))}
                 </div>
               )}
@@ -267,9 +301,9 @@ const Decks = () => {
                           <div className="grid grid-cols-13 gap-1">
                             {deck.cards.map((card) => (
                               <div key={card.position} className="aspect-square">
-                                <img 
-                                  src={card.card_image} 
-                                  alt={card.card_name}
+                                <CardImage 
+                                  cardId={card.card_id}
+                                  cardName={card.card_name}
                                   className="w-full h-full object-cover rounded border"
                                 />
                               </div>

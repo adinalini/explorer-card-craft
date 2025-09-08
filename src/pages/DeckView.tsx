@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { WaveDivider } from "@/components/ui/wave-divider";
 import { DeckCodeDisplay } from "@/components/DeckCodeDisplay";
+import { CardImage } from "@/components/CardImage";
 import { supabase } from "@/integrations/supabase/client";
 import { ArrowLeft, Share, Copy, Check, Flame, Droplet, Cloud, Bomb, Plus, CreditCard } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
@@ -14,6 +15,7 @@ interface Deck {
   description?: string;
   author_name?: string;
   is_featured: boolean;
+  notes?: string;
   created_at: string;
   cards: Array<{
     card_id: string;
@@ -212,9 +214,9 @@ const DeckView = () => {
               <h3 className="font-semibold mb-4 text-card-foreground">Legendary</h3>
               <div className="aspect-[3/4] max-w-sm">
                 {legendaryCard ? (
-                  <img
-                    src={legendaryCard.card_image}
-                    alt={legendaryCard.card_name}
+                  <CardImage
+                    cardId={legendaryCard.card_id}
+                    cardName={legendaryCard.card_name}
                     className="w-full h-full object-cover rounded border-2 border-yellow-400"
                   />
                 ) : (
@@ -232,9 +234,9 @@ const DeckView = () => {
                 {normalCards.concat(Array(12 - normalCards.length).fill(null)).map((card, index) => (
                   <div key={index} className="aspect-[3/4]">
                     {card ? (
-                      <img
-                        src={card.card_image}
-                        alt={card.card_name}
+                      <CardImage
+                        cardId={card.card_id}
+                        cardName={card.card_name}
                         className="w-full h-full object-cover rounded border"
                       />
                     ) : (

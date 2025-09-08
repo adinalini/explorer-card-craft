@@ -63,6 +63,7 @@ export type Database = {
           id: string
           is_featured: boolean
           name: string
+          notes: string | null
           type: Database["public"]["Enums"]["deck_type"]
           updated_at: string
         }
@@ -73,6 +74,7 @@ export type Database = {
           id?: string
           is_featured?: boolean
           name: string
+          notes?: string | null
           type: Database["public"]["Enums"]["deck_type"]
           updated_at?: string
         }
@@ -83,6 +85,7 @@ export type Database = {
           id?: string
           is_featured?: boolean
           name?: string
+          notes?: string | null
           type?: Database["public"]["Enums"]["deck_type"]
           updated_at?: string
         }

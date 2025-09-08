@@ -15,18 +15,17 @@ import { toast } from "@/hooks/use-toast"
 const Cards = () => {
   const navigate = useNavigate()
   const [searchQuery, setSearchQuery] = useState("")
-  const [minCost, setMinCost] = useState(0)
-  const [maxCost, setMaxCost] = useState(10)
+  const [costRange, setCostRange] = useState([0, 10])
   const [showUnits, setShowUnits] = useState(true)
   const [showLegendary, setShowLegendary] = useState(true)
-  const [showSpells, setShowSpells] = useState(false)
+  const [showSpells, setShowSpells] = useState(true)
   const [viewMode, setViewMode] = useState("5")
 
   // Filter cards based on search and filters
   const filteredCards = useMemo(() => {
     return cardDatabase.filter(card => {
       const matchesSearch = card.name.toLowerCase().includes(searchQuery.toLowerCase())
-      const matchesCost = card.cost >= minCost && card.cost <= maxCost
+      const matchesCost = card.cost >= costRange[0] && card.cost <= costRange[1]
       
       // Card type filtering - must show at least one type
       const isUnit = !card.isSpell && !card.isLegendary
@@ -35,8 +34,14 @@ const Cards = () => {
                          (showSpells && card.isSpell)
       
       return matchesSearch && matchesCost && matchesType
+    }).sort((a, b) => {
+      // Sort by cost first, then by name
+      if (a.cost !== b.cost) {
+        return a.cost - b.cost
+      }
+      return a.name.localeCompare(b.name)
     })
-  }, [searchQuery, minCost, maxCost, showUnits, showLegendary, showSpells])
+  }, [searchQuery, costRange, showUnits, showLegendary, showSpells])
 
   const downloadCardImage = async (card: any) => {
     try {
@@ -143,32 +148,18 @@ const Cards = () => {
             </div>
 
             {/* Cost Range */}
-            <div className="space-y-3">
-              <Label className="text-sm font-medium text-foreground">Cost Range</Label>
-              <div className="space-y-3">
-                <div>
-                  <Label className="text-xs text-muted-foreground">Min Cost: {minCost}</Label>
-                  <Slider
-                    value={[minCost]}
-                    onValueChange={([value]) => setMinCost(Math.min(value, maxCost))}
-                    max={10}
-                    min={0}
-                    step={1}
-                    className="w-full"
-                  />
-                </div>
-                <div>
-                  <Label className="text-xs text-muted-foreground">Max Cost: {maxCost}</Label>
-                  <Slider
-                    value={[maxCost]}
-                    onValueChange={([value]) => setMaxCost(Math.max(value, minCost))}
-                    max={10}
-                    min={0}
-                    step={1}
-                    className="w-full"
-                  />
-                </div>
-              </div>
+            <div className="space-y-2">
+              <Label className="text-sm font-medium text-foreground">
+                Cost Range: {costRange[0]} - {costRange[1]}
+              </Label>
+              <Slider
+                value={costRange}
+                onValueChange={setCostRange}
+                max={10}
+                min={0}
+                step={1}
+                className="w-full"
+              />
             </div>
 
             {/* Card Type Toggles */}

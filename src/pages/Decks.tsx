@@ -138,21 +138,11 @@ const Decks = () => {
     }
 
     if (cardKeys.length === 0) {
-      toast({
-        title: "Error",
-        description: "No valid cards found in this deck.",
-        variant: "destructive"
-      });
       return;
     }
 
     const deckCode = encodeDeck(cardKeys);
     if (!deckCode) {
-      toast({
-        title: "Error",
-        description: "Failed to generate deck code.",
-        variant: "destructive"
-      });
       return;
     }
 
@@ -160,16 +150,8 @@ const Decks = () => {
       await navigator.clipboard.writeText(deckCode);
       setCopiedDeckId(deck.id);
       setTimeout(() => setCopiedDeckId(null), 2000);
-      toast({
-        title: "Deck Code Copied",
-        description: "Deck code has been copied to clipboard!",
-      });
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to copy deck code. Please try again.",
-        variant: "destructive"
-      });
+      // Silent fail
     }
   };
 
@@ -367,18 +349,6 @@ const Decks = () => {
                   <div className="space-y-4">
                      {paginatedFeaturedDecks.map((deck, index) => (
                        <div key={deck.id} className="flex items-center gap-2">
-                         <Button
-                           variant="ghost"
-                           size="sm"
-                           onClick={(e) => handleCopyDeckCode(deck, e)}
-                           className="text-muted-foreground hover:text-muted-foreground/80 p-2"
-                         >
-                           {copiedDeckId === deck.id ? (
-                             <Check className="h-4 w-4" />
-                           ) : (
-                             <Copy className="h-4 w-4" />
-                           )}
-                         </Button>
                          <div 
                            className="flex-1 bg-card border rounded-lg p-4 cursor-pointer hover:shadow-lg transition-all"
                            onClick={() => navigate(`/deck/${deck.id}`)}
@@ -415,6 +385,18 @@ const Decks = () => {
                              </div>
                            </div>
                          </div>
+                         <Button
+                           variant="ghost"
+                           size="sm"
+                           onClick={(e) => handleCopyDeckCode(deck, e)}
+                           className="text-muted-foreground hover:text-muted-foreground/80 p-2"
+                         >
+                           {copiedDeckId === deck.id ? (
+                             <Check className="h-4 w-4" />
+                           ) : (
+                             <Copy className="h-4 w-4" />
+                           )}
+                         </Button>
                        </div>
                      ))}
                   </div>
@@ -439,18 +421,6 @@ const Decks = () => {
                   <div className="space-y-4">
                      {paginatedCommunityDecks.map((deck, index) => (
                        <div key={deck.id} className="flex items-center gap-2">
-                         <Button
-                           variant="ghost"
-                           size="sm"
-                           onClick={(e) => handleCopyDeckCode(deck, e)}
-                           className="text-muted-foreground hover:text-muted-foreground/80 p-2"
-                         >
-                           {copiedDeckId === deck.id ? (
-                             <Check className="h-4 w-4" />
-                           ) : (
-                             <Copy className="h-4 w-4" />
-                           )}
-                         </Button>
                          <div 
                            className="flex-1 bg-card border rounded-lg p-4 cursor-pointer hover:shadow-lg transition-all"
                            onClick={() => navigate(`/deck/${deck.id}`)}
@@ -484,6 +454,18 @@ const Decks = () => {
                              </div>
                            </div>
                          </div>
+                         <Button
+                           variant="ghost"
+                           size="sm"
+                           onClick={(e) => handleCopyDeckCode(deck, e)}
+                           className="text-muted-foreground hover:text-muted-foreground/80 p-2"
+                         >
+                           {copiedDeckId === deck.id ? (
+                             <Check className="h-4 w-4" />
+                           ) : (
+                             <Copy className="h-4 w-4" />
+                           )}
+                         </Button>
                        </div>
                      ))}
                   </div>

@@ -283,7 +283,7 @@ const Decks = () => {
                   onValueChange={(value) => setItemsPerPage(parseInt(value))}
                   className="flex gap-4"
                 >
-                  {[10, 20, 50].map(num => (
+                  {[10, 25, 50].map(num => (
                     <div key={num} className="flex items-center space-x-2">
                       <RadioGroupItem value={num.toString()} id={`per-page-${num}`} />
                       <Label htmlFor={`per-page-${num}`} className="text-sm">{num}</Label>

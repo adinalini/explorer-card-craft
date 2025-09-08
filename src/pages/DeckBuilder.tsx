@@ -270,54 +270,84 @@ const DeckBuilder = () => {
               Your Deck ({selectedCards.length}/13)
             </h2>
             
-            <div className="grid grid-cols-4 gap-4 min-h-[400px]">
-              {/* Legendary slot */}
-              <div className="col-span-4 h-32">
-                {selectedCards.find(c => c.is_legendary) ? (
-                  <div className="relative group">
+            <div className="grid grid-cols-13 gap-2">
+              {/* First card position */}
+              {selectedCards.filter(c => !c.is_legendary)[0] ? (
+                <div className="relative group aspect-square">
+                  <CardImage 
+                    cardId={selectedCards.filter(c => !c.is_legendary)[0].card_id}
+                    cardName={selectedCards.filter(c => !c.is_legendary)[0].card_name}
+                    className="w-full h-full object-cover rounded border"
+                  />
+                  <button
+                    onClick={() => handleCardRemove(selectedCards.filter(c => !c.is_legendary)[0].card_id)}
+                    className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-4 h-4 text-xs opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
+                  >
+                    ×
+                  </button>
+                </div>
+              ) : (
+                <div className="aspect-square border border-dashed border-muted-foreground/30 rounded flex items-center justify-center">
+                  <span className="text-muted-foreground text-xs">1</span>
+                </div>
+              )}
+
+              {/* Legendary card position */}
+              {selectedCards.find(c => c.is_legendary) ? (
+                <div className="relative group aspect-square">
+                  <CardImage 
+                    cardId={selectedCards.find(c => c.is_legendary)!.card_id}
+                    cardName={selectedCards.find(c => c.is_legendary)!.card_name}
+                    className="w-full h-full object-cover rounded border-2 border-yellow-400"
+                  />
+                  <button
+                    onClick={() => handleCardRemove(selectedCards.find(c => c.is_legendary)!.card_id)}
+                    className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-4 h-4 text-xs opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
+                  >
+                    ×
+                  </button>
+                </div>
+              ) : (
+                <div className="aspect-square border-2 border-dashed border-yellow-400/30 rounded flex items-center justify-center">
+                  <span className="text-yellow-600 text-xs text-center">L</span>
+                </div>
+              )}
+
+              {/* Deck info section */}
+              <div className="aspect-square flex flex-col justify-center items-center px-1 bg-muted/20 rounded text-center">
+                <div className="text-xs font-semibold text-card-foreground truncate w-full">
+                  {deckName || "Deck"}
+                </div>
+                <div className="text-xs text-muted-foreground capitalize">
+                  {deckType || "Type"}
+                </div>
+                <div className="text-xs text-muted-foreground truncate w-full">
+                  {authorName || "Author"}
+                </div>
+              </div>
+
+              {/* Remaining cards (positions 4-13) */}
+              {Array.from({ length: 10 }, (_, i) => {
+                const nonLegendaryCards = selectedCards.filter(c => !c.is_legendary);
+                const card = nonLegendaryCards[i + 1]; // Skip first card (position 0)
+                
+                return card ? (
+                  <div key={i + 4} className="relative group aspect-square">
                     <CardImage 
-                      cardId={selectedCards.find(c => c.is_legendary)!.card_id}
-                      cardName={selectedCards.find(c => c.is_legendary)!.card_name}
-                      className="w-full h-full object-cover rounded border-2 border-yellow-400"
+                      cardId={card.card_id}
+                      cardName={card.card_name}
+                      className="w-full h-full object-cover rounded border"
                     />
                     <button
-                      onClick={() => handleCardRemove(selectedCards.find(c => c.is_legendary)!.card_id)}
-                      className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 text-xs opacity-0 group-hover:opacity-100 transition-opacity"
+                      onClick={() => handleCardRemove(card.card_id)}
+                      className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-4 h-4 text-xs opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
                     >
                       ×
                     </button>
                   </div>
                 ) : (
-                  <div className="w-full h-full border-2 border-dashed border-muted-foreground/30 rounded flex items-center justify-center">
-                    <span className="text-muted-foreground text-sm">Legendary Card</span>
-                  </div>
-                )}
-              </div>
-              
-              {/* Normal cards */}
-              {Array.from({ length: 12 }, (_, i) => {
-                const card = selectedCards.filter(c => !c.is_legendary)[i];
-                return (
-                  <div key={i} className="aspect-[3/4]">
-                    {card ? (
-                      <div className="relative group">
-                        <CardImage 
-                          cardId={card.card_id}
-                          cardName={card.card_name}
-                          className="w-full h-full object-cover rounded border"
-                        />
-                        <button
-                          onClick={() => handleCardRemove(card.card_id)}
-                          className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 text-xs opacity-0 group-hover:opacity-100 transition-opacity"
-                        >
-                          ×
-                        </button>
-                      </div>
-                    ) : (
-                      <div className="w-full h-full border border-dashed border-muted-foreground/30 rounded flex items-center justify-center">
-                        <span className="text-muted-foreground text-xs">{i + 1}</span>
-                      </div>
-                    )}
+                  <div key={i + 4} className="aspect-square border border-dashed border-muted-foreground/30 rounded flex items-center justify-center">
+                    <span className="text-muted-foreground text-xs">{i + 4}</span>
                   </div>
                 );
               })}

@@ -45,20 +45,37 @@ const Cards = () => {
 
   const downloadCardImage = async (card: any) => {
     try {
-      // Get the image URL from the dynamic import
-      const imageModule = await card.image()
-      const imageUrl = imageModule.default || imageModule
+      // Import the cardImages mapping from CardImage component
+      const { cardImages } = await import('@/components/CardImage')
+      
+      // Get the actual image URL using the cardImages mapping
+      const imageUrl = cardImages[card.id]
+      
+      if (!imageUrl) {
+        throw new Error('Image not found for card: ' + card.id)
+      }
+      
+      // Fetch the image as a blob to ensure it downloads properly
+      const response = await fetch(imageUrl)
+      if (!response.ok) {
+        throw new Error('Failed to fetch image')
+      }
+      
+      const blob = await response.blob()
+      const url = URL.createObjectURL(blob)
       
       // Create a temporary link to download the image
       const link = document.createElement('a')
-      link.href = imageUrl
+      link.href = url
       link.download = `${card.name.replace(/\s+/g, '_').toLowerCase()}.png`
-      link.target = '_blank' // Open in new tab to avoid navigation issues
       
       // Trigger download
       document.body.appendChild(link)
       link.click()
       document.body.removeChild(link)
+      
+      // Clean up the blob URL
+      URL.revokeObjectURL(url)
       
       toast({
         title: "Download Started",

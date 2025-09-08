@@ -14,6 +14,80 @@ export type Database = {
   }
   public: {
     Tables: {
+      deck_cards: {
+        Row: {
+          card_id: string
+          card_image: string
+          card_name: string
+          created_at: string
+          deck_id: string
+          id: string
+          is_legendary: boolean
+          position: number
+        }
+        Insert: {
+          card_id: string
+          card_image: string
+          card_name: string
+          created_at?: string
+          deck_id: string
+          id?: string
+          is_legendary?: boolean
+          position: number
+        }
+        Update: {
+          card_id?: string
+          card_image?: string
+          card_name?: string
+          created_at?: string
+          deck_id?: string
+          id?: string
+          is_legendary?: boolean
+          position?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deck_cards_deck_id_fkey"
+            columns: ["deck_id"]
+            isOneToOne: false
+            referencedRelation: "decks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      decks: {
+        Row: {
+          author_name: string | null
+          created_at: string
+          description: string | null
+          id: string
+          is_featured: boolean
+          name: string
+          type: Database["public"]["Enums"]["deck_type"]
+          updated_at: string
+        }
+        Insert: {
+          author_name?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_featured?: boolean
+          name: string
+          type: Database["public"]["Enums"]["deck_type"]
+          updated_at?: string
+        }
+        Update: {
+          author_name?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_featured?: boolean
+          name?: string
+          type?: Database["public"]["Enums"]["deck_type"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
       game_sessions: {
         Row: {
           created_at: string | null
@@ -242,7 +316,7 @@ export type Database = {
       }
     }
     Enums: {
-      [_ in never]: never
+      deck_type: "aggro" | "control" | "destroy" | "discard" | "move" | "ramp"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -369,6 +443,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      deck_type: ["aggro", "control", "destroy", "discard", "move", "ramp"],
+    },
   },
 } as const

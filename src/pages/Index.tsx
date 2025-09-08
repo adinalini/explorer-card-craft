@@ -238,13 +238,19 @@ const Index = () => {
       <Blob variant="orange" size="sm" className="bottom-40 left-32 animate-bounce" style={{ animationDelay: '4s', animationDuration: '7s' }} />
       <Blob variant="pink" size="md" className="bottom-20 right-16 animate-bounce" style={{ animationDelay: '1s', animationDuration: '9s' }} />
       
-      {/* Card Explorer Button in top left */}
-      <div className="absolute top-4 left-4 z-20">
+      {/* Card Explorer and Deck Builder Buttons in top left */}
+      <div className="absolute top-4 left-4 z-20 flex gap-3">
         <Button 
           onClick={() => navigate('/cards')}
           className="bg-[hsl(var(--wave-light))] dark:bg-[hsl(var(--wave-dark))] text-[hsl(var(--background))] hover:bg-[hsl(var(--wave-light))]/80 dark:hover:bg-[hsl(var(--wave-dark))]/80 transition-all font-semibold"
         >
           Card Explorer
+        </Button>
+        <Button 
+          onClick={() => navigate('/decks')}
+          className="bg-primary text-primary-foreground hover:bg-primary/90 transition-all font-semibold"
+        >
+          Deck Builder
         </Button>
       </div>
 

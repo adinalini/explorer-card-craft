@@ -8,6 +8,9 @@ import Index from "./pages/Index";
 import Room from "./pages/Room";
 import RandomDeck from "./pages/RandomDeck";
 import Cards from "./pages/Cards";
+import Decks from "./pages/Decks";
+import DeckBuilder from "./pages/DeckBuilder";
+import DeckView from "./pages/DeckView";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -24,6 +27,9 @@ const App = () => (
             <Route path="/room/:roomId" element={<Room />} />
             <Route path="/random" element={<RandomDeck />} />
             <Route path="/cards" element={<Cards />} />
+            <Route path="/decks" element={<Decks />} />
+            <Route path="/deck-builder" element={<DeckBuilder />} />
+            <Route path="/deck/:id" element={<DeckView />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

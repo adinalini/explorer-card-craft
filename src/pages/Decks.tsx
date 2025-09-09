@@ -354,11 +354,11 @@ const Decks = () => {
                            className="flex-1 bg-card border rounded-lg p-4 cursor-pointer hover:shadow-lg transition-all"
                            onClick={() => navigate(`/deck/${deck.id}`)}
                          >
-                            <div className="grid grid-cols-12 gap-4 items-center">
-                              <div className="text-sm font-mono text-muted-foreground w-4">
-                                {(currentPage - 1) * itemsPerPage + index + 1}
-                              </div>
-                              <div className="col-span-1 -ml-2">
+                           <div className="grid grid-cols-12 gap-4 items-center">
+                             <div className="text-sm font-mono text-muted-foreground">
+                               {(currentPage - 1) * itemsPerPage + index + 1}
+                             </div>
+                              <div className="col-span-1">
                                 <h3 className="font-semibold text-card-foreground">{deck.name}</h3>
                               </div>
                              <div className="flex items-center gap-1">

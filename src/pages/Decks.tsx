@@ -378,7 +378,7 @@ const Decks = () => {
                                   ))}
                                 </div>
                               </div>
-                              <div className="col-span-2 text-xs text-muted-foreground">
+                              <div className="col-span-2 text-xs text-muted-foreground break-words">
                                 {deck.notes || 'N/A'}
                               </div>
                              <div className="text-sm text-muted-foreground text-right">

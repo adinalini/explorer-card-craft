@@ -215,24 +215,22 @@ const DeckBuilder = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[hsl(var(--background-start))] to-[hsl(var(--background-end))]">
-      {/* Theme Toggle in top right */}
-      <div className="absolute top-4 right-4 z-20">
-        <ThemeToggle className="text-foreground hover:bg-accent" />
-      </div>
-      
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
-        <div className="flex items-center gap-4 mb-8">
-          <Button
-            onClick={() => navigate('/decks')}
-            variant="ghost"
-            size="sm"
-            className="text-foreground hover:bg-accent"
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Decks
-          </Button>
-          <h1 className="text-4xl font-bold text-foreground">Create New Deck</h1>
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center gap-4">
+            <Button
+              onClick={() => navigate('/decks')}
+              variant="ghost"
+              size="sm"
+              className="text-foreground hover:bg-accent"
+            >
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back to Decks
+            </Button>
+            <h1 className="text-4xl font-bold text-foreground">Create New Deck</h1>
+          </div>
+          <ThemeToggle className="text-foreground hover:bg-accent" />
         </div>
 
         {/* Deck Information Form */}

@@ -251,11 +251,6 @@ const Decks = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[hsl(var(--background-start))] to-[hsl(var(--background-end))] flex flex-col">
-      {/* Theme Toggle in top right */}
-      <div className="absolute top-4 right-4 z-20">
-        <ThemeToggle className="text-foreground hover:bg-accent" />
-      </div>
-      
       <div className="flex-1">
         <div className="container mx-auto px-4 py-8">
           {/* Header */}
@@ -273,13 +268,16 @@ const Decks = () => {
               <h1 className="text-4xl font-bold text-foreground">Deck Builder</h1>
             </div>
             
-            <Button
-              onClick={() => navigate('/deck-builder')}
-              className="bg-orange-500 hover:bg-orange-600 text-white font-semibold"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Create Deck
-            </Button>
+            <div className="flex items-center gap-3">
+              <ThemeToggle className="text-foreground hover:bg-accent" />
+              <Button
+                onClick={() => navigate('/deck-builder')}
+                className="bg-orange-500 hover:bg-orange-600 text-white font-semibold"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Create Deck
+              </Button>
+            </div>
           </div>
 
           {/* Search and Filters */}

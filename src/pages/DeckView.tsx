@@ -166,14 +166,14 @@ const DeckView = () => {
             )}
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-            <div>
-              <h3 className="font-semibold text-card-foreground mb-2">Description</h3>
-              <p className="text-muted-foreground">
-                {deck.description || 'N/A'}
-              </p>
-            </div>
-            
+          <div className="mb-6">
+            <h3 className="font-semibold text-card-foreground mb-2">Description</h3>
+            <p className="text-muted-foreground whitespace-pre-line">
+              {deck.description || 'N/A'}
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
             <div>
               <h3 className="font-semibold text-card-foreground mb-2">Author</h3>
               <p className="text-muted-foreground">

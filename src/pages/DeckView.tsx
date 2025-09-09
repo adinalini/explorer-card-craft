@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { WaveDivider } from "@/components/ui/wave-divider";
 import { DeckCodeDisplay } from "@/components/DeckCodeDisplay";
 import { CardImage } from "@/components/CardImage";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { supabase } from "@/integrations/supabase/client";
 import { ArrowLeft, Share, Copy, Check, Flame, Droplet, Cloud, Bomb, Plus, CreditCard } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
@@ -137,7 +138,7 @@ const DeckView = () => {
     <div className="min-h-screen bg-gradient-to-br from-[hsl(var(--background-start))] to-[hsl(var(--background-end))]">
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
-        <div className="flex items-center gap-4 mb-8">
+        <div className="flex items-center justify-between mb-8">
           <Button
             onClick={() => navigate('/decks')}
             variant="ghost"
@@ -147,6 +148,7 @@ const DeckView = () => {
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Decks
           </Button>
+          <ThemeToggle className="text-foreground hover:bg-accent" />
         </div>
 
         {/* Deck Info */}
@@ -214,7 +216,7 @@ const DeckView = () => {
 
         {/* Deck Visual */}
         <div className="bg-card rounded-lg p-6">
-          <h2 className="text-xl font-semibold mb-6 text-card-foreground">Deck Cards (13)</h2>
+          <h2 className="text-xl font-semibold mb-6 text-card-foreground">Deck Cards</h2>
           
           {/* Section Headers */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-4">
@@ -222,7 +224,7 @@ const DeckView = () => {
               <h3 className="font-semibold text-card-foreground">Legendary</h3>
             </div>
             <div>
-              <h3 className="font-semibold text-card-foreground">Cards (12)</h3>
+              <h3 className="font-semibold text-card-foreground">Cards</h3>
             </div>
           </div>
 

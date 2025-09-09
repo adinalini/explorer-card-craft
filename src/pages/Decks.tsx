@@ -358,37 +358,75 @@ const Decks = () => {
                            className="flex-1 bg-card border rounded-lg p-4 cursor-pointer hover:shadow-lg transition-all"
                            onClick={() => navigate(`/deck/${deck.id}`)}
                          >
-                           <div className="grid grid-cols-12 gap-4 items-center">
-                             <div className="text-sm font-mono text-muted-foreground">
-                               {(currentPage - 1) * itemsPerPage + index + 1}
-                             </div>
-                              <div className="col-span-1">
-                                <h3 className="font-semibold text-card-foreground">{deck.name}</h3>
-                              </div>
-                             <div className="flex items-center gap-1">
-                               {React.createElement(deckTypeIcons[deck.type], { className: "h-4 w-4 text-primary" })}
-                               <span className="text-sm capitalize">{deck.type}</span>
-                             </div>
-                              <div className="col-span-6">
-                                <div className="grid grid-cols-13 gap-1">
-                                  {deck.cards.map((card) => (
-                                    <div key={card.position} className="aspect-square">
-                                      <CardImage 
-                                        cardId={card.card_id}
-                                        cardName={card.card_name}
-                                        className="w-full h-full object-cover rounded border"
-                                      />
-                                    </div>
-                                  ))}
+                            {/* Mobile Layout */}
+                            <div className="md:hidden">
+                              <div className="flex items-center justify-between mb-2">
+                                <div className="flex items-center gap-2">
+                                  <div className="text-sm font-mono text-muted-foreground">
+                                    {(currentPage - 1) * itemsPerPage + index + 1}
+                                  </div>
+                                  <h3 className="font-semibold text-card-foreground">{deck.name}</h3>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  {React.createElement(deckTypeIcons[deck.type], { className: "h-4 w-4 text-primary" })}
+                                  <span className="text-sm capitalize">{deck.type}</span>
                                 </div>
                               </div>
-                              <div className="col-span-2 text-xs text-muted-foreground break-words whitespace-pre-line">
-                                {deck.notes || 'N/A'}
+                              
+                              <div className="flex items-center gap-4 mb-2">
+                                {/* Show only legendary card on mobile */}
+                                {deck.cards.find(card => card.is_legendary) && (
+                                  <div className="w-16 h-16">
+                                    <CardImage 
+                                      cardId={deck.cards.find(card => card.is_legendary)!.card_id}
+                                      cardName={deck.cards.find(card => card.is_legendary)!.card_name}
+                                      className="w-full h-full object-cover rounded border"
+                                    />
+                                  </div>
+                                )}
+                                <div className="flex-1">
+                                  <div className="text-xs text-muted-foreground break-words whitespace-pre-line mb-1">
+                                    {deck.notes || 'N/A'}
+                                  </div>
+                                  <div className="text-sm text-muted-foreground">
+                                    By: {deck.author_name || 'N/A'}
+                                  </div>
+                                </div>
                               </div>
-                             <div className="text-sm text-muted-foreground text-right">
-                               {deck.author_name || 'N/A'}
-                             </div>
-                           </div>
+                            </div>
+
+                            {/* Desktop Layout */}
+                            <div className="hidden md:grid grid-cols-12 gap-4 items-center">
+                              <div className="text-sm font-mono text-muted-foreground">
+                                {(currentPage - 1) * itemsPerPage + index + 1}
+                              </div>
+                               <div className="col-span-1">
+                                 <h3 className="font-semibold text-card-foreground">{deck.name}</h3>
+                               </div>
+                              <div className="flex items-center gap-1">
+                                {React.createElement(deckTypeIcons[deck.type], { className: "h-4 w-4 text-primary" })}
+                                <span className="text-sm capitalize">{deck.type}</span>
+                              </div>
+                               <div className="col-span-6">
+                                 <div className="grid grid-cols-13 gap-1">
+                                   {deck.cards.map((card) => (
+                                     <div key={card.position} className="aspect-square">
+                                       <CardImage 
+                                         cardId={card.card_id}
+                                         cardName={card.card_name}
+                                         className="w-full h-full object-cover rounded border"
+                                       />
+                                     </div>
+                                   ))}
+                                 </div>
+                               </div>
+                               <div className="col-span-2 text-xs text-muted-foreground break-words whitespace-pre-line">
+                                 {deck.notes || 'N/A'}
+                               </div>
+                              <div className="text-sm text-muted-foreground text-right">
+                                {deck.author_name || 'N/A'}
+                              </div>
+                            </div>
                          </div>
                          <Button
                            variant="ghost"
@@ -430,34 +468,69 @@ const Decks = () => {
                            className="flex-1 bg-card border rounded-lg p-4 cursor-pointer hover:shadow-lg transition-all"
                            onClick={() => navigate(`/deck/${deck.id}`)}
                          >
-                           <div className="grid grid-cols-12 gap-4 items-center">
-                             <div className="text-sm font-mono text-muted-foreground">
-                               {(currentPage - 1) * itemsPerPage + index + 1}
-                             </div>
-                             <div className="col-span-2">
-                               <h3 className="font-semibold text-card-foreground">{deck.name}</h3>
-                             </div>
-                             <div className="flex items-center gap-1">
-                               {React.createElement(deckTypeIcons[deck.type], { className: "h-4 w-4 text-primary" })}
-                               <span className="text-sm capitalize">{deck.type}</span>
-                             </div>
-                             <div className="col-span-6">
-                               <div className="grid grid-cols-13 gap-1">
-                                 {deck.cards.map((card) => (
-                                   <div key={card.position} className="aspect-square">
-                                     <CardImage 
-                                       cardId={card.card_id}
-                                       cardName={card.card_name}
-                                       className="w-full h-full object-cover rounded border"
-                                     />
-                                   </div>
-                                 ))}
-                               </div>
-                             </div>
-                             <div className="col-span-2 text-sm text-muted-foreground text-right">
-                               {deck.author_name || 'N/A'}
-                             </div>
-                           </div>
+                            {/* Mobile Layout */}
+                            <div className="md:hidden">
+                              <div className="flex items-center justify-between mb-2">
+                                <div className="flex items-center gap-2">
+                                  <div className="text-sm font-mono text-muted-foreground">
+                                    {(currentPage - 1) * itemsPerPage + index + 1}
+                                  </div>
+                                  <h3 className="font-semibold text-card-foreground">{deck.name}</h3>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  {React.createElement(deckTypeIcons[deck.type], { className: "h-4 w-4 text-primary" })}
+                                  <span className="text-sm capitalize">{deck.type}</span>
+                                </div>
+                              </div>
+                              
+                              <div className="flex items-center gap-4 mb-2">
+                                {/* Show only legendary card on mobile */}
+                                {deck.cards.find(card => card.is_legendary) && (
+                                  <div className="w-16 h-16">
+                                    <CardImage 
+                                      cardId={deck.cards.find(card => card.is_legendary)!.card_id}
+                                      cardName={deck.cards.find(card => card.is_legendary)!.card_name}
+                                      className="w-full h-full object-cover rounded border"
+                                    />
+                                  </div>
+                                )}
+                                <div className="flex-1">
+                                  <div className="text-sm text-muted-foreground">
+                                    By: {deck.author_name || 'N/A'}
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Desktop Layout */}
+                            <div className="hidden md:grid grid-cols-12 gap-4 items-center">
+                              <div className="text-sm font-mono text-muted-foreground">
+                                {(currentPage - 1) * itemsPerPage + index + 1}
+                              </div>
+                              <div className="col-span-2">
+                                <h3 className="font-semibold text-card-foreground">{deck.name}</h3>
+                              </div>
+                              <div className="flex items-center gap-1">
+                                {React.createElement(deckTypeIcons[deck.type], { className: "h-4 w-4 text-primary" })}
+                                <span className="text-sm capitalize">{deck.type}</span>
+                              </div>
+                              <div className="col-span-6">
+                                <div className="grid grid-cols-13 gap-1">
+                                  {deck.cards.map((card) => (
+                                    <div key={card.position} className="aspect-square">
+                                      <CardImage 
+                                        cardId={card.card_id}
+                                        cardName={card.card_name}
+                                        className="w-full h-full object-cover rounded border"
+                                      />
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                              <div className="col-span-2 text-sm text-muted-foreground text-right">
+                                {deck.author_name || 'N/A'}
+                              </div>
+                            </div>
                          </div>
                          <Button
                            variant="ghost"

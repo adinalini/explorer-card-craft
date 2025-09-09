@@ -340,8 +340,8 @@ const Decks = () => {
               </TabsTrigger>
             </TabsList>
 
-             <TabsContent value="featured" className="ml-4">
-               <div className="space-y-4 pr-8">
+             <TabsContent value="featured" className="ml-2">
+               <div className="space-y-4 pr-4">
                  {paginatedFeaturedDecks.length === 0 ? (
                    <div className="text-center py-12">
                      <p className="text-lg text-muted-foreground">No featured decks found.</p>
@@ -354,14 +354,14 @@ const Decks = () => {
                             className="flex-1 bg-card border rounded-lg p-6 cursor-pointer hover:shadow-lg transition-all"
                             onClick={() => navigate(`/deck/${deck.id}`)}
                           >
-                             <div className="grid grid-cols-11 gap-8 items-center">
+                             <div className="grid grid-cols-12 gap-6 items-center">
                                <div className="text-sm font-mono text-muted-foreground">
                                  {(currentPage - 1) * itemsPerPage + index + 1}
                                </div>
                                <div className="col-span-2">
                                  <h3 className="font-semibold text-card-foreground">{deck.name}</h3>
                                </div>
-                               <div className="col-span-1 flex items-center gap-1">
+                               <div className="col-span-2 flex items-center gap-1">
                                  {React.createElement(deckTypeIcons[deck.type], { className: "h-4 w-4 text-primary" })}
                                  <span className="text-sm capitalize">{deck.type}</span>
                                </div>

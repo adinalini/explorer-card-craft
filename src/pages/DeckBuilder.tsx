@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { WaveDivider } from "@/components/ui/wave-divider";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { supabase } from "@/integrations/supabase/client";
 import { ArrowLeft, Flame, Droplet, Cloud, Bomb, Plus, CreditCard } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
@@ -214,6 +215,11 @@ const DeckBuilder = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[hsl(var(--background-start))] to-[hsl(var(--background-end))]">
+      {/* Theme Toggle in top right */}
+      <div className="absolute top-4 right-4 z-20">
+        <ThemeToggle className="text-foreground hover:bg-accent" />
+      </div>
+      
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="flex items-center gap-4 mb-8">

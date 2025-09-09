@@ -6,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { WaveDivider } from "@/components/ui/wave-divider";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { CardImage } from "@/components/CardImage";
 import { supabase } from "@/integrations/supabase/client";
 import { Star, Users, ArrowLeft, Flame, Droplet, Cloud, Bomb, Plus, CreditCard, ChevronLeft, ChevronRight, Copy, Check } from "lucide-react";
@@ -250,6 +251,11 @@ const Decks = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[hsl(var(--background-start))] to-[hsl(var(--background-end))] flex flex-col">
+      {/* Theme Toggle in top right */}
+      <div className="absolute top-4 right-4 z-20">
+        <ThemeToggle className="text-foreground hover:bg-accent" />
+      </div>
+      
       <div className="flex-1">
         <div className="container mx-auto px-4 py-8">
           {/* Header */}

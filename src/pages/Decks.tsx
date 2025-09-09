@@ -269,7 +269,6 @@ const Decks = () => {
             </div>
             
             <div className="flex items-center gap-3">
-              <ThemeToggle className="text-foreground hover:bg-accent" />
               <Button
                 onClick={() => navigate('/deck-builder')}
                 className="bg-orange-500 hover:bg-orange-600 text-white font-semibold"
@@ -277,6 +276,7 @@ const Decks = () => {
                 <Plus className="h-4 w-4 mr-2" />
                 Create Deck
               </Button>
+              <ThemeToggle className="text-foreground hover:bg-accent" />
             </div>
           </div>
 

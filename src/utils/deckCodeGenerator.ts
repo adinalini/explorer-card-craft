@@ -15,8 +15,15 @@ export function encodeDeck(cardKeys: string[]): string | null {
     return null
   }
 
-  // Sort the card keys to ensure consistent ordering
-  const sortedCardKeys = [...cardKeys].sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()))
+  // Sort the card keys by numeric code (Cxxxxx) to ensure canonical ordering
+  const normalize = (k: string) => (k.includes('_V') ? k.split('_V')[0] : k)
+  const codeNum = (k: string) => {
+    const m = normalize(k).match(/^C(\d+)/i)
+    return m ? parseInt(m[1], 10) : Number.MAX_SAFE_INTEGER
+  }
+  const sortedCardKeys = [...cardKeys]
+    .map(normalize)
+    .sort((a, b) => codeNum(a) - codeNum(b) || a.localeCompare(b))
 
   // Encode the deck code
   const joined = VERSION_PREFIX + SEPARATOR + sortedCardKeys.join(SEPARATOR)

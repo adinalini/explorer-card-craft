@@ -133,7 +133,8 @@ const Decks = () => {
     
     const cardKeys: string[] = [];
     for (const card of deck.cards) {
-      const cardKey = getCardKey(card.card_id);
+      const rawKey = getCardKey(card.card_id);
+      const cardKey = rawKey ? rawKey.split('_V')[0] : undefined; // normalize: strip variant if present
       if (cardKey) {
         cardKeys.push(cardKey);
       }

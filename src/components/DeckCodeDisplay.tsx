@@ -22,7 +22,8 @@ export function DeckCodeDisplay({ cards }: DeckCodeDisplayProps) {
     const cardKeys: string[] = []
     
     for (const card of cards) {
-      const cardKey = getCardKey(card.card_id)
+      const rawKey = getCardKey(card.card_id)
+      const cardKey = rawKey ? rawKey.split('_V')[0] : undefined // normalize: strip variant if present
       if (cardKey) {
         cardKeys.push(cardKey)
       }

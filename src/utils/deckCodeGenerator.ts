@@ -108,22 +108,30 @@ export function decodeDeck(input: string): { cardKeys: string[] | null, errorMes
  * Computes a hash checksum for the input string (browser-compatible)
  */
 function computeChecksum(input: string): string {
-  return simpleHash(input)
+  return crc32(input)
 }
 
-/**
- * Simple hash function for browser compatibility
- * Uses a variation of the djb2 hash algorithm for better distribution
- */
-function simpleHash(input: string): string {
-  let hash = 5381 // djb2 initial value
-  for (let i = 0; i < input.length; i++) {
-    const char = input.charCodeAt(i)
-    hash = ((hash << 5) + hash) + char // hash * 33 + char
-    hash = hash & 0xffffffff // Keep it 32-bit
+// CRC32 checksum (polynomial 0xEDB88320), returns 8-char lowercase hex
+let CRC32_TABLE: number[] | undefined
+function getCrc32Table() {
+  if (CRC32_TABLE) return CRC32_TABLE
+  CRC32_TABLE = new Array(256)
+  for (let n = 0; n < 256; n++) {
+    let c = n
+    for (let k = 0; k < 8; k++) {
+      c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1)
+    }
+    CRC32_TABLE[n] = c >>> 0
   }
-  
-  // Convert to 8-character hex string
-  const hex = Math.abs(hash).toString(16).padStart(8, '0')
-  return hex.substring(0, 8)
+  return CRC32_TABLE
+}
+function crc32(input: string): string {
+  const table = getCrc32Table()
+  let crc = 0 ^ -1
+  for (let i = 0; i < input.length; i++) {
+    const code = input.charCodeAt(i)
+    crc = (crc >>> 8) ^ table[(crc ^ code) & 0xff]
+  }
+  const out = (crc ^ -1) >>> 0
+  return out.toString(16).padStart(8, '0')
 }

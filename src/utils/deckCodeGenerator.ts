@@ -33,7 +33,7 @@ export function encodeDeck(cardKeys: string[]): string | null {
   // Helper to check if a card is a spell
   const isSpell = (cardKey: string) => !!getCardData(cardKey)?.isSpell
 
-  // Sort with spells last, otherwise by numeric card code (canonical)
+  // Sort with spells last, all other cards by card number regardless of legendary status
   const sortedCardKeys = [...cardKeys]
     .map(normalize)
     .sort((a: string, b: string) => {
@@ -44,6 +44,7 @@ export function encodeDeck(cardKeys: string[]): string | null {
         return spellA - spellB // non-spells first, spells last
       }
 
+      // Sort by card number, ignoring legendary status
       return codeNum(a) - codeNum(b) || a.localeCompare(b)
     })
 

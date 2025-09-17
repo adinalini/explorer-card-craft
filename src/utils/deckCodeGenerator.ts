@@ -1,6 +1,8 @@
 // Deck Code Generator - JavaScript port of the C# implementation
 // Copyright Notice: Based on code by Koin Games Inc.
 
+import { cardDatabase } from './cardData'
+
 const PREFIX_MARKER = 'KGBLDC'
 const VERSION_PREFIX = 'v1'
 const SEPARATOR = '|'
@@ -15,15 +17,53 @@ export function encodeDeck(cardKeys: string[]): string | null {
     return null
   }
 
-  // Sort the card keys by numeric code (Cxxxxx) to ensure canonical ordering
+  // Helper functions for card key processing
   const normalize = (k: string) => (k.includes('_V') ? k.split('_V')[0] : k)
   const codeNum = (k: string) => {
     const m = normalize(k).match(/^C(\d+)/i)
     return m ? parseInt(m[1], 10) : Number.MAX_SAFE_INTEGER
   }
+
+  // Helper function to get card data by card key
+  const getCardData = (cardKey: string) => {
+    const normalizedKey = normalize(cardKey)
+    return cardDatabase.find(card => card.cardKey?.split('_V')[0] === normalizedKey)
+  }
+
+  // Helper function to determine card type priority for sorting
+  const getCardTypePriority = (cardKey: string) => {
+    const cardData = getCardData(cardKey)
+    if (!cardData) return 3 // Unknown cards go to the end
+    if (cardData.isLegendary) return 0 // Legendary first
+    if (cardData.isSpell) return 2 // Spells last
+    return 1 // Units in the middle
+  }
+
+  // Sort by type first (legendary, units, spells), then by cost, then by card number
   const sortedCardKeys = [...cardKeys]
     .map(normalize)
-    .sort((a, b) => codeNum(a) - codeNum(b) || a.localeCompare(b))
+    .sort((a: string, b: string) => {
+      const typePriorityA = getCardTypePriority(a)
+      const typePriorityB = getCardTypePriority(b)
+      
+      // First sort by type priority
+      if (typePriorityA !== typePriorityB) {
+        return typePriorityA - typePriorityB
+      }
+      
+      // Then by cost within the same type
+      const cardDataA = getCardData(a)
+      const cardDataB = getCardData(b)
+      const costA = cardDataA?.cost || 0
+      const costB = cardDataB?.cost || 0
+      
+      if (costA !== costB) {
+        return costA - costB
+      }
+      
+      // Finally by card number if costs are equal
+      return codeNum(a) - codeNum(b) || a.localeCompare(b)
+    })
 
   // Encode the deck code
   const joined = VERSION_PREFIX + SEPARATOR + sortedCardKeys.join(SEPARATOR)

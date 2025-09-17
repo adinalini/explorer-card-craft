@@ -32,19 +32,25 @@ export function encodeDeck(cardKeys: string[]): string | null {
 
   // Helper to check if a card is a spell
   const isSpell = (cardKey: string) => !!getCardData(cardKey)?.isSpell
+  
+  // Helper to check if a card is legendary
+  const isLegendary = (cardKey: string) => !!getCardData(cardKey)?.isLegendary
 
-  // Sort with spells last, all other cards by card number regardless of legendary status
+  // Sort: legendaries first, then regular units, then spells - all sorted by card number within each group
   const sortedCardKeys = [...cardKeys]
     .map(normalize)
     .sort((a: string, b: string) => {
-      const spellA = isSpell(a) ? 1 : 0
-      const spellB = isSpell(b) ? 1 : 0
+      const legendaryA = isLegendary(a) ? 0 : 1
+      const legendaryB = isLegendary(b) ? 0 : 1
+      const spellA = isSpell(a) ? 2 : (isLegendary(a) ? 0 : 1)
+      const spellB = isSpell(b) ? 2 : (isLegendary(b) ? 0 : 1)
 
+      // First sort by type: legendary (0), regular (1), spell (2)
       if (spellA !== spellB) {
-        return spellA - spellB // non-spells first, spells last
+        return spellA - spellB
       }
 
-      // Sort by card number, ignoring legendary status
+      // Within each type, sort by card number
       return codeNum(a) - codeNum(b) || a.localeCompare(b)
     })
 

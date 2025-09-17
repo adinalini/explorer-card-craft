@@ -38,11 +38,7 @@ export function encodeDeck(cardKeys: string[]): string | null {
 
   // Sort: legendaries first, then regular units, then spells - all sorted by card number within each group
   const sortedCardKeys = [...cardKeys]
-    .map(k => {
-      const normalized = normalize(k)
-      // Add variant suffix if missing
-      return normalized.includes('_V') ? normalized : normalized + '_V00000'
-    })
+    .map(normalize)
     .sort((a: string, b: string) => {
       const legendaryA = isLegendary(a) ? 0 : 1
       const legendaryB = isLegendary(b) ? 0 : 1

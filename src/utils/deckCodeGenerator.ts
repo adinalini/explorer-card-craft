@@ -30,38 +30,20 @@ export function encodeDeck(cardKeys: string[]): string | null {
     return cardDatabase.find(card => card.cardKey?.split('_V')[0] === normalizedKey)
   }
 
-  // Helper function to determine card type priority for sorting
-  const getCardTypePriority = (cardKey: string) => {
-    const cardData = getCardData(cardKey)
-    if (!cardData) return 3 // Unknown cards go to the end
-    if (cardData.isLegendary) return 0 // Legendary first
-    if (cardData.isSpell) return 2 // Spells last
-    return 1 // Units in the middle
-  }
+  // Helper to check if a card is a spell
+  const isSpell = (cardKey: string) => !!getCardData(cardKey)?.isSpell
 
-  // Sort by type first (legendary, units, spells), then by cost, then by card number
+  // Sort with spells last, otherwise by numeric card code (canonical)
   const sortedCardKeys = [...cardKeys]
     .map(normalize)
     .sort((a: string, b: string) => {
-      const typePriorityA = getCardTypePriority(a)
-      const typePriorityB = getCardTypePriority(b)
-      
-      // First sort by type priority
-      if (typePriorityA !== typePriorityB) {
-        return typePriorityA - typePriorityB
+      const spellA = isSpell(a) ? 1 : 0
+      const spellB = isSpell(b) ? 1 : 0
+
+      if (spellA !== spellB) {
+        return spellA - spellB // non-spells first, spells last
       }
-      
-      // Then by cost within the same type
-      const cardDataA = getCardData(a)
-      const cardDataB = getCardData(b)
-      const costA = cardDataA?.cost || 0
-      const costB = cardDataB?.cost || 0
-      
-      if (costA !== costB) {
-        return costA - costB
-      }
-      
-      // Finally by card number if costs are equal
+
       return codeNum(a) - codeNum(b) || a.localeCompare(b)
     })
 

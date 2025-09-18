@@ -138,14 +138,10 @@ export function decodeDeck(input: string): { cardKeys: string[] | null, errorMes
   }
 }
 
-/**
- * Computes a hash checksum for the input string (browser-compatible)
- */
 function computeChecksum(input: string): string {
-  return crc32(input)
+  return crc32NonReflected(input)
 }
 
-// --- CRC32 (C# compatible, non-reflected) ---
 let CRC32_TABLE_NON_REFLECTED: number[] | undefined
 function getCrc32TableNonReflected() {
   if (CRC32_TABLE_NON_REFLECTED) return CRC32_TABLE_NON_REFLECTED
@@ -161,15 +157,13 @@ function getCrc32TableNonReflected() {
   return CRC32_TABLE_NON_REFLECTED
 }
 
-function crc32(input: string): string {
+function crc32NonReflected(input: string): string {
   const table = getCrc32TableNonReflected()
-  let crc = 0 // Start at 0 (different from reflected)
-
+  let crc = 0 >>> 0
   for (let i = 0; i < input.length; i++) {
     const code = input.charCodeAt(i)
     crc = (crc << 8) ^ table[((crc >>> 24) ^ code) & 0xff]
     crc >>>= 0
   }
-
   return crc.toString(16).padStart(8, '0')
 }

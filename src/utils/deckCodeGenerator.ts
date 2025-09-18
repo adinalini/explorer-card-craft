@@ -45,22 +45,23 @@ export function encodeDeck(cardKeys: string[]): string | null {
   const isLegendary = (cardKey: string) => !!getCardData(cardKey)?.isLegendary
 
   // Sort: legendaries first, then regular units, then spells - all sorted by card number within each group
-  const sortedCardKeys = [...normalizedCardKeys]
-    .map(normalize)
-    .sort((a: string, b: string) => {
-      const legendaryA = isLegendary(a) ? 0 : 1
-      const legendaryB = isLegendary(b) ? 0 : 1
-      const spellA = isSpell(a) ? 2 : (isLegendary(a) ? 0 : 1)
-      const spellB = isSpell(b) ? 2 : (isLegendary(b) ? 0 : 1)
+  const sortedCardKeys = [...normalizedCardKeys].sort((a: string, b: string) => {
+    const normA = normalize(a)
+    const normB = normalize(b)
 
-      // First sort by type: legendary (0), regular (1), spell (2)
-      if (spellA !== spellB) {
-        return spellA - spellB
-      }
+    const legendaryA = isLegendary(normA) ? 0 : 1
+    const legendaryB = isLegendary(normB) ? 0 : 1
+    const spellA = isSpell(normA) ? 2 : (isLegendary(normA) ? 0 : 1)
+    const spellB = isSpell(normB) ? 2 : (isLegendary(normB) ? 0 : 1)
 
-      // Within each type, sort by card number
-      return codeNum(a) - codeNum(b) || a.localeCompare(b)
-    })
+    // First sort by type: legendary (0), regular (1), spell (2)
+    if (spellA !== spellB) {
+      return spellA - spellB
+    }
+
+    // Within each type, sort by card number
+    return codeNum(normA) - codeNum(normB) || normA.localeCompare(normB)
+  })
 
   // Encode the deck code
   const joined = VERSION_PREFIX + SEPARATOR + sortedCardKeys.join(SEPARATOR)

@@ -65,10 +65,7 @@ export function encodeDeck(cardKeys: string[]): string | null {
 
   // Encode
   const joined = VERSION_PREFIX + SEPARATOR + cleanedCardKeys.join(SEPARATOR)
-
-  // 🔍 Debug: log what string is being checksummed
-  console.log("ENCODE - Joined string for checksum:", JSON.stringify(joined))
-
+  console.log('ENCODE - Joined string for checksum:', JSON.stringify(joined))
   const bytes = new TextEncoder().encode(joined)
   const base64 = btoa(String.fromCharCode(...bytes))
 
@@ -138,10 +135,14 @@ export function decodeDeck(input: string): { cardKeys: string[] | null, errorMes
   }
 }
 
+/**
+ * Computes a hash checksum for the input string (browser-compatible)
+ */
 function computeChecksum(input: string): string {
   return crc32NonReflected(input)
 }
 
+// Non-reflected CRC32 (poly 0x04C11DB7, init 0, no XOR, no reflection)
 let CRC32_TABLE_NON_REFLECTED: number[] | undefined
 function getCrc32TableNonReflected() {
   if (CRC32_TABLE_NON_REFLECTED) return CRC32_TABLE_NON_REFLECTED

@@ -17,6 +17,14 @@ export function encodeDeck(cardKeys: string[]): string | null {
     return null
   }
 
+  // Add _V00000 to card keys that don't have variant suffix
+  const normalizedCardKeys = cardKeys.map(key => {
+    if (!key.includes('_V')) {
+      return key + '_V00000'
+    }
+    return key
+  })
+
   // Helper functions for card key processing
   const normalize = (k: string) => (k.includes('_V') ? k.split('_V')[0] : k)
   const codeNum = (k: string) => {
@@ -37,7 +45,7 @@ export function encodeDeck(cardKeys: string[]): string | null {
   const isLegendary = (cardKey: string) => !!getCardData(cardKey)?.isLegendary
 
   // Sort: legendaries first, then regular units, then spells - all sorted by card number within each group
-  const sortedCardKeys = [...cardKeys]
+  const sortedCardKeys = [...normalizedCardKeys]
     .map(normalize)
     .sort((a: string, b: string) => {
       const legendaryA = isLegendary(a) ? 0 : 1

@@ -28,7 +28,7 @@ export async function encodeDeck(cardKeys: string[]): Promise<string | null> {
     return m ? parseInt(m[1], 10) : Number.MAX_SAFE_INTEGER
   }
 
-  // Champions first, everything else (units + spells + specials) sorted together
+  // Champions first, everything else (units + spells + specials) grouped together
   function getCardType(cardKey: string): number {
     if (cardKey.includes('_MC')) return 0 // champions
     return 1 // minions + spells + specials
@@ -46,7 +46,8 @@ export async function encodeDeck(cardKeys: string[]): Promise<string | null> {
       return typeA - typeB
     }
 
-    return codeNum(normA) - codeNum(normB) || normA.localeCompare(normB)
+    // Within each type, sort only by number
+    return codeNum(normA) - codeNum(normB)
   })
 
   // Strip default variant suffix before encoding

@@ -106,7 +106,7 @@ export const cardKeyMapping: Record<string, string> = {
   'snow_queen': 'C00150_MB',
   'snow_ball': 'C00151_SB',
   'hansel_gretel': 'C00152_MB',
-  'the_kraken': 'C00153_MB',
+  'the_kraken': 'C00153_MC',
   'scarecrow': 'C00155_MB',
   'queen_guinevere': 'C00156_MB',
   'princess_aurora': 'C00157_MB',

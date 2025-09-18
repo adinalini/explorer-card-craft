@@ -80,7 +80,7 @@ export const cardKeyMapping: Record<string, string> = {
   'quasimodo': 'C00119_MB',
   'genie': 'C00120_MB',
   'king_shahryar': 'C00121_MB',
-  'stryga': 'C00122_MB',
+  'striga': 'C00122_MB',
   'siren': 'C00123_MB',
   'freeze': 'C00124_SB',
   'baloo': 'C00125_MB',

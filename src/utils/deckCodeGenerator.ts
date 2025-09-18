@@ -28,12 +28,10 @@ export async function encodeDeck(cardKeys: string[]): Promise<string | null> {
     return m ? parseInt(m[1], 10) : Number.MAX_SAFE_INTEGER
   }
 
-  // New: Determine card type directly from suffix
+  // Champions first, everything else (units + spells + specials) sorted together
   function getCardType(cardKey: string): number {
-    if (cardKey.includes('_MC')) return 0 // champions / legendaries
-    if (cardKey.includes('_MB')) return 1 // regular units
-    if (cardKey.includes('_SB') || cardKey.includes('_SC')) return 2 // spells / specials
-    return 3 // fallback
+    if (cardKey.includes('_MC')) return 0 // champions
+    return 1 // minions + spells + specials
   }
 
   // Sort cards

@@ -66,7 +66,7 @@ export function encodeDeck(cardKeys: string[]): string | null {
   // Encode
   const joined = VERSION_PREFIX + SEPARATOR + cleanedCardKeys.join(SEPARATOR)
 
-  // 🔍 Debug log: show what string is being checksummed
+  // 🔍 Debug: log what string is being checksummed
   console.log("ENCODE - Joined string for checksum:", JSON.stringify(joined))
 
   const bytes = new TextEncoder().encode(joined)
@@ -113,9 +113,6 @@ export function decodeDeck(input: string): { cardKeys: string[] | null, errorMes
     }
     const joined = new TextDecoder().decode(bytes)
 
-    // 🔍 Debug log: show the string recovered before checksum verification
-    console.log("DECODE - Joined string recovered:", JSON.stringify(joined))
-
     const expectedChecksum = computeChecksum(joined)
     if (givenChecksum !== expectedChecksum) {
       return { cardKeys: null, errorMessage: 'Checksum mismatch: the deck code may be corrupted.' }
@@ -148,27 +145,31 @@ function computeChecksum(input: string): string {
   return crc32(input)
 }
 
-// CRC32 checksum (polynomial 0xEDB88320), returns 8-char lowercase hex
-let CRC32_TABLE: number[] | undefined
-function getCrc32Table() {
-  if (CRC32_TABLE) return CRC32_TABLE
-  CRC32_TABLE = new Array(256)
+// --- CRC32 (C# compatible, non-reflected) ---
+let CRC32_TABLE_NON_REFLECTED: number[] | undefined
+function getCrc32TableNonReflected() {
+  if (CRC32_TABLE_NON_REFLECTED) return CRC32_TABLE_NON_REFLECTED
+  CRC32_TABLE_NON_REFLECTED = new Array(256)
+  const poly = 0x04C11DB7
   for (let n = 0; n < 256; n++) {
-    let c = n
+    let c = n << 24
     for (let k = 0; k < 8; k++) {
-      c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1)
+      c = (c & 0x80000000) ? ((c << 1) ^ poly) : (c << 1)
     }
-    CRC32_TABLE[n] = c >>> 0
+    CRC32_TABLE_NON_REFLECTED[n] = c >>> 0
   }
-  return CRC32_TABLE
+  return CRC32_TABLE_NON_REFLECTED
 }
+
 function crc32(input: string): string {
-  const table = getCrc32Table()
-  let crc = 0 ^ -1
+  const table = getCrc32TableNonReflected()
+  let crc = 0 // Start at 0 (different from reflected)
+
   for (let i = 0; i < input.length; i++) {
     const code = input.charCodeAt(i)
-    crc = (crc >>> 8) ^ table[(crc ^ code) & 0xff]
+    crc = (crc << 8) ^ table[((crc >>> 24) ^ code) & 0xff]
+    crc >>>= 0
   }
-  const out = (crc ^ -1) >>> 0
-  return out.toString(16).padStart(8, '0')
+
+  return crc.toString(16).padStart(8, '0')
 }

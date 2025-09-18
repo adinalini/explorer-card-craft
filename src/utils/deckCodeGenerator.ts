@@ -12,66 +12,65 @@ const CHECKSUM_SEPARATOR = ':'
  * Creates a shareable Deck Code string from a list of card keys by encoding it in a specific format.
  */
 export function encodeDeck(cardKeys: string[]): string | null {
-  // Sanity check
   if (!cardKeys || cardKeys.length === 0) {
     return null
   }
 
-  // Add _V00000 to card keys that don't have variant suffix
-  const normalizedCardKeys = cardKeys.map(key => {
-    if (!key.includes('_V')) {
-      return key + '_V00000'
-    }
-    return key
-  })
+  // Ensure all keys have a variant (default _V00000 if missing)
+  const normalizedCardKeys = cardKeys.map(key =>
+    key.includes('_V') ? key : key + '_V00000'
+  )
 
-  // Helper functions for card key processing
-  const normalize = (k: string) => (k.includes('_V') ? k.split('_V')[0] : k)
+  // Helpers
+  const normalize = (k: string) =>
+    k.includes('_V') ? k.split('_V')[0] : k
+
   const codeNum = (k: string) => {
     const m = normalize(k).match(/^C(\d+)/i)
     return m ? parseInt(m[1], 10) : Number.MAX_SAFE_INTEGER
   }
 
-  // Helper function to get card data by card key
   const getCardData = (cardKey: string) => {
     const normalizedKey = normalize(cardKey)
-    return cardDatabase.find(card => card.cardKey?.split('_V')[0] === normalizedKey)
+    return cardDatabase.find(
+      card => card.cardKey?.split('_V')[0] === normalizedKey
+    )
   }
 
-  // Helper to check if a card is a spell
-  const isSpell = (cardKey: string) => !!getCardData(cardKey)?.isSpell
-  
-  // Helper to check if a card is legendary
-  const isLegendary = (cardKey: string) => !!getCardData(cardKey)?.isLegendary
+  const isSpell = (cardKey: string) =>
+    !!getCardData(cardKey)?.isSpell
 
-  // Sort: legendaries first, then regular units, then spells - all sorted by card number within each group
-  const sortedCardKeys = [...normalizedCardKeys].sort((a: string, b: string) => {
+  const isLegendary = (cardKey: string) =>
+    !!getCardData(cardKey)?.isLegendary
+
+  // Sort cards
+  const sortedCardKeys = [...normalizedCardKeys].sort((a, b) => {
     const normA = normalize(a)
     const normB = normalize(b)
 
-    const legendaryA = isLegendary(normA) ? 0 : 1
-    const legendaryB = isLegendary(normB) ? 0 : 1
-    const spellA = isSpell(normA) ? 2 : (isLegendary(normA) ? 0 : 1)
-    const spellB = isSpell(normB) ? 2 : (isLegendary(normB) ? 0 : 1)
+    const typeA = isLegendary(normA) ? 0 : isSpell(normA) ? 2 : 1
+    const typeB = isLegendary(normB) ? 0 : isSpell(normB) ? 2 : 1
 
-    // First sort by type: legendary (0), regular (1), spell (2)
-    if (spellA !== spellB) {
-      return spellA - spellB
+    if (typeA !== typeB) {
+      return typeA - typeB
     }
 
-    // Within each type, sort by card number
     return codeNum(normA) - codeNum(normB) || normA.localeCompare(normB)
   })
 
-  // Encode the deck code
-  const joined = VERSION_PREFIX + SEPARATOR + sortedCardKeys.join(SEPARATOR)
+  // Strip default variant suffix before encoding
+  const cleanedCardKeys = sortedCardKeys.map(k =>
+    k.endsWith('_V00000') ? k.split('_V')[0] : k
+  )
+
+  // Encode
+  const joined = VERSION_PREFIX + SEPARATOR + cleanedCardKeys.join(SEPARATOR)
   const bytes = new TextEncoder().encode(joined)
   const base64 = btoa(String.fromCharCode(...bytes))
 
-  // Create the checksum
+  // Checksum
   const checksum = computeChecksum(joined)
 
-  // Put the deck code together with the prefix and checksum
   return PREFIX_MARKER + base64 + CHECKSUM_SEPARATOR + checksum
 }
 
@@ -81,38 +80,28 @@ export function encodeDeck(cardKeys: string[]): string | null {
 export function decodeDeck(input: string): { cardKeys: string[] | null, errorMessage: string } {
   let errorMessage = ''
 
-  // Verify we have valid input
   if (!input || input.trim() === '') {
-    errorMessage = 'Input is empty.'
-    return { cardKeys: null, errorMessage }
+    return { cardKeys: null, errorMessage: 'Input is empty.' }
   }
 
-  // Sanitize the input by removing whitespace and invalid trailing characters
   input = input.trim()
   input = input.replace(/[^\w|:+=/]+$/, '')
 
-  // Locate the Prefix Marker in the input string
   const prefixIndex = input.indexOf(PREFIX_MARKER)
   if (prefixIndex < 0) {
-    errorMessage = 'Invalid deck code format: missing prefix marker.'
-    return { cardKeys: null, errorMessage }
+    return { cardKeys: null, errorMessage: 'Invalid deck code format: missing prefix marker.' }
   }
 
-  // Extract the encoded portion starting after the Prefix Marker
   const deckCode = input.substring(prefixIndex + PREFIX_MARKER.length)
-
-  // Split off the checksum using the last colon
   const checksumIndex = deckCode.lastIndexOf(':')
   if (checksumIndex < 0) {
-    errorMessage = 'Invalid deck code format: missing checksum separator.'
-    return { cardKeys: null, errorMessage }
+    return { cardKeys: null, errorMessage: 'Invalid deck code format: missing checksum separator.' }
   }
 
   const base64 = deckCode.substring(0, checksumIndex)
   const givenChecksum = deckCode.substring(checksumIndex + 1)
 
   try {
-    // Base64 decode and verify checksum
     const binaryString = atob(base64)
     const bytes = new Uint8Array(binaryString.length)
     for (let i = 0; i < binaryString.length; i++) {
@@ -122,30 +111,26 @@ export function decodeDeck(input: string): { cardKeys: string[] | null, errorMes
 
     const expectedChecksum = computeChecksum(joined)
     if (givenChecksum !== expectedChecksum) {
-      errorMessage = 'Checksum mismatch: the deck code may be corrupted.'
-      return { cardKeys: null, errorMessage }
+      return { cardKeys: null, errorMessage: 'Checksum mismatch: the deck code may be corrupted.' }
     }
 
-    // Validate version and extract card keys
     const tokens = joined.split('|')
     if (tokens.length < 2 || tokens[0] !== 'v1') {
-      errorMessage = 'Unsupported or missing version prefix.'
-      return { cardKeys: null, errorMessage }
+      return { cardKeys: null, errorMessage: 'Unsupported or missing version prefix.' }
     }
 
     const cardKeys: string[] = []
     for (let i = 1; i < tokens.length; i++) {
       let cardKey = tokens[i]
       if (!cardKey.includes('_V')) {
-        cardKey += '_V00000' // Ensure it has a variant suffix if missing
+        cardKey += '_V00000'
       }
       cardKeys.push(cardKey)
     }
 
     return { cardKeys, errorMessage: '' }
   } catch (e: any) {
-    errorMessage = 'Failed to decode deck: ' + e.message
-    return { cardKeys: null, errorMessage }
+    return { cardKeys: null, errorMessage: 'Failed to decode deck: ' + e.message }
   }
 }
 

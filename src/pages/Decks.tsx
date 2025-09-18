@@ -144,7 +144,7 @@ const Decks = () => {
       return;
     }
 
-    const deckCode = encodeDeck(cardKeys);
+    const deckCode = await encodeDeck(cardKeys);
     if (!deckCode) {
       return;
     }

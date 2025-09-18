@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button"
 import { Copy, Check } from "lucide-react"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { toast } from "@/hooks/use-toast"
 import { encodeDeck } from "@/utils/deckCodeGenerator"
 import { getCardKey } from "@/utils/cardKeyMapping"
@@ -18,7 +18,7 @@ interface DeckCodeDisplayProps {
 export function DeckCodeDisplay({ cards }: DeckCodeDisplayProps) {
   const [copied, setCopied] = useState(false)
 
-  const generateDeckCode = () => {
+  const generateDeckCode = async () => {
     const cardKeys: string[] = []
     
     for (const card of cards) {
@@ -32,11 +32,11 @@ export function DeckCodeDisplay({ cards }: DeckCodeDisplayProps) {
       return null
     }
 
-    return encodeDeck(cardKeys)
+    return await encodeDeck(cardKeys)
   }
 
   const handleCopyDeckCode = async () => {
-    const deckCode = generateDeckCode()
+    const deckCode = await generateDeckCode()
     
     if (!deckCode) {
       return
@@ -51,7 +51,12 @@ export function DeckCodeDisplay({ cards }: DeckCodeDisplayProps) {
     }
   }
 
-  const deckCode = generateDeckCode()
+  const [deckCode, setDeckCode] = useState<string | null>(null)
+
+  // Generate deck code on component mount and when cards change
+  useEffect(() => {
+    generateDeckCode().then(setDeckCode)
+  }, [cards])
 
   if (!deckCode) {
     return null

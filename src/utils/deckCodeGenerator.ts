@@ -11,7 +11,7 @@ const CHECKSUM_SEPARATOR = ':'
 /**
  * Creates a shareable Deck Code string from a list of card keys by encoding it in a specific format.
  */
-export async function encodeDeck(cardKeys: string[]): Promise<string | null> {
+export function encodeDeck(cardKeys: string[]): string | null {
   if (!cardKeys || cardKeys.length === 0) {
     return null
   }
@@ -69,8 +69,8 @@ export async function encodeDeck(cardKeys: string[]): Promise<string | null> {
   const bytes = new TextEncoder().encode(joined)
   const base64 = btoa(String.fromCharCode(...bytes))
 
-  // Checksum (SHA256 truncated to 4 bytes, hex)
-  const checksum = await computeChecksum(joined)
+  // Checksum (CRC32 non-reflected)
+  const checksum = computeChecksum(joined)
 
   return PREFIX_MARKER + base64 + CHECKSUM_SEPARATOR + checksum
 }
@@ -78,7 +78,7 @@ export async function encodeDeck(cardKeys: string[]): Promise<string | null> {
 /**
  * Decodes a Deck Code string back into a list of card keys.
  */
-export async function decodeDeck(input: string): Promise<{ cardKeys: string[] | null, errorMessage: string }> {
+export function decodeDeck(input: string): { cardKeys: string[] | null, errorMessage: string } {
   let errorMessage = ''
 
   if (!input || input.trim() === '') {
@@ -110,7 +110,7 @@ export async function decodeDeck(input: string): Promise<{ cardKeys: string[] | 
     }
     const joined = new TextDecoder().decode(bytes)
 
-    const expectedChecksum = await computeChecksum(joined)
+    const expectedChecksum = computeChecksum(joined)
     if (givenChecksum !== expectedChecksum) {
       return { cardKeys: null, errorMessage: 'Checksum mismatch: the deck code may be corrupted.' }
     }
@@ -135,13 +135,32 @@ export async function decodeDeck(input: string): Promise<{ cardKeys: string[] | 
   }
 }
 
-/**
- * Computes SHA256-based checksum (first 4 bytes of SHA256 digest as hex)
- */
-async function computeChecksum(input: string): Promise<string> {
-  const encoder = new TextEncoder()
-  const data = encoder.encode(input)
-  const hashBuffer = await crypto.subtle.digest('SHA-256', data)
-  const hashArray = Array.from(new Uint8Array(hashBuffer.slice(0, 4))) // first 4 bytes
-  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('')
+function computeChecksum(input: string): string {
+  return crc32NonReflected(input)
+}
+
+let CRC32_TABLE_NON_REFLECTED: number[] | undefined
+function getCrc32TableNonReflected() {
+  if (CRC32_TABLE_NON_REFLECTED) return CRC32_TABLE_NON_REFLECTED
+  CRC32_TABLE_NON_REFLECTED = new Array(256)
+  const poly = 0x04C11DB7
+  for (let n = 0; n < 256; n++) {
+    let c = n << 24
+    for (let k = 0; k < 8; k++) {
+      c = (c & 0x80000000) ? ((c << 1) ^ poly) : (c << 1)
+    }
+    CRC32_TABLE_NON_REFLECTED[n] = c >>> 0
+  }
+  return CRC32_TABLE_NON_REFLECTED
+}
+
+function crc32NonReflected(input: string): string {
+  const table = getCrc32TableNonReflected()
+  let crc = 0 >>> 0
+  for (let i = 0; i < input.length; i++) {
+    const code = input.charCodeAt(i)
+    crc = (crc << 8) ^ table[((crc >>> 24) ^ code) & 0xff]
+    crc >>>= 0
+  }
+  return crc.toString(16).padStart(8, '0')
 }

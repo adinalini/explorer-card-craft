@@ -65,6 +65,10 @@ export function encodeDeck(cardKeys: string[]): string | null {
 
   // Encode
   const joined = VERSION_PREFIX + SEPARATOR + cleanedCardKeys.join(SEPARATOR)
+
+  // 🔍 Debug log: show what string is being checksummed
+  console.log("ENCODE - Joined string for checksum:", JSON.stringify(joined))
+
   const bytes = new TextEncoder().encode(joined)
   const base64 = btoa(String.fromCharCode(...bytes))
 
@@ -108,6 +112,9 @@ export function decodeDeck(input: string): { cardKeys: string[] | null, errorMes
       bytes[i] = binaryString.charCodeAt(i)
     }
     const joined = new TextDecoder().decode(bytes)
+
+    // 🔍 Debug log: show the string recovered before checksum verification
+    console.log("DECODE - Joined string recovered:", JSON.stringify(joined))
 
     const expectedChecksum = computeChecksum(joined)
     if (givenChecksum !== expectedChecksum) {

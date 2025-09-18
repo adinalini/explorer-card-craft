@@ -1,8 +1,6 @@
 // Deck Code Generator - JavaScript port of the C# implementation
 // Copyright Notice: Based on code by Koin Games Inc.
 
-import { cardDatabase } from './cardData'
-
 const PREFIX_MARKER = 'KGBLDC'
 const VERSION_PREFIX = 'v1'
 const SEPARATOR = '|'
@@ -30,26 +28,21 @@ export async function encodeDeck(cardKeys: string[]): Promise<string | null> {
     return m ? parseInt(m[1], 10) : Number.MAX_SAFE_INTEGER
   }
 
-  const getCardData = (cardKey: string) => {
-    const normalizedKey = normalize(cardKey)
-    return cardDatabase.find(
-      card => card.cardKey?.split('_V')[0] === normalizedKey
-    )
+  // New: Determine card type directly from suffix
+  function getCardType(cardKey: string): number {
+    if (cardKey.includes('_MC')) return 0 // champions / legendaries
+    if (cardKey.includes('_MB')) return 1 // regular units
+    if (cardKey.includes('_SB') || cardKey.includes('_SC')) return 2 // spells / specials
+    return 3 // fallback
   }
-
-  const isSpell = (cardKey: string) =>
-    !!getCardData(cardKey)?.isSpell
-
-  const isLegendary = (cardKey: string) =>
-    !!getCardData(cardKey)?.isLegendary
 
   // Sort cards
   const sortedCardKeys = [...normalizedCardKeys].sort((a, b) => {
     const normA = normalize(a)
     const normB = normalize(b)
 
-    const typeA = isLegendary(normA) ? 0 : isSpell(normA) ? 2 : 1
-    const typeB = isLegendary(normB) ? 0 : isSpell(normB) ? 2 : 1
+    const typeA = getCardType(normA)
+    const typeB = getCardType(normB)
 
     if (typeA !== typeB) {
       return typeA - typeB

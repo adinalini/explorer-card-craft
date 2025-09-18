@@ -28,25 +28,10 @@ export async function encodeDeck(cardKeys: string[]): Promise<string | null> {
     return m ? parseInt(m[1], 10) : Number.MAX_SAFE_INTEGER
   }
 
-  // Champions first, everything else (units + spells + specials) grouped together
-  function getCardType(cardKey: string): number {
-    if (cardKey.includes('_MC')) return 0 // champions
-    return 1 // minions + spells + specials
-  }
-
-  // Sort cards
+  // Sort all cards by number only
   const sortedCardKeys = [...normalizedCardKeys].sort((a, b) => {
     const normA = normalize(a)
     const normB = normalize(b)
-
-    const typeA = getCardType(normA)
-    const typeB = getCardType(normB)
-
-    if (typeA !== typeB) {
-      return typeA - typeB
-    }
-
-    // Within each type, sort only by number
     return codeNum(normA) - codeNum(normB)
   })
 

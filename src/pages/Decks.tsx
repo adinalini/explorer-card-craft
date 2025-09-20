@@ -258,8 +258,8 @@ const Decks = () => {
       <div className="flex-1">
         <div className="container mx-auto px-4 py-8">
           {/* Header */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4">
-            <div className="flex items-center gap-4">
+          <div className="flex items-center justify-between mb-8 gap-4">
+            <div className="flex items-center gap-2 sm:gap-4 flex-wrap">
               <Button
                 onClick={() => navigate('/')}
                 variant="ghost"
@@ -271,16 +271,24 @@ const Decks = () => {
                 <span className="sm:hidden">Back</span>
               </Button>
               <h1 className="text-2xl sm:text-4xl font-bold text-foreground">Deck Builder</h1>
+              <Button
+                onClick={() => navigate('/deck-builder')}
+                size="sm"
+                className="bg-orange-500 hover:bg-orange-600 text-white font-semibold px-2 py-1 text-xs sm:text-sm sm:px-3 sm:py-2 sm:hidden"
+              >
+                <Plus className="h-3 w-3 mr-1" />
+                Create
+              </Button>
             </div>
             
             <div className="flex items-center gap-2">
               <Button
                 onClick={() => navigate('/deck-builder')}
                 size="sm"
-                className="bg-orange-500 hover:bg-orange-600 text-white font-semibold px-2 py-1 text-xs sm:text-sm sm:px-3 sm:py-2"
+                className="bg-orange-500 hover:bg-orange-600 text-white font-semibold hidden sm:inline-flex px-3 py-2"
               >
-                <Plus className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
-                Create
+                <Plus className="h-4 w-4 mr-2" />
+                Create Deck
               </Button>
               <ThemeToggle className="text-foreground hover:bg-accent" />
             </div>

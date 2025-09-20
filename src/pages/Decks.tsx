@@ -456,19 +456,26 @@ const Decks = () => {
                                 {React.createElement(deckTypeIcons[deck.type], { className: "h-4 w-4 text-primary" })}
                                 <span className="text-sm capitalize">{deck.type}</span>
                               </div>
-                               <div className="col-span-6">
-                                 <div className="grid grid-cols-13 gap-1">
-                                   {deck.cards.map((card) => (
-                                     <div key={card.position} className="aspect-square">
-                                       <CardImage 
-                                         cardId={card.card_id}
-                                         cardName={card.card_name}
-                                         className="w-full h-full object-cover rounded border"
-                                       />
-                                     </div>
-                                   ))}
-                                 </div>
-                               </div>
+                                <div className="col-span-6">
+                                  <div className="grid grid-cols-13 gap-1">
+                                    {[...deck.cards]
+                                      .sort((a, b) => {
+                                        // Show legendary cards first, maintain original order within each group
+                                        if (a.is_legendary && !b.is_legendary) return -1;
+                                        if (!a.is_legendary && b.is_legendary) return 1;
+                                        return a.position - b.position;
+                                      })
+                                      .map((card) => (
+                                      <div key={card.position} className="aspect-square">
+                                        <CardImage 
+                                          cardId={card.card_id}
+                                          cardName={card.card_name}
+                                          className="w-full h-full object-cover rounded border"
+                                        />
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
                                <div className="col-span-2 text-xs text-muted-foreground break-words whitespace-pre-line">
                                  {deck.notes || 'N/A'}
                                </div>
@@ -563,19 +570,26 @@ const Decks = () => {
                                 {React.createElement(deckTypeIcons[deck.type], { className: "h-4 w-4 text-primary" })}
                                 <span className="text-sm capitalize">{deck.type}</span>
                               </div>
-                              <div className="col-span-6">
-                                <div className="grid grid-cols-13 gap-1">
-                                  {deck.cards.map((card) => (
-                                    <div key={card.position} className="aspect-square">
-                                      <CardImage 
-                                        cardId={card.card_id}
-                                        cardName={card.card_name}
-                                        className="w-full h-full object-cover rounded border"
-                                      />
-                                    </div>
-                                  ))}
-                                </div>
-                              </div>
+                               <div className="col-span-6">
+                                 <div className="grid grid-cols-13 gap-1">
+                                   {[...deck.cards]
+                                     .sort((a, b) => {
+                                       // Show legendary cards first, maintain original order within each group
+                                       if (a.is_legendary && !b.is_legendary) return -1;
+                                       if (!a.is_legendary && b.is_legendary) return 1;
+                                       return a.position - b.position;
+                                     })
+                                     .map((card) => (
+                                     <div key={card.position} className="aspect-square">
+                                       <CardImage 
+                                         cardId={card.card_id}
+                                         cardName={card.card_name}
+                                         className="w-full h-full object-cover rounded border"
+                                       />
+                                     </div>
+                                   ))}
+                                 </div>
+                               </div>
                               <div className="col-span-2 text-sm text-muted-foreground text-right">
                                 {deck.author_name || 'N/A'}
                               </div>

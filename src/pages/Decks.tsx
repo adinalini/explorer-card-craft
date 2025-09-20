@@ -5,11 +5,12 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { WaveDivider } from "@/components/ui/wave-divider";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { CardImage } from "@/components/CardImage";
 import { supabase } from "@/integrations/supabase/client";
-import { Star, Users, ArrowLeft, Flame, Droplet, Cloud, Bomb, Plus, CreditCard, ChevronLeft, ChevronRight, Copy, Check } from "lucide-react";
+import { Star, Users, ArrowLeft, Flame, Droplet, Cloud, Bomb, Plus, CreditCard, ChevronLeft, ChevronRight, Copy, Check, Sparkles, TrendingUp } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { encodeDeck } from "@/utils/deckCodeGenerator";
 import { getCardKey } from "@/utils/cardKeyMapping";
@@ -17,7 +18,7 @@ import { getCardKey } from "@/utils/cardKeyMapping";
 interface Deck {
   id: string;
   name: string;
-  type: 'aggro' | 'control' | 'destroy' | 'discard' | 'move' | 'ramp';
+  type: 'aggro' | 'control' | 'destroy' | 'discard' | 'move' | 'ramp' | 'combo' | 'midrange';
   description?: string;
   author_name?: string;
   is_featured: boolean;
@@ -39,6 +40,8 @@ const deckTypeIcons = {
   discard: CreditCard,
   move: Cloud,
   ramp: Plus,
+  combo: Sparkles,
+  midrange: TrendingUp,
 };
 
 const Decks = () => {
@@ -255,7 +258,7 @@ const Decks = () => {
       <div className="flex-1">
         <div className="container mx-auto px-4 py-8">
           {/* Header */}
-          <div className="flex items-center justify-between mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4">
             <div className="flex items-center gap-4">
               <Button
                 onClick={() => navigate('/')}
@@ -266,13 +269,13 @@ const Decks = () => {
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Back to Home
               </Button>
-              <h1 className="text-4xl font-bold text-foreground">Deck Builder</h1>
+              <h1 className="text-2xl sm:text-4xl font-bold text-foreground">Deck Builder</h1>
             </div>
             
             <div className="flex items-center gap-3">
               <Button
                 onClick={() => navigate('/deck-builder')}
-                className="bg-orange-500 hover:bg-orange-600 text-white font-semibold"
+                className="bg-orange-500 hover:bg-orange-600 text-white font-semibold text-sm px-3 py-2"
               >
                 <Plus className="h-4 w-4 mr-2" />
                 Create Deck
@@ -290,13 +293,44 @@ const Decks = () => {
               className="max-w-md"
             />
             
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-4">
                 <Label className="text-sm font-medium text-foreground">Deck Type:</Label>
+                
+                {/* Mobile: Dropdown */}
+                <div className="sm:hidden">
+                  <Select value={selectedType} onValueChange={setSelectedType}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue>
+                        {selectedType === "all" ? (
+                          "All Types"
+                        ) : (
+                          <div className="flex items-center gap-1">
+                            {React.createElement(deckTypeIcons[selectedType as keyof typeof deckTypeIcons], { className: "h-3 w-3" })}
+                            {selectedType.charAt(0).toUpperCase() + selectedType.slice(1)}
+                          </div>
+                        )}
+                      </SelectValue>
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Types</SelectItem>
+                      {Object.entries(deckTypeIcons).map(([type, Icon]) => (
+                        <SelectItem key={type} value={type}>
+                          <div className="flex items-center gap-1">
+                            <Icon className="h-3 w-3" />
+                            {type.charAt(0).toUpperCase() + type.slice(1)}
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                {/* Desktop: Radio Group */}
                 <RadioGroup
                   value={selectedType}
                   onValueChange={setSelectedType}
-                  className="flex gap-4"
+                  className="hidden sm:flex sm:gap-4 sm:flex-wrap"
                 >
                   <div className="flex items-center space-x-2">
                     <RadioGroupItem value="all" id="all" />
@@ -314,7 +348,7 @@ const Decks = () => {
                 </RadioGroup>
               </div>
               
-              <div className="flex items-center gap-4">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-4">
                 <Label className="text-sm font-medium text-foreground">Decks per page:</Label>
                 <RadioGroup
                   value={itemsPerPage.toString()}

@@ -95,7 +95,7 @@ import sirenImg from '@/assets/cards/siren.png'
 import snowwhiteImg from '@/assets/cards/snow_white.png'
 import soldierImg from '@/assets/cards/soldier.png'
 import soulsurgeImg from '@/assets/cards/soul_surge.png'
-import strigaImg from '@/assets/cards/striga.png'
+import strygaImg from '@/assets/cards/stryga.png'
 import thegreenknightImg from '@/assets/cards/the_green_knight.png'
 import thekrakenImg from '@/assets/cards/the_kraken.png'
 import thewhitequeenImg from '@/assets/cards/the_white_queen.png'
@@ -217,7 +217,7 @@ const cardImages: Record<string, string> = {
   'snow_white': snowwhiteImg,
   'soldier': soldierImg,
   'soul_surge': soulsurgeImg,
-  'striga': strigaImg,
+  'stryga': strygaImg,
   'the_green_knight': thegreenknightImg,
   'the_kraken': thekrakenImg,
   'the_white_queen': thewhitequeenImg,

@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { WaveDivider } from "@/components/ui/wave-divider";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowLeft, Flame, Droplet, Cloud, Bomb, Plus, CreditCard } from "lucide-react";
+import { ArrowLeft, Flame, Droplet, Cloud, Bomb, Plus, CreditCard, Sparkles, TrendingUp } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { cardDatabase } from "@/utils/cardData";
 import { CardImage } from "@/components/CardImage";
@@ -31,6 +31,8 @@ const deckTypeIcons = {
   discard: CreditCard,
   move: Cloud,
   ramp: Plus,
+  combo: Sparkles,
+  midrange: TrendingUp,
 };
 
 const DeckBuilder = () => {
@@ -169,10 +171,11 @@ const DeckBuilder = () => {
         .from('decks')
         .insert({
           name: deckName.trim(),
-          type: deckType as 'aggro' | 'control' | 'destroy' | 'discard' | 'move' | 'ramp',
+          type: deckType as 'aggro' | 'control' | 'destroy' | 'discard' | 'move' | 'ramp' | 'combo' | 'midrange',
           description: description.trim() || null,
           author_name: authorName.trim() || null,
-          is_featured: false
+          is_featured: false,
+          patch: 'v1.0.0.40 (latest)'
         })
         .select()
         .single();

@@ -6,13 +6,13 @@ import { DeckCodeDisplay } from "@/components/DeckCodeDisplay";
 import { CardImage } from "@/components/CardImage";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowLeft, Share, Copy, Check, Flame, Droplet, Cloud, Bomb, Plus, CreditCard } from "lucide-react";
+import { ArrowLeft, Share, Copy, Check, Flame, Droplet, Cloud, Bomb, Plus, CreditCard, Sparkles, TrendingUp } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 
 interface Deck {
   id: string;
   name: string;
-  type: 'aggro' | 'control' | 'destroy' | 'discard' | 'move' | 'ramp';
+  type: 'aggro' | 'control' | 'destroy' | 'discard' | 'move' | 'ramp' | 'combo' | 'midrange';
   description?: string;
   author_name?: string;
   is_featured: boolean;
@@ -35,6 +35,8 @@ const deckTypeIcons = {
   discard: CreditCard,
   move: Cloud,
   ramp: Plus,
+  combo: Sparkles,
+  midrange: TrendingUp,
 };
 
 const DeckView = () => {

@@ -322,7 +322,15 @@ export type Database = {
       }
     }
     Enums: {
-      deck_type: "aggro" | "control" | "destroy" | "discard" | "move" | "ramp"
+      deck_type:
+        | "aggro"
+        | "control"
+        | "destroy"
+        | "discard"
+        | "move"
+        | "ramp"
+        | "combo"
+        | "midrange"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -450,7 +458,16 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      deck_type: ["aggro", "control", "destroy", "discard", "move", "ramp"],
+      deck_type: [
+        "aggro",
+        "control",
+        "destroy",
+        "discard",
+        "move",
+        "ramp",
+        "combo",
+        "midrange",
+      ],
     },
   },
 } as const

@@ -264,21 +264,23 @@ const Decks = () => {
                 onClick={() => navigate('/')}
                 variant="ghost"
                 size="sm"
-                className="text-foreground hover:bg-accent"
+                className="text-foreground hover:bg-accent px-2 py-1 text-xs sm:text-sm sm:px-3 sm:py-2"
               >
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Back to Home
+                <ArrowLeft className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                <span className="hidden sm:inline">Back to Home</span>
+                <span className="sm:hidden">Back</span>
               </Button>
               <h1 className="text-2xl sm:text-4xl font-bold text-foreground">Deck Builder</h1>
             </div>
             
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
               <Button
                 onClick={() => navigate('/deck-builder')}
-                className="bg-orange-500 hover:bg-orange-600 text-white font-semibold text-sm px-3 py-2"
+                size="sm"
+                className="bg-orange-500 hover:bg-orange-600 text-white font-semibold px-2 py-1 text-xs sm:text-sm sm:px-3 sm:py-2"
               >
-                <Plus className="h-4 w-4 mr-2" />
-                Create Deck
+                <Plus className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                Create
               </Button>
               <ThemeToggle className="text-foreground hover:bg-accent" />
             </div>
@@ -314,7 +316,9 @@ const Decks = () => {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">All Types</SelectItem>
-                      {Object.entries(deckTypeIcons).map(([type, Icon]) => (
+                      {Object.entries(deckTypeIcons)
+                        .sort(([a], [b]) => a.localeCompare(b))
+                        .map(([type, Icon]) => (
                         <SelectItem key={type} value={type}>
                           <div className="flex items-center gap-1">
                             <Icon className="h-3 w-3" />
@@ -336,7 +340,9 @@ const Decks = () => {
                     <RadioGroupItem value="all" id="all" />
                     <Label htmlFor="all" className="text-sm">All</Label>
                   </div>
-                  {Object.entries(deckTypeIcons).map(([type, Icon]) => (
+                  {Object.entries(deckTypeIcons)
+                    .sort(([a], [b]) => a.localeCompare(b))
+                    .map(([type, Icon]) => (
                     <div key={type} className="flex items-center space-x-2">
                       <RadioGroupItem value={type} id={type} />
                       <Label htmlFor={type} className="text-sm flex items-center gap-1">

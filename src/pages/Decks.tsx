@@ -227,7 +227,14 @@ const Decks = () => {
         )}
         
         <div className="grid grid-cols-13 gap-1 mb-3">
-          {deck.cards.map((card) => (
+          {[...deck.cards]
+            .sort((a, b) => {
+              // Show legendary cards first, maintain original order within each group
+              if (a.is_legendary && !b.is_legendary) return -1;
+              if (!a.is_legendary && b.is_legendary) return 1;
+              return a.position - b.position;
+            })
+            .map((card) => (
             <div key={card.position} className="aspect-square">
               <CardImage 
                 cardId={card.card_id}

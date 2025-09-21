@@ -140,7 +140,7 @@ const DeckView = () => {
   return (
     <>
       <SEOHead 
-        title={`Everything Project O - ${deck?.name || 'Deck Details'}`}
+        title="Project O Zone"
         description={deck ? `${deck.name} - ${deck.description || 'A competitive deck build'} by ${deck.author_name || 'Anonymous'}` : "View detailed deck information and cards"}
         image="/og-images/deck-default.jpg"
         url={`/deck/${id}`}

@@ -11,6 +11,7 @@ import { useNavigate } from "react-router-dom"
 import { supabase } from "@/integrations/supabase/client"
 import { createClient } from '@supabase/supabase-js'
 import { toast } from "@/hooks/use-toast"
+import { SEOHead } from "@/components/SEOHead"
 
 const Index = () => {
   const navigate = useNavigate()
@@ -231,7 +232,14 @@ const Index = () => {
   }
 
   return (
-    <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-[hsl(var(--background-start))] to-[hsl(var(--background-end))]">
+    <>
+      <SEOHead 
+        title="Project O Zone - Draft Battles & Random Decks"
+        description="Host Draft battles or generate random decks! Create rooms, join battles, and explore cards in this epic gaming experience."
+        image="/og-images/homepage.jpg"
+        url="/"
+      />
+      <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-[hsl(var(--background-start))] to-[hsl(var(--background-end))]">
       {/* Abstract Blobs */}
       <Blob variant="pink" size="lg" className="top-20 left-10 animate-bounce" style={{ animationDelay: '0s', animationDuration: '6s' }} />
       <Blob variant="yellow" size="md" className="top-32 right-20 animate-bounce" style={{ animationDelay: '2s', animationDuration: '8s' }} />
@@ -431,7 +439,8 @@ const Index = () => {
       <div className="absolute bottom-0 w-full">
         <WaveDivider />
       </div>
-    </div>
+      </div>
+    </>
   );
 };
 

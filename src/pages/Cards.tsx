@@ -11,6 +11,7 @@ import { useNavigate } from "react-router-dom"
 import { ArrowLeft, Download, Search } from "lucide-react"
 import { cardDatabase } from "@/utils/cardData"
 import { toast } from "@/hooks/use-toast"
+import { SEOHead } from "@/components/SEOHead"
 
 const Cards = () => {
   const navigate = useNavigate()
@@ -101,7 +102,14 @@ const Cards = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[hsl(var(--background-start))] to-[hsl(var(--background-end))]">
+    <>
+      <SEOHead 
+        title="Project O Zone - Cards Explorer"
+        description="Explore all cards in Project O Zone. Browse, search, and filter through our extensive card collection with detailed stats and artwork."
+        image="/og-images/cards.jpg"
+        url="/cards"
+      />
+      <div className="min-h-screen bg-gradient-to-br from-[hsl(var(--background-start))] to-[hsl(var(--background-end))]">
       {/* Header */}
       <div className="relative p-4 border-b border-border/20">
         <div className="flex items-center justify-between">
@@ -294,8 +302,9 @@ const Cards = () => {
       <div className="mt-12">
         <WaveDivider />
       </div>
-    </div>
-  )
-}
+      </div>
+    </>
+  );
+};
 
 export default Cards

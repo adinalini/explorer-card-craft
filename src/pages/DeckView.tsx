@@ -8,6 +8,7 @@ import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { supabase } from "@/integrations/supabase/client";
 import { ArrowLeft, Share, Copy, Check, Flame, Droplet, Cloud, Bomb, Plus, CreditCard, Sparkles, TrendingUp } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import { SEOHead } from "@/components/SEOHead";
 
 interface Deck {
   id: string;
@@ -137,7 +138,14 @@ const DeckView = () => {
   const normalCards = deck.cards.filter(c => !c.is_legendary);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[hsl(var(--background-start))] to-[hsl(var(--background-end))]">
+    <>
+      <SEOHead 
+        title="Project O Zone - Deck Details"
+        description={deck ? `${deck.name} - ${deck.description || 'A competitive deck build'} by ${deck.author_name || 'Anonymous'}` : "View detailed deck information and cards"}
+        image="/og-images/cards.jpg"
+        url={`/deck/${id}`}
+      />
+      <div className="min-h-screen bg-gradient-to-br from-[hsl(var(--background-start))] to-[hsl(var(--background-end))]">
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
@@ -274,6 +282,7 @@ const DeckView = () => {
       
       <WaveDivider />
     </div>
+    </>
   );
 };
 

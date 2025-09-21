@@ -14,6 +14,7 @@ import { Star, Users, ArrowLeft, Flame, Droplet, Cloud, Bomb, Plus, CreditCard, 
 import { toast } from "@/hooks/use-toast";
 import { encodeDeck } from "@/utils/deckCodeGenerator";
 import { getCardKey } from "@/utils/cardKeyMapping";
+import { SEOHead } from "@/components/SEOHead";
 
 interface Deck {
   id: string;
@@ -261,7 +262,14 @@ const Decks = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[hsl(var(--background-start))] to-[hsl(var(--background-end))] flex flex-col">
+    <>
+      <SEOHead 
+        title="Project O Zone - Decks Collection"
+        description="Browse featured and community decks in Project O Zone. Discover winning strategies and explore deck builds for every playstyle."
+        image="/og-images/decks.jpg"
+        url="/decks"
+      />
+      <div className="min-h-screen bg-gradient-to-br from-[hsl(var(--background-start))] to-[hsl(var(--background-end))] flex flex-col">
       <div className="flex-1">
         <div className="container mx-auto px-4 py-8">
           {/* Header */}
@@ -614,12 +622,13 @@ const Decks = () => {
                 <PaginationControls deckList={communityDecks} />
               </div>
             </TabsContent>
-          </Tabs>
-        </div>
-      </div>
-      
-      <WaveDivider />
-    </div>
+           </Tabs>
+         </div>
+       </div>
+       
+       <WaveDivider />
+     </div>
+    </>
   );
 };
 

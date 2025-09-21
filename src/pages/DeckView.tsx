@@ -140,9 +140,9 @@ const DeckView = () => {
   return (
     <>
       <SEOHead 
-        title="Project O Zone - Deck Details"
+        title={`Everything Project O - ${deck?.name || 'Deck Details'}`}
         description={deck ? `${deck.name} - ${deck.description || 'A competitive deck build'} by ${deck.author_name || 'Anonymous'}` : "View detailed deck information and cards"}
-        image="/og-images/cards.jpg"
+        image="/og-images/deck-default.jpg"
         url={`/deck/${id}`}
       />
       <div className="min-h-screen bg-gradient-to-br from-[hsl(var(--background-start))] to-[hsl(var(--background-end))]">

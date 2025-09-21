@@ -234,7 +234,7 @@ const Index = () => {
   return (
     <>
       <SEOHead 
-        title="Project O Zone - Draft Battles & Random Decks"
+        title="Everything Project O - Draft Battles & Random Decks"
         description="Host Draft battles or generate random decks! Create rooms, join battles, and explore cards in this epic gaming experience."
         image="/og-images/homepage.jpg"
         url="/"

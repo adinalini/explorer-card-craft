@@ -104,7 +104,7 @@ const Cards = () => {
   return (
     <>
       <SEOHead 
-        title="Project O Zone - Cards Explorer"
+        title="Everything Project O - Cards Explorer"
         description="Explore all cards in Project O Zone. Browse, search, and filter through our extensive card collection with detailed stats and artwork."
         image="/og-images/cards.jpg"
         url="/cards"

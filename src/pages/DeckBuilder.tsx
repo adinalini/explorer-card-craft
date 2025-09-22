@@ -69,21 +69,12 @@ const DeckBuilder = () => {
   }, [searchQuery, costRange, showUnits, showLegendary, showSpells]);
 
   const handleCardSelect = (card: any) => {
-    if (selectedCards.length >= 13) {
-      toast({
-        title: "Deck Full",
-        description: "Please deselect an existing card before adding a new one.",
-        variant: "destructive"
-      });
-      return;
-    }
-
     // Check if card is already selected
     if (selectedCards.some(c => c.card_id === card.id)) {
       return;
     }
 
-    // Handle legendary replacement
+    // Handle legendary replacement (works even when deck is full)
     if (card.isLegendary) {
       const existingLegendary = selectedCards.find(c => c.is_legendary);
       if (existingLegendary) {
@@ -105,6 +96,29 @@ const DeckBuilder = () => {
         setSelectedCards(sortedCards);
         return;
       }
+    }
+
+    // Check deck constraints for adding new cards
+    const hasLegendary = selectedCards.some(c => c.is_legendary);
+    const normalCards = selectedCards.filter(c => !c.is_legendary);
+
+    if (selectedCards.length >= 13) {
+      toast({
+        title: "Deck Full",
+        description: "Please deselect an existing card before adding a new one.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // If trying to add 13th card and it's not legendary, and no legendary exists
+    if (normalCards.length >= 12 && !card.isLegendary && !hasLegendary) {
+      toast({
+        title: "Need Legendary Card",
+        description: "Please select a legendary card before adding your 12th normal card.",
+        variant: "destructive"
+      });
+      return;
     }
 
     // Add new card

@@ -115,7 +115,7 @@ const DeckBuilder = () => {
     if (normalCards.length >= 12 && !card.isLegendary && !hasLegendary) {
       toast({
         title: "Need Legendary Card",
-        description: "Please select a legendary card before adding your 12th normal card.",
+        description: "Please add your legendary card or remove a non-legendary card.",
         variant: "destructive"
       });
       return;

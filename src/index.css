@@ -18,7 +18,6 @@ All colors MUST be HSL.
     --homepage-background-start: 240 10% 85%;
     --homepage-background-end: 260 15% 80%;
     --homepage-text: 240 10% 3.9%;
-    --homepage-contrast-text: 180 100% 95%; /* Light text in light mode for buttons */
     
     /* Draft page colors - original background colors */
     --draft-background-start: 240 10% 85%;
@@ -111,7 +110,6 @@ All colors MUST be HSL.
     --homepage-background-start: 260 90% 10%;
     --homepage-background-end: 290 95% 5%;
     --homepage-text: 180 100% 95%;
-    --homepage-contrast-text: 240 10% 3.9%; /* Dark text in dark mode for buttons */
     
     /* Draft page colors - original dark background colors */
     --draft-background-start: 260 90% 10%;

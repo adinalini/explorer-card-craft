@@ -63,7 +63,7 @@ const Index = () => {
               onClick={() => navigate('/cards')}
               onMouseEnter={() => setHoveredButton('cards')}
               onMouseLeave={() => setHoveredButton(null)}
-              className="h-full bg-[hsl(var(--homepage-button-cards))] hover:bg-[hsl(var(--homepage-button-cards))]/90 text-foreground text-4xl md:text-6xl font-bold rounded-3xl shadow-2xl transform transition-all duration-300 hover:scale-105 hover:shadow-neon-green animate-fade-in"
+              className="h-full bg-[hsl(var(--homepage-button-cards))] hover:bg-[hsl(var(--homepage-button-cards-hover))] text-foreground text-4xl md:text-6xl font-bold rounded-3xl shadow-2xl transform transition-all duration-300 hover:scale-105 animate-fade-in"
               style={{ animationDelay: '0.1s' }}
             >
               Cards
@@ -74,7 +74,7 @@ const Index = () => {
               onClick={() => navigate('/decks')}
               onMouseEnter={() => setHoveredButton('decks')}
               onMouseLeave={() => setHoveredButton(null)}
-              className="h-full bg-[hsl(var(--homepage-button-decks))] hover:bg-[hsl(var(--homepage-button-decks))]/90 text-foreground text-4xl md:text-6xl font-bold rounded-3xl shadow-2xl transform transition-all duration-300 hover:scale-105 animate-fade-in"
+              className="h-full bg-[hsl(var(--homepage-button-decks))] hover:bg-[hsl(var(--homepage-button-decks-hover))] text-foreground text-4xl md:text-6xl font-bold rounded-3xl shadow-2xl transform transition-all duration-300 hover:scale-105 animate-fade-in"
               style={{ animationDelay: '0.2s' }}
             >
               Decks
@@ -85,7 +85,7 @@ const Index = () => {
               onClick={() => navigate('/draft')}
               onMouseEnter={() => setHoveredButton('draft')}
               onMouseLeave={() => setHoveredButton(null)}
-              className="h-full bg-[hsl(var(--homepage-button-draft))] hover:bg-[hsl(var(--homepage-button-draft))]/90 text-foreground text-4xl md:text-6xl font-bold rounded-3xl shadow-2xl transform transition-all duration-300 hover:scale-105 hover:shadow-neon-pink animate-fade-in"
+              className="h-full bg-[hsl(var(--homepage-button-draft))] hover:bg-[hsl(var(--homepage-button-draft-hover))] text-foreground text-4xl md:text-6xl font-bold rounded-3xl shadow-2xl transform transition-all duration-300 hover:scale-105 animate-fade-in"
               style={{ animationDelay: '0.3s' }}
             >
               Draft
@@ -96,7 +96,7 @@ const Index = () => {
               onClick={() => navigate('/random')}
               onMouseEnter={() => setHoveredButton('random')}
               onMouseLeave={() => setHoveredButton(null)}
-              className="h-full bg-[hsl(var(--homepage-button-random))] hover:bg-[hsl(var(--homepage-button-random))]/90 text-foreground text-4xl md:text-6xl font-bold rounded-3xl shadow-2xl transform transition-all duration-300 hover:scale-105 animate-fade-in flex items-center justify-center"
+              className="h-full bg-[hsl(var(--homepage-button-random))] hover:bg-[hsl(var(--homepage-button-random-hover))] text-foreground text-4xl md:text-6xl font-bold rounded-3xl shadow-2xl transform transition-all duration-300 hover:scale-105 animate-fade-in flex items-center justify-center"
               style={{ animationDelay: '0.4s' }}
             >
               <span className="text-center leading-tight">

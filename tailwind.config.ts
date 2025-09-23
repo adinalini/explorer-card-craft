@@ -115,6 +115,16 @@ export default {
 					'50%': {
 						transform: 'translateY(-10px)'
 					}
+				},
+				'fade-in': {
+					'0%': {
+						opacity: '0',
+						transform: 'translateY(20px)'
+					},
+					'100%': {
+						opacity: '1',
+						transform: 'translateY(0)'
+					}
 				}
 			},
 			animation: {
@@ -122,7 +132,8 @@ export default {
 				'accordion-up': 'accordion-up 0.2s ease-out',
 				'glow-pulse': 'glow-pulse 2s ease-in-out infinite alternate',
 				'neon-flicker': 'neon-flicker 3s ease-in-out infinite',
-				'float': 'float 3s ease-in-out infinite'
+				'float': 'float 3s ease-in-out infinite',
+				'fade-in': 'fade-in 0.6s ease-out forwards'
 			},
 			boxShadow: {
 				'neon-pink': 'var(--shadow-neon-pink)',

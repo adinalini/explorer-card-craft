@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
 import { HelmetProvider } from "react-helmet-async";
 import Index from "./pages/Index";
+import Draft from "./pages/Draft";
 import Room from "./pages/Room";
 import RandomDeck from "./pages/RandomDeck";
 import Cards from "./pages/Cards";
@@ -26,6 +27,7 @@ const App = () => (
           <BrowserRouter>
           <Routes>
             <Route path="/" element={<Index />} />
+            <Route path="/draft" element={<Draft />} />
             <Route path="/room/:roomId" element={<Room />} />
             <Route path="/random" element={<RandomDeck />} />
             <Route path="/cards" element={<Cards />} />

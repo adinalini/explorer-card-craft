@@ -1,233 +1,29 @@
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Blob } from "@/components/ui/blob"
 import { WaveDivider } from "@/components/ui/wave-divider"
 import { ThemeToggle } from "@/components/ui/theme-toggle"
 import { useNavigate } from "react-router-dom"
-import { supabase } from "@/integrations/supabase/client"
-import { createClient } from '@supabase/supabase-js'
-import { toast } from "@/hooks/use-toast"
 import { SEOHead } from "@/components/SEOHead"
 
 const Index = () => {
   const navigate = useNavigate()
-  const [createDialogOpen, setCreateDialogOpen] = useState(false)
-  const [joinDialogOpen, setJoinDialogOpen] = useState(false)
-  const [draftType, setDraftType] = useState("default")
-  const [creatorName, setCreatorName] = useState("")
-  const [joinerName, setJoinerName] = useState("")
-  const [roomId, setRoomId] = useState("")
-  const [isCreating, setIsCreating] = useState(false)
-  const [isJoining, setIsJoining] = useState(false)
+  const [hoveredButton, setHoveredButton] = useState<string | null>(null)
 
-  const generateRoomId = () => {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
-    let result = ''
-    for (let i = 0; i < 4; i++) {
-      result += chars.charAt(Math.floor(Math.random() * chars.length))
-    }
-    return result
-  }
-
-  const getUserSessionId = () => {
-    let sessionId = sessionStorage.getItem('userSessionId')
-    if (!sessionId) {
-      sessionId = 'session_' + Math.random().toString(36).substr(2, 16) + Date.now().toString(36)
-      sessionStorage.setItem('userSessionId', sessionId)
-    }
-    return sessionId
-  }
-
-  const handleCreateRoom = async () => {
-    if (!creatorName.trim()) {
-      toast({
-        title: "Name Required",
-        description: "Please enter your name to create a room.",
-        variant: "destructive"
-      })
-      return
-    }
-
-    setIsCreating(true)
-    const newRoomId = generateRoomId()
-
-    try {
-      // First create the room
-      const { error } = await supabase
-        .from('rooms')
-        .insert([{
-          id: newRoomId,
-          draft_type: draftType,
-          creator_name: creatorName.trim(),
-          status: 'waiting'
-        }])
-
-      if (error) throw error
-
-      // Then create a game session for the creator - create new session to avoid conflicts
-      const sessionId = 'session_' + Math.random().toString(36).substr(2, 16) + Date.now().toString(36)
-      console.log('Creating game session for creator:', { roomId: newRoomId, sessionId, creatorName: creatorName.trim() })
-      
-      const { error: sessionError } = await supabase
-        .from('game_sessions')
-        .insert({
-          room_id: newRoomId,
-          session_token: sessionId,
-          player_role: 'creator',
-          player_name: creatorName.trim()
-        })
-      
-      console.log('Creator game session creation result:', { sessionError })
-      
-      // Update sessionStorage to match the database session
-      sessionStorage.setItem('userSessionId', sessionId)
-
-      if (sessionError) {
-        console.error('Failed to create creator game session:', sessionError)
-        // Don't throw here, just log it
-      }
-
-      // Set session flag to indicate this user created this room
-      localStorage.setItem(`room_${newRoomId}_creator`, sessionId)
-      console.log('Creator session set:', { roomId: newRoomId, sessionId })
-      setCreateDialogOpen(false)
-      navigate(`/room/${newRoomId}`)
-    } catch (error) {
-      console.error('Error creating room:', error)
-      toast({
-        title: "Error",
-        description: "Failed to create room. Please try again.",
-        variant: "destructive"
-      })
-    } finally {
-      setIsCreating(false)
-    }
-  }
-
-  const handleJoinRoom = async () => {
-    if (!joinerName.trim() || !roomId.trim()) {
-      toast({
-        title: "Details Required",
-        description: "Please enter both your name and room ID.",
-        variant: "destructive"
-      })
-      return
-    }
-
-    setIsJoining(true)
-
-    try {
-      console.log('Attempting to join room:', { roomId: roomId.toUpperCase(), joinerName: joinerName.trim() })
-      
-      const { data: room, error: fetchError } = await supabase
-        .from('rooms')
-        .select('*')
-        .eq('id', roomId.toUpperCase())
-        .single()
-
-      console.log('Fetched room data:', { room, fetchError })
-
-      if (fetchError || !room) {
-        toast({
-          title: "Room Not Found",
-          description: "The room ID you entered doesn't exist.",
-          variant: "destructive"
-        })
-        return
-      }
-
-      if (room.joiner_name) {
-        toast({
-          title: "Draft has already begun",
-          description: "This room already has two players.",
-          variant: "destructive"
-        })
-        return
-      }
-
-      if (room.status === 'active' || room.status === 'completed') {
-        toast({
-          title: "Draft has already begun",
-          description: "This room's draft is already in progress.",
-          variant: "destructive"
-        })
-        return
-      }
-
-      // Generate a unique session token for this room join
-      const sessionId = 'session_' + Math.random().toString(36).substr(2, 16) + Date.now().toString(36)
-      console.log('Creating game session for joiner:', { roomId: roomId.toUpperCase(), sessionId, joinerName: joinerName.trim() })
-      
-      try {
-        const { error: sessionError } = await supabase
-          .from('game_sessions')
-          .insert({
-            room_id: roomId.toUpperCase(),
-            session_token: sessionId,
-            player_role: 'joiner',
-            player_name: joinerName.trim()
-          })
-
-        console.log('Game session creation result:', { sessionError })
-        
-        if (sessionError) {
-          console.error('Failed to create game session:', sessionError)
-          throw sessionError
-        }
-      } catch (sessionCreateError) {
-        console.error('Error creating game session:', sessionCreateError)
-        toast({
-          title: "Error",
-          description: "Failed to create game session. Please try again.",
-          variant: "destructive"
-        })
-        return
-      }
-
-      console.log('Updating room with joiner:', { roomId: roomId.toUpperCase(), joinerName: joinerName.trim() })
-      
-      // Create a new supabase client instance with session token header
-      const supabaseWithToken = createClient(
-        "https://ophgbcyhxvwljfztlvyu.supabase.co",
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9waGdiY3loeHZ3bGpmenRsdnl1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQzMzU4NzYsImV4cCI6MjA2OTkxMTg3Nn0.iiiRP6WtGtwI_jJDnAJUqmEZcoNUbYT3HiBl3VuBnKs",
-        {
-          global: {
-            headers: {
-              'x-session-token': sessionId
-            }
-          }
-        }
-      )
-      
-      const { data: updateData, error: updateError } = await supabaseWithToken
-        .from('rooms')
-        .update({ joiner_name: joinerName.trim() })
-        .eq('id', roomId.toUpperCase())
-        .select()
-
-      console.log('Database update result:', { updateData, updateError })
-      
-      if (updateError) throw updateError
-
-      // Update sessionStorage to match the database session and set localStorage flag
-      sessionStorage.setItem('userSessionId', sessionId)
-      localStorage.setItem(`room_${roomId.toUpperCase()}_joiner`, sessionId)
-      console.log('Joiner session set:', { roomId: roomId.toUpperCase(), sessionId })
-      setJoinDialogOpen(false)
-      navigate(`/room/${roomId.toUpperCase()}`)
-    } catch (error) {
-      console.error('Error joining room:', error)
-      toast({
-        title: "Error",
-        description: "Failed to join room. Please try again.",
-        variant: "destructive"
-      })
-    } finally {
-      setIsJoining(false)
+  const getTextColor = () => {
+    if (!hoveredButton) return "text-[hsl(var(--homepage-text))]"
+    
+    switch (hoveredButton) {
+      case 'cards':
+        return "text-[hsl(var(--homepage-button-cards))]"
+      case 'decks':
+        return "text-[hsl(var(--homepage-button-decks))]"
+      case 'draft':
+        return "text-[hsl(var(--homepage-button-draft))]"
+      case 'random':
+        return "text-[hsl(var(--homepage-button-random))]"
+      default:
+        return "text-[hsl(var(--homepage-text))]"
     }
   }
 
@@ -235,213 +31,85 @@ const Index = () => {
     <>
       <SEOHead 
         title="Project O Zone"
-        description="Host Draft battles or generate random decks! Create rooms, join battles, and explore cards in this epic gaming experience."
+        description="Master the cards, build decks, battle in drafts, and explore random strategies! Your complete Project O gaming hub."
         image="/og-images/homepage.jpg"
         url="/"
       />
-      <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-[hsl(var(--background-start))] to-[hsl(var(--background-end))]">
-      {/* Abstract Blobs */}
-      <Blob variant="pink" size="lg" className="top-20 left-10 animate-bounce" style={{ animationDelay: '0s', animationDuration: '6s' }} />
-      <Blob variant="yellow" size="md" className="top-32 right-20 animate-bounce" style={{ animationDelay: '2s', animationDuration: '8s' }} />
-      <Blob variant="orange" size="sm" className="bottom-40 left-32 animate-bounce" style={{ animationDelay: '4s', animationDuration: '7s' }} />
-      <Blob variant="pink" size="md" className="bottom-20 right-16 animate-bounce" style={{ animationDelay: '1s', animationDuration: '9s' }} />
-      
-      {/* Card Explorer and Deck Builder Buttons in top left */}
-      <div className="absolute top-4 left-4 z-20 flex gap-3">
-        <Button 
-          onClick={() => navigate('/cards')}
-          className="bg-[hsl(var(--wave-light))] dark:bg-[hsl(var(--wave-dark))] text-[hsl(var(--background))] hover:bg-[hsl(var(--wave-light))]/80 dark:hover:bg-[hsl(var(--wave-dark))]/80 transition-all font-semibold"
-        >
-          Card Explorer
-        </Button>
-        <Button 
-          onClick={() => navigate('/decks')}
-          className="bg-primary text-primary-foreground hover:bg-primary/90 transition-all font-semibold"
-        >
-          Deck Builder
-        </Button>
-      </div>
+      <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-[hsl(var(--homepage-background-start))] to-[hsl(var(--homepage-background-end))]">
+        {/* Abstract Blobs */}
+        <Blob variant="pink" size="lg" className="top-20 left-10 animate-float" style={{ animationDelay: '0s', animationDuration: '6s' }} />
+        <Blob variant="yellow" size="md" className="top-32 right-20 animate-float" style={{ animationDelay: '2s', animationDuration: '8s' }} />
+        <Blob variant="orange" size="sm" className="bottom-40 left-32 animate-float" style={{ animationDelay: '4s', animationDuration: '7s' }} />
+        <Blob variant="pink" size="md" className="bottom-20 right-16 animate-float" style={{ animationDelay: '1s', animationDuration: '9s' }} />
+        
+        {/* Theme Toggle in top right */}
+        <div className="absolute top-4 right-4 z-20">
+          <ThemeToggle className="text-[hsl(var(--homepage-text))] hover:bg-white/10 dark:hover:bg-black/20" />
+        </div>
 
-      {/* Theme Toggle in top right */}
-      <div className="absolute top-4 right-4 z-20">
-        <ThemeToggle className="text-white dark:text-foreground hover:bg-white/10 dark:hover:bg-accent" />
-      </div>
-
-      {/* Main Content */}
-      <div className="relative z-10 min-h-screen flex flex-col items-center justify-center px-4">
-        <div className="text-center space-y-12">
-          <h1 className="text-6xl md:text-8xl font-bold text-foreground mb-16 drop-shadow-2xl">
-            Project O Draft Battler
+        {/* Top 30% - Project O Zone Title */}
+        <div className="relative z-10 h-[30vh] flex flex-col items-center justify-center px-4">
+          <h1 className={`text-6xl md:text-8xl font-bold transition-colors duration-500 drop-shadow-2xl ${getTextColor()}`}>
+            Project O Zone
           </h1>
-          
-          <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
-            <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
-              <DialogTrigger asChild>
-                <Button 
-                  size="lg" 
-                  className="bg-primary hover:bg-primary/90 text-primary-foreground px-12 py-6 text-xl font-semibold rounded-2xl shadow-2xl transform transition-all duration-200 hover:scale-105"
-                >
-                  Create Room
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="bg-card text-card-foreground">
-                <div className="relative mb-4">
-                  <svg
-                    viewBox="0 0 1200 120"
-                    preserveAspectRatio="none"
-                    className="absolute top-0 left-0 w-full h-12"
-                  >
-                    <path
-                      d="M985.66,92.83C906.67,72,823.78,31,743.84,14.19c-82.26-17.34-168.06-16.33-250.45.39-57.84,11.73-114,31.07-172,41.86A600.21,600.21,0,0,1,0,27.35V120H1200V95.8C1132.19,118.92,1055.71,111.31,985.66,92.83Z"
-                      className="fill-gradient-to-r from-primary to-secondary"
-                      fill="url(#gradient-create)"
-                    />
-                    <defs>
-                      <linearGradient id="gradient-create" x1="0%" y1="0%" x2="100%" y2="0%">
-                        <stop offset="0%" stopColor="hsl(320 100% 60%)" />
-                        <stop offset="100%" stopColor="hsl(30 100% 60%)" />
-                      </linearGradient>
-                    </defs>
-                  </svg>
-                </div>
-                <DialogHeader className="relative z-10 pt-6">
-                  <DialogTitle className="text-2xl text-center text-primary">Create New Room</DialogTitle>
-                  <DialogDescription className="text-center text-muted-foreground">
-                    Set up a new drafting room and invite players to join
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="space-y-6 py-4">
-                  <div className="space-y-4">
-                    <Label className="text-lg font-semibold text-primary">Draft Type:</Label>
-                     <RadioGroup value={draftType} onValueChange={setDraftType} className="grid grid-cols-1 gap-3">
-                       <label className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-accent/20 hover:scale-105 transition-all cursor-pointer">
-                         <RadioGroupItem value="default" id="default" />
-                         <span className="text-lg text-primary font-semibold">Default</span>
-                       </label>
-                        <label className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-accent/20 hover:scale-105 transition-all cursor-pointer">
-                          <RadioGroupItem value="triple" id="triple" />
-                          <span className="text-lg text-primary font-semibold">Triple Draft</span>
-                        </label>
-                        <label className="flex items-center space-x-3 p-3 border rounded-lg opacity-60 cursor-not-allowed">
-                          <RadioGroupItem value="mega" id="mega" disabled />
-                          <span className="text-lg text-primary font-semibold">Mega Draft (Not Available)</span>
-                        </label>
-                     </RadioGroup>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="creator-name" className="text-lg font-semibold text-primary">Your Name:</Label>
-                    <Input
-                      id="creator-name"
-                      placeholder="Enter your name"
-                      value={creatorName}
-                      onChange={(e) => setCreatorName(e.target.value)}
-                      className="text-lg py-3"
-                    />
-                  </div>
-                  
-                  <Button 
-                    onClick={handleCreateRoom} 
-                    disabled={isCreating}
-                    className="w-full bg-primary hover:bg-primary/90 text-primary-foreground py-3 text-lg font-semibold"
-                  >
-                    {isCreating ? "Creating..." : "Create Room"}
-                  </Button>
-                </div>
-              </DialogContent>
-            </Dialog>
+        </div>
 
-            <Dialog open={joinDialogOpen} onOpenChange={setJoinDialogOpen}>
-              <DialogTrigger asChild>
-                <Button 
-                      variant="outline" 
-                      size="lg"
-                      className="border-2 border-foreground text-foreground hover:bg-foreground hover:text-background px-12 py-6 text-xl font-semibold rounded-2xl shadow-2xl transform transition-all duration-200 hover:scale-105 bg-transparent"
-                >
-                  Join Room
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="bg-card text-card-foreground">
-                <div className="relative mb-4">
-                  <svg
-                    viewBox="0 0 1200 120"
-                    preserveAspectRatio="none"
-                    className="absolute top-0 left-0 w-full h-12"
-                  >
-                    <path
-                      d="M985.66,92.83C906.67,72,823.78,31,743.84,14.19c-82.26-17.34-168.06-16.33-250.45.39-57.84,11.73-114,31.07-172,41.86A600.21,600.21,0,0,1,0,27.35V120H1200V95.8C1132.19,118.92,1055.71,111.31,985.66,92.83Z"
-                      className="fill-gradient-to-r from-primary to-secondary"
-                      fill="url(#gradient-join)"
-                    />
-                    <defs>
-                      <linearGradient id="gradient-join" x1="0%" y1="0%" x2="100%" y2="0%">
-                        <stop offset="0%" stopColor="hsl(320 100% 60%)" />
-                        <stop offset="100%" stopColor="hsl(30 100% 60%)" />
-                      </linearGradient>
-                    </defs>
-                  </svg>
-                </div>
-                <DialogHeader className="relative z-10 pt-6">
-                  <DialogTitle className="text-2xl text-center text-primary">Join Room</DialogTitle>
-                  <DialogDescription className="text-center text-muted-foreground">
-                    Enter the room ID to join an existing draft
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="space-y-6 py-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="room-id" className="text-lg font-semibold text-primary">Room ID:</Label>
-                    <Input
-                      id="room-id"
-                      placeholder="Enter 4-character room ID"
-                      value={roomId}
-                      onChange={(e) => setRoomId(e.target.value.toUpperCase())}
-                      maxLength={4}
-                      className="text-lg py-3 uppercase"
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="joiner-name" className="text-lg font-semibold text-primary">Your Name:</Label>
-                    <Input
-                      id="joiner-name"
-                      placeholder="Enter your name"
-                      value={joinerName}
-                      onChange={(e) => setJoinerName(e.target.value)}
-                      className="text-lg py-3"
-                    />
-                  </div>
-                  
-                  <Button 
-                    onClick={handleJoinRoom}
-                    disabled={isJoining}
-                    className="w-full bg-primary hover:bg-primary/90 text-primary-foreground py-3 text-lg font-semibold"
-                  >
-                    {isJoining ? "Joining..." : "Join Room"}
-                  </Button>
-                </div>
-              </DialogContent>
-            </Dialog>
-          </div>
-          
-          <div className="mt-8">
+        {/* Bottom 70% - 2x2 Button Grid */}
+        <div className="relative z-10 h-[70vh] p-8">
+          <div className="grid grid-cols-2 grid-rows-2 gap-6 h-full max-w-6xl mx-auto">
+            {/* Cards Button */}
+            <Button 
+              onClick={() => navigate('/cards')}
+              onMouseEnter={() => setHoveredButton('cards')}
+              onMouseLeave={() => setHoveredButton(null)}
+              className="h-full bg-[hsl(var(--homepage-button-cards))] hover:bg-[hsl(var(--homepage-button-cards))]/90 text-white text-4xl md:text-6xl font-bold rounded-3xl shadow-2xl transform transition-all duration-300 hover:scale-105 hover:shadow-neon-green animate-fade-in"
+              style={{ animationDelay: '0.1s' }}
+            >
+              Cards
+            </Button>
+
+            {/* Decks Button */}
+            <Button 
+              onClick={() => navigate('/deck-builder')}
+              onMouseEnter={() => setHoveredButton('decks')}
+              onMouseLeave={() => setHoveredButton(null)}
+              className="h-full bg-[hsl(var(--homepage-button-decks))] hover:bg-[hsl(var(--homepage-button-decks))]/90 text-white text-4xl md:text-6xl font-bold rounded-3xl shadow-2xl transform transition-all duration-300 hover:scale-105 animate-fade-in"
+              style={{ animationDelay: '0.2s' }}
+            >
+              Decks
+            </Button>
+
+            {/* Draft Button */}
+            <Button 
+              onClick={() => navigate('/draft')}
+              onMouseEnter={() => setHoveredButton('draft')}
+              onMouseLeave={() => setHoveredButton(null)}
+              className="h-full bg-[hsl(var(--homepage-button-draft))] hover:bg-[hsl(var(--homepage-button-draft))]/90 text-white text-4xl md:text-6xl font-bold rounded-3xl shadow-2xl transform transition-all duration-300 hover:scale-105 hover:shadow-neon-pink animate-fade-in"
+              style={{ animationDelay: '0.3s' }}
+            >
+              Draft
+            </Button>
+
+            {/* Random Deck Button */}
             <Button 
               onClick={() => navigate('/random')}
-              size="lg" 
-              className="bg-orange-500 hover:bg-orange-600 text-white px-12 py-6 text-xl font-semibold rounded-2xl shadow-2xl transform transition-all duration-200 hover:scale-105"
+              onMouseEnter={() => setHoveredButton('random')}
+              onMouseLeave={() => setHoveredButton(null)}
+              className="h-full bg-[hsl(var(--homepage-button-random))] hover:bg-[hsl(var(--homepage-button-random))]/90 text-white text-4xl md:text-6xl font-bold rounded-3xl shadow-2xl transform transition-all duration-300 hover:scale-105 animate-fade-in"
+              style={{ animationDelay: '0.4s' }}
             >
-              Give me a random deck 🎲
+              Random Deck
             </Button>
           </div>
         </div>
-      </div>
-      
-      {/* Wave Divider at bottom */}
-      <div className="absolute bottom-0 w-full">
-        <WaveDivider />
-      </div>
+
+        {/* Wave Divider at bottom */}
+        <div className="absolute bottom-0 left-0 right-0">
+          <WaveDivider />
+        </div>
       </div>
     </>
-  );
-};
+  )
+}
 
-export default Index;
+export default Index

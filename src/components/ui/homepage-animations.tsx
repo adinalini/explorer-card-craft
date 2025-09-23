@@ -6,6 +6,7 @@ interface Card {
   y: number
   size: number
   speed: number
+  rotation: number
 }
 
 interface QuestionMarkHorizontal {
@@ -40,7 +41,8 @@ export const FloatingCards = ({ isActive }: { isActive: boolean }) => {
             x: -30,
             y: Math.random() * window.innerHeight,
             size: Math.random() * 20 + 15,
-            speed: Math.random() * 2 + 1
+            speed: Math.random() * 2 + 1,
+            rotation: Math.random() * 360
           }
           
           setCards(prev => [...prev, newCard])
@@ -78,7 +80,7 @@ export const FloatingCards = ({ isActive }: { isActive: boolean }) => {
       {cards.map(card => (
         <div
           key={card.id}
-          className="absolute rounded-lg opacity-70 border-2"
+          className="absolute opacity-70 border-2"
           style={{
             left: card.x,
             top: card.y,
@@ -86,7 +88,7 @@ export const FloatingCards = ({ isActive }: { isActive: boolean }) => {
             height: card.size * 1.4,
             backgroundColor: 'hsl(var(--homepage-button-cards))',
             borderColor: 'hsl(var(--homepage-button-cards) / 0.3)',
-            transform: 'translate(-50%, -50%)'
+            transform: `translate(-50%, -50%) rotate(${card.rotation}deg)`
           }}
         />
       ))}
@@ -107,7 +109,7 @@ export const FloatingQuestionMarksHorizontal = ({ isActive }: { isActive: boolea
           id: Date.now() + Math.random(),
           x: window.innerWidth + 30,
           y: Math.random() * window.innerHeight,
-          size: Math.random() * 20 + 15,
+          size: Math.random() * 60 + 45,
           speed: Math.random() * 2 + 1,
           rotation: Math.random() * 360
         }

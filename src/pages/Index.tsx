@@ -63,7 +63,7 @@ const Index = () => {
               onClick={() => navigate('/cards')}
               onMouseEnter={() => setHoveredButton('cards')}
               onMouseLeave={() => setHoveredButton(null)}
-              className="h-full bg-[hsl(var(--homepage-button-cards))] hover:bg-[hsl(var(--homepage-button-cards))]/90 text-foreground text-4xl md:text-6xl font-bold rounded-3xl shadow-2xl transform transition-all duration-300 hover:scale-105 hover:shadow-neon-green animate-fade-in"
+              className="h-full bg-[hsl(var(--homepage-button-cards))] hover:bg-[hsl(var(--homepage-button-cards))]/90 text-foreground text-4xl md:text-6xl font-bold rounded-3xl shadow-2xl transform transition-all duration-300 hover:scale-105 animate-fade-in"
               style={{ animationDelay: '0.1s' }}
             >
               Cards
@@ -85,7 +85,7 @@ const Index = () => {
               onClick={() => navigate('/draft')}
               onMouseEnter={() => setHoveredButton('draft')}
               onMouseLeave={() => setHoveredButton(null)}
-              className="h-full bg-[hsl(var(--homepage-button-draft))] hover:bg-[hsl(var(--homepage-button-draft))]/90 text-foreground text-4xl md:text-6xl font-bold rounded-3xl shadow-2xl transform transition-all duration-300 hover:scale-105 hover:shadow-neon-pink animate-fade-in"
+              className="h-full bg-[hsl(var(--homepage-button-draft))] hover:bg-[hsl(var(--homepage-button-draft))]/90 text-foreground text-4xl md:text-6xl font-bold rounded-3xl shadow-2xl transform transition-all duration-300 hover:scale-105 animate-fade-in"
               style={{ animationDelay: '0.3s' }}
             >
               Draft

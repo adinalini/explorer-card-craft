@@ -121,7 +121,7 @@ All colors MUST be HSL.
     --homepage-button-decks: 200 100% 60%; /* Sky Blue */
     --homepage-button-draft: 320 100% 60%; /* Pink */
     --homepage-button-random: 25 95% 55%; /* Orange */
-    --homepage-button-text: 260 25% 5%; /* Dark text for dark mode */
+    --homepage-button-text: 0 0% 98%; /* Light text for dark mode too */
     
     /* Enhanced Neon Colors for Dark Mode */
     --primary: 320 100% 75%;

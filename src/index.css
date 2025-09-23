@@ -29,12 +29,6 @@ All colors MUST be HSL.
     --homepage-button-draft: 320 100% 60%; /* Pink */
     --homepage-button-random: 25 95% 55%; /* Orange */
     
-    /* Button hover colors for homepage (darker in both modes) */
-    --homepage-button-cards-hover: 120 100% 20%;
-    --homepage-button-decks-hover: 200 100% 45%;
-    --homepage-button-draft-hover: 320 100% 45%;
-    --homepage-button-random-hover: 25 95% 40%;
-    
     /* Light Mode Primary Colors */
     --primary: 320 100% 50%;
     --primary-foreground: 0 0% 98%;
@@ -126,12 +120,6 @@ All colors MUST be HSL.
     --homepage-button-decks: 200 100% 60%; /* Sky Blue */
     --homepage-button-draft: 320 100% 60%; /* Pink */
     --homepage-button-random: 25 95% 55%; /* Orange */
-    
-    /* Button hover colors for homepage (darker in both modes) */
-    --homepage-button-cards-hover: 120 100% 20%;
-    --homepage-button-decks-hover: 200 100% 45%;
-    --homepage-button-draft-hover: 320 100% 45%;
-    --homepage-button-random-hover: 25 95% 40%;
     
     /* Enhanced Neon Colors for Dark Mode */
     --primary: 320 100% 75%;

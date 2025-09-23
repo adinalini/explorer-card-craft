@@ -5,6 +5,7 @@ import { WaveDivider } from "@/components/ui/wave-divider"
 import { ThemeToggle } from "@/components/ui/theme-toggle"
 import { useNavigate } from "react-router-dom"
 import { SEOHead } from "@/components/SEOHead"
+import { TreeBranches, FloatingBubbles, FloatingDots, FlyingBirds } from "@/components/ui/homepage-animations"
 
 const Index = () => {
   const navigate = useNavigate()
@@ -49,7 +50,7 @@ const Index = () => {
 
         {/* Top 30% - Project O Zone Title */}
         <div className="relative z-10 h-[30vh] flex flex-col items-center justify-center px-4">
-          <h1 className={`text-6xl md:text-8xl font-bold transition-colors duration-500 drop-shadow-2xl ${getTextColor()}`}>
+          <h1 className={`text-4xl sm:text-6xl md:text-8xl font-bold transition-colors duration-500 drop-shadow-2xl ${getTextColor()}`}>
             Project O Zone
           </h1>
         </div>
@@ -62,7 +63,7 @@ const Index = () => {
               onClick={() => navigate('/cards')}
               onMouseEnter={() => setHoveredButton('cards')}
               onMouseLeave={() => setHoveredButton(null)}
-              className="h-full bg-[hsl(var(--homepage-button-cards))] hover:bg-[hsl(var(--homepage-button-cards))]/90 text-white text-4xl md:text-6xl font-bold rounded-3xl shadow-2xl transform transition-all duration-300 hover:scale-105 hover:shadow-neon-green animate-fade-in"
+              className="h-full bg-[hsl(var(--homepage-button-cards))] hover:bg-[hsl(var(--homepage-button-cards))]/90 text-[hsl(var(--homepage-text))] text-4xl md:text-6xl font-bold rounded-3xl shadow-2xl transform transition-all duration-300 hover:scale-105 hover:shadow-neon-green animate-fade-in"
               style={{ animationDelay: '0.1s' }}
             >
               Cards
@@ -70,10 +71,10 @@ const Index = () => {
 
             {/* Decks Button */}
             <Button 
-              onClick={() => navigate('/deck-builder')}
+              onClick={() => navigate('/decks')}
               onMouseEnter={() => setHoveredButton('decks')}
               onMouseLeave={() => setHoveredButton(null)}
-              className="h-full bg-[hsl(var(--homepage-button-decks))] hover:bg-[hsl(var(--homepage-button-decks))]/90 text-white text-4xl md:text-6xl font-bold rounded-3xl shadow-2xl transform transition-all duration-300 hover:scale-105 animate-fade-in"
+              className="h-full bg-[hsl(var(--homepage-button-decks))] hover:bg-[hsl(var(--homepage-button-decks))]/90 text-[hsl(var(--homepage-text))] text-4xl md:text-6xl font-bold rounded-3xl shadow-2xl transform transition-all duration-300 hover:scale-105 animate-fade-in"
               style={{ animationDelay: '0.2s' }}
             >
               Decks
@@ -84,7 +85,7 @@ const Index = () => {
               onClick={() => navigate('/draft')}
               onMouseEnter={() => setHoveredButton('draft')}
               onMouseLeave={() => setHoveredButton(null)}
-              className="h-full bg-[hsl(var(--homepage-button-draft))] hover:bg-[hsl(var(--homepage-button-draft))]/90 text-white text-4xl md:text-6xl font-bold rounded-3xl shadow-2xl transform transition-all duration-300 hover:scale-105 hover:shadow-neon-pink animate-fade-in"
+              className="h-full bg-[hsl(var(--homepage-button-draft))] hover:bg-[hsl(var(--homepage-button-draft))]/90 text-[hsl(var(--homepage-text))] text-4xl md:text-6xl font-bold rounded-3xl shadow-2xl transform transition-all duration-300 hover:scale-105 hover:shadow-neon-pink animate-fade-in"
               style={{ animationDelay: '0.3s' }}
             >
               Draft
@@ -95,10 +96,12 @@ const Index = () => {
               onClick={() => navigate('/random')}
               onMouseEnter={() => setHoveredButton('random')}
               onMouseLeave={() => setHoveredButton(null)}
-              className="h-full bg-[hsl(var(--homepage-button-random))] hover:bg-[hsl(var(--homepage-button-random))]/90 text-white text-4xl md:text-6xl font-bold rounded-3xl shadow-2xl transform transition-all duration-300 hover:scale-105 animate-fade-in"
+              className="h-full bg-[hsl(var(--homepage-button-random))] hover:bg-[hsl(var(--homepage-button-random))]/90 text-[hsl(var(--homepage-text))] text-3xl md:text-5xl font-bold rounded-3xl shadow-2xl transform transition-all duration-300 hover:scale-105 animate-fade-in flex items-center justify-center"
               style={{ animationDelay: '0.4s' }}
             >
-              Random Deck
+              <span className="text-center leading-tight">
+                Random<br />Deck
+              </span>
             </Button>
           </div>
         </div>
@@ -107,6 +110,12 @@ const Index = () => {
         <div className="absolute bottom-0 left-0 right-0">
           <WaveDivider />
         </div>
+
+        {/* Animation Components */}
+        <TreeBranches isActive={hoveredButton === 'cards'} />
+        <FloatingBubbles isActive={hoveredButton === 'decks'} />
+        <FloatingDots isActive={hoveredButton === 'draft'} />
+        <FlyingBirds isActive={hoveredButton === 'random'} />
       </div>
     </>
   )

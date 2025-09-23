@@ -17,22 +17,21 @@ interface Bubble {
   speed: number
 }
 
-interface Dot {
+interface PaintSplash {
   id: number
   x: number
   y: number
   size: number
   opacity: number
-  delay: number
+  splashRadius: number
 }
 
-interface Bird {
+interface QuestionMark {
   id: number
   x: number
   y: number
-  speed: number
-  isPerched: boolean
-  perchTarget?: { x: number; y: number }
+  size: number
+  opacity: number
 }
 
 export const TreeBranches = ({ isActive }: { isActive: boolean }) => {
@@ -152,11 +151,10 @@ export const FloatingBubbles = ({ isActive }: { isActive: boolean }) => {
 
     if (isActive) {
       interval = setInterval(() => {
-        const shouldAddBubble = Math.random() < 0.5 // 50% chance per second (adjusted for 500ms interval)
-        
-        if (shouldAddBubble) {
+        // 5 bubbles per second - add multiple bubbles each interval
+        for (let i = 0; i < 1; i++) {
           const newBubble: Bubble = {
-            id: Date.now() + Math.random(),
+            id: Date.now() + Math.random() + i,
             x: Math.random() * window.innerWidth,
             y: window.innerHeight + 20,
             size: Math.random() * 30 + 10,
@@ -165,7 +163,7 @@ export const FloatingBubbles = ({ isActive }: { isActive: boolean }) => {
           
           setBubbles(prev => [...prev, newBubble])
         }
-      }, 500)
+      }, 200) // 200ms interval = 5 per second
     }
 
     return () => {
@@ -194,7 +192,7 @@ export const FloatingBubbles = ({ isActive }: { isActive: boolean }) => {
   }, [isActive])
 
   return (
-    <div className="fixed inset-0 pointer-events-none z-5">
+    <div className="fixed inset-0 pointer-events-none z-20">
       {bubbles.map(bubble => (
         <div
           key={bubble.id}
@@ -214,168 +212,204 @@ export const FloatingBubbles = ({ isActive }: { isActive: boolean }) => {
   )
 }
 
-export const FloatingDots = ({ isActive }: { isActive: boolean }) => {
-  const [dots, setDots] = useState<Dot[]>([])
+export const PaintSplashes = ({ isActive }: { isActive: boolean }) => {
+  const [splashes, setSplashes] = useState<PaintSplash[]>([])
 
   useEffect(() => {
+    let interval: NodeJS.Timeout
+
     if (isActive) {
-      const newDots: Dot[] = []
-      
-      for (let i = 0; i < 50; i++) {
-        newDots.push({
-          id: i,
-          x: Math.random() * window.innerWidth,
-          y: Math.random() * window.innerHeight,
-          size: Math.random() * 8 + 2,
+      interval = setInterval(() => {
+        // Get button positions to avoid spawning paint centers on them
+        const buttonMargin = 100 // Margin around buttons
+        const centerX = window.innerWidth / 2
+        const centerY = window.innerHeight * 0.65 // Roughly where buttons are
+        
+        let x, y
+        do {
+          x = Math.random() * window.innerWidth
+          y = Math.random() * window.innerHeight
+        } while (
+          // Avoid button area centers
+          (x > centerX - window.innerWidth/4 - buttonMargin && 
+           x < centerX + window.innerWidth/4 + buttonMargin &&
+           y > centerY - window.innerHeight/8 - buttonMargin &&
+           y < centerY + window.innerHeight/8 + buttonMargin)
+        )
+        
+        const newSplash: PaintSplash = {
+          id: Date.now() + Math.random(),
+          x,
+          y,
+          size: Math.random() * 20 + 15,
           opacity: 0,
-          delay: i * 20 // Stagger appearance
-        })
-      }
-      
-      setDots(newDots)
-      
-      // Animate dots appearing
-      const interval = setInterval(() => {
-        setDots(prev => prev.map(dot => ({
-          ...dot,
-          opacity: dot.delay <= 0 ? Math.min(dot.opacity + 0.1, 1) : (dot.delay -= 20, dot.opacity),
-        })))
-      }, 16)
-      
-      return () => clearInterval(interval)
-    } else {
-      // Animate dots disappearing in reverse order at double speed
-      const interval = setInterval(() => {
-        setDots(prev => {
-          const updated = prev.map((dot, index) => ({
-            ...dot,
-            opacity: Math.max(dot.opacity - 0.2, 0),
-            delay: (prev.length - index - 1) * 10 // Reverse delay
-          }))
-          
-          if (updated.every(dot => dot.opacity === 0)) {
-            clearInterval(interval)
-            return []
-          }
-          
-          return updated
-        })
-      }, 16)
-      
-      return () => clearInterval(interval)
+          splashRadius: Math.random() * 30 + 20
+        }
+        
+        setSplashes(prev => [...prev, newSplash])
+      }, 500) // 2 per second
+    }
+
+    return () => {
+      if (interval) clearInterval(interval)
+    }
+  }, [isActive])
+
+  // Animate splashes appearing and disappearing
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setSplashes(prev => prev
+        .map(splash => ({
+          ...splash,
+          opacity: isActive ? Math.min(splash.opacity + 0.1, 1) : Math.max(splash.opacity - 0.15, 0)
+        }))
+        .filter(splash => splash.opacity > 0)
+      )
+    }, 16)
+
+    return () => clearInterval(interval)
+  }, [isActive])
+
+  useEffect(() => {
+    if (!isActive) {
+      // Clear all splashes when not active
+      const timeout = setTimeout(() => {
+        setSplashes([])
+      }, 1000)
+      return () => clearTimeout(timeout)
     }
   }, [isActive])
 
   return (
     <div className="fixed inset-0 pointer-events-none z-5">
-      {dots.map(dot => (
-        <div
-          key={dot.id}
-          className="absolute rounded-full transition-opacity duration-100"
-          style={{
-            left: dot.x,
-            top: dot.y,
-            width: dot.size,
-            height: dot.size,
-            backgroundColor: 'hsl(var(--homepage-button-draft))',
-            opacity: dot.opacity,
-            transform: 'translate(-50%, -50%)'
-          }}
-        />
+      {splashes.map(splash => (
+        <div key={splash.id}>
+          {/* Main paint blob */}
+          <div
+            className="absolute rounded-full"
+            style={{
+              left: splash.x,
+              top: splash.y,
+              width: splash.size,
+              height: splash.size,
+              backgroundColor: 'hsl(var(--homepage-button-draft))',
+              opacity: splash.opacity,
+              transform: 'translate(-50%, -50%)'
+            }}
+          />
+          {/* Splash droplets */}
+          {Array.from({ length: 6 }).map((_, i) => {
+            const angle = (i * 60) * (Math.PI / 180)
+            const distance = splash.splashRadius
+            const dropletX = splash.x + Math.cos(angle) * distance
+            const dropletY = splash.y + Math.sin(angle) * distance
+            const dropletSize = Math.random() * 8 + 4
+            
+            return (
+              <div
+                key={i}
+                className="absolute rounded-full"
+                style={{
+                  left: dropletX,
+                  top: dropletY,
+                  width: dropletSize,
+                  height: dropletSize,
+                  backgroundColor: 'hsl(var(--homepage-button-draft))',
+                  opacity: splash.opacity * 0.7,
+                  transform: 'translate(-50%, -50%)'
+                }}
+              />
+            )
+          })}
+        </div>
       ))}
     </div>
   )
 }
 
-export const FlyingBirds = ({ isActive }: { isActive: boolean }) => {
-  const [birds, setBirds] = useState<Bird[]>([])
+export const FloatingQuestionMarks = ({ isActive }: { isActive: boolean }) => {
+  const [questionMarks, setQuestionMarks] = useState<QuestionMark[]>([])
 
   useEffect(() => {
+    let interval: NodeJS.Timeout
+
     if (isActive) {
-      const newBirds: Bird[] = []
-      
-      for (let i = 0; i < 15; i++) {
-        const isPerched = Math.random() < 0.3
-        newBirds.push({
-          id: i,
-          x: -50,
-          y: Math.random() * window.innerHeight,
-          speed: Math.random() * 3 + 2,
-          isPerched,
-          perchTarget: isPerched ? {
-            x: Math.random() * window.innerWidth,
-            y: Math.random() * (window.innerHeight * 0.6) + (window.innerHeight * 0.2)
-          } : undefined
-        })
-      }
-      
-      setBirds(newBirds)
-    } else {
-      // All birds fly off screen
-      setBirds(prev => prev.map(bird => ({
-        ...bird,
-        isPerched: false,
-        perchTarget: undefined,
-        speed: bird.speed * 2
-      })))
-      
-      // Clean up after they've flown off
-      setTimeout(() => {
-        setBirds([])
-      }, 3000)
+      interval = setInterval(() => {
+        // Get button positions to avoid spawning question mark centers on them
+        const buttonMargin = 80
+        const centerX = window.innerWidth / 2
+        const centerY = window.innerHeight * 0.65
+        
+        let x, y
+        do {
+          x = Math.random() * window.innerWidth
+          y = Math.random() * window.innerHeight
+        } while (
+          // Avoid button area centers but allow spillover
+          (x > centerX - window.innerWidth/4 - buttonMargin && 
+           x < centerX + window.innerWidth/4 + buttonMargin &&
+           y > centerY - window.innerHeight/8 - buttonMargin &&
+           y < centerY + window.innerHeight/8 + buttonMargin)
+        )
+        
+        const newQuestionMark: QuestionMark = {
+          id: Date.now() + Math.random(),
+          x,
+          y,
+          size: Math.random() * 20 + 15,
+          opacity: 0
+        }
+        
+        setQuestionMarks(prev => [...prev, newQuestionMark])
+      }, 300) // Roughly 3 per second
+    }
+
+    return () => {
+      if (interval) clearInterval(interval)
     }
   }, [isActive])
 
+  // Animate question marks appearing and disappearing
   useEffect(() => {
-    if (birds.length === 0) return
-
     const interval = setInterval(() => {
-      setBirds(prev => prev
-        .map(bird => {
-          if (bird.isPerched && bird.perchTarget) {
-            // Move towards perch target
-            const dx = bird.perchTarget.x - bird.x
-            const dy = bird.perchTarget.y - bird.y
-            const distance = Math.sqrt(dx * dx + dy * dy)
-            
-            if (distance < 5) {
-              return { ...bird, x: bird.perchTarget.x, y: bird.perchTarget.y }
-            }
-            
-            return {
-              ...bird,
-              x: bird.x + (dx / distance) * bird.speed,
-              y: bird.y + (dy / distance) * bird.speed
-            }
-          } else {
-            // Fly across screen
-            return {
-              ...bird,
-              x: bird.x + bird.speed
-            }
-          }
-        })
-        .filter(bird => bird.x < window.innerWidth + 100)
+      setQuestionMarks(prev => prev
+        .map(qm => ({
+          ...qm,
+          opacity: isActive ? Math.min(qm.opacity + 0.08, 1) : Math.max(qm.opacity - 0.12, 0)
+        }))
+        .filter(qm => qm.opacity > 0)
       )
     }, 16)
 
     return () => clearInterval(interval)
-  }, [birds])
+  }, [isActive])
+
+  useEffect(() => {
+    if (!isActive) {
+      // Clear all question marks when not active
+      const timeout = setTimeout(() => {
+        setQuestionMarks([])
+      }, 1000)
+      return () => clearTimeout(timeout)
+    }
+  }, [isActive])
 
   return (
     <div className="fixed inset-0 pointer-events-none z-5">
-      {birds.map(bird => (
+      {questionMarks.map(qm => (
         <div
-          key={bird.id}
-          className="absolute text-xl"
+          key={qm.id}
+          className="absolute font-bold select-none"
           style={{
-            left: bird.x,
-            top: bird.y,
+            left: qm.x,
+            top: qm.y,
+            fontSize: qm.size + 'px',
             color: 'hsl(var(--homepage-button-random))',
+            opacity: qm.opacity,
             transform: 'translate(-50%, -50%)'
           }}
         >
-          🐦
+          ?
         </div>
       ))}
     </div>

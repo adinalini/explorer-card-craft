@@ -20,7 +20,13 @@ const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <HelmetProvider>
-      <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
+      <ThemeProvider 
+        attribute="class" 
+        defaultTheme="dark" 
+        enableSystem={false} 
+        storageKey="project-o-zone-theme"
+        disableTransitionOnChange={false}
+      >
         <TooltipProvider>
           <Toaster />
           <Sonner />

@@ -96,11 +96,12 @@ const Index = () => {
               onClick={() => navigate('/random')}
               onMouseEnter={() => setHoveredButton('random')}
               onMouseLeave={() => setHoveredButton(null)}
-              className="h-full bg-[hsl(var(--homepage-button-random))] hover:bg-[hsl(var(--homepage-button-random))]/90 text-[hsl(var(--homepage-text))] text-3xl md:text-5xl font-bold rounded-3xl shadow-2xl transform transition-all duration-300 hover:scale-105 animate-fade-in flex items-center justify-center"
+              className="h-full bg-[hsl(var(--homepage-button-random))] hover:bg-[hsl(var(--homepage-button-random))]/90 text-[hsl(var(--homepage-text))] text-4xl md:text-6xl font-bold rounded-3xl shadow-2xl transform transition-all duration-300 hover:scale-105 animate-fade-in flex items-center justify-center"
               style={{ animationDelay: '0.4s' }}
             >
               <span className="text-center leading-tight">
-                Random<br />Deck
+                <span className="hidden sm:inline">Random Deck</span>
+                <span className="sm:hidden">Random<br />Deck</span>
               </span>
             </Button>
           </div>

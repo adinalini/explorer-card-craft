@@ -5,7 +5,7 @@ import { WaveDivider } from "@/components/ui/wave-divider"
 import { ThemeToggle } from "@/components/ui/theme-toggle"
 import { useNavigate } from "react-router-dom"
 import { SEOHead } from "@/components/SEOHead"
-import { TreeBranches, FloatingBubbles, FloatingBubblesDown, FloatingQuestionMarks } from "@/components/ui/homepage-animations"
+import { FloatingCards, FloatingBubbles, FloatingBubblesDown, FloatingQuestionMarksHorizontal } from "@/components/ui/homepage-animations"
 
 const Index = () => {
   const navigate = useNavigate()
@@ -113,10 +113,10 @@ const Index = () => {
         </div>
 
         {/* Animation Components */}
-        <TreeBranches isActive={hoveredButton === 'cards'} />
+        <FloatingCards isActive={hoveredButton === 'cards'} />
         <FloatingBubbles isActive={hoveredButton === 'decks'} />
         <FloatingBubblesDown isActive={hoveredButton === 'draft'} />
-        <FloatingQuestionMarks isActive={hoveredButton === 'random'} />
+        <FloatingQuestionMarksHorizontal isActive={hoveredButton === 'random'} />
       </div>
     </>
   )

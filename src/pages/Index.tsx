@@ -19,8 +19,9 @@ const Index = () => {
 
     const handleVideoEnd = () => {
       if (!isReversing) {
-        // Start reversing
+        // Start reversing - set to end and play backwards
         setIsReversing(true)
+        video.currentTime = video.duration
         video.playbackRate = -0.8
         video.play()
       } else {
@@ -32,10 +33,22 @@ const Index = () => {
       }
     }
 
+    const handleTimeUpdate = () => {
+      if (isReversing && video.currentTime <= 0) {
+        // When reverse playback reaches the beginning, start normal playback
+        setIsReversing(false)
+        video.currentTime = 0
+        video.playbackRate = 0.8
+        video.play()
+      }
+    }
+
     video.addEventListener('ended', handleVideoEnd)
+    video.addEventListener('timeupdate', handleTimeUpdate)
     
     return () => {
       video.removeEventListener('ended', handleVideoEnd)
+      video.removeEventListener('timeupdate', handleTimeUpdate)
     }
   }, [isReversing])
 

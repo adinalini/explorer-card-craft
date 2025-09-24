@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom"
 import { SEOHead } from "@/components/SEOHead"
 import { FloatingCards, FloatingBubbles, FloatingBubblesDown, FloatingQuestionMarksHorizontal } from "@/components/ui/homepage-animations"
 import whiteRabbit from "@/assets/white_rabbit.webp"
+import logoIcon from "@/assets/ProjectOLogoIcon_512x512.png"
 
 const Index = () => {
   const navigate = useNavigate()
@@ -51,7 +52,7 @@ const Index = () => {
               }
             }}
           >
-            <source src="/animated_card_reel.mp4" type="video/mp4" />
+            <source src="/animated_card_reel_reverse.mp4" type="video/mp4" />
             Your browser does not support the video tag.
           </video>
         </div>
@@ -67,11 +68,54 @@ const Index = () => {
           <ThemeToggle className="text-[hsl(var(--homepage-text))] hover:bg-white/10 dark:hover:bg-black/20" />
         </div>
 
-        {/* Top - Project O Zone Title */}
+        {/* Top - Project O Zone Title with Center Logo */}
         <div className="relative z-10 h-[15vh] sm:h-[20vh] flex flex-col items-center justify-center px-4">
-          <h1 className={`text-3xl sm:text-6xl md:text-8xl font-bold transition-colors duration-500 drop-shadow-2xl ${getTextColor()}`}>
-            Project O Zone
-          </h1>
+          <div className="flex items-center gap-2 sm:gap-4">
+            <h1 className={`text-2xl sm:text-4xl md:text-6xl lg:text-7xl font-bold transition-colors duration-500 drop-shadow-2xl bg-gradient-to-r ${
+              hoveredButton 
+                ? getTextColor().replace('text-[hsl(var(--homepage-', 'from-[hsl(var(--homepage-').replace('))]', '))] to-[hsl(var(--homepage-' + hoveredButton + '))]')
+                : 'from-[hsl(var(--homepage-title-gradient-light))] to-[hsl(var(--homepage-title-gradient-dark))] dark:from-[hsl(var(--homepage-title-gradient-dark))] dark:to-[hsl(var(--homepage-title-gradient-light))]'
+            } bg-clip-text text-transparent`}>
+              Project
+            </h1>
+            
+            {/* Center O Logo with matching gradient */}
+            <div className="relative">
+              <img 
+                src={logoIcon} 
+                alt="Project O Logo" 
+                className="w-8 h-8 sm:w-12 sm:h-12 md:w-16 md:h-16 lg:w-20 lg:h-20 object-contain"
+                style={{
+                  filter: `
+                    ${hoveredButton 
+                      ? `hue-rotate(${hoveredButton === 'cards' ? '180deg' : hoveredButton === 'decks' ? '300deg' : hoveredButton === 'draft' ? '45deg' : '120deg'})` 
+                      : ''
+                    }
+                    drop-shadow(0 0 10px rgba(255, 255, 255, 0.5))
+                  `
+                }}
+              />
+              {/* Gradient overlay mask for theme matching */}
+              <div 
+                className="absolute inset-0 opacity-75 mix-blend-multiply"
+                style={{
+                  background: hoveredButton 
+                    ? `hsl(var(--homepage-button-${hoveredButton}))`
+                    : 'linear-gradient(135deg, hsl(258, 42%, 22%) 0%, hsl(339, 86%, 44%) 100%)',
+                  WebkitMask: `url(${logoIcon}) center/contain no-repeat`,
+                  mask: `url(${logoIcon}) center/contain no-repeat`
+                }}
+              />
+            </div>
+            
+            <h1 className={`text-2xl sm:text-4xl md:text-6xl lg:text-7xl font-bold transition-colors duration-500 drop-shadow-2xl bg-gradient-to-r ${
+              hoveredButton 
+                ? getTextColor().replace('text-[hsl(var(--homepage-', 'from-[hsl(var(--homepage-').replace('))]', '))] to-[hsl(var(--homepage-' + hoveredButton + '))]')
+                : 'from-[hsl(var(--homepage-title-gradient-light))] to-[hsl(var(--homepage-title-gradient-dark))] dark:from-[hsl(var(--homepage-title-gradient-dark))] dark:to-[hsl(var(--homepage-title-gradient-light))]'
+            } bg-clip-text text-transparent`}>
+              Zone
+            </h1>
+          </div>
         </div>
 
         {/* Main Content - Rabbit, Buttons, and Video */}
@@ -92,7 +136,9 @@ const Index = () => {
               {/* Cards Button */}
               <Button 
                 onClick={() => navigate('/cards')}
-                className="h-12 sm:h-14 md:h-16 bg-slate-900/90 border border-cyan-400/50 text-cyan-400 text-sm sm:text-base md:text-lg font-bold rounded-lg shadow-lg backdrop-blur-sm animate-fade-in"
+                onMouseEnter={() => setHoveredButton('cards')}
+                onMouseLeave={() => setHoveredButton(null)}
+                className="h-12 sm:h-14 md:h-16 bg-slate-900/90 border border-cyan-400/50 text-cyan-400 text-sm sm:text-base md:text-lg font-bold rounded-lg shadow-lg backdrop-blur-sm animate-fade-in hover:bg-cyan-400/10 hover:border-cyan-400 hover:shadow-cyan-400/50 hover:shadow-lg transition-all duration-300"
                 style={{ animationDelay: '0.3s' }}
               >
                 Cards
@@ -101,7 +147,9 @@ const Index = () => {
               {/* Decks Button */}
               <Button 
                 onClick={() => navigate('/decks')}
-                className="h-12 sm:h-14 md:h-16 bg-slate-900/90 border border-cyan-400/50 text-cyan-400 text-sm sm:text-base md:text-lg font-bold rounded-lg shadow-lg backdrop-blur-sm animate-fade-in"
+                onMouseEnter={() => setHoveredButton('decks')}
+                onMouseLeave={() => setHoveredButton(null)}
+                className="h-12 sm:h-14 md:h-16 bg-slate-900/90 border border-purple-400/50 text-purple-400 text-sm sm:text-base md:text-lg font-bold rounded-lg shadow-lg backdrop-blur-sm animate-fade-in hover:bg-purple-400/10 hover:border-purple-400 hover:shadow-purple-400/50 hover:shadow-lg transition-all duration-300"
                 style={{ animationDelay: '0.4s' }}
               >
                 Decks
@@ -110,7 +158,9 @@ const Index = () => {
               {/* Draft Button */}
               <Button 
                 onClick={() => navigate('/draft')}
-                className="h-12 sm:h-14 md:h-16 bg-slate-900/90 border border-cyan-400/50 text-cyan-400 text-sm sm:text-base md:text-lg font-bold rounded-lg shadow-lg backdrop-blur-sm animate-fade-in"
+                onMouseEnter={() => setHoveredButton('draft')}
+                onMouseLeave={() => setHoveredButton(null)}
+                className="h-12 sm:h-14 md:h-16 bg-slate-900/90 border border-orange-400/50 text-orange-400 text-sm sm:text-base md:text-lg font-bold rounded-lg shadow-lg backdrop-blur-sm animate-fade-in hover:bg-orange-400/10 hover:border-orange-400 hover:shadow-orange-400/50 hover:shadow-lg transition-all duration-300"
                 style={{ animationDelay: '0.5s' }}
               >
                 Draft
@@ -119,7 +169,9 @@ const Index = () => {
               {/* Random Deck Button */}
               <Button 
                 onClick={() => navigate('/random')}
-                className="h-12 sm:h-14 md:h-16 bg-slate-900/90 border border-cyan-400/50 text-cyan-400 text-sm sm:text-base md:text-lg font-bold rounded-lg shadow-lg backdrop-blur-sm animate-fade-in flex items-center justify-center"
+                onMouseEnter={() => setHoveredButton('random')}
+                onMouseLeave={() => setHoveredButton(null)}
+                className="h-12 sm:h-14 md:h-16 bg-slate-900/90 border border-green-400/50 text-green-400 text-sm sm:text-base md:text-lg font-bold rounded-lg shadow-lg backdrop-blur-sm animate-fade-in hover:bg-green-400/10 hover:border-green-400 hover:shadow-green-400/50 hover:shadow-lg flex items-center justify-center transition-all duration-300"
                 style={{ animationDelay: '0.6s' }}
               >
                 <span className="text-center leading-tight text-xs sm:text-sm md:text-base">
@@ -131,6 +183,19 @@ const Index = () => {
 
         </div>
 
+        {/* Floating Animations */}
+        <FloatingCards isActive={true} />
+        <FloatingBubbles isActive={true} />
+        <FloatingBubblesDown isActive={true} />
+        <FloatingQuestionMarksHorizontal isActive={true} />
+
+        {/* Wave Divider at bottom */}
+        <div className="absolute bottom-0 left-0 w-full z-5">
+          <WaveDivider 
+            className="h-16 sm:h-24 opacity-60" 
+            inverted={false}
+          />
+        </div>
 
       </div>
     </>

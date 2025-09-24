@@ -19,6 +19,10 @@ All colors MUST be HSL.
     --homepage-background-end: 260 15% 80%;
     --homepage-text: 240 10% 3.9%;
     
+    /* Homepage title gradients - based on UI style guide */
+    --homepage-title-gradient-light: linear-gradient(135deg, hsl(258, 42%, 22%), hsl(339, 86%, 44%)); /* Purple to Pink */
+    --homepage-title-gradient-dark: linear-gradient(135deg, hsl(352, 100%, 46%), hsl(339, 94%, 40%)); /* Red gradient */
+    
     /* Draft page colors - original background colors */
     --draft-background-start: 240 10% 85%;
     --draft-background-end: 260 15% 80%;
@@ -111,6 +115,10 @@ All colors MUST be HSL.
     --homepage-background-start: 260 90% 10%;
     --homepage-background-end: 290 95% 5%;
     --homepage-text: 180 100% 95%;
+    
+    /* Homepage title gradients - based on UI style guide (swapped for dark mode) */
+    --homepage-title-gradient-light: linear-gradient(135deg, hsl(352, 100%, 46%), hsl(339, 94%, 40%)); /* Red gradient */
+    --homepage-title-gradient-dark: linear-gradient(135deg, hsl(258, 42%, 22%), hsl(339, 86%, 44%)); /* Purple to Pink */
     
     /* Draft page colors - original dark background colors */
     --draft-background-start: 260 90% 10%;

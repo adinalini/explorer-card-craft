@@ -97,37 +97,41 @@ const Index = () => {
             {/* Center - Buttons Grid */}
             <div className="flex items-center justify-center z-10 lg:ml-48">
               <div className="grid grid-cols-2 gap-3 sm:gap-4 w-72 sm:w-80 md:w-96">
-                {/* Cards Button */}
+                {/* Cards Button - Neon Green */}
                 <Button 
                   onClick={() => navigate('/cards')}
-                  className="btn-project-o h-14 sm:h-16 md:h-18 text-sm sm:text-base md:text-lg animate-fade-in"
+                  variant="neonGreen"
+                  className="h-14 sm:h-16 md:h-18 text-sm sm:text-base md:text-lg animate-fade-in"
                   style={{ animationDelay: '0.3s' }}
                 >
                   <span className="text-montserrat-black">CARDS</span>
                 </Button>
 
-                {/* Decks Button */}
+                {/* Decks Button - Epic Purple */}
                 <Button 
                   onClick={() => navigate('/decks')}
-                  className="btn-project-o h-14 sm:h-16 md:h-18 text-sm sm:text-base md:text-lg animate-fade-in"
+                  variant="epicPurple"
+                  className="h-14 sm:h-16 md:h-18 text-sm sm:text-base md:text-lg animate-fade-in"
                   style={{ animationDelay: '0.4s' }}
                 >
                   <span className="text-montserrat-black">DECKS</span>
                 </Button>
 
-                {/* Draft Button */}
+                {/* Draft Button - Rare Blue */}
                 <Button 
                   onClick={() => navigate('/draft')}
-                  className="btn-project-o h-14 sm:h-16 md:h-18 text-sm sm:text-base md:text-lg animate-fade-in"
+                  variant="rareBlue"
+                  className="h-14 sm:h-16 md:h-18 text-sm sm:text-base md:text-lg animate-fade-in"
                   style={{ animationDelay: '0.5s' }}
                 >
                   <span className="text-montserrat-black">DRAFT</span>
                 </Button>
 
-                {/* Random Deck Button */}
+                {/* Random Deck Button - Legendary Orange */}
                 <Button 
                   onClick={() => navigate('/random')}
-                  className="btn-project-o h-14 sm:h-16 md:h-18 text-xs sm:text-sm md:text-base animate-fade-in flex items-center justify-center"
+                  variant="legendaryOrange"
+                  className="h-14 sm:h-16 md:h-18 text-xs sm:text-sm md:text-base animate-fade-in flex items-center justify-center"
                   style={{ animationDelay: '0.6s' }}
                 >
                   <span className="text-montserrat-black text-center leading-tight">

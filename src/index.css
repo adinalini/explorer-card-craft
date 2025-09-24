@@ -219,6 +219,67 @@ All colors MUST be HSL.
     background: hsl(var(--button-active));
     transform: translateY(0);
   }
+
+  /* Project O Button Variants - Using Full Color Palette */
+  .btn-neon-green {
+    @apply text-montserrat-black;
+    background: hsl(var(--project-o-neon-green));
+    color: hsl(var(--project-o-darkest-purple));
+    border: 2px solid hsl(var(--project-o-bright-green));
+    border-radius: var(--radius);
+    transition: all 0.2s ease;
+  }
+  
+  .btn-neon-green:hover {
+    background: hsl(var(--project-o-bright-green));
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px hsl(var(--project-o-neon-green) / 0.4);
+  }
+
+  .btn-epic-purple {
+    @apply text-montserrat-black;
+    background: hsl(var(--project-o-purple-neon));
+    color: hsl(var(--project-o-darkest-purple));
+    border: 2px solid hsl(var(--project-o-bright-purple));
+    border-radius: var(--radius);
+    transition: all 0.2s ease;
+  }
+  
+  .btn-epic-purple:hover {
+    background: hsl(var(--project-o-bright-purple));
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px hsl(var(--project-o-purple-neon) / 0.4);
+  }
+
+  .btn-legendary-orange {
+    @apply text-montserrat-black;
+    background: hsl(var(--project-o-orange));
+    color: hsl(var(--project-o-darkest-purple));
+    border: 2px solid hsl(var(--project-o-hot-pink));
+    border-radius: var(--radius);
+    transition: all 0.2s ease;
+  }
+  
+  .btn-legendary-orange:hover {
+    background: hsl(var(--project-o-hot-pink));
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px hsl(var(--project-o-orange) / 0.4);
+  }
+
+  .btn-rare-blue {
+    @apply text-montserrat-black;
+    background: hsl(var(--project-o-light-blue));
+    color: hsl(var(--project-o-darkest-purple));
+    border: 2px solid hsl(var(--project-o-cyan));
+    border-radius: var(--radius);
+    transition: all 0.2s ease;
+  }
+  
+  .btn-rare-blue:hover {
+    background: hsl(var(--project-o-cyan));
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px hsl(var(--project-o-light-blue) / 0.4);
+  }
   
   /* Project O Style Guide - Shapes */
   .shape-irregular {

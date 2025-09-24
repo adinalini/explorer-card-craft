@@ -182,24 +182,24 @@ const Index = () => {
           </div>
         </div>
 
-        {/* Desktop Layout - Pooh, Buttons, Rabbit */}
+        {/* Desktop Layout - Rabbit Left, Red Character Right, Buttons Center */}
         <div className="hidden md:block relative z-10 h-[82vh] sm:h-[78vh]">
-          {/* Left Side - Pooh Bear (hidden on lg and smaller when space is tight) */}
+          {/* Left Side - Rabbit (hidden on lg and smaller when space is tight) */}
           <div className="absolute bottom-0 left-0 z-5 hidden xl:block">
             <img 
-              src="/lovable-uploads/1e21299a-3039-497b-8f8f-c31410dea36d.png" 
-              alt="Pooh Bear Character" 
+              src={whiteRabbit} 
+              alt="White Rabbit Character" 
               className="w-[459px] object-contain animate-fade-in transform -translate-x-24"
               style={{ animationDelay: '0.2s' }}
             />
           </div>
 
-          {/* Right Side - Rabbit (hidden on sm and smaller when buttons need space) */}
-          <div className="absolute bottom-0 right-0 z-5 hidden lg:block">
+          {/* Right Side - Red Character (hidden on lg and smaller when space is tight) */}
+          <div className="absolute bottom-0 right-0 z-5 hidden xl:block">
             <img 
-              src={whiteRabbit} 
-              alt="White Rabbit Character" 
-              className="w-[459px] sm:w-[536px] md:w-[612px] lg:w-[689px] object-contain animate-fade-in transform translate-x-24"
+              src="/lovable-uploads/eba0e4ff-4de0-48d3-89b7-2c962d6b6c27.png" 
+              alt="Red Character" 
+              className="w-[459px] object-contain animate-fade-in transform translate-x-24"
               style={{ animationDelay: '0.2s' }}
             />
           </div>
@@ -221,10 +221,10 @@ const Index = () => {
                 className="flex flex-col items-center justify-center p-4 sm:p-6 md:p-8 bg-black/20 backdrop-blur-sm cursor-pointer hover:bg-black/30 transition-all duration-300 animate-fade-in"
                 style={{ animationDelay: '0.3s' }}
               >
-                <div className="text-lg sm:text-xl md:text-2xl font-bold text-slate-900 dark:text-white mb-2">
+                <div className="text-lg sm:text-xl md:text-2xl font-bold text-white mb-2">
                   Cards
                 </div>
-                <div className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 text-center leading-tight">
+                <div className="text-xs sm:text-sm text-slate-300 text-center leading-tight">
                   View all the cards and their variants & blueprints.
                 </div>
               </div>
@@ -235,10 +235,10 @@ const Index = () => {
                 className="flex flex-col items-center justify-center p-4 sm:p-6 md:p-8 bg-black/20 backdrop-blur-sm cursor-pointer hover:bg-black/30 transition-all duration-300 animate-fade-in"
                 style={{ animationDelay: '0.4s' }}
               >
-                <div className="text-lg sm:text-xl md:text-2xl font-bold text-slate-900 dark:text-white mb-2">
+                <div className="text-lg sm:text-xl md:text-2xl font-bold text-white mb-2">
                   Decks
                 </div>
-                <div className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 text-center leading-tight">
+                <div className="text-xs sm:text-sm text-slate-300 text-center leading-tight">
                   Browse through featured & community decks.
                 </div>
               </div>
@@ -249,10 +249,10 @@ const Index = () => {
                 className="flex flex-col items-center justify-center p-4 sm:p-6 md:p-8 bg-black/20 backdrop-blur-sm cursor-pointer hover:bg-black/30 transition-all duration-300 animate-fade-in"
                 style={{ animationDelay: '0.5s' }}
               >
-                <div className="text-lg sm:text-xl md:text-2xl font-bold text-slate-900 dark:text-white mb-2">
+                <div className="text-lg sm:text-xl md:text-2xl font-bold text-white mb-2">
                   Draft
                 </div>
-                <div className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 text-center leading-tight">
+                <div className="text-xs sm:text-sm text-slate-300 text-center leading-tight">
                   Play a Double/Triple Draft with someone.
                 </div>
               </div>
@@ -263,10 +263,10 @@ const Index = () => {
                 className="flex flex-col items-center justify-center p-4 sm:p-6 md:p-8 bg-black/20 backdrop-blur-sm cursor-pointer hover:bg-black/30 transition-all duration-300 animate-fade-in"
                 style={{ animationDelay: '0.6s' }}
               >
-                <div className="text-lg sm:text-xl md:text-2xl font-bold text-slate-900 dark:text-white mb-2">
+                <div className="text-lg sm:text-xl md:text-2xl font-bold text-white mb-2">
                   Random Deck
                 </div>
-                <div className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 text-center leading-tight">
+                <div className="text-xs sm:text-sm text-slate-300 text-center leading-tight">
                   Feeling adventurous? Play a random deck.
                 </div>
               </div>
@@ -293,10 +293,10 @@ const Index = () => {
                 className="flex flex-col items-center justify-center p-4 bg-black/20 backdrop-blur-sm cursor-pointer hover:bg-black/30 transition-all duration-300 animate-fade-in"
                 style={{ animationDelay: '0.3s' }}
               >
-                <div className="text-lg font-bold text-slate-900 dark:text-white mb-2">
+                <div className="text-lg font-bold text-white mb-2">
                   Cards
                 </div>
-                <div className="text-xs text-slate-700 dark:text-slate-300 text-center leading-tight">
+                <div className="text-xs text-slate-300 text-center leading-tight">
                   View all the cards and their variants & blueprints.
                 </div>
               </div>
@@ -307,10 +307,10 @@ const Index = () => {
                 className="flex flex-col items-center justify-center p-4 bg-black/20 backdrop-blur-sm cursor-pointer hover:bg-black/30 transition-all duration-300 animate-fade-in"
                 style={{ animationDelay: '0.4s' }}
               >
-                <div className="text-lg font-bold text-slate-900 dark:text-white mb-2">
+                <div className="text-lg font-bold text-white mb-2">
                   Decks
                 </div>
-                <div className="text-xs text-slate-700 dark:text-slate-300 text-center leading-tight">
+                <div className="text-xs text-slate-300 text-center leading-tight">
                   Browse through featured & community decks.
                 </div>
               </div>
@@ -321,10 +321,10 @@ const Index = () => {
                 className="flex flex-col items-center justify-center p-4 bg-black/20 backdrop-blur-sm cursor-pointer hover:bg-black/30 transition-all duration-300 animate-fade-in"
                 style={{ animationDelay: '0.5s' }}
               >
-                <div className="text-lg font-bold text-slate-900 dark:text-white mb-2">
+                <div className="text-lg font-bold text-white mb-2">
                   Draft
                 </div>
-                <div className="text-xs text-slate-700 dark:text-slate-300 text-center leading-tight">
+                <div className="text-xs text-slate-300 text-center leading-tight">
                   Play a Double/Triple Draft with someone.
                 </div>
               </div>
@@ -335,10 +335,10 @@ const Index = () => {
                 className="flex flex-col items-center justify-center p-4 bg-black/20 backdrop-blur-sm cursor-pointer hover:bg-black/30 transition-all duration-300 animate-fade-in"
                 style={{ animationDelay: '0.6s' }}
               >
-                <div className="text-lg font-bold text-slate-900 dark:text-white mb-2">
+                <div className="text-lg font-bold text-white mb-2">
                   Random Deck
                 </div>
-                <div className="text-xs text-slate-700 dark:text-slate-300 text-center leading-tight">
+                <div className="text-xs text-slate-300 text-center leading-tight">
                   Feeling adventurous? Play a random deck.
                 </div>
               </div>

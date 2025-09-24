@@ -219,12 +219,12 @@ const Index = () => {
           </div>
         </div>
 
-        {/* Skull and Arrows Image - Below title, above buttons */}
-        <div className="relative z-10 flex justify-center pb-8">
+        {/* Skull and Arrows Image - Positioned absolutely to not affect button layout */}
+        <div className="absolute top-[18vh] sm:top-[22vh] left-1/2 -translate-x-1/2 z-5">
           <img 
             src="/lovable-uploads/skull-arrows.png" 
             alt="Skull with crossed arrows decoration" 
-            className="w-24 h-24 sm:w-32 sm:h-32 md:w-40 md:h-40 object-contain animate-fade-in"
+            className="w-14 h-14 sm:w-19 sm:h-19 md:w-24 md:h-24 object-contain animate-fade-in"
             style={{ animationDelay: '0.1s' }}
           />
         </div>

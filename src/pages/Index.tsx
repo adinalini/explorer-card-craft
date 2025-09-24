@@ -213,7 +213,7 @@ const Index = () => {
               }}
               style={{ position: 'absolute' }}
             >
-              <source src="/animated%20card%20reel%20reverse.mp4" type="video/mp4" />
+              <source src="/animated_card_reel_reverse.mp4" type="video/mp4" />
               Your browser does not support the video tag.
             </video>
           )}

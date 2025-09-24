@@ -219,8 +219,27 @@ const Index = () => {
           </div>
         </div>
 
+        {/* Skull and Arrows Image - Below title, above buttons */}
+        <div className="relative z-10 flex justify-center pb-8">
+          <img 
+            src="/lovable-uploads/skull-arrows.png" 
+            alt="Skull with crossed arrows decoration" 
+            className="w-24 h-24 sm:w-32 sm:h-32 md:w-40 md:h-40 object-contain animate-fade-in"
+            style={{ animationDelay: '0.1s' }}
+          />
+        </div>
+
         {/* Desktop Layout - Rabbit Left, Red Character Right, Buttons Center */}
         <div className="hidden md:block relative z-10 h-[82vh] sm:h-[78vh]">
+          {/* Sketch Pattern - Left side, middle height */}
+          <div className="absolute left-4 top-1/2 -translate-y-1/2 z-5 hidden xl:block">
+            <img 
+              src="/lovable-uploads/sketch-pattern.png" 
+              alt="Sketch pattern decoration" 
+              className="w-32 h-32 lg:w-40 lg:h-40 object-contain animate-fade-in opacity-60"
+              style={{ animationDelay: '0.4s' }}
+            />
+          </div>
           {/* Left Side - Rabbit (hidden on xl and smaller when space is tight) */}
           <div className="absolute bottom-0 left-0 z-5 hidden 2xl:block">
             <img 

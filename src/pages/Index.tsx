@@ -56,8 +56,8 @@ const Index = () => {
           </h1>
         </div>
 
-        {/* Main Content - Rabbit and Right Side Content */}
-        <div className="relative z-10 h-[85vh] sm:h-[80vh] flex items-start justify-between px-8 sm:px-16">
+        {/* Main Content - Rabbit, Buttons, and Video */}
+        <div className="relative z-10 h-[85vh] sm:h-[80vh] flex items-center justify-center px-4 sm:px-8">
           {/* Left Side - Rabbit */}
           <div className="absolute bottom-0 left-0 z-5">
             <img 
@@ -68,14 +68,13 @@ const Index = () => {
             />
           </div>
 
-          {/* Right Side - Buttons and Video */}
-          <div className="flex flex-col items-end justify-start ml-auto pt-8 space-y-8">
-            {/* Buttons Grid */}
-            <div className="grid grid-cols-2 gap-3 w-80">
+          {/* Center - Buttons */}
+          <div className="flex items-center justify-center z-10 ml-24 sm:ml-32 md:ml-40 lg:ml-48">
+            <div className="grid grid-cols-2 gap-2 sm:gap-3 w-64 sm:w-72 md:w-80">
               {/* Cards Button */}
               <Button 
                 onClick={() => navigate('/cards')}
-                className="h-16 bg-slate-900/90 border border-cyan-400/50 text-cyan-400 text-lg font-bold rounded-lg shadow-lg backdrop-blur-sm animate-fade-in"
+                className="h-12 sm:h-14 md:h-16 bg-slate-900/90 border border-cyan-400/50 text-cyan-400 text-sm sm:text-base md:text-lg font-bold rounded-lg shadow-lg backdrop-blur-sm animate-fade-in"
                 style={{ animationDelay: '0.3s' }}
               >
                 Cards
@@ -84,7 +83,7 @@ const Index = () => {
               {/* Decks Button */}
               <Button 
                 onClick={() => navigate('/decks')}
-                className="h-16 bg-slate-900/90 border border-cyan-400/50 text-cyan-400 text-lg font-bold rounded-lg shadow-lg backdrop-blur-sm animate-fade-in"
+                className="h-12 sm:h-14 md:h-16 bg-slate-900/90 border border-cyan-400/50 text-cyan-400 text-sm sm:text-base md:text-lg font-bold rounded-lg shadow-lg backdrop-blur-sm animate-fade-in"
                 style={{ animationDelay: '0.4s' }}
               >
                 Decks
@@ -93,7 +92,7 @@ const Index = () => {
               {/* Draft Button */}
               <Button 
                 onClick={() => navigate('/draft')}
-                className="h-16 bg-slate-900/90 border border-cyan-400/50 text-cyan-400 text-lg font-bold rounded-lg shadow-lg backdrop-blur-sm animate-fade-in"
+                className="h-12 sm:h-14 md:h-16 bg-slate-900/90 border border-cyan-400/50 text-cyan-400 text-sm sm:text-base md:text-lg font-bold rounded-lg shadow-lg backdrop-blur-sm animate-fade-in"
                 style={{ animationDelay: '0.5s' }}
               >
                 Draft
@@ -102,17 +101,19 @@ const Index = () => {
               {/* Random Deck Button */}
               <Button 
                 onClick={() => navigate('/random')}
-                className="h-16 bg-slate-900/90 border border-cyan-400/50 text-cyan-400 text-lg font-bold rounded-lg shadow-lg backdrop-blur-sm animate-fade-in flex items-center justify-center"
+                className="h-12 sm:h-14 md:h-16 bg-slate-900/90 border border-cyan-400/50 text-cyan-400 text-sm sm:text-base md:text-lg font-bold rounded-lg shadow-lg backdrop-blur-sm animate-fade-in flex items-center justify-center"
                 style={{ animationDelay: '0.6s' }}
               >
-                <span className="text-center leading-tight">
+                <span className="text-center leading-tight text-xs sm:text-sm md:text-base">
                   Random<br />Deck
                 </span>
               </Button>
             </div>
+          </div>
 
-            {/* Video */}
-            <div className="w-80 h-48 rounded-lg overflow-hidden shadow-lg border border-cyan-400/30 animate-fade-in" style={{ animationDelay: '0.7s' }}>
+          {/* Bottom Right - Video */}
+          <div className="absolute bottom-2 sm:bottom-4 right-2 sm:right-4 z-10">
+            <div className="w-48 sm:w-64 md:w-80 h-32 sm:h-48 md:h-64 rounded-lg overflow-hidden shadow-lg border border-cyan-400/30 animate-fade-in" style={{ animationDelay: '0.7s' }}>
               <video 
                 autoPlay 
                 loop 

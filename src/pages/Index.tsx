@@ -13,6 +13,7 @@ const Index = () => {
   // Force rebuild to clear videoRef cache issue
   const navigate = useNavigate()
   const [currentVideo, setCurrentVideo] = useState<'original' | 'reverse'>('original')
+  const [videosLoaded, setVideosLoaded] = useState(false)
   const originalVideoRef = useRef<HTMLVideoElement>(null)
   const reverseVideoRef = useRef<HTMLVideoElement>(null)
 
@@ -85,6 +86,16 @@ const Index = () => {
       <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-[hsl(260_90%_10%)] to-[hsl(290_95%_5%)]">
         {/* Background Videos */}
         <div className="absolute inset-0 z-0">
+          {/* Fallback Background Image */}
+          <div 
+            className={`absolute inset-0 w-full h-full bg-cover bg-center bg-no-repeat transition-opacity duration-300 ${
+              videosLoaded ? 'opacity-0' : 'opacity-40'
+            }`}
+            style={{
+              backgroundImage: 'url(/lovable-uploads/3bc78144-de54-443f-8b86-d8f5835966a1.png)'
+            }}
+          />
+          
           {/* Original Video */}
           <video 
             ref={originalVideoRef}
@@ -101,6 +112,7 @@ const Index = () => {
             onLoadedData={(e) => {
               const video = e.currentTarget;
               video.playbackRate = 0.8;
+              setVideosLoaded(true);
             }}
             style={{ position: 'absolute' }}
           >
@@ -189,7 +201,7 @@ const Index = () => {
             <img 
               src={whiteRabbit} 
               alt="White Rabbit Character" 
-              className="w-[551px] object-contain animate-fade-in transform -translate-x-24"
+              className="w-[634px] object-contain animate-fade-in transform -translate-x-24"
               style={{ animationDelay: '0.2s' }}
             />
           </div>
@@ -212,7 +224,7 @@ const Index = () => {
             <img 
               src={whiteRabbit} 
               alt="White Rabbit Character" 
-              className="w-[551px] object-contain animate-fade-in transform -translate-x-12"
+              className="w-[634px] object-contain animate-fade-in transform -translate-x-12"
               style={{ animationDelay: '0.2s' }}
             />
           </div>
@@ -501,7 +513,7 @@ const Index = () => {
             <img 
               src={whiteRabbit} 
               alt="White Rabbit Character" 
-              className="w-64 object-contain animate-fade-in"
+              className="w-[294px] object-contain animate-fade-in"
               style={{ animationDelay: '0.7s' }}
             />
           </div>

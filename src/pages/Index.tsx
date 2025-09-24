@@ -7,8 +7,8 @@ import { useNavigate } from "react-router-dom"
 import { SEOHead } from "@/components/SEOHead"
 import { FloatingCards, FloatingBubbles, FloatingBubblesDown, FloatingQuestionMarksHorizontal } from "@/components/ui/homepage-animations"
 import whiteRabbit from "@/assets/white_rabbit.webp"
-import projectOLogoLight from "@/assets/ProjectOLogoIcon_512x512.png"
-import projectOLogoDark from "@/assets/ProjectOLogo_Dark.png"
+import projectOLogoLight from "@/assets/project-o-logo-light.png"
+import projectOLogoDark from "@/assets/project-o-logo-dark.png"
 
 const Index = () => {
   const navigate = useNavigate()
@@ -98,24 +98,9 @@ const Index = () => {
               <span style={{ background: 'var(--title-gradient)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
                 PROJECT
               </span>
-			<div
-                aria-label="Project O Logo Light"
-                className="inline-block w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 lg:w-28 lg:h-28 block dark:hidden"
-                style={{
-                  background: 'var(--title-gradient)',
-                  WebkitMaskImage: `url(${projectOLogoLight})`,
-                  maskImage: `url(${projectOLogoLight})`,
-                  WebkitMaskRepeat: 'no-repeat',
-                  maskRepeat: 'no-repeat',
-                  WebkitMaskSize: 'contain',
-                  maskSize: 'contain',
-                  WebkitMaskPosition: 'center',
-                  maskPosition: 'center',
-                }}
-              />
               <div
-                aria-label="Project O Logo Dark"
-                className="inline-block w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 lg:w-28 lg:h-28 hidden dark:block"
+                aria-label="Project O Logo"
+                className="inline-block w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 lg:w-28 lg:h-28"
                 style={{
                   background: 'var(--title-gradient)',
                   WebkitMaskImage: `url(${projectOLogoDark})`,
@@ -141,7 +126,8 @@ const Index = () => {
               <img 
                 src={whiteRabbit} 
                 alt="White Rabbit Character" 
-                className="w-[510px] sm:w-[595px] md:w-[680px] lg:w-[765px] object-contain transform -translate-x-24"
+                className="w-[510px] sm:w-[595px] md:w-[680px] lg:w-[765px] object-contain animate-fade-in transform -translate-x-24"
+                style={{ animationDelay: '0.2s' }}
               />
             </div>
 
@@ -152,7 +138,8 @@ const Index = () => {
                 <Button 
                   onClick={() => navigate('/cards')}
                   variant="neonGreen"
-                  className="h-14 sm:h-16 md:h-18 text-sm sm:text-base md:text-lg"
+                  className="h-14 sm:h-16 md:h-18 text-sm sm:text-base md:text-lg animate-fade-in"
+                  style={{ animationDelay: '0.3s' }}
                 >
                   <span className="text-montserrat-black">CARDS</span>
                 </Button>
@@ -161,7 +148,8 @@ const Index = () => {
                 <Button 
                   onClick={() => navigate('/decks')}
                   variant="epicPurple"
-                  className="h-14 sm:h-16 md:h-18 text-sm sm:text-base md:text-lg"
+                  className="h-14 sm:h-16 md:h-18 text-sm sm:text-base md:text-lg animate-fade-in"
+                  style={{ animationDelay: '0.4s' }}
                 >
                   <span className="text-montserrat-black">DECKS</span>
                 </Button>
@@ -170,7 +158,8 @@ const Index = () => {
                 <Button 
                   onClick={() => navigate('/draft')}
                   variant="rareBlue"
-                  className="h-14 sm:h-16 md:h-18 text-sm sm:text-base md:text-lg"
+                  className="h-14 sm:h-16 md:h-18 text-sm sm:text-base md:text-lg animate-fade-in"
+                  style={{ animationDelay: '0.5s' }}
                 >
                   <span className="text-montserrat-black">DRAFT</span>
                 </Button>
@@ -179,7 +168,8 @@ const Index = () => {
                 <Button 
                   onClick={() => navigate('/random')}
                   variant="legendaryOrange"
-                  className="h-14 sm:h-16 md:h-18 text-xs sm:text-sm md:text-base flex items-center justify-center"
+                  className="h-14 sm:h-16 md:h-18 text-xs sm:text-sm md:text-base animate-fade-in flex items-center justify-center"
+                  style={{ animationDelay: '0.6s' }}
                 >
                   <span className="text-montserrat-black text-center leading-tight">
                     RANDOM<br />DECK

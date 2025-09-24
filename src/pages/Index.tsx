@@ -11,15 +11,24 @@ import whiteRabbit from "@/assets/white_rabbit.webp"
 const Index = () => {
   const navigate = useNavigate()
   const [hoveredButton, setHoveredButton] = useState<string | null>(null)
-  const [isReversed, setIsReversed] = useState(false)
-  const videoRef = useRef<HTMLVideoElement>(null)
+  const [currentVideo, setCurrentVideo] = useState<'original' | 'reverse'>('original')
+  const [fadeClass, setFadeClass] = useState('opacity-40')
+  const originalVideoRef = useRef<HTMLVideoElement>(null)
+  const reverseVideoRef = useRef<HTMLVideoElement>(null)
 
   const handleVideoEnd = () => {
-    setIsReversed(!isReversed)
-    if (videoRef.current) {
-      videoRef.current.load() // Reload the video with new source
-      videoRef.current.play()
-    }
+    setFadeClass('opacity-0')
+    setTimeout(() => {
+      setCurrentVideo(currentVideo === 'original' ? 'reverse' : 'original')
+      setFadeClass('opacity-40')
+      
+      // Play the next video
+      const nextVideoRef = currentVideo === 'original' ? reverseVideoRef : originalVideoRef
+      if (nextVideoRef.current) {
+        nextVideoRef.current.currentTime = 0
+        nextVideoRef.current.play()
+      }
+    }, 300) // 300ms fade transition
   }
 
   const getTextColor = () => {
@@ -48,20 +57,41 @@ const Index = () => {
         url="/"
       />
       <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-[hsl(var(--homepage-background-start))] to-[hsl(var(--homepage-background-end))]">
-        {/* Background Video */}
+        {/* Background Videos */}
         <div className="absolute inset-0 z-0">
+          {/* Original Video */}
           <video 
-            ref={videoRef}
+            ref={originalVideoRef}
             autoPlay 
             muted 
+            preload="auto"
+            poster="/lovable-uploads/918d2f07-eec2-4aea-9105-f29011a86707.png"
             onEnded={handleVideoEnd}
-            className="w-full h-full object-cover opacity-20"
+            className={`w-full h-full object-cover transition-opacity duration-300 ${currentVideo === 'original' ? fadeClass : 'opacity-0'}`}
             onLoadedData={(e) => {
               const video = e.currentTarget;
               video.playbackRate = 0.8;
             }}
+            style={{ position: 'absolute' }}
           >
-            <source src={isReversed ? "/animated card reel reverse.mp4" : "/animated_card_reel.mp4"} type="video/mp4" />
+            <source src="/animated_card_reel.mp4" type="video/mp4" />
+            Your browser does not support the video tag.
+          </video>
+
+          {/* Reverse Video */}
+          <video 
+            ref={reverseVideoRef}
+            muted 
+            preload="auto"
+            onEnded={handleVideoEnd}
+            className={`w-full h-full object-cover transition-opacity duration-300 ${currentVideo === 'reverse' ? fadeClass : 'opacity-0'}`}
+            onLoadedData={(e) => {
+              const video = e.currentTarget;
+              video.playbackRate = 0.8;
+            }}
+            style={{ position: 'absolute' }}
+          >
+            <source src="/animated card reel reverse.mp4" type="video/mp4" />
             Your browser does not support the video tag.
           </video>
         </div>

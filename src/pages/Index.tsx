@@ -72,7 +72,7 @@ const Index = () => {
             ref={videoRef1}
             muted 
             className="w-full h-full object-cover absolute inset-0 transition-opacity duration-1000"
-            poster="/animated_card_reel.mp4"
+            
             preload="auto"
           >
             <source src={videos[0]} type="video/mp4" />
@@ -95,7 +95,7 @@ const Index = () => {
         {/* Top - Project O Zone Title with Center Logo */}
         <div className="relative z-10 h-[15vh] sm:h-[20vh] flex flex-col items-center justify-center px-4">
           <div className="flex items-center gap-2 sm:gap-4">
-            <h1 className="text-2xl sm:text-4xl md:text-6xl lg:text-7xl font-bold drop-shadow-2xl bg-gradient-to-r from-[hsl(258,42%,22%)] to-[hsl(339,86%,44%)] dark:from-[hsl(339,86%,44%)] dark:to-[hsl(258,42%,22%)] bg-clip-text text-transparent">
+            <h1 className="text-2xl sm:text-4xl md:text-6xl lg:text-7xl font-bold drop-shadow-2xl bg-gradient-to-r from-[hsl(258,42%,22%)] to-[hsl(339,86%,44%)] dark:from-[hsl(352,100%,46%)] dark:to-[hsl(339,94%,40%)] bg-clip-text text-transparent">
               Project
             </h1>
             
@@ -104,16 +104,16 @@ const Index = () => {
               <img 
                 src={logoIcon}
                 alt="Project O Logo" 
-                className="w-full h-full object-contain dark:hidden"
+                className="w-full h-full object-contain hidden dark:block"
               />
               <img 
                 src={logoDark}
                 alt="Project O Logo" 
-                className="w-full h-full object-contain hidden dark:block"
+                className="w-full h-full object-contain dark:hidden"
               />
             </div>
             
-            <h1 className="text-2xl sm:text-4xl md:text-6xl lg:text-7xl font-bold drop-shadow-2xl bg-gradient-to-r from-[hsl(258,42%,22%)] to-[hsl(339,86%,44%)] dark:from-[hsl(339,86%,44%)] dark:to-[hsl(258,42%,22%)] bg-clip-text text-transparent">
+            <h1 className="text-2xl sm:text-4xl md:text-6xl lg:text-7xl font-bold drop-shadow-2xl bg-gradient-to-r from-[hsl(258,42%,22%)] to-[hsl(339,86%,44%)] dark:from-[hsl(352,100%,46%)] dark:to-[hsl(339,94%,40%)] bg-clip-text text-transparent">
               Zone
             </h1>
           </div>
@@ -126,8 +126,7 @@ const Index = () => {
             <img 
               src={whiteRabbit} 
               alt="White Rabbit Character" 
-              className="w-[510px] sm:w-[595px] md:w-[680px] lg:w-[765px] object-contain animate-fade-in transform -translate-x-24"
-              style={{ animationDelay: '0.2s' }}
+              className="w-[510px] sm:w-[595px] md:w-[680px] lg:w-[765px] object-contain transform -translate-x-24"
             />
           </div>
 

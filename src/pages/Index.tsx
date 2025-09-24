@@ -182,20 +182,30 @@ const Index = () => {
           </div>
         </div>
 
-        {/* Main Content - Rabbit, Buttons, and Video */}
-        <div className="relative z-10 h-[82vh] sm:h-[78vh] flex items-center justify-center px-4 sm:px-8">
-          {/* Left Side - Rabbit */}
-          <div className="absolute bottom-0 left-0 z-5">
+        {/* Desktop Layout - Pooh, Buttons, Rabbit */}
+        <div className="hidden md:block relative z-10 h-[82vh] sm:h-[78vh]">
+          {/* Left Side - Pooh Bear (hidden on lg and smaller when space is tight) */}
+          <div className="absolute bottom-0 left-0 z-5 hidden xl:block">
             <img 
-              src={whiteRabbit} 
-              alt="White Rabbit Character" 
-              className="w-[459px] sm:w-[536px] md:w-[612px] lg:w-[689px] object-contain animate-fade-in transform -translate-x-24"
+              src="/lovable-uploads/1e21299a-3039-497b-8f8f-c31410dea36d.png" 
+              alt="Pooh Bear Character" 
+              className="w-[459px] object-contain animate-fade-in transform -translate-x-24"
               style={{ animationDelay: '0.2s' }}
             />
           </div>
 
-          {/* Right Side - Buttons */}
-          <div className="absolute right-4 sm:right-8 md:right-12 lg:right-16 top-1/2 -translate-y-1/2 z-10">
+          {/* Right Side - Rabbit (hidden on sm and smaller when buttons need space) */}
+          <div className="absolute bottom-0 right-0 z-5 hidden lg:block">
+            <img 
+              src={whiteRabbit} 
+              alt="White Rabbit Character" 
+              className="w-[459px] sm:w-[536px] md:w-[612px] lg:w-[689px] object-contain animate-fade-in transform translate-x-24"
+              style={{ animationDelay: '0.2s' }}
+            />
+          </div>
+
+          {/* Center - Buttons */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10">
             <div className="relative grid grid-cols-2 w-80 sm:w-96 md:w-[420px] lg:w-[480px]" style={{ height: '459px' }}>
               {/* Cross-style borders */}
               <div className="absolute inset-0 pointer-events-none">
@@ -257,12 +267,93 @@ const Index = () => {
                   Random Deck
                 </div>
                 <div className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 text-center leading-tight">
-                  Feeling adventurous? Just play a random deck.
+                  Feeling adventurous? Play a random deck.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Mobile Layout - Stacked vertically */}
+        <div className="block md:hidden relative z-10 h-[82vh] sm:h-[78vh] flex flex-col items-center justify-center px-4 space-y-8">
+          {/* Buttons Section */}
+          <div className="flex-shrink-0">
+            <div className="relative grid grid-cols-2 w-80" style={{ height: '320px' }}>
+              {/* Cross-style borders */}
+              <div className="absolute inset-0 pointer-events-none">
+                {/* Vertical line */}
+                <div className="absolute left-1/2 top-0 bottom-0 w-px bg-black/30 -translate-x-0.5"></div>
+                {/* Horizontal line */}
+                <div className="absolute top-1/2 left-0 right-0 h-px bg-black/30 -translate-y-0.5"></div>
+              </div>
+              
+              {/* Cards Button */}
+              <div 
+                onClick={() => navigate('/cards')}
+                className="flex flex-col items-center justify-center p-4 bg-black/20 backdrop-blur-sm cursor-pointer hover:bg-black/30 transition-all duration-300 animate-fade-in"
+                style={{ animationDelay: '0.3s' }}
+              >
+                <div className="text-lg font-bold text-slate-900 dark:text-white mb-2">
+                  Cards
+                </div>
+                <div className="text-xs text-slate-700 dark:text-slate-300 text-center leading-tight">
+                  View all the cards and their variants & blueprints.
+                </div>
+              </div>
+
+              {/* Decks Button */}
+              <div 
+                onClick={() => navigate('/decks')}
+                className="flex flex-col items-center justify-center p-4 bg-black/20 backdrop-blur-sm cursor-pointer hover:bg-black/30 transition-all duration-300 animate-fade-in"
+                style={{ animationDelay: '0.4s' }}
+              >
+                <div className="text-lg font-bold text-slate-900 dark:text-white mb-2">
+                  Decks
+                </div>
+                <div className="text-xs text-slate-700 dark:text-slate-300 text-center leading-tight">
+                  Browse through featured & community decks.
+                </div>
+              </div>
+
+              {/* Draft Button */}
+              <div 
+                onClick={() => navigate('/draft')}
+                className="flex flex-col items-center justify-center p-4 bg-black/20 backdrop-blur-sm cursor-pointer hover:bg-black/30 transition-all duration-300 animate-fade-in"
+                style={{ animationDelay: '0.5s' }}
+              >
+                <div className="text-lg font-bold text-slate-900 dark:text-white mb-2">
+                  Draft
+                </div>
+                <div className="text-xs text-slate-700 dark:text-slate-300 text-center leading-tight">
+                  Play a Double/Triple Draft with someone.
+                </div>
+              </div>
+
+              {/* Random Deck Button */}
+              <div 
+                onClick={() => navigate('/random')}
+                className="flex flex-col items-center justify-center p-4 bg-black/20 backdrop-blur-sm cursor-pointer hover:bg-black/30 transition-all duration-300 animate-fade-in"
+                style={{ animationDelay: '0.6s' }}
+              >
+                <div className="text-lg font-bold text-slate-900 dark:text-white mb-2">
+                  Random Deck
+                </div>
+                <div className="text-xs text-slate-700 dark:text-slate-300 text-center leading-tight">
+                  Feeling adventurous? Play a random deck.
                 </div>
               </div>
             </div>
           </div>
 
+          {/* Rabbit at bottom center on mobile */}
+          <div className="flex-shrink-0 flex justify-center">
+            <img 
+              src={whiteRabbit} 
+              alt="White Rabbit Character" 
+              className="w-64 object-contain animate-fade-in"
+              style={{ animationDelay: '0.7s' }}
+            />
+          </div>
         </div>
 
 

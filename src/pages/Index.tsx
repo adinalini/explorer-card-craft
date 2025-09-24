@@ -6,6 +6,7 @@ import { ThemeToggle } from "@/components/ui/theme-toggle"
 import { useNavigate } from "react-router-dom"
 import { SEOHead } from "@/components/SEOHead"
 import { FloatingCards, FloatingBubbles, FloatingBubblesDown, FloatingQuestionMarksHorizontal } from "@/components/ui/homepage-animations"
+import whiteRabbit from "@/assets/white_rabbit.webp"
 
 const Index = () => {
   const navigate = useNavigate()
@@ -49,61 +50,73 @@ const Index = () => {
         </div>
 
         {/* Top - Project O Zone Title */}
-        <div className="relative z-10 h-[20vh] sm:h-[30vh] flex flex-col items-center justify-center px-4">
+        <div className="relative z-10 h-[15vh] sm:h-[20vh] flex flex-col items-center justify-center px-4">
           <h1 className={`text-3xl sm:text-6xl md:text-8xl font-bold transition-colors duration-500 drop-shadow-2xl ${getTextColor()}`}>
             Project O Zone
           </h1>
         </div>
 
-        {/* Bottom - 2x2 Button Grid */}
-        <div className="relative z-10 h-[80vh] sm:h-[70vh] p-4 sm:p-8">
-          <div className="grid grid-cols-2 grid-rows-2 gap-6 h-full max-w-6xl mx-auto">
-            {/* Cards Button */}
-            <Button 
-              onClick={() => navigate('/cards')}
-              onMouseEnter={() => setHoveredButton('cards')}
-              onMouseLeave={() => setHoveredButton(null)}
-              className="h-full bg-[hsl(var(--homepage-button-cards))] hover:bg-[hsl(var(--homepage-button-cards))]/90 text-[hsl(var(--homepage-button-text))] text-4xl md:text-6xl font-bold rounded-3xl shadow-2xl transform transition-all duration-300 hover:scale-105 animate-fade-in"
-              style={{ animationDelay: '0.1s' }}
-            >
-              Cards
-            </Button>
-
-            {/* Decks Button */}
-            <Button 
-              onClick={() => navigate('/decks')}
-              onMouseEnter={() => setHoveredButton('decks')}
-              onMouseLeave={() => setHoveredButton(null)}
-              className="h-full bg-[hsl(var(--homepage-button-decks))] hover:bg-[hsl(var(--homepage-button-decks))]/90 text-[hsl(var(--homepage-button-text))] text-4xl md:text-6xl font-bold rounded-3xl shadow-2xl transform transition-all duration-300 hover:scale-105 animate-fade-in"
+        {/* Main Content - Rabbit and Buttons */}
+        <div className="relative z-10 h-[85vh] sm:h-[80vh] flex items-center justify-between px-8 sm:px-16">
+          {/* Left Side - Rabbit */}
+          <div className="flex-1 flex items-center justify-center">
+            <img 
+              src={whiteRabbit} 
+              alt="White Rabbit Character" 
+              className="w-72 sm:w-96 md:w-[500px] object-contain animate-fade-in"
               style={{ animationDelay: '0.2s' }}
-            >
-              Decks
-            </Button>
+            />
+          </div>
 
-            {/* Draft Button */}
-            <Button 
-              onClick={() => navigate('/draft')}
-              onMouseEnter={() => setHoveredButton('draft')}
-              onMouseLeave={() => setHoveredButton(null)}
-              className="h-full bg-[hsl(var(--homepage-button-draft))] hover:bg-[hsl(var(--homepage-button-draft))]/90 text-[hsl(var(--homepage-button-text))] text-4xl md:text-6xl font-bold rounded-3xl shadow-2xl transform transition-all duration-300 hover:scale-105 animate-fade-in"
-              style={{ animationDelay: '0.3s' }}
-            >
-              Draft
-            </Button>
+          {/* Right Side - Buttons Grid */}
+          <div className="flex-1 flex items-center justify-center">
+            <div className="grid grid-cols-2 gap-4 w-full max-w-md">
+              {/* Cards Button */}
+              <Button 
+                onClick={() => navigate('/cards')}
+                onMouseEnter={() => setHoveredButton('cards')}
+                onMouseLeave={() => setHoveredButton(null)}
+                className="h-24 sm:h-32 bg-[hsl(var(--homepage-button-cards))] hover:bg-[hsl(var(--homepage-button-cards))]/90 text-[hsl(var(--homepage-button-text))] text-xl sm:text-2xl font-bold rounded-2xl shadow-2xl transform transition-all duration-300 hover:scale-105 animate-fade-in"
+                style={{ animationDelay: '0.3s' }}
+              >
+                Cards
+              </Button>
 
-            {/* Random Deck Button */}
-            <Button 
-              onClick={() => navigate('/random')}
-              onMouseEnter={() => setHoveredButton('random')}
-              onMouseLeave={() => setHoveredButton(null)}
-              className="h-full bg-[hsl(var(--homepage-button-random))] hover:bg-[hsl(var(--homepage-button-random))]/90 text-[hsl(var(--homepage-button-text))] text-4xl md:text-6xl font-bold rounded-3xl shadow-2xl transform transition-all duration-300 hover:scale-105 animate-fade-in flex items-center justify-center"
-              style={{ animationDelay: '0.4s' }}
-            >
-              <span className="text-center leading-tight">
-                <span className="hidden sm:inline">Random Deck</span>
-                <span className="sm:hidden">Random<br />Deck</span>
-              </span>
-            </Button>
+              {/* Decks Button */}
+              <Button 
+                onClick={() => navigate('/decks')}
+                onMouseEnter={() => setHoveredButton('decks')}
+                onMouseLeave={() => setHoveredButton(null)}
+                className="h-24 sm:h-32 bg-[hsl(var(--homepage-button-decks))] hover:bg-[hsl(var(--homepage-button-decks))]/90 text-[hsl(var(--homepage-button-text))] text-xl sm:text-2xl font-bold rounded-2xl shadow-2xl transform transition-all duration-300 hover:scale-105 animate-fade-in"
+                style={{ animationDelay: '0.4s' }}
+              >
+                Decks
+              </Button>
+
+              {/* Draft Button */}
+              <Button 
+                onClick={() => navigate('/draft')}
+                onMouseEnter={() => setHoveredButton('draft')}
+                onMouseLeave={() => setHoveredButton(null)}
+                className="h-24 sm:h-32 bg-[hsl(var(--homepage-button-draft))] hover:bg-[hsl(var(--homepage-button-draft))]/90 text-[hsl(var(--homepage-button-text))] text-xl sm:text-2xl font-bold rounded-2xl shadow-2xl transform transition-all duration-300 hover:scale-105 animate-fade-in"
+                style={{ animationDelay: '0.5s' }}
+              >
+                Draft
+              </Button>
+
+              {/* Random Deck Button */}
+              <Button 
+                onClick={() => navigate('/random')}
+                onMouseEnter={() => setHoveredButton('random')}
+                onMouseLeave={() => setHoveredButton(null)}
+                className="h-24 sm:h-32 bg-[hsl(var(--homepage-button-random))] hover:bg-[hsl(var(--homepage-button-random))]/90 text-[hsl(var(--homepage-button-text))] text-lg sm:text-xl font-bold rounded-2xl shadow-2xl transform transition-all duration-300 hover:scale-105 animate-fade-in flex items-center justify-center"
+                style={{ animationDelay: '0.6s' }}
+              >
+                <span className="text-center leading-tight">
+                  Random<br />Deck
+                </span>
+              </Button>
+            </div>
           </div>
         </div>
 

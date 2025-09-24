@@ -84,7 +84,7 @@ All colors MUST be HSL.
     --gradient-card: linear-gradient(135deg, hsl(0 0% 92%), hsl(210 40% 88%));
     
     /* Title gradients to match logo - always dark mode colors for homepage (20% darker) */
-    --title-gradient: linear-gradient(135deg, hsl(350 100% 48%), hsl(320 100% 52%), hsl(10 95% 52%));
+    --title-gradient: linear-gradient(135deg, hsl(350 100% 55%), hsl(320 100% 59%), hsl(10 95% 59%));
     
     /* Light Mode Shadows and Glows */
     --shadow-neon-pink: 0 0 20px hsl(320 100% 50% / 0.3);

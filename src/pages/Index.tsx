@@ -219,7 +219,7 @@ const Index = () => {
                   Cards
                 </div>
                 <div className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 text-center leading-tight">
-                  View all the cards along with their variants and blueprints. You can also browse through old versions and download the images.
+                  View all the cards and their variants & blueprints.
                 </div>
               </div>
 
@@ -233,7 +233,7 @@ const Index = () => {
                   Decks
                 </div>
                 <div className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 text-center leading-tight">
-                  Browse through the featured decks that have secured positions or community decks made you. Deck builder feature with deck codes available.
+                  Browse through featured/community decks.
                 </div>
               </div>
 
@@ -247,7 +247,7 @@ const Index = () => {
                   Draft
                 </div>
                 <div className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 text-center leading-tight">
-                  Play a draft game with someone. Current modes available are: Default double draft and triple draft. Mega Draft coming soon.
+                  Play a Double/Triple Draft with someone.
                 </div>
               </div>
 

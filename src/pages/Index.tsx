@@ -345,7 +345,7 @@ const Index = () => {
                   Cards
                 </div>
                 <div className="text-xs sm:text-sm text-slate-300 text-center leading-tight">
-                  View all the cards and their variants & blueprints.
+                  View all the cards along with their variants and blueprints.
                 </div>
               </div>
 
@@ -414,7 +414,7 @@ const Index = () => {
                   Cards
                 </div>
                 <div className="text-xs sm:text-sm text-slate-300 text-center leading-tight">
-                  View all the cards and their variants & blueprints.
+                  View all the cards along with their variants and blueprints.
                 </div>
               </div>
 
@@ -483,7 +483,7 @@ const Index = () => {
                   Cards
                 </div>
                 <div className="text-xs sm:text-sm text-slate-300 text-center leading-tight">
-                  View all the cards and their variants & blueprints.
+                  View all the cards along with their variants and blueprints.
                 </div>
               </div>
 
@@ -555,7 +555,7 @@ const Index = () => {
                   Cards
                 </div>
                 <div className="text-xs text-slate-300 text-center leading-tight">
-                  View all the cards and their variants & blueprints.
+                  View all the cards along with their variants and blueprints.
                 </div>
               </div>
 

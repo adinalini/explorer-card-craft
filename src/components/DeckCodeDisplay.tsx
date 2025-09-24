@@ -64,7 +64,7 @@ export function DeckCodeDisplay({ cards }: DeckCodeDisplayProps) {
 
   return (
     <Button
-      variant="legendaryOrange"
+      variant="orange"
       size="sm"
       onClick={handleCopyDeckCode}
       className="flex items-center gap-2"

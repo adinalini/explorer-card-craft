@@ -67,9 +67,8 @@ export default {
 				}
 			},
 			fontFamily: {
-				'project-o': ['Montserrat', 'system-ui', 'sans-serif'],
-				'impact': ['Impact', 'Arial Black', 'sans-serif'],
-				'montserrat': ['Montserrat', 'sans-serif']
+				'gaming': ['Orbitron', 'Rajdhani', 'system-ui', 'sans-serif'],
+				'mono-gaming': ['Fira Code', 'Courier New', 'monospace']
 			},
 			borderRadius: {
 				lg: 'var(--radius)',

@@ -184,8 +184,8 @@ const Index = () => {
 
         {/* Desktop Layout - Rabbit Left, Red Character Right, Buttons Center */}
         <div className="hidden md:block relative z-10 h-[82vh] sm:h-[78vh]">
-          {/* Left Side - Rabbit (hidden on lg and smaller when space is tight) */}
-          <div className="absolute bottom-0 left-0 z-5 hidden xl:block">
+          {/* Left Side - Rabbit (hidden on xl and smaller when space is tight) */}
+          <div className="absolute bottom-0 left-0 z-5 hidden 2xl:block">
             <img 
               src={whiteRabbit} 
               alt="White Rabbit Character" 
@@ -194,12 +194,25 @@ const Index = () => {
             />
           </div>
 
-          {/* Right Side - Red Character (hidden on lg and smaller when space is tight) */}
-          <div className="absolute bottom-0 right-0 z-5 hidden xl:block">
+          {/* Right Side - Red Character (hidden first when space is tight, centered to rabbit height) */}
+          <div className="absolute bottom-0 right-0 z-5 hidden 2xl:block">
             <img 
               src="/lovable-uploads/eba0e4ff-4de0-48d3-89b7-2c962d6b6c27.png" 
               alt="Red Character" 
-              className="w-[459px] object-contain animate-fade-in transform translate-x-24"
+              className="w-[551px] object-contain animate-fade-in transform translate-x-24"
+              style={{ 
+                animationDelay: '0.2s',
+                transform: 'translateX(96px) translateY(-46px)' // Center to rabbit height + translate out
+              }}
+            />
+          </div>
+
+          {/* Rabbit only layout (when red is hidden but rabbit fits) */}
+          <div className="absolute bottom-0 left-0 z-5 hidden xl:block 2xl:hidden">
+            <img 
+              src={whiteRabbit} 
+              alt="White Rabbit Character" 
+              className="w-[459px] object-contain animate-fade-in transform -translate-x-12"
               style={{ animationDelay: '0.2s' }}
             />
           </div>

@@ -51,8 +51,8 @@ All colors MUST be HSL.
     --homepage-background-end: 222 84% 5%;
     --homepage-text: var(--project-o-white);
     
-    /* Title gradient for light mode */
-    --title-gradient: linear-gradient(135deg, hsl(var(--project-o-hot-pink)), hsl(var(--project-o-orange)));
+    /* Title gradient for light mode - should be purple */
+    --title-gradient: linear-gradient(135deg, hsl(var(--project-o-purple-neon)), hsl(var(--project-o-bright-cyan)));
     
     /* Primary Colors */
     --primary: var(--project-o-bright-cyan);
@@ -116,8 +116,8 @@ All colors MUST be HSL.
     --homepage-background-end: 222 84% 5%;
     --homepage-text: var(--project-o-bright-cyan);
     
-    /* Title gradient for dark mode */
-    --title-gradient: linear-gradient(135deg, hsl(var(--project-o-purple-neon)), hsl(var(--project-o-bright-cyan)));
+    /* Title gradient for dark mode - should be red */
+    --title-gradient: linear-gradient(135deg, hsl(var(--project-o-hot-pink)), hsl(var(--project-o-orange)));
     
     /* Primary Colors - Dark Mode */
     --primary: var(--project-o-bright-cyan);

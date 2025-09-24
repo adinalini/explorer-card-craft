@@ -101,12 +101,7 @@ const Index = () => {
               <img 
                 src={projectOLogoLight} 
                 alt="O" 
-                className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 lg:w-28 lg:h-28 inline-block dark:hidden" 
-              />
-              <img 
-                src={projectOLogoDark} 
-                alt="O" 
-                className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 lg:w-28 lg:h-28 hidden dark:inline-block" 
+                className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 lg:w-28 lg:h-28 inline-block dark:brightness-0 dark:invert dark:hue-rotate-[270deg] dark:saturate-200" 
               />
               <span style={{ background: 'var(--title-gradient)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
                 ZONE

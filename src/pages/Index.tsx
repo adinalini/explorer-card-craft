@@ -1,60 +1,55 @@
-import { useState, useEffect, useRef } from "react"
+import { useState, useRef, useEffect } from "react"
 import { Button } from "@/components/ui/button"
+import { Blob } from "@/components/ui/blob"
 import { WaveDivider } from "@/components/ui/wave-divider"
 import { ThemeToggle } from "@/components/ui/theme-toggle"
 import { useNavigate } from "react-router-dom"
 import { SEOHead } from "@/components/SEOHead"
+import { FloatingCards, FloatingBubbles, FloatingBubblesDown, FloatingQuestionMarksHorizontal } from "@/components/ui/homepage-animations"
 import whiteRabbit from "@/assets/white_rabbit.webp"
-import logoIcon from "@/assets/ProjectOLogoIcon_512x512.png"
-import logoDark from "@/assets/ProjectOLogo_Dark.png"
+import projectOLogoLight from "@/assets/project-o-logo-light.png"
+import projectOLogoDark from "@/assets/project-o-logo-dark.png"
 
 const Index = () => {
   const navigate = useNavigate()
-  const [currentVideo, setCurrentVideo] = useState(0)
   const videoRef1 = useRef<HTMLVideoElement>(null)
   const videoRef2 = useRef<HTMLVideoElement>(null)
-
-  const videos = [
-    "/animated_card_reel.mp4",
-    "/animated_card_reel_reverse.mp4"
-  ]
+  const [activeVideo, setActiveVideo] = useState(1)
 
   useEffect(() => {
     const video1 = videoRef1.current
     const video2 = videoRef2.current
-    
     if (!video1 || !video2) return
 
-    const handleVideoEnd = () => {
-      setCurrentVideo(prev => {
-        const nextVideo = prev === 0 ? 1 : 0
-        const nextVideoRef = nextVideo === 0 ? video1 : video2
-        const currentVideoRef = nextVideo === 0 ? video2 : video1
-        
-        // Start next video
-        nextVideoRef.currentTime = 0
-        nextVideoRef.play()
-        
-        // Hide current video
-        currentVideoRef.style.opacity = '0'
-        nextVideoRef.style.opacity = '0.25'
-        
-        return nextVideo
-      })
+    const handleVideo1End = () => {
+      setActiveVideo(2)
+      video2.currentTime = 0
+      video2.play()
     }
 
-    video1.addEventListener('ended', handleVideoEnd)
-    video2.addEventListener('ended', handleVideoEnd)
+    const handleVideo2End = () => {
+      setActiveVideo(1)
+      video1.currentTime = 0
+      video1.play()
+    }
+
+    video1.addEventListener('ended', handleVideo1End)
+    video2.addEventListener('ended', handleVideo2End)
     
-    // Start first video
-    video1.style.opacity = '0.25'
-    video2.style.opacity = '0'
-    video1.play()
-
     return () => {
-      video1.removeEventListener('ended', handleVideoEnd)
-      video2.removeEventListener('ended', handleVideoEnd)
+      video1.removeEventListener('ended', handleVideo1End)
+      video2.removeEventListener('ended', handleVideo2End)
     }
+  }, [])
+
+  // Preload both videos
+  useEffect(() => {
+    const video1 = videoRef1.current
+    const video2 = videoRef2.current
+    if (!video1 || !video2) return
+
+    video1.load()
+    video2.load()
   }, [])
 
   return (
@@ -66,122 +61,124 @@ const Index = () => {
         url="/"
       />
       <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-[hsl(var(--homepage-background-start))] to-[hsl(var(--homepage-background-end))]">
-        {/* Background Videos */}
+        {/* Background Videos with Preloading */}
         <div className="absolute inset-0 z-0">
           <video 
             ref={videoRef1}
-            muted
-            playsInline
-            className="w-full h-full object-cover absolute inset-0 transition-opacity duration-1000 opacity-25"
-            poster="/og-images/homepage.jpg"
+            autoPlay 
+            muted 
             preload="auto"
+            poster="/animated_card_reel.jpg"
+            className={`video-background transition-opacity duration-300 ${activeVideo === 1 ? 'opacity-25' : 'opacity-0'}`}
           >
-            <source src={videos[0]} type="video/mp4" />
+            <source src="/animated_card_reel.mp4" type="video/mp4" />
+            Your browser does not support the video tag.
           </video>
           <video 
             ref={videoRef2}
-            muted
-            playsInline
-            className="w-full h-full object-cover absolute inset-0 transition-opacity duration-1000 opacity-0"
+            muted 
             preload="auto"
+            className={`video-background absolute inset-0 transition-opacity duration-300 ${activeVideo === 2 ? 'opacity-25' : 'opacity-0'}`}
           >
-            <source src={videos[1]} type="video/mp4" />
+            <source src="/animated_card_reel_reverse.mp4" type="video/mp4" />
+            Your browser does not support the video tag.
           </video>
         </div>
-        
+
         {/* Theme Toggle in top right */}
         <div className="absolute top-4 right-4 z-20">
-          <ThemeToggle className="text-[hsl(var(--homepage-text))]" />
+          <ThemeToggle />
         </div>
 
-        {/* Top - Project O Zone Title with Center Logo */}
-        <div className="relative z-10 h-[15vh] sm:h-[20vh] flex flex-col items-center justify-center px-4">
-          <div className="flex items-center gap-2 sm:gap-4">
-            <h1 className="text-2xl sm:text-4xl md:text-6xl lg:text-7xl font-bold drop-shadow-2xl bg-gradient-to-r from-[hsl(258,42%,22%)] to-[hsl(339,86%,44%)] dark:from-[hsl(352,100%,46%)] dark:to-[hsl(339,94%,40%)] bg-clip-text text-transparent">
-              Project
-            </h1>
-            
-            {/* Center O Logo */}
-            <div className="w-8 h-8 sm:w-12 sm:h-12 md:w-16 md:h-16 lg:w-20 lg:h-20">
-              <img 
-                src={logoIcon}
-                alt="Project O Logo" 
-                className="w-full h-full object-contain hidden dark:block"
+        {/* Main Content */}
+        <div className="relative z-10 min-h-screen flex flex-col">
+          {/* Top - Project O Zone Title */}
+          <div className="flex-none h-[25vh] flex flex-col items-center justify-center px-4">
+            <h1 className="text-impact-title text-center leading-none drop-shadow-2xl effect-chromatic-aberration flex items-center justify-center gap-2">
+              <span style={{ background: 'var(--title-gradient)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
+                PROJECT
+              </span>
+ 		<div
+                aria-label="Project O Logo"
+                className="inline-block w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 lg:w-28 lg:h-28"
+                style={{
+                  background: 'var(--title-gradient)',
+                  WebkitMaskImage: `url(${projectOLogoDark})`,
+                  maskImage: `url(${projectOLogoDark})`,
+                  WebkitMaskRepeat: 'no-repeat',
+                  maskRepeat: 'no-repeat',
+                  WebkitMaskSize: 'contain',
+                  maskSize: 'contain',
+                  WebkitMaskPosition: 'center',
+                  maskPosition: 'center',
+                }}
               />
+              <span style={{ background: 'var(--title-gradient)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
+                ZONE
+              </span>
+            </h1>
+          </div>
+
+          {/* Main Content Area */}
+          <div className="flex-1 flex items-center justify-center px-4 sm:px-8">
+            {/* Left Side - Rabbit */}
+            <div className="absolute bottom-0 left-0 z-5 hidden lg:block">
               <img 
-                src={logoDark}
-                alt="Project O Logo" 
-                className="w-full h-full object-contain dark:hidden"
+                src={whiteRabbit} 
+                alt="White Rabbit Character" 
+                className="w-[510px] sm:w-[595px] md:w-[680px] lg:w-[765px] object-contain animate-fade-in transform -translate-x-24"
+                style={{ animationDelay: '0.2s' }}
               />
             </div>
-            
-            <h1 className="text-2xl sm:text-4xl md:text-6xl lg:text-7xl font-bold drop-shadow-2xl bg-gradient-to-r from-[hsl(258,42%,22%)] to-[hsl(339,86%,44%)] dark:from-[hsl(352,100%,46%)] dark:to-[hsl(339,94%,40%)] bg-clip-text text-transparent">
-              Zone
-            </h1>
-          </div>
-        </div>
 
-        {/* Main Content - Rabbit, Buttons, and Video */}
-        <div className="relative z-10 h-[85vh] sm:h-[80vh] flex items-center justify-center px-4 sm:px-8">
-          {/* Left Side - Rabbit */}
-          <div className="absolute bottom-0 left-0 z-5">
-            <img 
-              src={whiteRabbit} 
-              alt="White Rabbit Character" 
-              className="w-[510px] sm:w-[595px] md:w-[680px] lg:w-[765px] object-contain transform -translate-x-24"
-            />
-          </div>
+            {/* Center - Buttons Grid */}
+            <div className="flex items-center justify-center z-10 lg:ml-48">
+              <div className="grid grid-cols-2 gap-3 sm:gap-4 w-72 sm:w-80 md:w-96">
+                {/* Cards Button - Neon Green */}
+                <Button 
+                  onClick={() => navigate('/cards')}
+                  variant="neonGreen"
+                  className="h-14 sm:h-16 md:h-18 text-sm sm:text-base md:text-lg animate-fade-in"
+                  style={{ animationDelay: '0.3s' }}
+                >
+                  <span className="text-montserrat-black">CARDS</span>
+                </Button>
 
-          {/* Center - Buttons */}
-          <div className="flex items-center justify-center z-10 ml-24 sm:ml-32 md:ml-40 lg:ml-48">
-            <div className="grid grid-cols-2 gap-2 sm:gap-3 w-64 sm:w-72 md:w-80">
-              {/* Cards Button */}
-              <Button 
-                onClick={() => navigate('/cards')}
-                className="h-12 sm:h-14 md:h-16 bg-slate-900/90 border border-cyan-400/50 text-cyan-400 text-sm sm:text-base md:text-lg font-bold rounded-lg shadow-lg backdrop-blur-sm"
-              >
-                Cards
-              </Button>
+                {/* Decks Button - Epic Purple */}
+                <Button 
+                  onClick={() => navigate('/decks')}
+                  variant="epicPurple"
+                  className="h-14 sm:h-16 md:h-18 text-sm sm:text-base md:text-lg animate-fade-in"
+                  style={{ animationDelay: '0.4s' }}
+                >
+                  <span className="text-montserrat-black">DECKS</span>
+                </Button>
 
-              {/* Decks Button */}
-              <Button 
-                onClick={() => navigate('/decks')}
-                className="h-12 sm:h-14 md:h-16 bg-slate-900/90 border border-purple-400/50 text-purple-400 text-sm sm:text-base md:text-lg font-bold rounded-lg shadow-lg backdrop-blur-sm"
-              >
-                Decks
-              </Button>
+                {/* Draft Button - Rare Blue */}
+                <Button 
+                  onClick={() => navigate('/draft')}
+                  variant="rareBlue"
+                  className="h-14 sm:h-16 md:h-18 text-sm sm:text-base md:text-lg animate-fade-in"
+                  style={{ animationDelay: '0.5s' }}
+                >
+                  <span className="text-montserrat-black">DRAFT</span>
+                </Button>
 
-              {/* Draft Button */}
-              <Button 
-                onClick={() => navigate('/draft')}
-                className="h-12 sm:h-14 md:h-16 bg-slate-900/90 border border-orange-400/50 text-orange-400 text-sm sm:text-base md:text-lg font-bold rounded-lg shadow-lg backdrop-blur-sm"
-              >
-                Draft
-              </Button>
-
-              {/* Random Deck Button */}
-              <Button 
-                onClick={() => navigate('/random')}
-                className="h-12 sm:h-14 md:h-16 bg-slate-900/90 border border-green-400/50 text-green-400 text-sm sm:text-base md:text-lg font-bold rounded-lg shadow-lg backdrop-blur-sm flex items-center justify-center"
-              >
-                <span className="text-center leading-tight text-xs sm:text-sm md:text-base">
-                  Random<br />Deck
-                </span>
-              </Button>
+                {/* Random Deck Button - Legendary Orange */}
+                <Button 
+                  onClick={() => navigate('/random')}
+                  variant="legendaryOrange"
+                  className="h-14 sm:h-16 md:h-18 text-xs sm:text-sm md:text-base animate-fade-in flex items-center justify-center"
+                  style={{ animationDelay: '0.6s' }}
+                >
+                  <span className="text-montserrat-black text-center leading-tight">
+                    RANDOM<br />DECK
+                  </span>
+                </Button>
+              </div>
             </div>
           </div>
-
         </div>
-
-
-        {/* Wave Divider at bottom */}
-        <div className="absolute bottom-0 left-0 w-full z-5">
-          <WaveDivider 
-            className="h-16 sm:h-24 opacity-60" 
-            inverted={false}
-          />
-        </div>
-
       </div>
     </>
   )

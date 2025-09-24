@@ -8,162 +8,186 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    /* Project O Style Guide - Primary Tint Ranges */
-    --project-o-white: 0 0% 100%; /* #FFFFFF */
-    --project-o-light-blue-gray: 200 21% 81%; /* #C8D6DD */
-    --project-o-dark-purple: 252 47% 29%; /* #2D1D51 */
-    --project-o-purple: 246 37% 35%; /* #453269 */
-    --project-o-very-dark-purple: 250 56% 21%; /* #250F39 */
-    --project-o-darkest-purple: 251 58% 18%; /* #1E0B2E */
-    --project-o-dark-teal: 180 81% 22%; /* #0b6262 */
-    --project-o-bright-cyan: 170 86% 57%; /* #2BEDC8 */
+    /* Light Mode - Darker, duller backgrounds */
+    --background-start: 240 10% 85%;
+    --background-end: 260 15% 80%;
+    --background: 0 0% 92%;
+    --foreground: 240 10% 3.9%;
     
-    /* Project O - Uncommon Colors */
-    --project-o-deep-purple: 252 69% 21%; /* #150935 */
-    --project-o-magenta-dark: 308 100% 17%; /* #17002D */
-    --project-o-navy: 250 73% 19%; /* #120926 */
-    --project-o-bright-purple: 277 100% 57%; /* #A100E4 */
-    --project-o-bright-red: 355 100% 57%; /* #E80017 */
-    --project-o-bright-green: 118 100% 66%; /* #5EFF50 */
+    /* Homepage colors - should be light in light mode */
+    --homepage-background-start: 240 10% 85%;
+    --homepage-background-end: 260 15% 80%;
+    --homepage-text: 240 10% 3.9%;
     
-    /* Project O - Rare Colors */
-    --project-o-neon-green: 151 100% 52%; /* #10FE93 */
-    --project-o-cyan: 180 100% 50%; /* #00FFFF */
-    --project-o-light-blue: 208 100% 70%; /* #6BC1FF */
+    /* Draft page colors - original background colors */
+    --draft-background-start: 240 10% 85%;
+    --draft-background-end: 260 15% 80%;
     
-    /* Project O - Epic Colors */
-    --project-o-purple-bright: 267 98% 50%; /* #7b02c9 */
-    --project-o-purple-neon: 275 100% 66%; /* #B556FF */
-    --project-o-pink-bright: 334 98% 46%; /* #C9024F */
+    /* Button colors for homepage */
+    --homepage-button-cards: 120 100% 35%; /* Green */
+    --homepage-button-decks: 200 100% 60%; /* Sky Blue */
+    --homepage-button-draft: 320 100% 60%; /* Pink */
+    --homepage-button-random: 25 95% 55%; /* Orange */
+    --homepage-button-text: 0 0% 98%; /* Light text for light mode */
     
-    /* Project O - Legendary Colors */
-    --project-o-pink-deep: 342 86% 56%; /* #CE1151 */
-    --project-o-magenta: 314 86% 42%; /* #960A6B */
-    --project-o-orange: 33 100% 58%; /* #FFB225 */
-    --project-o-hot-pink: 314 100% 58%; /* #FF0190 */
+    /* Light Mode Primary Colors */
+    --primary: 320 100% 50%;
+    --primary-foreground: 0 0% 98%;
     
-    /* Light Mode Design System */
-    --background: var(--project-o-white);
-    --foreground: var(--project-o-dark-purple);
+    /* Light Mode Accent */
+    --accent: 180 100% 40%;
+    --accent-foreground: 0 0% 98%;
     
-    /* Homepage specific - always dark background for video visibility */
-    --homepage-background-start: 210 40% 2%;
-    --homepage-background-end: 222 84% 5%;
-    --homepage-text: var(--project-o-white);
+    /* Light Mode Secondary */
+    --secondary: 120 100% 35%;
+    --secondary-foreground: 0 0% 98%;
     
-    /* Title gradient for light mode - should be purple */
-    --title-gradient: linear-gradient(135deg, hsl(var(--project-o-purple-neon)), hsl(var(--project-o-bright-cyan)));
+    /* Light Mode Supporting Colors */
+    --muted: 210 40% 95%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 3.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 3.9%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 320 100% 50%;
     
-    /* Primary Colors */
-    --primary: var(--project-o-bright-cyan);
-    --primary-foreground: var(--project-o-dark-purple);
+    /* Light Mode Wave colors - Should match dark mode background */
+    --wave-light: 260 90% 10%;
+    --wave-dark: 290 95% 5%;
     
-    /* Secondary Colors */
-    --secondary: var(--project-o-purple);
-    --secondary-foreground: var(--project-o-white);
+    /* Light Mode Chart colors */
+    --chart-1: 320 100% 50%;
+    --chart-2: 180 100% 40%;
+    --chart-3: 120 100% 35%;
+    --chart-4: 290 90% 45%;
+    --chart-5: 240 100% 55%;
     
-    /* Accent Colors */
-    --accent: var(--project-o-neon-green);
-    --accent-foreground: var(--project-o-dark-purple);
+    /* Light Mode Status indicators */
+    --success: 120 100% 35%;
+    --warning: 60 100% 45%;
+    --destructive: 0 84.2% 60.2%;
+    --orange: 20 95% 55%;
+    --orange-foreground: 0 0% 98%;
     
-    /* Supporting Colors */
-    --muted: 200 15% 95%;
-    --muted-foreground: var(--project-o-purple);
-    --card: var(--project-o-white);
-    --card-foreground: var(--project-o-dark-purple);
-    --popover: var(--project-o-white);
-    --popover-foreground: var(--project-o-dark-purple);
-    --destructive: var(--project-o-bright-red);
-    --destructive-foreground: var(--project-o-white);
-    --border: 200 15% 90%;
-    --input: 200 15% 95%;
-    --ring: var(--project-o-bright-cyan);
+    /* Light Mode text for gaming aesthetic */
+    --box-text: 240 10% 3.9%;
+    --neon-glow: 320 100% 50%;
     
-    /* Interactive Elements */
-    --button-default: var(--project-o-dark-purple);
-    --button-default-foreground: var(--project-o-white);
-    --button-hover: var(--project-o-purple);
-    --button-active: var(--project-o-very-dark-purple);
+    /* Light Mode Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(320 100% 50%), hsl(290 90% 45%));
+    --gradient-secondary: linear-gradient(135deg, hsl(180 100% 40%), hsl(120 100% 35%));
+    --gradient-fantasy: linear-gradient(135deg, hsl(240 10% 85%), hsl(260 15% 80%));
+    --gradient-card: linear-gradient(135deg, hsl(0 0% 92%), hsl(210 40% 88%));
     
-    /* Gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(var(--project-o-bright-cyan)), hsl(var(--project-o-purple)));
-    --gradient-secondary: linear-gradient(135deg, hsl(var(--project-o-neon-green)), hsl(var(--project-o-cyan)));
-    --gradient-background: linear-gradient(135deg, hsl(var(--project-o-light-blue-gray)), hsl(var(--project-o-white)));
-    
-    /* Signature Style Effects */
-    --halftone-opacity: 0.1;
-    --glitch-offset: 2px;
-    --chromatic-aberration: 1px;
-    
-    --radius: 0.25rem; /* Sharp corners as per style guide */
-    --sidebar-background: var(--project-o-white);
-    --sidebar-foreground: var(--project-o-dark-purple);
-    --sidebar-primary: var(--project-o-bright-cyan);
-    --sidebar-primary-foreground: var(--project-o-dark-purple);
-    --sidebar-accent: 200 15% 98%;
-    --sidebar-accent-foreground: var(--project-o-dark-purple);
-    --sidebar-border: 200 15% 90%;
-    --sidebar-ring: var(--project-o-bright-cyan);
+    /* Light Mode Shadows and Glows */
+    --shadow-neon-pink: 0 0 20px hsl(320 100% 50% / 0.3);
+    --shadow-neon-cyan: 0 0 20px hsl(180 100% 40% / 0.3);
+    --shadow-neon-green: 0 0 20px hsl(120 100% 35% / 0.3);
+    --shadow-gaming: 0 10px 30px hsl(240 20% 95% / 0.8);
+
+    --radius: 0.75rem;
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5% 26%;
+    --sidebar-primary: 320 100% 50%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 5% 96%;
+    --sidebar-accent-foreground: 320 100% 50%;
+    --sidebar-border: 240 6% 90%;
+    --sidebar-ring: 320 100% 50%;
   }
 
   .dark {
-    /* Dark Mode Design System */
-    --background: var(--project-o-darkest-purple);
-    --foreground: var(--project-o-bright-cyan);
+    /* Dark Mode - Dark Fantasy Enhanced */
+    --background-start: 260 90% 10%;
+    --background-end: 290 95% 5%;
+    --background: 260 25% 8%;
+    --foreground: 180 100% 95%;
     
-    /* Homepage specific - same dark background, different text gradient */
-    --homepage-background-start: 210 40% 2%;
-    --homepage-background-end: 222 84% 5%;
-    --homepage-text: var(--project-o-bright-cyan);
+    /* Homepage colors - should be dark in dark mode */
+    --homepage-background-start: 260 90% 10%;
+    --homepage-background-end: 290 95% 5%;
+    --homepage-text: 180 100% 95%;
     
-    /* Title gradient for dark mode - should be red */
-    --title-gradient: linear-gradient(135deg, hsl(var(--project-o-hot-pink)), hsl(var(--project-o-orange)));
+    /* Draft page colors - original dark background colors */
+    --draft-background-start: 260 90% 10%;
+    --draft-background-end: 290 95% 5%;
     
-    /* Primary Colors - Dark Mode */
-    --primary: var(--project-o-bright-cyan);
-    --primary-foreground: var(--project-o-dark-purple);
+    /* Button colors for homepage (same across modes) */
+    --homepage-button-cards: 120 100% 35%; /* Green */
+    --homepage-button-decks: 200 100% 60%; /* Sky Blue */
+    --homepage-button-draft: 320 100% 60%; /* Pink */
+    --homepage-button-random: 25 95% 55%; /* Orange */
+    --homepage-button-text: 0 0% 98%; /* Light text for dark mode too */
     
-    /* Secondary Colors - Dark Mode */
-    --secondary: var(--project-o-purple-neon);
-    --secondary-foreground: var(--project-o-darkest-purple);
+    /* Enhanced Neon Colors for Dark Mode */
+    --primary: 320 100% 75%;
+    --primary-foreground: 260 25% 5%;
     
-    /* Accent Colors - Dark Mode */
-    --accent: var(--project-o-neon-green);
-    --accent-foreground: var(--project-o-darkest-purple);
+    --accent: 180 100% 75%;
+    --accent-foreground: 260 25% 5%;
     
-    /* Supporting Colors - Dark Mode */
-    --muted: var(--project-o-very-dark-purple);
-    --muted-foreground: var(--project-o-light-blue-gray);
-    --card: var(--project-o-dark-purple);
-    --card-foreground: var(--project-o-bright-cyan);
-    --popover: var(--project-o-dark-purple);
-    --popover-foreground: var(--project-o-bright-cyan);
-    --destructive: var(--project-o-bright-red);
-    --destructive-foreground: var(--project-o-white);
-    --border: var(--project-o-purple);
-    --input: var(--project-o-very-dark-purple);
-    --ring: var(--project-o-bright-cyan);
+    --secondary: 120 100% 70%;
+    --secondary-foreground: 260 25% 5%;
     
-    /* Interactive Elements - Dark Mode */
-    --button-default: var(--project-o-dark-purple);
-    --button-default-foreground: var(--project-o-bright-cyan);
-    --button-hover: var(--project-o-purple);
-    --button-active: var(--project-o-very-dark-purple);
+    /* Dark Fantasy Supporting Colors */
+    --muted: 260 20% 15%;
+    --muted-foreground: 260 10% 70%;
+    --card: 260 30% 12%;
+    --card-foreground: 180 100% 95%;
+    --popover: 260 30% 12%;
+    --popover-foreground: 180 100% 95%;
+    --destructive: 0 100% 70%;
+    --destructive-foreground: 260 25% 5%;
+    --border: 260 35% 20%;
+    --input: 260 30% 18%;
+    --ring: 320 100% 75%;
     
-    /* Gradients - Dark Mode */
-    --gradient-primary: linear-gradient(135deg, hsl(var(--project-o-bright-cyan)), hsl(var(--project-o-purple-neon)));
-    --gradient-secondary: linear-gradient(135deg, hsl(var(--project-o-neon-green)), hsl(var(--project-o-cyan)));
-    --gradient-background: linear-gradient(135deg, hsl(var(--project-o-very-dark-purple)), hsl(var(--project-o-darkest-purple)));
+    --wave-light: 240 10% 85%;
+    --wave-dark: 260 15% 80%;
     
-    /* Sidebar - Dark Mode */
-    --sidebar-background: var(--project-o-dark-purple);
-    --sidebar-foreground: var(--project-o-bright-cyan);
-    --sidebar-primary: var(--project-o-bright-cyan);
-    --sidebar-primary-foreground: var(--project-o-dark-purple);
-    --sidebar-accent: var(--project-o-very-dark-purple);
-    --sidebar-accent-foreground: var(--project-o-bright-cyan);
-    --sidebar-border: var(--project-o-purple);
-    --sidebar-ring: var(--project-o-bright-cyan);
+    /* Dark Mode Gaming Chart colors */
+    --chart-1: 320 100% 75%;
+    --chart-2: 180 100% 75%;
+    --chart-3: 120 100% 70%;
+    --chart-4: 290 90% 65%;
+    --chart-5: 240 100% 80%;
+    
+    /* Dark Mode Status indicators */
+    --success: 120 100% 70%;
+    --warning: 60 100% 70%;
+    --destructive: 0 100% 70%;
+    --orange: 20 95% 65%;
+    --orange-foreground: 260 25% 5%;
+    
+    /* Dark Mode text for gaming aesthetic */
+    --box-text: 180 100% 95%;
+    --neon-glow: 320 100% 75%;
+    
+    /* Dark Mode Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(320 100% 75%), hsl(290 90% 65%));
+    --gradient-secondary: linear-gradient(135deg, hsl(180 100% 75%), hsl(120 100% 70%));
+    --gradient-fantasy: linear-gradient(135deg, hsl(260 90% 10%), hsl(290 95% 5%));
+    --gradient-card: linear-gradient(135deg, hsl(260 30% 12%), hsl(280 35% 15%));
+    
+    /* Dark Mode Shadows and Glows */
+    --shadow-neon-pink: 0 0 20px hsl(320 100% 75% / 0.5);
+    --shadow-neon-cyan: 0 0 20px hsl(180 100% 75% / 0.5);
+    --shadow-neon-green: 0 0 20px hsl(120 100% 70% / 0.5);
+    --shadow-gaming: 0 10px 30px hsl(260 90% 10% / 0.8);
+    
+    /* Dark Mode Gaming Sidebar */
+    --sidebar-background: 260 30% 12%;
+    --sidebar-foreground: 180 100% 95%;
+    --sidebar-primary: 320 100% 75%;
+    --sidebar-primary-foreground: 260 25% 5%;
+    --sidebar-accent: 260 25% 18%;
+    --sidebar-accent-foreground: 180 100% 95%;
+    --sidebar-border: 260 35% 20%;
+    --sidebar-ring: 320 100% 75%;
   }
 }
 
@@ -173,235 +197,113 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground font-project-o;
-    background: var(--gradient-background);
+    @apply bg-background text-foreground;
+    background: var(--gradient-fantasy);
     background-attachment: fixed;
   }
   
   .dark body {
-    background: var(--gradient-background);
+    background: var(--gradient-fantasy);
     background-attachment: fixed;
   }
 }
 
 @layer components {
-  /* Project O Style Guide - Typography */
-  .text-impact {
-    font-family: Impact, Arial Black, sans-serif;
-    font-weight: normal;
+  /* Gaming Neon Text Effects */
+  .neon-text {
+    @apply text-primary;
+    text-shadow: 
+      0 0 5px hsl(var(--primary)),
+      0 0 10px hsl(var(--primary)),
+      0 0 15px hsl(var(--primary));
   }
   
-  .text-impact-title {
-    @apply text-impact text-6xl md:text-8xl font-normal;
+  .neon-cyan-text {
+    @apply text-accent;
+    text-shadow: 
+      0 0 5px hsl(var(--accent)),
+      0 0 10px hsl(var(--accent)),
+      0 0 15px hsl(var(--accent));
   }
   
-  .text-montserrat {
-    font-family: 'Montserrat', sans-serif;
-  }
-  
-  .text-montserrat-black {
-    @apply text-montserrat font-black;
-  }
-  
-  .text-montserrat-regular {
-    @apply text-montserrat font-normal;
+  .neon-green-text {
+    @apply text-secondary;
+    text-shadow: 
+      0 0 5px hsl(var(--secondary)),
+      0 0 10px hsl(var(--secondary)),
+      0 0 15px hsl(var(--secondary));
   }
 
-  /* Project O Style Guide - Interactive Elements */
-  .btn-project-o {
-    @apply text-montserrat-black;
-    background: hsl(var(--button-default));
-    color: hsl(var(--button-default-foreground));
-    border: 2px solid hsl(var(--primary));
-    border-radius: var(--radius);
-    transition: all 0.2s ease;
+  /* Gaming Card Effects */
+  .card-gaming {
+    background: var(--gradient-card);
+    border: 1px solid hsl(var(--primary) / 0.3);
+    box-shadow: 
+      0 0 20px hsl(var(--primary) / 0.2),
+      inset 0 1px 0 hsl(var(--accent) / 0.1);
+  }
+
+  /* Gaming Button Effects */
+  .btn-gaming {
+    background: var(--gradient-primary);
+    border: 1px solid hsl(var(--primary));
+    box-shadow: var(--shadow-neon-pink);
+    transition: all 0.3s ease;
+  }
+  
+  .btn-gaming:hover {
+    box-shadow: var(--shadow-neon-pink), 0 0 30px hsl(var(--primary) / 0.7);
+    transform: translateY(-2px);
+  }
+
+  /* Pixelated Gaming Effects */
+  .pixelated {
+    image-rendering: pixelated;
+    image-rendering: -moz-crisp-edges;
+  }
+
+  /* Room Background */
+  .room-background {
     position: relative;
-    overflow: hidden;
+    background: var(--gradient-fantasy);
+    background-attachment: fixed;
   }
   
-  .btn-project-o:hover {
-    background: hsl(var(--button-hover));
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px hsl(var(--primary) / 0.3);
-  }
-  
-  .btn-project-o:active {
-    background: hsl(var(--button-active));
-    transform: translateY(0);
-  }
-
-  /* Project O Button Variants - Using Full Color Palette */
-  .btn-neon-green {
-    @apply text-montserrat-black;
-    background: hsl(var(--project-o-neon-green));
-    color: hsl(var(--project-o-darkest-purple));
-    border: 2px solid hsl(var(--project-o-bright-green));
-    border-radius: var(--radius);
-    transition: all 0.2s ease;
-  }
-  
-  .btn-neon-green:hover {
-    background: hsl(var(--project-o-bright-green));
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px hsl(var(--project-o-neon-green) / 0.4);
-  }
-
-  .btn-epic-purple {
-    @apply text-montserrat-black;
-    background: hsl(var(--project-o-purple-neon));
-    color: hsl(var(--project-o-darkest-purple));
-    border: 2px solid hsl(var(--project-o-bright-purple));
-    border-radius: var(--radius);
-    transition: all 0.2s ease;
-  }
-  
-  .btn-epic-purple:hover {
-    background: hsl(var(--project-o-bright-purple));
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px hsl(var(--project-o-purple-neon) / 0.4);
-  }
-
-  .btn-legendary-orange {
-    @apply text-montserrat-black;
-    background: hsl(var(--project-o-orange));
-    color: hsl(var(--project-o-darkest-purple));
-    border: 2px solid hsl(var(--project-o-hot-pink));
-    border-radius: var(--radius);
-    transition: all 0.2s ease;
-  }
-  
-  .btn-legendary-orange:hover {
-    background: hsl(var(--project-o-hot-pink));
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px hsl(var(--project-o-orange) / 0.4);
-  }
-
-  .btn-rare-blue {
-    @apply text-montserrat-black;
-    background: hsl(var(--project-o-light-blue));
-    color: hsl(var(--project-o-darkest-purple));
-    border: 2px solid hsl(var(--project-o-cyan));
-    border-radius: var(--radius);
-    transition: all 0.2s ease;
-  }
-  
-  .btn-rare-blue:hover {
-    background: hsl(var(--project-o-cyan));
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px hsl(var(--project-o-light-blue) / 0.4);
-  }
-  
-  /* Project O Style Guide - Shapes */
-  .shape-irregular {
-    clip-path: polygon(0% 0%, 95% 0%, 100% 10%, 100% 90%, 90% 100%, 5% 100%, 0% 85%);
-  }
-  
-  .shape-clean {
-    clip-path: polygon(5% 0%, 100% 0%, 95% 100%, 0% 100%);
-  }
-  
-  .shape-diagonal-cut {
-    clip-path: polygon(0% 0%, 90% 0%, 100% 15%, 100% 100%, 0% 100%);
-  }
-
-  /* Project O Style Guide - Signature Effects */
-  .effect-halftone::before {
+  .dark .room-background::before {
     content: '';
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    background-image: radial-gradient(circle, hsl(var(--foreground)) 1px, transparent 1px);
-    background-size: 8px 8px;
-    opacity: var(--halftone-opacity);
-    pointer-events: none;
+    background: var(--gradient-fantasy);
+    background-attachment: fixed;
+    opacity: 0.7;
+    z-index: -1;
   }
   
-  .effect-glitch {
-    position: relative;
-  }
-  
-  .effect-glitch::before,
-  .effect-glitch::after {
-    content: attr(data-text);
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+  .dark .room-background {
     background: transparent;
   }
   
-  .effect-glitch::before {
-    animation: glitch-1 0.5s infinite;
-    color: hsl(var(--destructive));
-    z-index: -1;
+  /* Gaming Glow Animation */
+  .glow-pulse {
+    animation: glow-pulse 2s ease-in-out infinite alternate;
   }
   
-  .effect-glitch::after {
-    animation: glitch-2 0.5s infinite;
-    color: hsl(var(--accent));
-    z-index: -2;
+  @keyframes glow-pulse {
+    from {
+      box-shadow: 0 0 20px hsl(var(--primary) / 0.5);
+    }
+    to {
+      box-shadow: 0 0 30px hsl(var(--primary) / 0.8), 0 0 40px hsl(var(--accent) / 0.3);
+    }
   }
-  
-  @keyframes glitch-1 {
-    0%, 100% { transform: translate(0); }
-    20% { transform: translate(-2px, 2px); }
-    40% { transform: translate(-2px, -2px); }
-    60% { transform: translate(2px, 2px); }
-    80% { transform: translate(2px, -2px); }
-  }
-  
-  @keyframes glitch-2 {
-    0%, 100% { transform: translate(0); }
-    20% { transform: translate(2px, 2px); }
-    40% { transform: translate(2px, -2px); }
-    60% { transform: translate(-2px, 2px); }
-    80% { transform: translate(-2px, -2px); }
-  }
-  
-  .effect-chromatic-aberration {
-    position: relative;
-    filter: drop-shadow(var(--chromatic-aberration) 0 0 hsl(var(--destructive)))
-            drop-shadow(calc(-1 * var(--chromatic-aberration)) 0 0 hsl(var(--accent)));
-  }
-  
-  /* Project O Style Guide - Cards */
-  .card-project-o {
-    background: hsl(var(--card));
-    border: 2px solid hsl(var(--border));
-    border-radius: var(--radius);
-    position: relative;
-    overflow: hidden;
-  }
-  
-  .card-project-o::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: var(--gradient-primary);
-    opacity: 0.05;
-    pointer-events: none;
-  }
-  
-  /* Project O Style Guide - Asymmetric Elements */
-  .asymmetric-cut {
-    clip-path: polygon(0% 0%, 85% 0%, 100% 25%, 95% 100%, 10% 100%, 0% 75%);
-  }
-  
-  /* Project O Style Guide - Video Background Fix */
-  .video-background {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    opacity: 0.2;
-    z-index: -1;
+
+  /* Gaming Typography */
+  .heading-gaming {
+    @apply font-bold text-transparent bg-clip-text;
+    background-image: var(--gradient-primary);
+    text-shadow: 0 0 30px hsl(var(--primary) / 0.5);
   }
 }

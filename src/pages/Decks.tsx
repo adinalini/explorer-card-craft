@@ -269,7 +269,7 @@ const Decks = () => {
         image="/og-images/decks.jpg"
         url="/decks"
       />
-      <div className="min-h-screen flex flex-col" style={{ background: 'var(--gradient-background)' }}>
+      <div className="min-h-screen bg-gradient-to-br from-[hsl(var(--background-start))] to-[hsl(var(--background-end))] flex flex-col">
       <div className="flex-1">
         <div className="container mx-auto px-4 py-8">
           {/* Header */}
@@ -279,26 +279,26 @@ const Decks = () => {
                 onClick={() => navigate('/')}
                 variant="ghost"
                 size="sm"
-                className="text-white hover:bg-white/20 px-2 py-1 text-xs sm:text-sm sm:px-3 sm:py-2"
+                className="text-foreground hover:bg-accent px-2 py-1 text-xs sm:text-sm sm:px-3 sm:py-2"
               >
                 <ArrowLeft className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
                 <span className="hidden sm:inline">Back to Home</span>
                 <span className="sm:hidden">Back</span>
               </Button>
-              <h1 className="text-2xl sm:text-4xl font-bold text-white">Deck Builder</h1>
+              <h1 className="text-2xl sm:text-4xl font-bold text-foreground">Deck Builder</h1>
             </div>
             
             <div className="flex items-center gap-2">
               <Button
                 onClick={() => navigate('/deck-builder')}
                 size="sm"
-                className="bg-orange-600 hover:bg-orange-700 text-white px-2 py-1 text-xs sm:text-sm sm:px-3 sm:py-2"
+                className="bg-orange-500 hover:bg-orange-600 text-white font-semibold px-2 py-1 text-xs sm:text-sm sm:px-3 sm:py-2"
               >
                 <Plus className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
                 <span className="sm:hidden">Create</span>
                 <span className="hidden sm:inline">Create Deck</span>
               </Button>
-              <ThemeToggle className="text-white hover:bg-white/20" />
+              <ThemeToggle className="text-foreground hover:bg-accent" />
             </div>
           </div>
 
@@ -313,7 +313,7 @@ const Decks = () => {
             
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-                <Label className="text-sm font-semibold text-white">Deck Type:</Label>
+                <Label className="text-sm font-medium text-foreground">Deck Type:</Label>
                 
                 {/* Mobile: Dropdown */}
                 <div className="sm:hidden">
@@ -371,7 +371,7 @@ const Decks = () => {
               </div>
               
               <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-                <Label className="text-sm font-semibold text-white">Decks per page:</Label>
+                <Label className="text-sm font-medium text-foreground">Decks per page:</Label>
                 <RadioGroup
                   value={itemsPerPage.toString()}
                   onValueChange={(value) => setItemsPerPage(parseInt(value))}

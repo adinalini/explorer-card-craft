@@ -16,6 +16,9 @@ const Index = () => {
   const [videosLoaded, setVideosLoaded] = useState(false)
   const originalVideoRef = useRef<HTMLVideoElement>(null)
   const reverseVideoRef = useRef<HTMLVideoElement>(null)
+  const [disableOriginal, setDisableOriginal] = useState(false)
+  const [disableReverse, setDisableReverse] = useState(false)
+  const errorCountsRef = useRef<{ original: number; reverse: number }>({ original: 0, reverse: 0 })
 
   // Seamless loop: use natural video end event for better timing
   const FREEZE_MS = 100;
@@ -25,29 +28,36 @@ const Index = () => {
   const prepareAndSwitch = (current: 'original' | 'reverse') => {
     // Debounce: prevent rapid successive switches
     const now = Date.now();
-    if (now - lastSwitchTimeRef.current < 1000) return;
+    if (now - lastSwitchTimeRef.current < 800) return;
     lastSwitchTimeRef.current = now;
 
     const currentRef = current === 'original' ? originalVideoRef : reverseVideoRef;
     const nextRef = current === 'original' ? reverseVideoRef : originalVideoRef;
     const next = current === 'original' ? 'reverse' : 'original';
 
-    if (!currentRef.current || !nextRef.current) return;
+    if (!currentRef.current) return;
+
+    // If next video is disabled, simply restart the current one
+    if ((next === 'reverse' && disableReverse) || (next === 'original' && disableOriginal) || !nextRef.current) {
+      try {
+        currentRef.current.currentTime = 0;
+        currentRef.current.play().catch(() => {});
+      } catch {}
+      isSwitchingRef.current = false;
+      return;
+    }
 
     console.log(`Switching from ${current} to ${next}`);
 
-    // Prepare and start the next video
     try {
       nextRef.current.currentTime = 0;
-      nextRef.current.play().catch(console.error);
+      nextRef.current.play().catch(() => {});
     } catch (e) {
       console.error('Error starting next video:', e);
     }
 
-    // Switch immediately with crossfade
     setCurrentVideo(next);
-    
-    // Reset switching flag after transition
+
     setTimeout(() => {
       isSwitchingRef.current = false;
     }, FREEZE_MS);
@@ -75,27 +85,52 @@ const Index = () => {
     prepareAndSwitch(current);
   };
 
-  // Handle video errors with restart logic
+  // Handle video errors with bounded retries and graceful fallback
   const handleVideoError = (current: 'original' | 'reverse', e: SyntheticEvent<HTMLVideoElement, Event>) => {
-    console.log(`Video error for ${current}, attempting restart...`);
     const video = e.currentTarget as HTMLVideoElement;
-    const otherVideo = current === 'original' ? reverseVideoRef.current : originalVideoRef.current;
-    
-    // Try to restart the errored video
-    setTimeout(() => {
-      video.load();
-      video.play().catch(() => {
-        // If restart fails, switch to the other video
-        if (otherVideo && !isSwitchingRef.current) {
-          isSwitchingRef.current = true;
-          const next = current === 'original' ? 'reverse' : 'original';
-          setCurrentVideo(next);
-          otherVideo.currentTime = 0;
-          otherVideo.play().catch(() => {});
-          isSwitchingRef.current = false;
-        }
-      });
-    }, 1000);
+    const counts = errorCountsRef.current;
+    counts[current] = (counts[current] ?? 0) + 1;
+
+    console.warn(`Video error for ${current} (attempt ${counts[current]}), handling...`);
+
+    // Try up to 2 quick retries
+    if (counts[current] <= 2) {
+      setTimeout(() => {
+        try {
+          video.pause();
+          video.currentTime = 0;
+          video.load();
+          video.play().catch(() => {});
+        } catch {}
+      }, 500);
+      return;
+    }
+
+    // Disable the problematic video and fall back to the other
+    if (current === 'reverse') {
+      setDisableReverse(true);
+    } else {
+      setDisableOriginal(true);
+    }
+
+    const otherRef = current === 'original' ? reverseVideoRef : originalVideoRef;
+    const otherDisabled = current === 'original' ? disableReverse : disableOriginal;
+    const next = current === 'original' ? 'reverse' : 'original';
+
+    if (!otherDisabled && otherRef.current) {
+      isSwitchingRef.current = true;
+      try {
+        otherRef.current.currentTime = 0;
+        otherRef.current.play().catch(() => {});
+      } catch {}
+      setCurrentVideo(next);
+      setTimeout(() => {
+        isSwitchingRef.current = false;
+      }, FREEZE_MS);
+    } else {
+      // Both videos unavailable; keep fallback background visible
+      setVideosLoaded(false);
+    }
   };
 
   useEffect(() => {
@@ -132,52 +167,56 @@ const Index = () => {
           />
           
           {/* Original Video */}
-          <video 
-            ref={originalVideoRef}
-            autoPlay 
-            muted 
-            playsInline
-            preload="auto"
-            poster="/lovable-uploads/3bc78144-de54-443f-8b86-d8f5835966a1.png"
-            onEnded={handleVideoEnd}
-            onTimeUpdate={(e) => handleTimeUpdate('original', e)}
-            onError={(e) => handleVideoError('original', e)}
-            className={`w-full h-full object-cover pointer-events-none transition-opacity duration-300 ${
-              currentVideo === 'original' ? 'opacity-40' : 'opacity-0'
-            }`}
-            onLoadedData={(e) => {
-              const video = e.currentTarget;
-              video.playbackRate = 0.8;
-              setVideosLoaded(true);
-            }}
-            style={{ position: 'absolute' }}
-          >
-            <source src="/animated_card_reel.mp4" type="video/mp4" />
-            Your browser does not support the video tag.
-          </video>
+          {!disableOriginal && (
+            <video 
+              ref={originalVideoRef}
+              autoPlay 
+              muted 
+              playsInline
+              preload="auto"
+              poster="/lovable-uploads/3bc78144-de54-443f-8b86-d8f5835966a1.png"
+              onEnded={handleVideoEnd}
+              onTimeUpdate={(e) => handleTimeUpdate('original', e)}
+              onError={(e) => handleVideoError('original', e)}
+              className={`w-full h-full object-cover pointer-events-none transition-opacity duration-300 ${
+                currentVideo === 'original' ? 'opacity-40' : 'opacity-0'
+              }`}
+              onLoadedData={(e) => {
+                const video = e.currentTarget;
+                video.playbackRate = 0.8;
+                setVideosLoaded(true);
+              }}
+              style={{ position: 'absolute' }}
+            >
+              <source src="/animated_card_reel.mp4" type="video/mp4" />
+              Your browser does not support the video tag.
+            </video>
+          )}
 
-          {/* Reverse Video - Always mounted */}
-          <video 
-            ref={reverseVideoRef}
-            muted 
-            playsInline
-            preload="auto"
-            poster="/lovable-uploads/3bc78144-de54-443f-8b86-d8f5835966a1.png"
-            onEnded={handleVideoEnd}
-            onTimeUpdate={(e) => handleTimeUpdate('reverse', e)}
-            onError={(e) => handleVideoError('reverse', e)}
-            className={`w-full h-full object-cover pointer-events-none transition-opacity duration-300 ${
-              currentVideo === 'reverse' ? 'opacity-40' : 'opacity-0'
-            }`}
-            onLoadedData={(e) => {
-              const video = e.currentTarget;
-              video.playbackRate = 0.8;
-            }}
-            style={{ position: 'absolute' }}
-          >
-            <source src="/animated card reel reverse.mp4" type="video/mp4" />
-            Your browser does not support the video tag.
-          </video>
+          {/* Reverse Video */}
+          {!disableReverse && (
+            <video 
+              ref={reverseVideoRef}
+              muted 
+              playsInline
+              preload="auto"
+              poster="/lovable-uploads/3bc78144-de54-443f-8b86-d8f5835966a1.png"
+              onEnded={handleVideoEnd}
+              onTimeUpdate={(e) => handleTimeUpdate('reverse', e)}
+              onError={(e) => handleVideoError('reverse', e)}
+              className={`w-full h-full object-cover pointer-events-none transition-opacity duration-300 ${
+                currentVideo === 'reverse' ? 'opacity-40' : 'opacity-0'
+              }`}
+              onLoadedData={(e) => {
+                const video = e.currentTarget;
+                video.playbackRate = 0.8;
+              }}
+              style={{ position: 'absolute' }}
+            >
+              <source src="/animated%20card%20reel%20reverse.mp4" type="video/mp4" />
+              Your browser does not support the video tag.
+            </video>
+          )}
         </div>
 
         {/* Abstract Blobs - Removed as requested */}

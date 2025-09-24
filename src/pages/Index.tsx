@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom"
 import { SEOHead } from "@/components/SEOHead"
 import { FloatingCards, FloatingBubbles, FloatingBubblesDown, FloatingQuestionMarksHorizontal } from "@/components/ui/homepage-animations"
 import whiteRabbit from "@/assets/white_rabbit.webp"
+import projectOLogo from "/lovable-uploads/219c067b-3ac3-4955-96d1-76dc64562ea1.png"
 
 const Index = () => {
   // Force rebuild to clear videoRef cache issue
@@ -109,27 +110,40 @@ const Index = () => {
         <div className="relative z-10 h-[15vh] sm:h-[20vh] flex flex-col items-center justify-center px-4">
           <div className="flex items-center justify-center text-3xl sm:text-6xl md:text-8xl font-bold transition-colors duration-500 drop-shadow-2xl">
             <span 
-              className="bg-gradient-to-r from-[hsl(290_95%_45%)] via-[hsl(320_100%_50%)] to-[hsl(290_95%_45%)] dark:from-[hsl(0_84%_60%)] dark:via-[hsl(320_100%_60%)] dark:to-[hsl(0_84%_60%)] bg-clip-text text-transparent"
-              style={{ backgroundSize: '200% 100%', animation: 'gradient-shift 3s ease infinite' }}
+              className="bg-gradient-to-r"
+              style={{ 
+                background: 'var(--title-gradient)',
+                WebkitBackgroundClip: 'text',
+                backgroundClip: 'text',
+                WebkitTextFillColor: 'transparent'
+              }}
             >
               Project{" "}
             </span>
-            {/* Logo O - Purple in light mode, Red in dark mode */}
-            <div className="inline-flex items-center justify-center mx-1 sm:mx-2 md:mx-3">
-              <img 
-                src="/lovable-uploads/219c067b-3ac3-4955-96d1-76dc64562ea1.png" 
-                alt="O Logo" 
-                className="w-8 sm:w-16 md:w-20 lg:w-24 h-8 sm:h-16 md:h-20 lg:h-24 object-contain dark:hidden"
-              />
-              <img 
-                src="/lovable-uploads/fc4bded4-d154-4368-9ba7-fcc6d9eedc5b.png" 
-                alt="O Logo" 
-                className="w-8 sm:w-16 md:w-20 lg:w-24 h-8 sm:h-16 md:h-20 lg:h-24 object-contain hidden dark:block"
-              />
-            </div>
+            {/* Logo O with CSS masking */}
+            <div 
+              aria-label="Project O Logo"
+              className="inline-block w-8 h-8 sm:w-16 sm:h-16 md:w-20 md:h-20 lg:w-24 lg:h-24 mx-1 sm:mx-2 md:mx-3"
+              style={{
+                background: 'var(--title-gradient)',
+                WebkitMaskImage: `url(${projectOLogo})`,
+                maskImage: `url(${projectOLogo})`,
+                WebkitMaskRepeat: 'no-repeat',
+                maskRepeat: 'no-repeat',
+                WebkitMaskSize: 'contain',
+                maskSize: 'contain',
+                WebkitMaskPosition: 'center',
+                maskPosition: 'center',
+              }}
+            />
             <span 
-              className="bg-gradient-to-r from-[hsl(290_95%_45%)] via-[hsl(320_100%_50%)] to-[hsl(290_95%_45%)] dark:from-[hsl(0_84%_60%)] dark:via-[hsl(320_100%_60%)] dark:to-[hsl(0_84%_60%)] bg-clip-text text-transparent"
-              style={{ backgroundSize: '200% 100%', animation: 'gradient-shift 3s ease infinite' }}
+              className="bg-gradient-to-r"
+              style={{ 
+                background: 'var(--title-gradient)',
+                WebkitBackgroundClip: 'text',
+                backgroundClip: 'text',
+                WebkitTextFillColor: 'transparent'
+              }}
             >
               Zone
             </span>

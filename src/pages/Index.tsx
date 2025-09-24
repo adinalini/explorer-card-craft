@@ -13,29 +13,39 @@ const Index = () => {
   const navigate = useNavigate()
   const [hoveredButton, setHoveredButton] = useState<string | null>(null)
   const [currentVideo, setCurrentVideo] = useState<'original' | 'reverse'>('original')
+  const [isTransitioning, setIsTransitioning] = useState(false)
   const originalVideoRef = useRef<HTMLVideoElement>(null)
   const reverseVideoRef = useRef<HTMLVideoElement>(null)
 
-  // Seamless switch: crossfade videos and control playback
+  // Handle video end with 0.2s delay and smooth transition
   const handleVideoEnd = () => {
-    setCurrentVideo((prev) => (prev === 'original' ? 'reverse' : 'original'))
+    setIsTransitioning(true)
+    
+    setTimeout(() => {
+      const nextVideo = currentVideo === 'original' ? 'reverse' : 'original'
+      const nextVideoRef = currentVideo === 'original' ? reverseVideoRef : originalVideoRef
+      
+      if (nextVideoRef.current) {
+        nextVideoRef.current.currentTime = 0
+        nextVideoRef.current.play().catch(() => {})
+      }
+      
+      setCurrentVideo(nextVideo)
+      setIsTransitioning(false)
+    }, 200) // 0.2s delay
   }
 
   useEffect(() => {
+    // Preload and prepare both videos
     const original = originalVideoRef.current
     const reverse = reverseVideoRef.current
-    if (!original || !reverse) return
-
-    if (currentVideo === 'original') {
-      reverse.pause()
+    
+    if (original && reverse) {
+      // Prepare the reverse video (paused and ready)
       reverse.currentTime = 0
-      original.play().catch(() => {})
-    } else {
-      original.pause()
-      original.currentTime = 0
-      reverse.play().catch(() => {})
+      reverse.pause()
     }
-  }, [currentVideo])
+  }, [])
 
   const getTextColor = () => {
     if (!hoveredButton) return "text-[hsl(var(--homepage-text))]"
@@ -74,7 +84,9 @@ const Index = () => {
             preload="auto"
             poster="/lovable-uploads/918d2f07-eec2-4aea-9105-f29011a86707.png"
             onEnded={handleVideoEnd}
-            className={`w-full h-full object-cover pointer-events-none transition-opacity duration-500 ${currentVideo === 'original' ? 'opacity-40' : 'opacity-0'}`}
+            className={`w-full h-full object-cover pointer-events-none transition-opacity duration-300 ${
+              currentVideo === 'original' && !isTransitioning ? 'opacity-40' : 'opacity-0'
+            }`}
             onLoadedData={(e) => {
               const video = e.currentTarget;
               video.playbackRate = 0.8;
@@ -85,14 +97,16 @@ const Index = () => {
             Your browser does not support the video tag.
           </video>
 
-          {/* Reverse Video */}
+          {/* Reverse Video - Always mounted */}
           <video 
             ref={reverseVideoRef}
             muted 
             playsInline
             preload="auto"
             onEnded={handleVideoEnd}
-            className={`w-full h-full object-cover pointer-events-none transition-opacity duration-500 ${currentVideo === 'reverse' ? 'opacity-40' : 'opacity-0'}`}
+            className={`w-full h-full object-cover pointer-events-none transition-opacity duration-300 ${
+              currentVideo === 'reverse' && !isTransitioning ? 'opacity-40' : 'opacity-0'
+            }`}
             onLoadedData={(e) => {
               const video = e.currentTarget;
               video.playbackRate = 0.8;

@@ -14,10 +14,9 @@ All colors MUST be HSL.
     --background: 0 0% 92%;
     --foreground: 240 10% 3.9%;
     
-    /* Homepage colors - should be light in light mode */
-    --homepage-background-start: 240 10% 85%;
-    --homepage-background-end: 260 15% 80%;
-    --homepage-text: 240 10% 3.9%;
+    /* Homepage colors - consistent dark background in both modes */
+    --homepage-background-start: 270 58% 14%;  /* #250F39 */
+    --homepage-background-end: 270 55% 12%;    /* #1E0B2E */
     
     /* Homepage title gradients - based on UI style guide */
     --homepage-title-gradient-light: linear-gradient(135deg, hsl(258, 42%, 22%), hsl(339, 86%, 44%)); /* Purple to Pink */
@@ -111,10 +110,9 @@ All colors MUST be HSL.
     --background: 260 25% 8%;
     --foreground: 180 100% 95%;
     
-    /* Homepage colors - should be dark in dark mode */
-    --homepage-background-start: 260 90% 10%;
-    --homepage-background-end: 290 95% 5%;
-    --homepage-text: 180 100% 95%;
+    /* Homepage colors - consistent dark background in both modes */
+    --homepage-background-start: 270 58% 14%;  /* #250F39 */
+    --homepage-background-end: 270 55% 12%;    /* #1E0B2E */
     
     /* Homepage title gradients - based on UI style guide (swapped for dark mode) */
     --homepage-title-gradient-light: linear-gradient(135deg, hsl(352, 100%, 46%), hsl(339, 94%, 40%)); /* Red gradient */

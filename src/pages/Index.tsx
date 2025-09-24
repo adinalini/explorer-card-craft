@@ -7,6 +7,8 @@ import { useNavigate } from "react-router-dom"
 import { SEOHead } from "@/components/SEOHead"
 import { FloatingCards, FloatingBubbles, FloatingBubblesDown, FloatingQuestionMarksHorizontal } from "@/components/ui/homepage-animations"
 import whiteRabbit from "@/assets/white_rabbit.webp"
+import projectOLogoLight from "@/assets/project-o-logo-light.png"
+import projectOLogoDark from "@/assets/project-o-logo-dark.png"
 
 const Index = () => {
   const navigate = useNavigate()
@@ -92,8 +94,23 @@ const Index = () => {
         <div className="relative z-10 min-h-screen flex flex-col">
           {/* Top - Project O Zone Title */}
           <div className="flex-none h-[25vh] flex flex-col items-center justify-center px-4">
-            <h1 className="text-impact-title text-[hsl(var(--homepage-text))] text-center leading-none drop-shadow-2xl effect-chromatic-aberration">
-              PROJECT O ZONE
+            <h1 className="text-impact-title text-center leading-none drop-shadow-2xl effect-chromatic-aberration flex items-center justify-center gap-2">
+              <span style={{ background: 'var(--title-gradient)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
+                PROJECT
+              </span>
+              <img 
+                src={projectOLogoLight} 
+                alt="O" 
+                className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 lg:w-28 lg:h-28 inline-block dark:hidden" 
+              />
+              <img 
+                src={projectOLogoDark} 
+                alt="O" 
+                className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 lg:w-28 lg:h-28 hidden dark:inline-block" 
+              />
+              <span style={{ background: 'var(--title-gradient)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
+                ZONE
+              </span>
             </h1>
           </div>
 

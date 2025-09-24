@@ -45,9 +45,14 @@ All colors MUST be HSL.
     /* Light Mode Design System */
     --background: var(--project-o-white);
     --foreground: var(--project-o-dark-purple);
-    --homepage-background-start: var(--project-o-light-blue-gray);
-    --homepage-background-end: var(--project-o-white);
-    --homepage-text: var(--project-o-dark-purple);
+    
+    /* Homepage specific - always dark background for video visibility */
+    --homepage-background-start: 210 40% 2%;
+    --homepage-background-end: 222 84% 5%;
+    --homepage-text: var(--project-o-white);
+    
+    /* Title gradient for light mode */
+    --title-gradient: linear-gradient(135deg, hsl(var(--project-o-hot-pink)), hsl(var(--project-o-orange)));
     
     /* Primary Colors */
     --primary: var(--project-o-bright-cyan);
@@ -105,9 +110,14 @@ All colors MUST be HSL.
     /* Dark Mode Design System */
     --background: var(--project-o-darkest-purple);
     --foreground: var(--project-o-bright-cyan);
-    --homepage-background-start: var(--project-o-very-dark-purple);
-    --homepage-background-end: var(--project-o-darkest-purple);
+    
+    /* Homepage specific - same dark background, different text gradient */
+    --homepage-background-start: 210 40% 2%;
+    --homepage-background-end: 222 84% 5%;
     --homepage-text: var(--project-o-bright-cyan);
+    
+    /* Title gradient for dark mode */
+    --title-gradient: linear-gradient(135deg, hsl(var(--project-o-purple-neon)), hsl(var(--project-o-bright-cyan)));
     
     /* Primary Colors - Dark Mode */
     --primary: var(--project-o-bright-cyan);

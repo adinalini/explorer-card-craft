@@ -83,12 +83,6 @@ const Index = () => {
           </video>
         </div>
 
-        {/* Project O Style Guide - Irregular Abstract Shapes */}
-        <div className="absolute top-10 left-8 w-32 h-32 bg-gradient-to-br from-[hsl(var(--project-o-bright-cyan))] to-[hsl(var(--project-o-purple))] opacity-20 shape-irregular animate-float" style={{ animationDelay: '0s', animationDuration: '6s' }}></div>
-        <div className="absolute top-20 right-12 w-24 h-24 bg-gradient-to-br from-[hsl(var(--project-o-neon-green))] to-[hsl(var(--project-o-cyan))] opacity-25 asymmetric-cut animate-float" style={{ animationDelay: '2s', animationDuration: '8s' }}></div>
-        <div className="absolute bottom-32 left-16 w-20 h-20 bg-gradient-to-br from-[hsl(var(--project-o-orange))] to-[hsl(var(--project-o-hot-pink))] opacity-15 shape-diagonal-cut animate-float" style={{ animationDelay: '4s', animationDuration: '7s' }}></div>
-        <div className="absolute bottom-16 right-20 w-28 h-28 bg-gradient-to-br from-[hsl(var(--project-o-purple-neon))] to-[hsl(var(--project-o-pink-bright))] opacity-20 shape-clean animate-float" style={{ animationDelay: '1s', animationDuration: '9s' }}></div>
-        
         {/* Theme Toggle in top right */}
         <div className="absolute top-4 right-4 z-20">
           <ThemeToggle />

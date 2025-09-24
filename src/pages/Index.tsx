@@ -67,7 +67,7 @@ const Index = () => {
             muted 
             preload="auto"
             poster="/animated_card_reel.jpg"
-            className={`video-background transition-opacity duration-300 ${activeVideo === 1 ? 'opacity-100' : 'opacity-0'}`}
+            className={`video-background transition-opacity duration-300 ${activeVideo === 1 ? 'opacity-25' : 'opacity-0'}`}
           >
             <source src="/animated_card_reel.mp4" type="video/mp4" />
             Your browser does not support the video tag.
@@ -76,7 +76,7 @@ const Index = () => {
             ref={videoRef2}
             muted 
             preload="auto"
-            className={`video-background absolute inset-0 transition-opacity duration-300 ${activeVideo === 2 ? 'opacity-100' : 'opacity-0'}`}
+            className={`video-background absolute inset-0 transition-opacity duration-300 ${activeVideo === 2 ? 'opacity-25' : 'opacity-0'}`}
           >
             <source src="/animated_card_reel_reverse.mp4" type="video/mp4" />
             Your browser does not support the video tag.

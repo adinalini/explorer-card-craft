@@ -198,46 +198,72 @@ const Index = () => {
             />
           </div>
 
-          {/* Center - Buttons */}
-          <div className="flex items-center justify-center z-10 ml-24 sm:ml-32 md:ml-40 lg:ml-48">
-            <div className="grid grid-cols-2 gap-2 sm:gap-3 w-64 sm:w-72 md:w-80">
+          {/* Right Side - Buttons */}
+          <div className="absolute right-4 sm:right-8 md:right-12 lg:right-16 top-1/2 -translate-y-1/2 z-10">
+            <div className="relative grid grid-cols-2 w-80 sm:w-96 md:w-[420px] lg:w-[480px]" style={{ height: '459px' }}>
+              {/* Cross-style borders */}
+              <div className="absolute inset-0 pointer-events-none">
+                {/* Vertical line */}
+                <div className="absolute left-1/2 top-0 bottom-0 w-px bg-black/30 -translate-x-0.5"></div>
+                {/* Horizontal line */}
+                <div className="absolute top-1/2 left-0 right-0 h-px bg-black/30 -translate-y-0.5"></div>
+              </div>
+              
               {/* Cards Button */}
-              <Button 
+              <div 
                 onClick={() => navigate('/cards')}
-                className="h-12 sm:h-14 md:h-16 bg-white dark:bg-slate-900/90 border border-cyan-400/50 text-slate-900 dark:text-cyan-400 text-sm sm:text-base md:text-lg font-bold rounded-lg shadow-lg backdrop-blur-sm animate-fade-in hover:bg-cyan-400 hover:text-white dark:hover:bg-cyan-400 dark:hover:text-white transition-all duration-300"
+                className="flex flex-col items-center justify-center p-4 sm:p-6 md:p-8 bg-black/20 backdrop-blur-sm cursor-pointer hover:bg-black/30 transition-all duration-300 animate-fade-in"
                 style={{ animationDelay: '0.3s' }}
               >
-                Cards
-              </Button>
+                <div className="text-lg sm:text-xl md:text-2xl font-bold text-slate-900 dark:text-white mb-2">
+                  Cards
+                </div>
+                <div className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 text-center leading-tight">
+                  View all the cards along with their variants and blueprints. You can also browse through old versions and download the images.
+                </div>
+              </div>
 
               {/* Decks Button */}
-              <Button 
+              <div 
                 onClick={() => navigate('/decks')}
-                className="h-12 sm:h-14 md:h-16 bg-white dark:bg-slate-900/90 border border-cyan-400/50 text-slate-900 dark:text-cyan-400 text-sm sm:text-base md:text-lg font-bold rounded-lg shadow-lg backdrop-blur-sm animate-fade-in hover:bg-cyan-400 hover:text-white dark:hover:bg-cyan-400 dark:hover:text-white transition-all duration-300"
+                className="flex flex-col items-center justify-center p-4 sm:p-6 md:p-8 bg-black/20 backdrop-blur-sm cursor-pointer hover:bg-black/30 transition-all duration-300 animate-fade-in"
                 style={{ animationDelay: '0.4s' }}
               >
-                Decks
-              </Button>
+                <div className="text-lg sm:text-xl md:text-2xl font-bold text-slate-900 dark:text-white mb-2">
+                  Decks
+                </div>
+                <div className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 text-center leading-tight">
+                  Browse through the featured decks that have secured positions or community decks made you. Deck builder feature with deck codes available.
+                </div>
+              </div>
 
               {/* Draft Button */}
-              <Button 
+              <div 
                 onClick={() => navigate('/draft')}
-                className="h-12 sm:h-14 md:h-16 bg-white dark:bg-slate-900/90 border border-cyan-400/50 text-slate-900 dark:text-cyan-400 text-sm sm:text-base md:text-lg font-bold rounded-lg shadow-lg backdrop-blur-sm animate-fade-in hover:bg-cyan-400 hover:text-white dark:hover:bg-cyan-400 dark:hover:text-white transition-all duration-300"
+                className="flex flex-col items-center justify-center p-4 sm:p-6 md:p-8 bg-black/20 backdrop-blur-sm cursor-pointer hover:bg-black/30 transition-all duration-300 animate-fade-in"
                 style={{ animationDelay: '0.5s' }}
               >
-                Draft
-              </Button>
+                <div className="text-lg sm:text-xl md:text-2xl font-bold text-slate-900 dark:text-white mb-2">
+                  Draft
+                </div>
+                <div className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 text-center leading-tight">
+                  Play a draft game with someone. Current modes available are: Default double draft and triple draft. Mega Draft coming soon.
+                </div>
+              </div>
 
               {/* Random Deck Button */}
-              <Button 
+              <div 
                 onClick={() => navigate('/random')}
-                className="h-12 sm:h-14 md:h-16 bg-white dark:bg-slate-900/90 border border-cyan-400/50 text-slate-900 dark:text-cyan-400 text-sm sm:text-base md:text-lg font-bold rounded-lg shadow-lg backdrop-blur-sm animate-fade-in flex items-center justify-center hover:bg-cyan-400 hover:text-white dark:hover:bg-cyan-400 dark:hover:text-white transition-all duration-300"
+                className="flex flex-col items-center justify-center p-4 sm:p-6 md:p-8 bg-black/20 backdrop-blur-sm cursor-pointer hover:bg-black/30 transition-all duration-300 animate-fade-in"
                 style={{ animationDelay: '0.6s' }}
               >
-                <span className="text-center leading-tight text-xs sm:text-sm md:text-base">
-                  Random<br />Deck
-                </span>
-              </Button>
+                <div className="text-lg sm:text-xl md:text-2xl font-bold text-slate-900 dark:text-white mb-2">
+                  Random Deck
+                </div>
+                <div className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 text-center leading-tight">
+                  Feeling adventurous? Just play a random deck.
+                </div>
+              </div>
             </div>
           </div>
 

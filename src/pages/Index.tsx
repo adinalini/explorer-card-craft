@@ -48,15 +48,15 @@ const Index = () => {
           <ThemeToggle className="text-[hsl(var(--homepage-text))] hover:bg-white/10 dark:hover:bg-black/20" />
         </div>
 
-        {/* Top 30% - Project O Zone Title */}
-        <div className="relative z-10 h-[30vh] flex flex-col items-center justify-center px-4">
-          <h1 className={`text-4xl sm:text-6xl md:text-8xl font-bold transition-colors duration-500 drop-shadow-2xl ${getTextColor()}`}>
+        {/* Top - Project O Zone Title */}
+        <div className="relative z-10 h-[20vh] sm:h-[30vh] flex flex-col items-center justify-center px-4">
+          <h1 className={`text-3xl sm:text-6xl md:text-8xl font-bold transition-colors duration-500 drop-shadow-2xl ${getTextColor()}`}>
             Project O Zone
           </h1>
         </div>
 
-        {/* Bottom 70% - 2x2 Button Grid */}
-        <div className="relative z-10 h-[70vh] p-8">
+        {/* Bottom - 2x2 Button Grid */}
+        <div className="relative z-10 h-[80vh] sm:h-[70vh] p-4 sm:p-8">
           <div className="grid grid-cols-2 grid-rows-2 gap-6 h-full max-w-6xl mx-auto">
             {/* Cards Button */}
             <Button 

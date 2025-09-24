@@ -11,7 +11,6 @@ import whiteRabbit from "@/assets/white_rabbit.webp"
 const Index = () => {
   // Force rebuild to clear videoRef cache issue
   const navigate = useNavigate()
-  const [hoveredButton, setHoveredButton] = useState<string | null>(null)
   const [currentVideo, setCurrentVideo] = useState<'original' | 'reverse'>('original')
   const originalVideoRef = useRef<HTMLVideoElement>(null)
   const reverseVideoRef = useRef<HTMLVideoElement>(null)
@@ -45,23 +44,6 @@ const Index = () => {
     }
   }, [])
 
-  const getTextColor = () => {
-    if (!hoveredButton) return "text-[hsl(var(--homepage-text))]"
-    
-    switch (hoveredButton) {
-      case 'cards':
-        return "text-[hsl(var(--homepage-button-cards))]"
-      case 'decks':
-        return "text-[hsl(var(--homepage-button-decks))]"
-      case 'draft':
-        return "text-[hsl(var(--homepage-button-draft))]"
-      case 'random':
-        return "text-[hsl(var(--homepage-button-random))]"
-      default:
-        return "text-[hsl(var(--homepage-text))]"
-    }
-  }
-
   return (
     <>
       <SEOHead 
@@ -70,7 +52,7 @@ const Index = () => {
         image="/og-images/homepage.jpg"
         url="/"
       />
-      <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-[hsl(var(--homepage-background-start))] to-[hsl(var(--homepage-background-end))]">
+      <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-[hsl(var(--draft-background-start))] to-[hsl(var(--draft-background-end))]">
         {/* Background Videos */}
         <div className="absolute inset-0 z-0">
           {/* Original Video */}
@@ -116,22 +98,42 @@ const Index = () => {
           </video>
         </div>
 
-        {/* Abstract Blobs */}
-        <Blob variant="pink" size="lg" className="top-20 left-10 animate-float" style={{ animationDelay: '0s', animationDuration: '6s' }} />
-        <Blob variant="yellow" size="md" className="top-32 right-20 animate-float" style={{ animationDelay: '2s', animationDuration: '8s' }} />
-        <Blob variant="orange" size="sm" className="bottom-40 left-32 animate-float" style={{ animationDelay: '4s', animationDuration: '7s' }} />
-        <Blob variant="pink" size="md" className="bottom-20 right-16 animate-float" style={{ animationDelay: '1s', animationDuration: '9s' }} />
+        {/* Abstract Blobs - Removed as requested */}
         
         {/* Theme Toggle in top right */}
         <div className="absolute top-4 right-4 z-20">
           <ThemeToggle className="text-[hsl(var(--homepage-text))] hover:bg-white/10 dark:hover:bg-black/20" />
         </div>
 
-        {/* Top - Project O Zone Title */}
+        {/* Top - Project O Zone Title with Logo */}
         <div className="relative z-10 h-[15vh] sm:h-[20vh] flex flex-col items-center justify-center px-4">
-          <h1 className={`text-3xl sm:text-6xl md:text-8xl font-bold transition-colors duration-500 drop-shadow-2xl ${getTextColor()}`}>
-            Project O Zone
-          </h1>
+          <div className="flex items-center text-3xl sm:text-6xl md:text-8xl font-bold transition-colors duration-500 drop-shadow-2xl">
+            <span 
+              className="bg-gradient-to-r from-[hsl(320_100%_50%)] via-[hsl(290_90%_45%)] to-[hsl(320_100%_50%)] dark:from-[hsl(320_100%_75%)] dark:via-[hsl(290_90%_65%)] dark:to-[hsl(320_100%_75%)] bg-clip-text text-transparent"
+              style={{ backgroundSize: '200% 100%', animation: 'gradient-shift 3s ease infinite' }}
+            >
+              Project{" "}
+            </span>
+            {/* Logo O - Purple in light mode, Red in dark mode */}
+            <div className="inline-block mx-1 sm:mx-2">
+              <img 
+                src="/lovable-uploads/219c067b-3ac3-4955-96d1-76dc64562ea1.png" 
+                alt="O Logo" 
+                className="w-8 sm:w-16 md:w-20 lg:w-24 h-auto dark:hidden"
+              />
+              <img 
+                src="/lovable-uploads/fc4bded4-d154-4368-9ba7-fcc6d9eedc5b.png" 
+                alt="O Logo" 
+                className="w-8 sm:w-16 md:w-20 lg:w-24 h-auto hidden dark:block"
+              />
+            </div>
+            <span 
+              className="bg-gradient-to-r from-[hsl(320_100%_50%)] via-[hsl(290_90%_45%)] to-[hsl(320_100%_50%)] dark:from-[hsl(320_100%_75%)] dark:via-[hsl(290_90%_65%)] dark:to-[hsl(320_100%_75%)] bg-clip-text text-transparent"
+              style={{ backgroundSize: '200% 100%', animation: 'gradient-shift 3s ease infinite' }}
+            >
+              {" "}Zone
+            </span>
+          </div>
         </div>
 
         {/* Main Content - Rabbit, Buttons, and Video */}

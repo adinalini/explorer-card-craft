@@ -300,6 +300,11 @@ All colors MUST be HSL.
     }
   }
 
+  @keyframes gradient-shift {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+  }
+
   /* Gaming Typography */
   .heading-gaming {
     @apply font-bold text-transparent bg-clip-text;

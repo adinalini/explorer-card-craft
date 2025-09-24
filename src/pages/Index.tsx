@@ -9,6 +9,7 @@ import { FloatingCards, FloatingBubbles, FloatingBubblesDown, FloatingQuestionMa
 import whiteRabbit from "@/assets/white_rabbit.webp"
 
 const Index = () => {
+  // Force rebuild to clear videoRef cache issue
   const navigate = useNavigate()
   const [hoveredButton, setHoveredButton] = useState<string | null>(null)
   const [currentVideo, setCurrentVideo] = useState<'original' | 'reverse'>('original')

@@ -224,7 +224,7 @@ const Index = () => {
 
         {/* Top - Project O Zone Title with Logo */}
         <div className="relative z-10 h-[18vh] sm:h-[22vh] flex flex-col items-center justify-center px-4 py-4">
-          <div className="flex items-center justify-center text-3xl sm:text-6xl md:text-8xl font-bold transition-colors duration-500 drop-shadow-2xl leading-[1.05]">
+          <div className="flex items-center justify-center text-6xl sm:text-6xl md:text-8xl font-bold transition-colors duration-500 drop-shadow-2xl leading-[1.05]">
             <span 
               className="inline-block bg-gradient-to-r leading-none align-baseline pb-[0.18em]"
               style={{ 
@@ -241,7 +241,7 @@ const Index = () => {
             {/* Logo O with CSS masking */}
             <div 
               aria-label="Project O Logo"
-              className="inline-block w-8 h-8 sm:w-16 sm:h-16 md:w-20 md:h-20 lg:w-24 lg:h-24 mx-1 sm:mx-2 md:mx-3"
+              className="inline-block w-16 h-16 sm:w-16 sm:h-16 md:w-20 md:h-20 lg:w-24 lg:h-24 mx-1 sm:mx-2 md:mx-3"
               style={{
                 background: 'var(--title-gradient)',
                 WebkitMaskImage: `url(${projectOLogo})`,

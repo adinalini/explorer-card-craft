@@ -13,26 +13,24 @@ const Index = () => {
   const navigate = useNavigate()
   const [hoveredButton, setHoveredButton] = useState<string | null>(null)
   const [currentVideo, setCurrentVideo] = useState<'original' | 'reverse'>('original')
-  const [isTransitioning, setIsTransitioning] = useState(false)
   const originalVideoRef = useRef<HTMLVideoElement>(null)
   const reverseVideoRef = useRef<HTMLVideoElement>(null)
 
-  // Handle video end with 0.2s delay and smooth transition
+  // Handle video end with immediate next video start and crossfade
   const handleVideoEnd = () => {
-    setIsTransitioning(true)
+    const nextVideo = currentVideo === 'original' ? 'reverse' : 'original'
+    const nextVideoRef = currentVideo === 'original' ? reverseVideoRef : originalVideoRef
     
+    // Start next video immediately
+    if (nextVideoRef.current) {
+      nextVideoRef.current.currentTime = 0
+      nextVideoRef.current.play().catch(() => {})
+    }
+    
+    // Switch after brief delay for crossfade
     setTimeout(() => {
-      const nextVideo = currentVideo === 'original' ? 'reverse' : 'original'
-      const nextVideoRef = currentVideo === 'original' ? reverseVideoRef : originalVideoRef
-      
-      if (nextVideoRef.current) {
-        nextVideoRef.current.currentTime = 0
-        nextVideoRef.current.play().catch(() => {})
-      }
-      
       setCurrentVideo(nextVideo)
-      setIsTransitioning(false)
-    }, 200) // 0.2s delay
+    }, 200) // 0.2s crossfade
   }
 
   useEffect(() => {
@@ -85,7 +83,7 @@ const Index = () => {
             poster="/lovable-uploads/918d2f07-eec2-4aea-9105-f29011a86707.png"
             onEnded={handleVideoEnd}
             className={`w-full h-full object-cover pointer-events-none transition-opacity duration-300 ${
-              currentVideo === 'original' && !isTransitioning ? 'opacity-40' : 'opacity-0'
+              currentVideo === 'original' ? 'opacity-40' : 'opacity-0'
             }`}
             onLoadedData={(e) => {
               const video = e.currentTarget;
@@ -105,7 +103,7 @@ const Index = () => {
             preload="auto"
             onEnded={handleVideoEnd}
             className={`w-full h-full object-cover pointer-events-none transition-opacity duration-300 ${
-              currentVideo === 'reverse' && !isTransitioning ? 'opacity-40' : 'opacity-0'
+              currentVideo === 'reverse' ? 'opacity-40' : 'opacity-0'
             }`}
             onLoadedData={(e) => {
               const video = e.currentTarget;

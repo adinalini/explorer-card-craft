@@ -70,17 +70,19 @@ const Index = () => {
         <div className="absolute inset-0 z-0">
           <video 
             ref={videoRef1}
-            muted 
-            className="w-full h-full object-cover absolute inset-0 transition-opacity duration-1000"
-            
+            muted
+            playsInline
+            className="w-full h-full object-cover absolute inset-0 transition-opacity duration-1000 opacity-25"
+            poster="/og-images/homepage.jpg"
             preload="auto"
           >
             <source src={videos[0]} type="video/mp4" />
           </video>
           <video 
             ref={videoRef2}
-            muted 
-            className="w-full h-full object-cover absolute inset-0 transition-opacity duration-1000"
+            muted
+            playsInline
+            className="w-full h-full object-cover absolute inset-0 transition-opacity duration-1000 opacity-0"
             preload="auto"
           >
             <source src={videos[1]} type="video/mp4" />
@@ -89,7 +91,7 @@ const Index = () => {
         
         {/* Theme Toggle in top right */}
         <div className="absolute top-4 right-4 z-20">
-          <ThemeToggle className="text-[hsl(var(--homepage-text))] hover:bg-white/10 dark:hover:bg-black/20" />
+          <ThemeToggle className="text-[hsl(var(--homepage-text))]" />
         </div>
 
         {/* Top - Project O Zone Title with Center Logo */}

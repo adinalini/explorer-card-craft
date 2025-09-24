@@ -83,8 +83,8 @@ All colors MUST be HSL.
     --gradient-fantasy: linear-gradient(135deg, hsl(240 10% 85%), hsl(260 15% 80%));
     --gradient-card: linear-gradient(135deg, hsl(0 0% 92%), hsl(210 40% 88%));
     
-    /* Title gradients to match logo */
-    --title-gradient: linear-gradient(135deg, hsl(290 80% 35%), hsl(270 90% 45%), hsl(290 80% 55%));
+    /* Title gradients to match logo - always dark mode colors for homepage */
+    --title-gradient: linear-gradient(135deg, hsl(350 100% 60%), hsl(320 100% 65%), hsl(10 95% 65%));
     
     /* Light Mode Shadows and Glows */
     --shadow-neon-pink: 0 0 20px hsl(320 100% 50% / 0.3);

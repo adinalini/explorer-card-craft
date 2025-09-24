@@ -63,6 +63,29 @@ const Index = () => {
     prepareAndSwitch(current);
   };
 
+  // Handle video errors with restart logic
+  const handleVideoError = (current: 'original' | 'reverse', e: SyntheticEvent<HTMLVideoElement, Event>) => {
+    console.log(`Video error for ${current}, attempting restart...`);
+    const video = e.currentTarget as HTMLVideoElement;
+    const otherVideo = current === 'original' ? reverseVideoRef.current : originalVideoRef.current;
+    
+    // Try to restart the errored video
+    setTimeout(() => {
+      video.load();
+      video.play().catch(() => {
+        // If restart fails, switch to the other video
+        if (otherVideo && !isSwitchingRef.current) {
+          isSwitchingRef.current = true;
+          const next = current === 'original' ? 'reverse' : 'original';
+          setCurrentVideo(next);
+          otherVideo.currentTime = 0;
+          otherVideo.play().catch(() => {});
+          isSwitchingRef.current = false;
+        }
+      });
+    }, 1000);
+  };
+
   useEffect(() => {
     // Preload and prepare both videos
     const original = originalVideoRef.current
@@ -103,9 +126,10 @@ const Index = () => {
             muted 
             playsInline
             preload="auto"
-            poster="/lovable-uploads/918d2f07-eec2-4aea-9105-f29011a86707.png"
+            poster="/lovable-uploads/3bc78144-de54-443f-8b86-d8f5835966a1.png"
             onEnded={handleVideoEnd}
             onTimeUpdate={(e) => handleTimeUpdate('original', e)}
+            onError={(e) => handleVideoError('original', e)}
             className={`w-full h-full object-cover pointer-events-none transition-opacity duration-300 ${
               currentVideo === 'original' ? 'opacity-40' : 'opacity-0'
             }`}
@@ -126,9 +150,10 @@ const Index = () => {
             muted 
             playsInline
             preload="auto"
-            poster="/lovable-uploads/918d2f07-eec2-4aea-9105-f29011a86707.png"
+            poster="/lovable-uploads/3bc78144-de54-443f-8b86-d8f5835966a1.png"
             onEnded={handleVideoEnd}
             onTimeUpdate={(e) => handleTimeUpdate('reverse', e)}
+            onError={(e) => handleVideoError('reverse', e)}
             className={`w-full h-full object-cover pointer-events-none transition-opacity duration-300 ${
               currentVideo === 'reverse' ? 'opacity-40' : 'opacity-0'
             }`}

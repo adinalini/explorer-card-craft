@@ -61,7 +61,7 @@ const Index = () => {
               video.playbackRate = 0.8;
             }}
           >
-            <source src={isReversed ? "/Evolved-video-purple.webm" : "/animated_card_reel.mp4"} type={isReversed ? "video/webm" : "video/mp4"} />
+            <source src={isReversed ? "/animated card reel reverse.mp4" : "/animated_card_reel.mp4"} type="video/mp4" />
             Your browser does not support the video tag.
           </video>
         </div>

@@ -107,8 +107,8 @@ const Index = () => {
         </div>
 
         {/* Top - Project O Zone Title with Logo */}
-        <div className="relative z-10 h-[15vh] sm:h-[20vh] flex flex-col items-center justify-center px-4">
-          <div className="flex items-center justify-center text-3xl sm:text-6xl md:text-8xl font-bold transition-colors duration-500 drop-shadow-2xl">
+        <div className="relative z-10 h-[18vh] sm:h-[22vh] flex flex-col items-center justify-center px-4 py-4">
+          <div className="flex items-center justify-center text-3xl sm:text-6xl md:text-8xl font-bold transition-colors duration-500 drop-shadow-2xl leading-tight">
             <span 
               className="bg-gradient-to-r"
               style={{ 
@@ -151,7 +151,7 @@ const Index = () => {
         </div>
 
         {/* Main Content - Rabbit, Buttons, and Video */}
-        <div className="relative z-10 h-[85vh] sm:h-[80vh] flex items-center justify-center px-4 sm:px-8">
+        <div className="relative z-10 h-[82vh] sm:h-[78vh] flex items-center justify-center px-4 sm:px-8">
           {/* Left Side - Rabbit */}
           <div className="absolute bottom-0 left-0 z-5">
             <img 

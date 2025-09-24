@@ -38,6 +38,24 @@ const Index = () => {
         url="/"
       />
       <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-[hsl(var(--homepage-background-start))] to-[hsl(var(--homepage-background-end))]">
+        {/* Background Video */}
+        <div className="absolute inset-0 z-0">
+          <video 
+            autoPlay 
+            loop 
+            muted 
+            className="w-full h-full object-cover opacity-20"
+            ref={(video) => {
+              if (video) {
+                video.playbackRate = 0.25;
+              }
+            }}
+          >
+            <source src="/animated_card_reel.mp4" type="video/mp4" />
+            Your browser does not support the video tag.
+          </video>
+        </div>
+
         {/* Abstract Blobs */}
         <Blob variant="pink" size="lg" className="top-20 left-10 animate-float" style={{ animationDelay: '0s', animationDuration: '6s' }} />
         <Blob variant="yellow" size="md" className="top-32 right-20 animate-float" style={{ animationDelay: '2s', animationDuration: '8s' }} />
@@ -111,20 +129,6 @@ const Index = () => {
             </div>
           </div>
 
-          {/* Bottom Right - Video */}
-          <div className="absolute bottom-2 sm:bottom-4 right-2 sm:right-4 z-10">
-            <div className="w-48 sm:w-64 md:w-80 h-32 sm:h-48 md:h-64 rounded-lg overflow-hidden shadow-lg border border-cyan-400/30 animate-fade-in" style={{ animationDelay: '0.7s' }}>
-              <video 
-                autoPlay 
-                loop 
-                muted 
-                className="w-full h-full object-cover"
-              >
-                <source src="/Evolved-video-purple.webm" type="video/webm" />
-                Your browser does not support the video tag.
-              </video>
-            </div>
-          </div>
         </div>
 
 

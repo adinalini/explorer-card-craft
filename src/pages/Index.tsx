@@ -108,14 +108,16 @@ const Index = () => {
 
         {/* Top - Project O Zone Title with Logo */}
         <div className="relative z-10 h-[18vh] sm:h-[22vh] flex flex-col items-center justify-center px-4 py-4">
-          <div className="flex items-center justify-center text-3xl sm:text-6xl md:text-8xl font-bold transition-colors duration-500 drop-shadow-2xl leading-tight">
+          <div className="flex items-center justify-center text-3xl sm:text-6xl md:text-8xl font-bold transition-colors duration-500 drop-shadow-2xl leading-none">
             <span 
-              className="bg-gradient-to-r"
+              className="inline-block bg-gradient-to-r leading-none align-baseline pb-[0.08em]"
               style={{ 
                 background: 'var(--title-gradient)',
                 WebkitBackgroundClip: 'text',
                 backgroundClip: 'text',
-                WebkitTextFillColor: 'transparent'
+                WebkitTextFillColor: 'transparent',
+                backgroundSize: '100% 200%',
+                backgroundPosition: '50% 0%'
               }}
             >
               Project{" "}
@@ -137,12 +139,14 @@ const Index = () => {
               }}
             />
             <span 
-              className="bg-gradient-to-r"
+              className="inline-block bg-gradient-to-r leading-none align-baseline pb-[0.08em]"
               style={{ 
                 background: 'var(--title-gradient)',
                 WebkitBackgroundClip: 'text',
                 backgroundClip: 'text',
-                WebkitTextFillColor: 'transparent'
+                WebkitTextFillColor: 'transparent',
+                backgroundSize: '100% 200%',
+                backgroundPosition: '50% 0%'
               }}
             >
               Zone

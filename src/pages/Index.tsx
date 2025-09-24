@@ -103,7 +103,7 @@ const Index = () => {
         
         {/* Theme Toggle in top right */}
         <div className="absolute top-4 right-4 z-20">
-          <ThemeToggle className="text-[hsl(var(--homepage-text))] hover:bg-white/10 dark:hover:bg-black/20" />
+          <ThemeToggle className="text-white hover:bg-cyan-400/20 hover:text-cyan-400 transition-all duration-300" />
         </div>
 
         {/* Top - Project O Zone Title with Logo */}

@@ -98,10 +98,20 @@ const Index = () => {
               <span style={{ background: 'var(--title-gradient)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
                 PROJECT
               </span>
-              <img 
-                src={projectOLogoLight} 
-                alt="O" 
-                className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 lg:w-28 lg:h-28 inline-block dark:brightness-0 dark:invert dark:hue-rotate-[270deg] dark:saturate-200" 
+              <div
+                aria-label="Project O Logo"
+                className="inline-block w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 lg:w-28 lg:h-28"
+                style={{
+                  background: 'var(--title-gradient)',
+                  WebkitMaskImage: `url(${projectOLogoDark})`,
+                  maskImage: `url(${projectOLogoDark})`,
+                  WebkitMaskRepeat: 'no-repeat',
+                  maskRepeat: 'no-repeat',
+                  WebkitMaskSize: 'contain',
+                  maskSize: 'contain',
+                  WebkitMaskPosition: 'center',
+                  maskPosition: 'center',
+                }}
               />
               <span style={{ background: 'var(--title-gradient)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
                 ZONE

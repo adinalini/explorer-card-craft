@@ -19,9 +19,7 @@ const Index = () => {
 
     const handleVideoEnd = () => {
       // Switch to the other video
-      setIsReverse(!isReverse)
-      video.currentTime = 0
-      video.play()
+      setIsReverse(prev => !prev)
     }
 
     video.addEventListener('ended', handleVideoEnd)
@@ -29,6 +27,15 @@ const Index = () => {
     return () => {
       video.removeEventListener('ended', handleVideoEnd)
     }
+  }, [])
+
+  // Separate effect to handle video source changes
+  useEffect(() => {
+    const video = videoRef.current
+    if (!video) return
+
+    video.load() // Reload the video with new source
+    video.play()
   }, [isReverse])
 
   return (

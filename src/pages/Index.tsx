@@ -11,46 +11,25 @@ import whiteRabbit from "@/assets/white_rabbit.webp"
 const Index = () => {
   const navigate = useNavigate()
   const videoRef = useRef<HTMLVideoElement>(null)
-  const [isReversing, setIsReversing] = useState(false)
+  const [isReverse, setIsReverse] = useState(false)
 
   useEffect(() => {
     const video = videoRef.current
     if (!video) return
 
     const handleVideoEnd = () => {
-      if (!isReversing) {
-        // Start reversing - set to end and play backwards
-        setIsReversing(true)
-        video.currentTime = video.duration
-        video.playbackRate = -0.8
-        video.play()
-      } else {
-        // End of reverse, start normal playback
-        setIsReversing(false)
-        video.currentTime = 0
-        video.playbackRate = 0.8
-        video.play()
-      }
-    }
-
-    const handleTimeUpdate = () => {
-      if (isReversing && video.currentTime <= 0) {
-        // When reverse playback reaches the beginning, start normal playback
-        setIsReversing(false)
-        video.currentTime = 0
-        video.playbackRate = 0.8
-        video.play()
-      }
+      // Switch to the other video
+      setIsReverse(!isReverse)
+      video.currentTime = 0
+      video.play()
     }
 
     video.addEventListener('ended', handleVideoEnd)
-    video.addEventListener('timeupdate', handleTimeUpdate)
     
     return () => {
       video.removeEventListener('ended', handleVideoEnd)
-      video.removeEventListener('timeupdate', handleTimeUpdate)
     }
-  }, [isReversing])
+  }, [isReverse])
 
   return (
     <>
@@ -70,7 +49,7 @@ const Index = () => {
             muted 
             className="video-background"
           >
-            <source src="/animated_card_reel.mp4" type="video/mp4" />
+            <source src={isReverse ? "/animated_card_reel_reverse.mp4" : "/animated_card_reel.mp4"} type="video/mp4" />
             Your browser does not support the video tag.
           </video>
         </div>

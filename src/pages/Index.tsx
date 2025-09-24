@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react"
+import { useState, useRef, useEffect, type SyntheticEvent } from "react"
 import { Button } from "@/components/ui/button"
 import { Blob } from "@/components/ui/blob"
 import { WaveDivider } from "@/components/ui/wave-divider"
@@ -16,22 +16,51 @@ const Index = () => {
   const originalVideoRef = useRef<HTMLVideoElement>(null)
   const reverseVideoRef = useRef<HTMLVideoElement>(null)
 
-  // Handle video end with immediate next video start and crossfade
-  const handleVideoEnd = () => {
-    const nextVideo = currentVideo === 'original' ? 'reverse' : 'original'
-    const nextVideoRef = currentVideo === 'original' ? reverseVideoRef : originalVideoRef
-    
-    // Start next video immediately
-    if (nextVideoRef.current) {
-      nextVideoRef.current.currentTime = 0
-      nextVideoRef.current.play().catch(() => {})
-    }
-    
-    // Switch after brief delay for crossfade
+  // Seamless loop: freeze last frame for 0.2s, then switch to the other video (already playing)
+  const FREEZE_MS = 200;
+  const isSwitchingRef = useRef(false);
+
+  const prepareAndSwitch = (current: 'original' | 'reverse') => {
+    const currentRef = current === 'original' ? originalVideoRef : reverseVideoRef;
+    const nextRef = current === 'original' ? reverseVideoRef : originalVideoRef;
+    const next = current === 'original' ? 'reverse' : 'original';
+
+    if (!currentRef.current || !nextRef.current) return;
+
+    // Hold the last frame of the current video
+    currentRef.current.pause();
+
+    // Prepare and start the next video behind the scenes
+    try {
+      nextRef.current.currentTime = 0;
+      nextRef.current.play().catch(() => {});
+    } catch {}
+
+    // After a short freeze, reveal the next video (crossfade handled by CSS)
     setTimeout(() => {
-      setCurrentVideo(nextVideo)
-    }, 200) // 0.2s crossfade
-  }
+      setCurrentVideo(next);
+      isSwitchingRef.current = false;
+    }, FREEZE_MS);
+  };
+
+  const handleTimeUpdate = (current: 'original' | 'reverse', e: SyntheticEvent<HTMLVideoElement, Event>) => {
+    if (isSwitchingRef.current) return;
+    const video = e.currentTarget as HTMLVideoElement;
+    if (!video || !video.duration || Number.isNaN(video.duration)) return;
+    const remaining = video.duration - video.currentTime;
+    if (remaining <= FREEZE_MS / 1000) {
+      isSwitchingRef.current = true;
+      prepareAndSwitch(current);
+    }
+  };
+
+  // Fallback in case 'ended' fires before our timeupdate threshold
+  const handleVideoEnd = (e: SyntheticEvent<HTMLVideoElement, Event>) => {
+    if (isSwitchingRef.current) return;
+    isSwitchingRef.current = true;
+    const current = e.currentTarget === originalVideoRef.current ? 'original' : 'reverse';
+    prepareAndSwitch(current);
+  };
 
   useEffect(() => {
     // Preload and prepare both videos
@@ -65,6 +94,7 @@ const Index = () => {
             preload="auto"
             poster="/lovable-uploads/918d2f07-eec2-4aea-9105-f29011a86707.png"
             onEnded={handleVideoEnd}
+            onTimeUpdate={(e) => handleTimeUpdate('original', e)}
             className={`w-full h-full object-cover pointer-events-none transition-opacity duration-300 ${
               currentVideo === 'original' ? 'opacity-40' : 'opacity-0'
             }`}
@@ -84,7 +114,9 @@ const Index = () => {
             muted 
             playsInline
             preload="auto"
+            poster="/lovable-uploads/918d2f07-eec2-4aea-9105-f29011a86707.png"
             onEnded={handleVideoEnd}
+            onTimeUpdate={(e) => handleTimeUpdate('reverse', e)}
             className={`w-full h-full object-cover pointer-events-none transition-opacity duration-300 ${
               currentVideo === 'reverse' ? 'opacity-40' : 'opacity-0'
             }`}

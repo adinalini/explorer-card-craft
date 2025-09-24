@@ -189,7 +189,7 @@ const Index = () => {
             <img 
               src={whiteRabbit} 
               alt="White Rabbit Character" 
-              className="w-[459px] object-contain animate-fade-in transform -translate-x-24"
+              className="w-[551px] object-contain animate-fade-in transform -translate-x-24"
               style={{ animationDelay: '0.2s' }}
             />
           </div>
@@ -207,18 +207,156 @@ const Index = () => {
             />
           </div>
 
-          {/* Rabbit only layout (when red is hidden but rabbit fits) */}
+          {/* Rabbit only layout (when red is hidden but rabbit fits) - buttons moved to right */}
           <div className="absolute bottom-0 left-0 z-5 hidden xl:block 2xl:hidden">
             <img 
               src={whiteRabbit} 
               alt="White Rabbit Character" 
-              className="w-[459px] object-contain animate-fade-in transform -translate-x-12"
+              className="w-[551px] object-contain animate-fade-in transform -translate-x-12"
               style={{ animationDelay: '0.2s' }}
             />
           </div>
 
-          {/* Center - Buttons */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10">
+          {/* Center - Buttons (when both characters visible) */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10 hidden 2xl:block">
+            <div className="relative grid grid-cols-2 w-80 sm:w-96 md:w-[420px] lg:w-[480px]" style={{ height: '459px' }}>
+              {/* Cross-style borders */}
+              <div className="absolute inset-0 pointer-events-none">
+                {/* Vertical line */}
+                <div className="absolute left-1/2 top-0 bottom-0 w-px bg-black/30 -translate-x-0.5"></div>
+                {/* Horizontal line */}
+                <div className="absolute top-1/2 left-0 right-0 h-px bg-black/30 -translate-y-0.5"></div>
+              </div>
+              
+              {/* Cards Button */}
+              <div 
+                onClick={() => navigate('/cards')}
+                className="flex flex-col items-center justify-center p-4 sm:p-6 md:p-8 bg-black/20 backdrop-blur-sm cursor-pointer hover:bg-black/30 transition-all duration-300 animate-fade-in"
+                style={{ animationDelay: '0.3s' }}
+              >
+                <div className="text-lg sm:text-xl md:text-2xl font-bold text-white mb-2">
+                  Cards
+                </div>
+                <div className="text-xs sm:text-sm text-slate-300 text-center leading-tight">
+                  View all the cards and their variants & blueprints.
+                </div>
+              </div>
+
+              {/* Decks Button */}
+              <div 
+                onClick={() => navigate('/decks')}
+                className="flex flex-col items-center justify-center p-4 sm:p-6 md:p-8 bg-black/20 backdrop-blur-sm cursor-pointer hover:bg-black/30 transition-all duration-300 animate-fade-in"
+                style={{ animationDelay: '0.4s' }}
+              >
+                <div className="text-lg sm:text-xl md:text-2xl font-bold text-white mb-2">
+                  Decks
+                </div>
+                <div className="text-xs sm:text-sm text-slate-300 text-center leading-tight">
+                  Browse through featured & community decks.
+                </div>
+              </div>
+
+              {/* Draft Button */}
+              <div 
+                onClick={() => navigate('/draft')}
+                className="flex flex-col items-center justify-center p-4 sm:p-6 md:p-8 bg-black/20 backdrop-blur-sm cursor-pointer hover:bg-black/30 transition-all duration-300 animate-fade-in"
+                style={{ animationDelay: '0.5s' }}
+              >
+                <div className="text-lg sm:text-xl md:text-2xl font-bold text-white mb-2">
+                  Draft
+                </div>
+                <div className="text-xs sm:text-sm text-slate-300 text-center leading-tight">
+                  Play a Double/Triple Draft with someone.
+                </div>
+              </div>
+
+              {/* Random Deck Button */}
+              <div 
+                onClick={() => navigate('/random')}
+                className="flex flex-col items-center justify-center p-4 sm:p-6 md:p-8 bg-black/20 backdrop-blur-sm cursor-pointer hover:bg-black/30 transition-all duration-300 animate-fade-in"
+                style={{ animationDelay: '0.6s' }}
+              >
+                <div className="text-lg sm:text-xl md:text-2xl font-bold text-white mb-2">
+                  Random Deck
+                </div>
+                <div className="text-xs sm:text-sm text-slate-300 text-center leading-tight">
+                  Feeling adventurous? Play a random deck.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Right-aligned Buttons (when only rabbit visible) */}
+          <div className="absolute top-1/2 right-0 -translate-y-1/2 transform translate-x-[-120px] z-10 hidden xl:block 2xl:hidden">
+            <div className="relative grid grid-cols-2 w-80 sm:w-96 md:w-[420px] lg:w-[480px]" style={{ height: '459px' }}>
+              {/* Cross-style borders */}
+              <div className="absolute inset-0 pointer-events-none">
+                {/* Vertical line */}
+                <div className="absolute left-1/2 top-0 bottom-0 w-px bg-black/30 -translate-x-0.5"></div>
+                {/* Horizontal line */}
+                <div className="absolute top-1/2 left-0 right-0 h-px bg-black/30 -translate-y-0.5"></div>
+              </div>
+              
+              {/* Cards Button */}
+              <div 
+                onClick={() => navigate('/cards')}
+                className="flex flex-col items-center justify-center p-4 sm:p-6 md:p-8 bg-black/20 backdrop-blur-sm cursor-pointer hover:bg-black/30 transition-all duration-300 animate-fade-in"
+                style={{ animationDelay: '0.3s' }}
+              >
+                <div className="text-lg sm:text-xl md:text-2xl font-bold text-white mb-2">
+                  Cards
+                </div>
+                <div className="text-xs sm:text-sm text-slate-300 text-center leading-tight">
+                  View all the cards and their variants & blueprints.
+                </div>
+              </div>
+
+              {/* Decks Button */}
+              <div 
+                onClick={() => navigate('/decks')}
+                className="flex flex-col items-center justify-center p-4 sm:p-6 md:p-8 bg-black/20 backdrop-blur-sm cursor-pointer hover:bg-black/30 transition-all duration-300 animate-fade-in"
+                style={{ animationDelay: '0.4s' }}
+              >
+                <div className="text-lg sm:text-xl md:text-2xl font-bold text-white mb-2">
+                  Decks
+                </div>
+                <div className="text-xs sm:text-sm text-slate-300 text-center leading-tight">
+                  Browse through featured & community decks.
+                </div>
+              </div>
+
+              {/* Draft Button */}
+              <div 
+                onClick={() => navigate('/draft')}
+                className="flex flex-col items-center justify-center p-4 sm:p-6 md:p-8 bg-black/20 backdrop-blur-sm cursor-pointer hover:bg-black/30 transition-all duration-300 animate-fade-in"
+                style={{ animationDelay: '0.5s' }}
+              >
+                <div className="text-lg sm:text-xl md:text-2xl font-bold text-white mb-2">
+                  Draft
+                </div>
+                <div className="text-xs sm:text-sm text-slate-300 text-center leading-tight">
+                  Play a Double/Triple Draft with someone.
+                </div>
+              </div>
+
+              {/* Random Deck Button */}
+              <div 
+                onClick={() => navigate('/random')}
+                className="flex flex-col items-center justify-center p-4 sm:p-6 md:p-8 bg-black/20 backdrop-blur-sm cursor-pointer hover:bg-black/30 transition-all duration-300 animate-fade-in"
+                style={{ animationDelay: '0.6s' }}
+              >
+                <div className="text-lg sm:text-xl md:text-2xl font-bold text-white mb-2">
+                  Random Deck
+                </div>
+                <div className="text-xs sm:text-sm text-slate-300 text-center leading-tight">
+                  Feeling adventurous? Play a random deck.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Center Buttons (when no characters visible) */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10 hidden md:block xl:hidden">
             <div className="relative grid grid-cols-2 w-80 sm:w-96 md:w-[420px] lg:w-[480px]" style={{ height: '459px' }}>
               {/* Cross-style borders */}
               <div className="absolute inset-0 pointer-events-none">

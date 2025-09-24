@@ -10,33 +10,45 @@ import whiteRabbit from "@/assets/white_rabbit.webp"
 
 const Index = () => {
   const navigate = useNavigate()
-  const videoRef = useRef<HTMLVideoElement>(null)
-  const [isReverse, setIsReverse] = useState(false)
+  const videoRef1 = useRef<HTMLVideoElement>(null)
+  const videoRef2 = useRef<HTMLVideoElement>(null)
+  const [activeVideo, setActiveVideo] = useState(1)
 
   useEffect(() => {
-    const video = videoRef.current
-    if (!video) return
+    const video1 = videoRef1.current
+    const video2 = videoRef2.current
+    if (!video1 || !video2) return
 
-    const handleVideoEnd = () => {
-      // Switch to the other video
-      setIsReverse(prev => !prev)
+    const handleVideo1End = () => {
+      setActiveVideo(2)
+      video2.currentTime = 0
+      video2.play()
     }
 
-    video.addEventListener('ended', handleVideoEnd)
+    const handleVideo2End = () => {
+      setActiveVideo(1)
+      video1.currentTime = 0
+      video1.play()
+    }
+
+    video1.addEventListener('ended', handleVideo1End)
+    video2.addEventListener('ended', handleVideo2End)
     
     return () => {
-      video.removeEventListener('ended', handleVideoEnd)
+      video1.removeEventListener('ended', handleVideo1End)
+      video2.removeEventListener('ended', handleVideo2End)
     }
   }, [])
 
-  // Separate effect to handle video source changes
+  // Preload both videos
   useEffect(() => {
-    const video = videoRef.current
-    if (!video) return
+    const video1 = videoRef1.current
+    const video2 = videoRef2.current
+    if (!video1 || !video2) return
 
-    video.load() // Reload the video with new source
-    video.play()
-  }, [isReverse])
+    video1.load()
+    video2.load()
+  }, [])
 
   return (
     <>
@@ -47,16 +59,26 @@ const Index = () => {
         url="/"
       />
       <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-[hsl(var(--homepage-background-start))] to-[hsl(var(--homepage-background-end))]">
-        {/* Background Video with Reverse Feature */}
+        {/* Background Videos with Preloading */}
         <div className="absolute inset-0 z-0">
           <video 
-            ref={videoRef}
+            ref={videoRef1}
             autoPlay 
-            loop={false}
             muted 
-            className="video-background"
+            preload="auto"
+            poster="/animated_card_reel.jpg"
+            className={`video-background transition-opacity duration-300 ${activeVideo === 1 ? 'opacity-100' : 'opacity-0'}`}
           >
-            <source src={isReverse ? "/animated_card_reel_reverse.mp4" : "/animated_card_reel.mp4"} type="video/mp4" />
+            <source src="/animated_card_reel.mp4" type="video/mp4" />
+            Your browser does not support the video tag.
+          </video>
+          <video 
+            ref={videoRef2}
+            muted 
+            preload="auto"
+            className={`video-background absolute inset-0 transition-opacity duration-300 ${activeVideo === 2 ? 'opacity-100' : 'opacity-0'}`}
+          >
+            <source src="/animated_card_reel_reverse.mp4" type="video/mp4" />
             Your browser does not support the video tag.
           </video>
         </div>

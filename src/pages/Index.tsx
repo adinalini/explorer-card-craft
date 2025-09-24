@@ -15,21 +15,9 @@ const Index = () => {
   const videoRef = useRef<HTMLVideoElement>(null)
 
   const handleVideoEnd = () => {
+    setIsReversed(!isReversed)
     if (videoRef.current) {
-      // Switch to reverse playback
-      setIsReversed(true)
-      videoRef.current.currentTime = videoRef.current.duration
-      videoRef.current.playbackRate = -0.8
-      videoRef.current.play()
-    }
-  }
-
-  const handleTimeUpdate = () => {
-    if (videoRef.current && isReversed && videoRef.current.currentTime <= 0.1) {
-      // Switch back to forward playback when reverse reaches the beginning
-      setIsReversed(false)
-      videoRef.current.currentTime = 0
-      videoRef.current.playbackRate = 0.8
+      videoRef.current.load() // Reload the video with new source
       videoRef.current.play()
     }
   }
@@ -67,14 +55,13 @@ const Index = () => {
             autoPlay 
             muted 
             onEnded={handleVideoEnd}
-            onTimeUpdate={handleTimeUpdate}
             className="w-full h-full object-cover opacity-20"
             onLoadedData={(e) => {
               const video = e.currentTarget;
               video.playbackRate = 0.8;
             }}
           >
-            <source src="/animated_card_reel.mp4" type="video/mp4" />
+            <source src={isReversed ? "/Evolved-video-purple.webm" : "/animated_card_reel.mp4"} type={isReversed ? "video/webm" : "video/mp4"} />
             Your browser does not support the video tag.
           </video>
         </div>

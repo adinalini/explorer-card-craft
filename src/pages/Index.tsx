@@ -201,7 +201,7 @@ const Index = () => {
             <img 
               src={whiteRabbit} 
               alt="White Rabbit Character" 
-              className="w-[634px] object-contain animate-fade-in transform -translate-x-24"
+              className="w-[729px] object-contain animate-fade-in transform -translate-x-24"
               style={{ animationDelay: '0.2s' }}
             />
           </div>
@@ -224,7 +224,7 @@ const Index = () => {
             <img 
               src={whiteRabbit} 
               alt="White Rabbit Character" 
-              className="w-[634px] object-contain animate-fade-in transform -translate-x-12"
+              className="w-[729px] object-contain animate-fade-in transform -translate-x-12"
               style={{ animationDelay: '0.2s' }}
             />
           </div>
@@ -513,7 +513,7 @@ const Index = () => {
             <img 
               src={whiteRabbit} 
               alt="White Rabbit Character" 
-              className="w-[294px] object-contain animate-fade-in"
+              className="w-[338px] object-contain animate-fade-in"
               style={{ animationDelay: '0.7s' }}
             />
           </div>

@@ -63,7 +63,7 @@ const Index = () => {
             <img 
               src={whiteRabbit} 
               alt="White Rabbit Character" 
-              className="w-[600px] sm:w-[700px] md:w-[800px] lg:w-[900px] object-contain animate-fade-in transform -translate-x-16"
+              className="w-[510px] sm:w-[595px] md:w-[680px] lg:w-[765px] object-contain animate-fade-in transform -translate-x-24"
               style={{ animationDelay: '0.2s' }}
             />
           </div>

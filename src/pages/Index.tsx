@@ -157,7 +157,7 @@ const Index = () => {
             <img 
               src={whiteRabbit} 
               alt="White Rabbit Character" 
-              className="w-[510px] sm:w-[595px] md:w-[680px] lg:w-[765px] object-contain animate-fade-in transform -translate-x-24"
+              className="w-[459px] sm:w-[536px] md:w-[612px] lg:w-[689px] object-contain animate-fade-in transform -translate-x-24"
               style={{ animationDelay: '0.2s' }}
             />
           </div>
@@ -168,7 +168,7 @@ const Index = () => {
               {/* Cards Button */}
               <Button 
                 onClick={() => navigate('/cards')}
-                className="h-12 sm:h-14 md:h-16 bg-slate-900/90 border border-cyan-400/50 text-cyan-400 text-sm sm:text-base md:text-lg font-bold rounded-lg shadow-lg backdrop-blur-sm animate-fade-in"
+                className="h-12 sm:h-14 md:h-16 bg-white dark:bg-slate-900/90 border border-cyan-400/50 text-slate-900 dark:text-cyan-400 text-sm sm:text-base md:text-lg font-bold rounded-lg shadow-lg backdrop-blur-sm animate-fade-in hover:bg-cyan-400 hover:text-white dark:hover:bg-cyan-400 dark:hover:text-white transition-all duration-300"
                 style={{ animationDelay: '0.3s' }}
               >
                 Cards
@@ -177,7 +177,7 @@ const Index = () => {
               {/* Decks Button */}
               <Button 
                 onClick={() => navigate('/decks')}
-                className="h-12 sm:h-14 md:h-16 bg-slate-900/90 border border-cyan-400/50 text-cyan-400 text-sm sm:text-base md:text-lg font-bold rounded-lg shadow-lg backdrop-blur-sm animate-fade-in"
+                className="h-12 sm:h-14 md:h-16 bg-white dark:bg-slate-900/90 border border-cyan-400/50 text-slate-900 dark:text-cyan-400 text-sm sm:text-base md:text-lg font-bold rounded-lg shadow-lg backdrop-blur-sm animate-fade-in hover:bg-cyan-400 hover:text-white dark:hover:bg-cyan-400 dark:hover:text-white transition-all duration-300"
                 style={{ animationDelay: '0.4s' }}
               >
                 Decks
@@ -186,7 +186,7 @@ const Index = () => {
               {/* Draft Button */}
               <Button 
                 onClick={() => navigate('/draft')}
-                className="h-12 sm:h-14 md:h-16 bg-slate-900/90 border border-cyan-400/50 text-cyan-400 text-sm sm:text-base md:text-lg font-bold rounded-lg shadow-lg backdrop-blur-sm animate-fade-in"
+                className="h-12 sm:h-14 md:h-16 bg-white dark:bg-slate-900/90 border border-cyan-400/50 text-slate-900 dark:text-cyan-400 text-sm sm:text-base md:text-lg font-bold rounded-lg shadow-lg backdrop-blur-sm animate-fade-in hover:bg-cyan-400 hover:text-white dark:hover:bg-cyan-400 dark:hover:text-white transition-all duration-300"
                 style={{ animationDelay: '0.5s' }}
               >
                 Draft
@@ -195,7 +195,7 @@ const Index = () => {
               {/* Random Deck Button */}
               <Button 
                 onClick={() => navigate('/random')}
-                className="h-12 sm:h-14 md:h-16 bg-slate-900/90 border border-cyan-400/50 text-cyan-400 text-sm sm:text-base md:text-lg font-bold rounded-lg shadow-lg backdrop-blur-sm animate-fade-in flex items-center justify-center"
+                className="h-12 sm:h-14 md:h-16 bg-white dark:bg-slate-900/90 border border-cyan-400/50 text-slate-900 dark:text-cyan-400 text-sm sm:text-base md:text-lg font-bold rounded-lg shadow-lg backdrop-blur-sm animate-fade-in flex items-center justify-center hover:bg-cyan-400 hover:text-white dark:hover:bg-cyan-400 dark:hover:text-white transition-all duration-300"
                 style={{ animationDelay: '0.6s' }}
               >
                 <span className="text-center leading-tight text-xs sm:text-sm md:text-base">

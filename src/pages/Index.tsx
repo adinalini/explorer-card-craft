@@ -59,17 +59,17 @@ const Index = () => {
         {/* Main Content - Rabbit and Buttons */}
         <div className="relative z-10 h-[85vh] sm:h-[80vh] flex items-center justify-between px-8 sm:px-16">
           {/* Left Side - Rabbit */}
-          <div className="flex-1 flex items-center justify-center">
+          <div className="absolute bottom-0 left-0 z-5">
             <img 
               src={whiteRabbit} 
               alt="White Rabbit Character" 
-              className="w-72 sm:w-96 md:w-[500px] object-contain animate-fade-in"
+              className="w-[600px] sm:w-[700px] md:w-[800px] lg:w-[900px] object-contain animate-fade-in transform -translate-x-16"
               style={{ animationDelay: '0.2s' }}
             />
           </div>
 
           {/* Right Side - Buttons Grid */}
-          <div className="flex-1 flex items-center justify-center">
+          <div className="flex-1 flex items-center justify-center relative z-10">
             <div className="grid grid-cols-2 gap-4 w-full max-w-md">
               {/* Cards Button */}
               <Button 

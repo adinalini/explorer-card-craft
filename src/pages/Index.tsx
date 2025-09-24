@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Blob } from "@/components/ui/blob"
 import { WaveDivider } from "@/components/ui/wave-divider"
@@ -11,6 +11,16 @@ import whiteRabbit from "@/assets/white_rabbit.webp"
 const Index = () => {
   const navigate = useNavigate()
   const [hoveredButton, setHoveredButton] = useState<string | null>(null)
+  const [isReversed, setIsReversed] = useState(false)
+  const videoRef = useRef<HTMLVideoElement>(null)
+
+  const handleVideoEnd = () => {
+    setIsReversed(!isReversed)
+    if (videoRef.current) {
+      videoRef.current.currentTime = 0
+      videoRef.current.play()
+    }
+  }
 
   const getTextColor = () => {
     if (!hoveredButton) return "text-[hsl(var(--homepage-text))]"
@@ -41,14 +51,14 @@ const Index = () => {
         {/* Background Video */}
         <div className="absolute inset-0 z-0">
           <video 
+            ref={videoRef}
             autoPlay 
-            loop 
             muted 
-            className="w-full h-full object-cover opacity-20"
-            ref={(video) => {
-              if (video) {
-                video.playbackRate = 0.8;
-              }
+            onEnded={handleVideoEnd}
+            className={`w-full h-full object-cover opacity-20 transition-transform duration-1000 ${isReversed ? 'scale-x-[-1]' : ''}`}
+            onLoadedData={(e) => {
+              const video = e.currentTarget;
+              video.playbackRate = 0.8;
             }}
           >
             <source src="/animated_card_reel.mp4" type="video/mp4" />

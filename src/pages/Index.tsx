@@ -56,8 +56,8 @@ const Index = () => {
           </h1>
         </div>
 
-        {/* Main Content - Rabbit and Buttons */}
-        <div className="relative z-10 h-[85vh] sm:h-[80vh] flex items-center justify-between px-8 sm:px-16">
+        {/* Main Content - Rabbit and Right Side Content */}
+        <div className="relative z-10 h-[85vh] sm:h-[80vh] flex items-start justify-between px-8 sm:px-16">
           {/* Left Side - Rabbit */}
           <div className="absolute bottom-0 left-0 z-5">
             <img 
@@ -68,15 +68,14 @@ const Index = () => {
             />
           </div>
 
-          {/* Right Side - Buttons Grid */}
-          <div className="flex-1 flex items-center justify-center relative z-10">
-            <div className="grid grid-cols-2 gap-4 w-full max-w-md">
+          {/* Right Side - Buttons and Video */}
+          <div className="flex flex-col items-end justify-start ml-auto pt-8 space-y-8">
+            {/* Buttons Grid */}
+            <div className="grid grid-cols-2 gap-3 w-80">
               {/* Cards Button */}
               <Button 
                 onClick={() => navigate('/cards')}
-                onMouseEnter={() => setHoveredButton('cards')}
-                onMouseLeave={() => setHoveredButton(null)}
-                className="h-24 sm:h-32 bg-[hsl(var(--homepage-button-cards))] hover:bg-[hsl(var(--homepage-button-cards))]/90 text-[hsl(var(--homepage-button-text))] text-xl sm:text-2xl font-bold rounded-2xl shadow-2xl transform transition-all duration-300 hover:scale-105 animate-fade-in"
+                className="h-16 bg-slate-900/90 border border-cyan-400/50 text-cyan-400 text-lg font-bold rounded-lg shadow-lg backdrop-blur-sm animate-fade-in"
                 style={{ animationDelay: '0.3s' }}
               >
                 Cards
@@ -85,9 +84,7 @@ const Index = () => {
               {/* Decks Button */}
               <Button 
                 onClick={() => navigate('/decks')}
-                onMouseEnter={() => setHoveredButton('decks')}
-                onMouseLeave={() => setHoveredButton(null)}
-                className="h-24 sm:h-32 bg-[hsl(var(--homepage-button-decks))] hover:bg-[hsl(var(--homepage-button-decks))]/90 text-[hsl(var(--homepage-button-text))] text-xl sm:text-2xl font-bold rounded-2xl shadow-2xl transform transition-all duration-300 hover:scale-105 animate-fade-in"
+                className="h-16 bg-slate-900/90 border border-cyan-400/50 text-cyan-400 text-lg font-bold rounded-lg shadow-lg backdrop-blur-sm animate-fade-in"
                 style={{ animationDelay: '0.4s' }}
               >
                 Decks
@@ -96,9 +93,7 @@ const Index = () => {
               {/* Draft Button */}
               <Button 
                 onClick={() => navigate('/draft')}
-                onMouseEnter={() => setHoveredButton('draft')}
-                onMouseLeave={() => setHoveredButton(null)}
-                className="h-24 sm:h-32 bg-[hsl(var(--homepage-button-draft))] hover:bg-[hsl(var(--homepage-button-draft))]/90 text-[hsl(var(--homepage-button-text))] text-xl sm:text-2xl font-bold rounded-2xl shadow-2xl transform transition-all duration-300 hover:scale-105 animate-fade-in"
+                className="h-16 bg-slate-900/90 border border-cyan-400/50 text-cyan-400 text-lg font-bold rounded-lg shadow-lg backdrop-blur-sm animate-fade-in"
                 style={{ animationDelay: '0.5s' }}
               >
                 Draft
@@ -107,9 +102,7 @@ const Index = () => {
               {/* Random Deck Button */}
               <Button 
                 onClick={() => navigate('/random')}
-                onMouseEnter={() => setHoveredButton('random')}
-                onMouseLeave={() => setHoveredButton(null)}
-                className="h-24 sm:h-32 bg-[hsl(var(--homepage-button-random))] hover:bg-[hsl(var(--homepage-button-random))]/90 text-[hsl(var(--homepage-button-text))] text-lg sm:text-xl font-bold rounded-2xl shadow-2xl transform transition-all duration-300 hover:scale-105 animate-fade-in flex items-center justify-center"
+                className="h-16 bg-slate-900/90 border border-cyan-400/50 text-cyan-400 text-lg font-bold rounded-lg shadow-lg backdrop-blur-sm animate-fade-in flex items-center justify-center"
                 style={{ animationDelay: '0.6s' }}
               >
                 <span className="text-center leading-tight">
@@ -117,15 +110,23 @@ const Index = () => {
                 </span>
               </Button>
             </div>
+
+            {/* Video */}
+            <div className="w-80 h-48 rounded-lg overflow-hidden shadow-lg border border-cyan-400/30 animate-fade-in" style={{ animationDelay: '0.7s' }}>
+              <video 
+                autoPlay 
+                loop 
+                muted 
+                className="w-full h-full object-cover"
+              >
+                <source src="/Evolved-video-purple.webm" type="video/webm" />
+                Your browser does not support the video tag.
+              </video>
+            </div>
           </div>
         </div>
 
 
-        {/* Animation Components */}
-        <FloatingCards isActive={hoveredButton === 'cards'} />
-        <FloatingBubbles isActive={hoveredButton === 'decks'} />
-        <FloatingBubblesDown isActive={hoveredButton === 'draft'} />
-        <FloatingQuestionMarksHorizontal isActive={hoveredButton === 'random'} />
       </div>
     </>
   )

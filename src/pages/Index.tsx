@@ -133,10 +133,6 @@ const Index = () => {
 
         {/* Abstract Blobs - Removed as requested */}
         
-        {/* Theme Toggle in top right */}
-        <div className="absolute top-4 right-4 z-20">
-          <ThemeToggle className="text-white hover:bg-cyan-400/20 hover:text-cyan-400 transition-all duration-300" />
-        </div>
 
         {/* Top - Project O Zone Title with Logo */}
         <div className="relative z-10 h-[18vh] sm:h-[22vh] flex flex-col items-center justify-center px-4 py-4">
@@ -233,7 +229,7 @@ const Index = () => {
                   Decks
                 </div>
                 <div className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 text-center leading-tight">
-                  Browse through featured/community decks.
+                  Browse through featured & community decks.
                 </div>
               </div>
 

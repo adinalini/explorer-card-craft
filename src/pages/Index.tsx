@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useRef, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Blob } from "@/components/ui/blob"
 import { WaveDivider } from "@/components/ui/wave-divider"
@@ -10,24 +10,34 @@ import whiteRabbit from "@/assets/white_rabbit.webp"
 
 const Index = () => {
   const navigate = useNavigate()
-  const [hoveredButton, setHoveredButton] = useState<string | null>(null)
+  const videoRef = useRef<HTMLVideoElement>(null)
+  const [isReversing, setIsReversing] = useState(false)
 
-  const getTextColor = () => {
-    if (!hoveredButton) return "text-[hsl(var(--homepage-text))]"
-    
-    switch (hoveredButton) {
-      case 'cards':
-        return "text-[hsl(var(--homepage-button-cards))]"
-      case 'decks':
-        return "text-[hsl(var(--homepage-button-decks))]"
-      case 'draft':
-        return "text-[hsl(var(--homepage-button-draft))]"
-      case 'random':
-        return "text-[hsl(var(--homepage-button-random))]"
-      default:
-        return "text-[hsl(var(--homepage-text))]"
+  useEffect(() => {
+    const video = videoRef.current
+    if (!video) return
+
+    const handleVideoEnd = () => {
+      if (!isReversing) {
+        // Start reversing
+        setIsReversing(true)
+        video.playbackRate = -0.8
+        video.play()
+      } else {
+        // End of reverse, start normal playback
+        setIsReversing(false)
+        video.currentTime = 0
+        video.playbackRate = 0.8
+        video.play()
+      }
     }
-  }
+
+    video.addEventListener('ended', handleVideoEnd)
+    
+    return () => {
+      video.removeEventListener('ended', handleVideoEnd)
+    }
+  }, [isReversing])
 
   return (
     <>
@@ -38,100 +48,96 @@ const Index = () => {
         url="/"
       />
       <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-[hsl(var(--homepage-background-start))] to-[hsl(var(--homepage-background-end))]">
-        {/* Background Video */}
+        {/* Background Video with Reverse Feature */}
         <div className="absolute inset-0 z-0">
           <video 
+            ref={videoRef}
             autoPlay 
-            loop 
+            loop={false}
             muted 
-            className="w-full h-full object-cover opacity-20"
-            ref={(video) => {
-              if (video) {
-                video.playbackRate = 0.8;
-              }
-            }}
+            className="video-background"
           >
             <source src="/animated_card_reel.mp4" type="video/mp4" />
             Your browser does not support the video tag.
           </video>
         </div>
 
-        {/* Abstract Blobs */}
-        <Blob variant="pink" size="lg" className="top-20 left-10 animate-float" style={{ animationDelay: '0s', animationDuration: '6s' }} />
-        <Blob variant="yellow" size="md" className="top-32 right-20 animate-float" style={{ animationDelay: '2s', animationDuration: '8s' }} />
-        <Blob variant="orange" size="sm" className="bottom-40 left-32 animate-float" style={{ animationDelay: '4s', animationDuration: '7s' }} />
-        <Blob variant="pink" size="md" className="bottom-20 right-16 animate-float" style={{ animationDelay: '1s', animationDuration: '9s' }} />
+        {/* Project O Style Guide - Irregular Abstract Shapes */}
+        <div className="absolute top-10 left-8 w-32 h-32 bg-gradient-to-br from-[hsl(var(--project-o-bright-cyan))] to-[hsl(var(--project-o-purple))] opacity-20 shape-irregular animate-float" style={{ animationDelay: '0s', animationDuration: '6s' }}></div>
+        <div className="absolute top-20 right-12 w-24 h-24 bg-gradient-to-br from-[hsl(var(--project-o-neon-green))] to-[hsl(var(--project-o-cyan))] opacity-25 asymmetric-cut animate-float" style={{ animationDelay: '2s', animationDuration: '8s' }}></div>
+        <div className="absolute bottom-32 left-16 w-20 h-20 bg-gradient-to-br from-[hsl(var(--project-o-orange))] to-[hsl(var(--project-o-hot-pink))] opacity-15 shape-diagonal-cut animate-float" style={{ animationDelay: '4s', animationDuration: '7s' }}></div>
+        <div className="absolute bottom-16 right-20 w-28 h-28 bg-gradient-to-br from-[hsl(var(--project-o-purple-neon))] to-[hsl(var(--project-o-pink-bright))] opacity-20 shape-clean animate-float" style={{ animationDelay: '1s', animationDuration: '9s' }}></div>
         
         {/* Theme Toggle in top right */}
         <div className="absolute top-4 right-4 z-20">
-          <ThemeToggle className="text-[hsl(var(--homepage-text))] hover:bg-white/10 dark:hover:bg-black/20" />
+          <ThemeToggle />
         </div>
 
-        {/* Top - Project O Zone Title */}
-        <div className="relative z-10 h-[15vh] sm:h-[20vh] flex flex-col items-center justify-center px-4">
-          <h1 className={`text-3xl sm:text-6xl md:text-8xl font-bold transition-colors duration-500 drop-shadow-2xl ${getTextColor()}`}>
-            Project O Zone
-          </h1>
-        </div>
-
-        {/* Main Content - Rabbit, Buttons, and Video */}
-        <div className="relative z-10 h-[85vh] sm:h-[80vh] flex items-center justify-center px-4 sm:px-8">
-          {/* Left Side - Rabbit */}
-          <div className="absolute bottom-0 left-0 z-5">
-            <img 
-              src={whiteRabbit} 
-              alt="White Rabbit Character" 
-              className="w-[510px] sm:w-[595px] md:w-[680px] lg:w-[765px] object-contain animate-fade-in transform -translate-x-24"
-              style={{ animationDelay: '0.2s' }}
-            />
+        {/* Main Content */}
+        <div className="relative z-10 min-h-screen flex flex-col">
+          {/* Top - Project O Zone Title */}
+          <div className="flex-none h-[25vh] flex flex-col items-center justify-center px-4">
+            <h1 className="text-impact-title text-[hsl(var(--homepage-text))] text-center leading-none drop-shadow-2xl effect-chromatic-aberration">
+              PROJECT O ZONE
+            </h1>
           </div>
 
-          {/* Center - Buttons */}
-          <div className="flex items-center justify-center z-10 ml-24 sm:ml-32 md:ml-40 lg:ml-48">
-            <div className="grid grid-cols-2 gap-2 sm:gap-3 w-64 sm:w-72 md:w-80">
-              {/* Cards Button */}
-              <Button 
-                onClick={() => navigate('/cards')}
-                className="h-12 sm:h-14 md:h-16 bg-slate-900/90 border border-cyan-400/50 text-cyan-400 text-sm sm:text-base md:text-lg font-bold rounded-lg shadow-lg backdrop-blur-sm animate-fade-in"
-                style={{ animationDelay: '0.3s' }}
-              >
-                Cards
-              </Button>
+          {/* Main Content Area */}
+          <div className="flex-1 flex items-center justify-center px-4 sm:px-8">
+            {/* Left Side - Rabbit */}
+            <div className="absolute bottom-0 left-0 z-5 hidden lg:block">
+              <img 
+                src={whiteRabbit} 
+                alt="White Rabbit Character" 
+                className="w-[510px] sm:w-[595px] md:w-[680px] lg:w-[765px] object-contain animate-fade-in transform -translate-x-24"
+                style={{ animationDelay: '0.2s' }}
+              />
+            </div>
 
-              {/* Decks Button */}
-              <Button 
-                onClick={() => navigate('/decks')}
-                className="h-12 sm:h-14 md:h-16 bg-slate-900/90 border border-cyan-400/50 text-cyan-400 text-sm sm:text-base md:text-lg font-bold rounded-lg shadow-lg backdrop-blur-sm animate-fade-in"
-                style={{ animationDelay: '0.4s' }}
-              >
-                Decks
-              </Button>
+            {/* Center - Buttons Grid */}
+            <div className="flex items-center justify-center z-10 lg:ml-48">
+              <div className="grid grid-cols-2 gap-3 sm:gap-4 w-72 sm:w-80 md:w-96">
+                {/* Cards Button */}
+                <Button 
+                  onClick={() => navigate('/cards')}
+                  className="btn-project-o h-14 sm:h-16 md:h-18 text-sm sm:text-base md:text-lg animate-fade-in"
+                  style={{ animationDelay: '0.3s' }}
+                >
+                  <span className="text-montserrat-black">CARDS</span>
+                </Button>
 
-              {/* Draft Button */}
-              <Button 
-                onClick={() => navigate('/draft')}
-                className="h-12 sm:h-14 md:h-16 bg-slate-900/90 border border-cyan-400/50 text-cyan-400 text-sm sm:text-base md:text-lg font-bold rounded-lg shadow-lg backdrop-blur-sm animate-fade-in"
-                style={{ animationDelay: '0.5s' }}
-              >
-                Draft
-              </Button>
+                {/* Decks Button */}
+                <Button 
+                  onClick={() => navigate('/decks')}
+                  className="btn-project-o h-14 sm:h-16 md:h-18 text-sm sm:text-base md:text-lg animate-fade-in"
+                  style={{ animationDelay: '0.4s' }}
+                >
+                  <span className="text-montserrat-black">DECKS</span>
+                </Button>
 
-              {/* Random Deck Button */}
-              <Button 
-                onClick={() => navigate('/random')}
-                className="h-12 sm:h-14 md:h-16 bg-slate-900/90 border border-cyan-400/50 text-cyan-400 text-sm sm:text-base md:text-lg font-bold rounded-lg shadow-lg backdrop-blur-sm animate-fade-in flex items-center justify-center"
-                style={{ animationDelay: '0.6s' }}
-              >
-                <span className="text-center leading-tight text-xs sm:text-sm md:text-base">
-                  Random<br />Deck
-                </span>
-              </Button>
+                {/* Draft Button */}
+                <Button 
+                  onClick={() => navigate('/draft')}
+                  className="btn-project-o h-14 sm:h-16 md:h-18 text-sm sm:text-base md:text-lg animate-fade-in"
+                  style={{ animationDelay: '0.5s' }}
+                >
+                  <span className="text-montserrat-black">DRAFT</span>
+                </Button>
+
+                {/* Random Deck Button */}
+                <Button 
+                  onClick={() => navigate('/random')}
+                  className="btn-project-o h-14 sm:h-16 md:h-18 text-xs sm:text-sm md:text-base animate-fade-in flex items-center justify-center"
+                  style={{ animationDelay: '0.6s' }}
+                >
+                  <span className="text-montserrat-black text-center leading-tight">
+                    RANDOM<br />DECK
+                  </span>
+                </Button>
+              </div>
             </div>
           </div>
-
         </div>
-
-
       </div>
     </>
   )

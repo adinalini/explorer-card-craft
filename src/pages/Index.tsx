@@ -17,29 +17,38 @@ const Index = () => {
   const originalVideoRef = useRef<HTMLVideoElement>(null)
   const reverseVideoRef = useRef<HTMLVideoElement>(null)
 
-  // Seamless loop: freeze last frame for 0.2s, then switch to the other video (already playing)
-  const FREEZE_MS = 200;
+  // Seamless loop: use natural video end event for better timing
+  const FREEZE_MS = 100;
   const isSwitchingRef = useRef(false);
+  const lastSwitchTimeRef = useRef(0);
 
   const prepareAndSwitch = (current: 'original' | 'reverse') => {
+    // Debounce: prevent rapid successive switches
+    const now = Date.now();
+    if (now - lastSwitchTimeRef.current < 1000) return;
+    lastSwitchTimeRef.current = now;
+
     const currentRef = current === 'original' ? originalVideoRef : reverseVideoRef;
     const nextRef = current === 'original' ? reverseVideoRef : originalVideoRef;
     const next = current === 'original' ? 'reverse' : 'original';
 
     if (!currentRef.current || !nextRef.current) return;
 
-    // Hold the last frame of the current video
-    currentRef.current.pause();
+    console.log(`Switching from ${current} to ${next}`);
 
-    // Prepare and start the next video behind the scenes
+    // Prepare and start the next video
     try {
       nextRef.current.currentTime = 0;
-      nextRef.current.play().catch(() => {});
-    } catch {}
+      nextRef.current.play().catch(console.error);
+    } catch (e) {
+      console.error('Error starting next video:', e);
+    }
 
-    // After a short freeze, reveal the next video (crossfade handled by CSS)
+    // Switch immediately with crossfade
+    setCurrentVideo(next);
+    
+    // Reset switching flag after transition
     setTimeout(() => {
-      setCurrentVideo(next);
       isSwitchingRef.current = false;
     }, FREEZE_MS);
   };
@@ -48,8 +57,11 @@ const Index = () => {
     if (isSwitchingRef.current) return;
     const video = e.currentTarget as HTMLVideoElement;
     if (!video || !video.duration || Number.isNaN(video.duration)) return;
+    
+    // Only switch very close to the end (last 50ms)
     const remaining = video.duration - video.currentTime;
-    if (remaining <= FREEZE_MS / 1000) {
+    if (remaining <= 0.05 && remaining > 0) {
+      console.log(`Time update switch triggered for ${current}, remaining: ${remaining}s`);
       isSwitchingRef.current = true;
       prepareAndSwitch(current);
     }

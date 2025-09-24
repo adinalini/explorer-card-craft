@@ -109,21 +109,21 @@ const Cards = () => {
         image="/og-images/cards.jpg"
         url="/cards"
       />
-      <div className="min-h-screen bg-gradient-to-br from-[hsl(var(--background-start))] to-[hsl(var(--background-end))]">
+      <div className="min-h-screen" style={{ background: 'var(--gradient-background)' }}>
       {/* Header */}
-      <div className="relative p-4 border-b border-border/20">
+      <div className="relative p-4 border-b border-border/20 backdrop-blur-sm bg-card/80">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Button
               onClick={() => navigate('/')}
               variant="ghost"
               size="sm"
-              className="flex items-center gap-2 text-foreground hover:bg-accent/20"
+              className="flex items-center gap-2 text-card-foreground hover:bg-accent/20 font-montserrat"
             >
               <ArrowLeft className="h-4 w-4" />
               Back to Home
             </Button>
-            <h1 className="text-2xl md:text-3xl font-bold text-foreground">Card Explorer</h1>
+            <h1 className="text-2xl md:text-3xl font-black text-card-foreground font-montserrat">Card Explorer</h1>
           </div>
           <ThemeToggle />
         </div>
@@ -131,11 +131,11 @@ const Cards = () => {
 
       <div className="container mx-auto p-4 space-y-6">
         {/* Filters Section */}
-        <div className="bg-card/50 backdrop-blur-sm rounded-lg p-6 shadow-lg border border-border/20">
+        <div className="bg-card/80 backdrop-blur-sm rounded-lg p-6 shadow-lg border border-border/20">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {/* Search */}
             <div className="space-y-2">
-              <Label className="text-sm font-medium text-foreground">Search by Name</Label>
+              <Label className="text-sm font-semibold text-card-foreground font-montserrat">Search by Name</Label>
               <div className="relative">
                 <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
@@ -149,7 +149,7 @@ const Cards = () => {
 
             {/* Cost Range */}
             <div className="space-y-2">
-              <Label className="text-sm font-medium text-foreground">
+              <Label className="text-sm font-semibold text-card-foreground font-montserrat">
                 Cost Range: {costRange[0]} - {costRange[1]}
               </Label>
               <Slider
@@ -164,7 +164,7 @@ const Cards = () => {
 
             {/* Card Type Toggles */}
             <div className="space-y-3">
-              <Label className="text-sm font-medium text-foreground">Card Types</Label>
+              <Label className="text-sm font-semibold text-card-foreground font-montserrat">Card Types</Label>
               <div className="space-y-2">
                 <label className="flex items-center space-x-2 cursor-pointer">
                   <input
@@ -213,7 +213,7 @@ const Cards = () => {
 
             {/* View Mode */}
             <div className="space-y-2">
-              <Label className="text-sm font-medium text-foreground">Cards per Row</Label>
+              <Label className="text-sm font-semibold text-card-foreground font-montserrat">Cards per Row</Label>
               <RadioGroup value={viewMode} onValueChange={setViewMode} className="flex gap-4">
                 <label className="flex items-center space-x-2 cursor-pointer">
                   <RadioGroupItem value="4" />

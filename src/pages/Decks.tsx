@@ -269,7 +269,7 @@ const Decks = () => {
         image="/og-images/decks.jpg"
         url="/decks"
       />
-      <div className="min-h-screen bg-gradient-to-br from-[hsl(var(--background-start))] to-[hsl(var(--background-end))] flex flex-col">
+      <div className="min-h-screen flex flex-col" style={{ background: 'var(--gradient-background)' }}>
       <div className="flex-1">
         <div className="container mx-auto px-4 py-8">
           {/* Header */}
@@ -285,14 +285,15 @@ const Decks = () => {
                 <span className="hidden sm:inline">Back to Home</span>
                 <span className="sm:hidden">Back</span>
               </Button>
-              <h1 className="text-2xl sm:text-4xl font-bold text-foreground">Deck Builder</h1>
+              <h1 className="text-2xl sm:text-4xl font-black text-foreground font-montserrat">Deck Builder</h1>
             </div>
             
             <div className="flex items-center gap-2">
               <Button
                 onClick={() => navigate('/deck-builder')}
                 size="sm"
-                className="bg-orange-500 hover:bg-orange-600 text-white font-semibold px-2 py-1 text-xs sm:text-sm sm:px-3 sm:py-2"
+                variant="legendaryOrange"
+                className="font-montserrat font-black px-2 py-1 text-xs sm:text-sm sm:px-3 sm:py-2"
               >
                 <Plus className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
                 <span className="sm:hidden">Create</span>
@@ -313,7 +314,7 @@ const Decks = () => {
             
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-                <Label className="text-sm font-medium text-foreground">Deck Type:</Label>
+                <Label className="text-sm font-semibold text-foreground font-montserrat">Deck Type:</Label>
                 
                 {/* Mobile: Dropdown */}
                 <div className="sm:hidden">
@@ -371,7 +372,7 @@ const Decks = () => {
               </div>
               
               <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-                <Label className="text-sm font-medium text-foreground">Decks per page:</Label>
+                <Label className="text-sm font-semibold text-foreground font-montserrat">Decks per page:</Label>
                 <RadioGroup
                   value={itemsPerPage.toString()}
                   onValueChange={(value) => setItemsPerPage(parseInt(value))}

@@ -2035,26 +2035,26 @@ const Room = () => {
   const joinerDeck = playerDecks.filter(card => card.player_side === 'joiner')
 
   return (
-    <div className="min-h-screen room-background">
+    <div className="min-h-screen" style={{ background: 'var(--gradient-background)' }}>
       {/* Header with gradient wave */}
       <div className="relative">
-        <div className="bg-gradient-to-r from-[hsl(320_100%_60%)] to-[hsl(30_100%_60%)] py-3 px-4">
+        <div className="bg-gradient-to-r from-primary to-secondary py-3 px-4">
           <div className="flex items-center justify-between max-w-6xl mx-auto">
             <Button
               onClick={handleBackToHome}
-              variant="outline"
+              variant="ghost"
               size="sm"
-              className="border-white text-white hover:bg-white hover:text-[hsl(var(--primary))] hover:scale-105 transition-all bg-transparent"
+              className="text-foreground hover:bg-card/20 font-montserrat font-black"
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back to Home
             </Button>
-            <div className="text-center text-white">
-              <h1 className="text-xl md:text-2xl font-bold mb-1">Project O Draft Battle</h1>
-              <p className="text-sm md:text-base">Draft Type: {getDraftTypeDisplay(room.draft_type)}</p>
+            <div className="text-center text-foreground">
+              <h1 className="text-xl md:text-2xl font-black mb-1 font-montserrat">Project O Draft Battle</h1>
+              <p className="text-sm md:text-base font-montserrat">Draft Type: {getDraftTypeDisplay(room.draft_type)}</p>
             </div>
             <div className="flex items-center gap-2">
-              <ThemeToggle className="text-white dark:text-foreground hover:bg-white/10 dark:hover:bg-accent" />
+              <ThemeToggle />
             </div>
           </div>
         </div>
@@ -2065,7 +2065,7 @@ const Room = () => {
       {!room.joiner_name && userRole === 'creator' ? (
         // Waiting for player (only show to creator)
         <div className="text-center space-y-8">
-          <div className="text-2xl md:text-3xl text-primary font-semibold">
+          <div className="text-2xl md:text-3xl text-primary font-black font-montserrat">
             Waiting for a player to join the room
           </div>
           <div className="text-xl md:text-2xl text-muted-foreground flex items-center justify-center gap-4">
@@ -2256,14 +2256,14 @@ const Room = () => {
               <div className="space-y-8">
                 {/* Draft Status */}
                 <div className="text-center space-y-4">
-                  <h2 className="text-2xl font-bold text-[hsl(260_90%_10%)] dark:text-[hsl(240_10%_85%)]">
+                  <h2 className="text-2xl font-black text-card-foreground font-montserrat">
                     Round {room.current_round} of 13
                   </h2>
                   <div className="space-y-4">
                     {/* Player Names with Turn Arrow */}
                     <div className="flex items-center justify-center gap-4 max-w-2xl mx-auto">
                       <div className="text-center flex-1">
-                        <div className="text-lg font-semibold text-[hsl(260_90%_10%)] dark:text-[hsl(240_10%_85%)]">
+                        <div className="text-lg font-black text-card-foreground font-montserrat">
                           {room.creator_name} {room.triple_draft_first_pick === 'creator' ? '(First Pick)' : ''}
                         </div>
                       </div>
@@ -2285,7 +2285,7 @@ const Room = () => {
                        </div>
                       
                       <div className="text-center flex-1">
-                        <div className="text-lg font-semibold text-[hsl(260_90%_10%)] dark:text-[hsl(240_10%_85%)]">
+                        <div className="text-lg font-black text-card-foreground font-montserrat">
                           {room.joiner_name} {room.triple_draft_first_pick === 'joiner' ? '(First Pick)' : ''}
                         </div>
                       </div>
@@ -2296,7 +2296,7 @@ const Room = () => {
                           {Math.ceil(timeRemaining)}s remaining
                         </div>
                       ) : (
-                        <p className="text-lg text-[hsl(260_90%_10%)] dark:text-[hsl(240_10%_85%)]">Revealing selection...</p>
+                        <p className="text-lg text-card-foreground font-montserrat">Revealing selection...</p>
                       )}
                   </div>
                 </div>
@@ -2319,7 +2319,7 @@ const Room = () => {
                 {/* Draft Status */}
                 <div className="text-center space-y-4">
                   <div className="flex justify-between items-center max-w-4xl mx-auto">
-                    <h2 className="text-2xl font-bold text-[hsl(260_90%_10%)] dark:text-[hsl(240_10%_85%)]">Mega Draft</h2>
+                    <h2 className="text-2xl font-black text-card-foreground font-montserrat">Mega Draft</h2>
                     <div className="text-lg font-semibold text-primary">
                       Progress: {Math.min((room.mega_draft_turn_count || 0) + 1, 23)}/23 cards selected
                     </div>
@@ -2328,7 +2328,7 @@ const Room = () => {
                     {/* Player Names with Turn Arrow */}
                     <div className="flex items-center justify-center gap-4 max-w-2xl mx-auto">
                       <div className="text-center flex-1">
-                        <div className="text-lg font-semibold text-[hsl(260_90%_10%)] dark:text-[hsl(240_10%_85%)]">
+                        <div className="text-lg font-black text-card-foreground font-montserrat">
                           {room.creator_name} {room.first_pick_player === 'creator' ? '(First Pick)' : ''}
                         </div>
                       </div>
@@ -2350,7 +2350,7 @@ const Room = () => {
                       </div>
                       
                       <div className="text-center flex-1">
-                        <div className="text-lg font-semibold text-[hsl(260_90%_10%)] dark:text-[hsl(240_10%_85%)]">
+                        <div className="text-lg font-black text-card-foreground font-montserrat">
                           {room.joiner_name} {room.first_pick_player === 'joiner' ? '(First Pick)' : ''}
                         </div>
                       </div>
@@ -2361,7 +2361,7 @@ const Room = () => {
                         {Math.ceil(timeRemaining)}s remaining
                       </div>
                     ) : (
-                      <p className="text-lg text-[hsl(260_90%_10%)] dark:text-[hsl(240_10%_85%)]">Processing selection...</p>
+                      <p className="text-lg text-card-foreground font-montserrat">Processing selection...</p>
                     )}
                   </div>
                 </div>
@@ -2407,10 +2407,10 @@ const Room = () => {
           // Draft completed
           <div className="space-y-8">
             <div className="text-center">
-              <h2 className="text-2xl lg:text-3xl font-bold text-primary mb-4">
+              <h2 className="text-2xl lg:text-3xl font-black text-primary mb-4 font-montserrat">
                 Draft Complete!
               </h2>
-              <p className="text-lg lg:text-xl text-[hsl(260_90%_10%)] dark:text-[hsl(240_10%_85%)]">Good luck, have fun!</p>
+              <p className="text-lg lg:text-xl text-card-foreground font-montserrat">Good luck, have fun!</p>
             </div>
 
             {/* Final Decks - Responsive layout */}

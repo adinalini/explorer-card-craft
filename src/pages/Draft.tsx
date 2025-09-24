@@ -232,7 +232,7 @@ const Draft = () => {
         image="/og-images/homepage.jpg"
         url="/draft"
       />
-      <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-[hsl(var(--draft-background-start))] to-[hsl(var(--draft-background-end))]">
+      <div className="min-h-screen relative overflow-hidden" style={{ background: 'var(--gradient-background)' }}>
         {/* Abstract Blobs */}
         <Blob variant="pink" size="lg" className="top-20 left-10 animate-bounce" style={{ animationDelay: '0s', animationDuration: '6s' }} />
         <Blob variant="yellow" size="md" className="top-32 right-20 animate-bounce" style={{ animationDelay: '2s', animationDuration: '8s' }} />
@@ -244,7 +244,7 @@ const Draft = () => {
           <Button 
             onClick={() => navigate('/')}
             variant="ghost"
-            className="bg-white/10 text-white hover:bg-white/20 transition-all font-semibold flex items-center gap-2"
+            className="bg-card/20 text-card-foreground hover:bg-card/30 transition-all font-montserrat font-black flex items-center gap-2"
           >
             <ArrowLeft className="h-4 w-4" />
             Home
@@ -259,7 +259,7 @@ const Draft = () => {
         {/* Main Content */}
         <div className="relative z-10 min-h-screen flex flex-col items-center justify-center px-4">
           <div className="text-center space-y-12">
-            <h1 className="text-6xl md:text-8xl font-bold text-foreground mb-16 drop-shadow-2xl">
+            <h1 className="text-6xl md:text-8xl font-black text-foreground mb-16 drop-shadow-2xl font-montserrat">
               Project O Draft Battler
             </h1>
             
@@ -268,7 +268,8 @@ const Draft = () => {
                 <DialogTrigger asChild>
                   <Button 
                     size="lg" 
-                    className="bg-primary hover:bg-primary/90 text-primary-foreground px-12 py-6 text-xl font-semibold rounded-2xl shadow-2xl transform transition-all duration-200 hover:scale-105"
+                    variant="neonGreen"
+                    className="px-12 py-6 text-xl font-montserrat font-black rounded-2xl shadow-2xl transform transition-all duration-200 hover:scale-105"
                   >
                     Create Room
                   </Button>
@@ -343,9 +344,9 @@ const Draft = () => {
               <Dialog open={joinDialogOpen} onOpenChange={setJoinDialogOpen}>
                 <DialogTrigger asChild>
                   <Button 
-                        variant="outline" 
+                        variant="epicPurple" 
                         size="lg"
-                        className="border-2 border-foreground text-foreground hover:bg-foreground hover:text-background px-12 py-6 text-xl font-semibold rounded-2xl shadow-2xl transform transition-all duration-200 hover:scale-105 bg-transparent"
+                        className="px-12 py-6 text-xl font-montserrat font-black rounded-2xl shadow-2xl transform transition-all duration-200 hover:scale-105"
                   >
                     Join Room
                   </Button>

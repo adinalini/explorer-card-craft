@@ -231,7 +231,7 @@ const DeckBuilder = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[hsl(var(--background-start))] to-[hsl(var(--background-end))]">
+    <div className="min-h-screen" style={{ background: 'var(--gradient-background)' }}>
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
@@ -245,7 +245,7 @@ const DeckBuilder = () => {
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back to Decks
             </Button>
-            <h1 className="text-4xl font-bold text-foreground">Create New Deck</h1>
+            <h1 className="text-4xl font-black text-foreground font-montserrat">Create New Deck</h1>
           </div>
           <ThemeToggle className="text-foreground hover:bg-accent" />
         </div>
@@ -254,7 +254,7 @@ const DeckBuilder = () => {
         <div className="bg-card rounded-lg p-6 mb-8">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
             <div className="space-y-2">
-              <Label htmlFor="deck-name" className="text-sm font-medium">Deck Name *</Label>
+              <Label htmlFor="deck-name" className="text-sm font-semibold font-montserrat">Deck Name *</Label>
               <Input
                 id="deck-name"
                 placeholder="Enter deck name"
@@ -264,7 +264,7 @@ const DeckBuilder = () => {
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="deck-type" className="text-sm font-medium">Type *</Label>
+              <Label htmlFor="deck-type" className="text-sm font-semibold font-montserrat">Type *</Label>
               <Select value={deckType} onValueChange={setDeckType}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select deck type" />
@@ -283,7 +283,7 @@ const DeckBuilder = () => {
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="author-name" className="text-sm font-medium">Author Name</Label>
+              <Label htmlFor="author-name" className="text-sm font-semibold font-montserrat">Author Name</Label>
               <Input
                 id="author-name"
                 placeholder="Your name (optional)"
@@ -294,7 +294,7 @@ const DeckBuilder = () => {
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="description" className="text-sm font-medium">Description</Label>
+            <Label htmlFor="description" className="text-sm font-semibold font-montserrat">Description</Label>
             <Textarea
               id="description"
               placeholder="Describe your deck strategy (optional)"
@@ -308,7 +308,7 @@ const DeckBuilder = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Deck Preview */}
           <div className="bg-card rounded-lg p-6">
-            <h2 className="text-xl font-semibold mb-4 text-card-foreground">
+            <h2 className="text-xl font-black mb-4 text-card-foreground font-montserrat">
               Your Deck ({selectedCards.length}/13)
             </h2>
             
@@ -384,7 +384,8 @@ const DeckBuilder = () => {
             <Button
               onClick={handleSaveDeck}
               disabled={saving || selectedCards.length !== 13 || !deckName || !deckType}
-              className="w-full mt-6 bg-green-600 hover:bg-green-700 text-white"
+              variant="neonGreen"
+              className="w-full mt-6 font-montserrat font-black"
             >
               {saving ? "Saving..." : "Save Deck"}
             </Button>
@@ -392,7 +393,7 @@ const DeckBuilder = () => {
 
           {/* Card Selection */}
           <div className="bg-card rounded-lg p-6">
-            <h2 className="text-xl font-semibold mb-4 text-card-foreground">Select Cards</h2>
+            <h2 className="text-xl font-black mb-4 text-card-foreground font-montserrat">Select Cards</h2>
             
             {/* Filters */}
             <div className="space-y-4 mb-6">
@@ -403,7 +404,7 @@ const DeckBuilder = () => {
               />
               
               <div className="space-y-2">
-                <Label className="text-sm font-medium">Cost Range: {costRange[0]} - {costRange[1]}</Label>
+                <Label className="text-sm font-semibold font-montserrat">Cost Range: {costRange[0]} - {costRange[1]}</Label>
                 <Slider
                   value={costRange}
                   onValueChange={setCostRange}

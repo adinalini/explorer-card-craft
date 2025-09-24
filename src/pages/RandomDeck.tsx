@@ -141,15 +141,15 @@ const RandomDeck = () => {
 
   return (
     <div className="h-screen flex flex-col overflow-hidden">
-      {/* Purple gradient background only until "Good luck have fun!" */}
-      <div className="bg-gradient-to-br from-[hsl(var(--background-start))] to-[hsl(var(--background-end))] p-4 flex-shrink-0">
+      {/* Gradient background only until "Good luck have fun!" */}
+      <div className="p-4 flex-shrink-0" style={{ background: 'var(--gradient-background)' }}>
         <div className="max-w-4xl mx-auto">
           {/* Header with back button */}
           <div className="flex items-center justify-between mb-4">
             <Button
               variant="ghost"
               onClick={() => navigate('/')}
-              className="text-[hsl(var(--wave-light))] dark:text-[hsl(var(--wave-dark))] hover:bg-accent flex items-center gap-2"
+              className="text-card-foreground hover:bg-accent flex items-center gap-2 font-montserrat"
             >
               <ArrowLeft className="w-4 h-4" />
               Back to Home
@@ -159,10 +159,10 @@ const RandomDeck = () => {
 
           {/* Title */}
           <div className="text-center space-y-2 pb-4">
-            <h1 className="text-4xl md:text-6xl font-bold text-[hsl(260_25%_8%)] dark:text-[hsl(0_0%_100%)] drop-shadow-2xl">
+            <h1 className="text-4xl md:text-6xl font-black text-card-foreground drop-shadow-2xl font-montserrat">
               Random Deck
             </h1>
-            <p className="text-xl text-[hsl(260_25%_8%)] dark:text-[hsl(0_0%_100%)]">
+            <p className="text-xl text-card-foreground font-montserrat">
               Good luck have fun!
             </p>
           </div>
@@ -199,7 +199,8 @@ const RandomDeck = () => {
             onClick={generateRandomDeck}
             disabled={isGenerating}
             size="lg"
-            className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-4 md:px-12 md:py-6 text-lg md:text-xl font-semibold rounded-2xl shadow-2xl transform transition-all duration-200 hover:scale-105"
+            variant="legendaryOrange"
+            className="px-8 py-4 md:px-12 md:py-6 text-lg md:text-xl font-montserrat font-black rounded-2xl shadow-2xl transform transition-all duration-200 hover:scale-105"
           >
             {isGenerating ? "Generating..." : "Give me a random deck 🎲"}
           </Button>

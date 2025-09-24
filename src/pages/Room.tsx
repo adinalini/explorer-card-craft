@@ -2044,14 +2044,14 @@ const Room = () => {
               onClick={handleBackToHome}
               variant="ghost"
               size="sm"
-              className="text-foreground hover:bg-card/20 font-montserrat font-black"
+              className="text-white hover:bg-white/20"
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back to Home
             </Button>
-            <div className="text-center text-foreground">
-              <h1 className="text-xl md:text-2xl font-black mb-1 font-montserrat">Project O Draft Battle</h1>
-              <p className="text-sm md:text-base font-montserrat">Draft Type: {getDraftTypeDisplay(room.draft_type)}</p>
+            <div className="text-center text-white">
+              <h1 className="text-xl md:text-2xl font-bold mb-1">Project O Draft Battle</h1>
+              <p className="text-sm md:text-base">Draft Type: {getDraftTypeDisplay(room.draft_type)}</p>
             </div>
             <div className="flex items-center gap-2">
               <ThemeToggle />

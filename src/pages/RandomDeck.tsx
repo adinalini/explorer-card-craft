@@ -149,20 +149,20 @@ const RandomDeck = () => {
             <Button
               variant="ghost"
               onClick={() => navigate('/')}
-              className="text-card-foreground hover:bg-accent flex items-center gap-2 font-montserrat"
+              className="text-white hover:bg-white/20 flex items-center gap-2"
             >
               <ArrowLeft className="w-4 h-4" />
               Back to Home
             </Button>
-            <ThemeToggle className="text-foreground hover:bg-accent" />
+            <ThemeToggle className="text-white hover:bg-white/20" />
           </div>
 
           {/* Title */}
           <div className="text-center space-y-2 pb-4">
-            <h1 className="text-4xl md:text-6xl font-black text-card-foreground drop-shadow-2xl font-montserrat">
+            <h1 className="text-4xl md:text-6xl font-bold text-white drop-shadow-2xl">
               Random Deck
             </h1>
-            <p className="text-xl text-card-foreground font-montserrat">
+            <p className="text-xl text-gray-200">
               Good luck have fun!
             </p>
           </div>
@@ -199,8 +199,7 @@ const RandomDeck = () => {
             onClick={generateRandomDeck}
             disabled={isGenerating}
             size="lg"
-            variant="legendaryOrange"
-            className="px-8 py-4 md:px-12 md:py-6 text-lg md:text-xl font-montserrat font-black rounded-2xl shadow-2xl transform transition-all duration-200 hover:scale-105"
+            className="bg-orange-600 hover:bg-orange-700 text-white px-8 py-4 md:px-12 md:py-6 text-lg md:text-xl rounded-2xl shadow-2xl transform transition-all duration-200 hover:scale-105"
           >
             {isGenerating ? "Generating..." : "Give me a random deck 🎲"}
           </Button>

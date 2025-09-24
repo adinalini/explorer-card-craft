@@ -240,21 +240,21 @@ const DeckBuilder = () => {
               onClick={() => navigate('/decks')}
               variant="ghost"
               size="sm"
-              className="text-foreground hover:bg-accent"
+              className="text-white hover:bg-white/20"
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back to Decks
             </Button>
-            <h1 className="text-4xl font-black text-foreground font-montserrat">Create New Deck</h1>
+            <h1 className="text-4xl font-bold text-white">Create New Deck</h1>
           </div>
-          <ThemeToggle className="text-foreground hover:bg-accent" />
+          <ThemeToggle className="text-white hover:bg-white/20" />
         </div>
 
         {/* Deck Information Form */}
         <div className="bg-card rounded-lg p-6 mb-8">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
             <div className="space-y-2">
-              <Label htmlFor="deck-name" className="text-sm font-semibold font-montserrat">Deck Name *</Label>
+              <Label htmlFor="deck-name" className="text-sm font-semibold">Deck Name *</Label>
               <Input
                 id="deck-name"
                 placeholder="Enter deck name"
@@ -264,7 +264,7 @@ const DeckBuilder = () => {
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="deck-type" className="text-sm font-semibold font-montserrat">Type *</Label>
+              <Label htmlFor="deck-type" className="text-sm font-semibold">Type *</Label>
               <Select value={deckType} onValueChange={setDeckType}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select deck type" />
@@ -283,7 +283,7 @@ const DeckBuilder = () => {
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="author-name" className="text-sm font-semibold font-montserrat">Author Name</Label>
+              <Label htmlFor="author-name" className="text-sm font-semibold">Author Name</Label>
               <Input
                 id="author-name"
                 placeholder="Your name (optional)"
@@ -294,7 +294,7 @@ const DeckBuilder = () => {
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="description" className="text-sm font-semibold font-montserrat">Description</Label>
+            <Label htmlFor="description" className="text-sm font-semibold">Description</Label>
             <Textarea
               id="description"
               placeholder="Describe your deck strategy (optional)"
@@ -308,7 +308,7 @@ const DeckBuilder = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Deck Preview */}
           <div className="bg-card rounded-lg p-6">
-            <h2 className="text-xl font-black mb-4 text-card-foreground font-montserrat">
+            <h2 className="text-xl font-bold mb-4 text-white">
               Your Deck ({selectedCards.length}/13)
             </h2>
             
@@ -384,8 +384,7 @@ const DeckBuilder = () => {
             <Button
               onClick={handleSaveDeck}
               disabled={saving || selectedCards.length !== 13 || !deckName || !deckType}
-              variant="neonGreen"
-              className="w-full mt-6 font-montserrat font-black"
+              className="bg-blue-600 hover:bg-blue-700 text-white w-full mt-6"
             >
               {saving ? "Saving..." : "Save Deck"}
             </Button>
@@ -393,7 +392,7 @@ const DeckBuilder = () => {
 
           {/* Card Selection */}
           <div className="bg-card rounded-lg p-6">
-            <h2 className="text-xl font-black mb-4 text-card-foreground font-montserrat">Select Cards</h2>
+            <h2 className="text-xl font-bold mb-4 text-white">Select Cards</h2>
             
             {/* Filters */}
             <div className="space-y-4 mb-6">
@@ -404,7 +403,7 @@ const DeckBuilder = () => {
               />
               
               <div className="space-y-2">
-                <Label className="text-sm font-semibold font-montserrat">Cost Range: {costRange[0]} - {costRange[1]}</Label>
+                <Label className="text-sm font-semibold text-white">Cost Range: {costRange[0]} - {costRange[1]}</Label>
                 <Slider
                   value={costRange}
                   onValueChange={setCostRange}

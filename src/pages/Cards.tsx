@@ -118,12 +118,12 @@ const Cards = () => {
               onClick={() => navigate('/')}
               variant="ghost"
               size="sm"
-              className="flex items-center gap-2 text-foreground hover:bg-accent/20"
+              className="flex items-center gap-2 text-white hover:bg-white/20"
             >
               <ArrowLeft className="h-4 w-4" />
               Back to Home
             </Button>
-            <h1 className="text-2xl md:text-3xl font-bold text-foreground">Card Explorer</h1>
+            <h1 className="text-2xl md:text-3xl font-bold text-white">Card Explorer</h1>
           </div>
           <ThemeToggle />
         </div>

@@ -47,7 +47,7 @@ const Index = () => {
             className="w-full h-full object-cover opacity-20"
             ref={(video) => {
               if (video) {
-                video.playbackRate = 0.25;
+                video.playbackRate = 0.8;
               }
             }}
           >

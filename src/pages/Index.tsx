@@ -1,4 +1,4 @@
-import { useState, useRef } from "react"
+import { useState, useRef, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Blob } from "@/components/ui/blob"
 import { WaveDivider } from "@/components/ui/wave-divider"
@@ -13,24 +13,29 @@ const Index = () => {
   const navigate = useNavigate()
   const [hoveredButton, setHoveredButton] = useState<string | null>(null)
   const [currentVideo, setCurrentVideo] = useState<'original' | 'reverse'>('original')
-  const [fadeClass, setFadeClass] = useState('opacity-40')
   const originalVideoRef = useRef<HTMLVideoElement>(null)
   const reverseVideoRef = useRef<HTMLVideoElement>(null)
 
+  // Seamless switch: crossfade videos and control playback
   const handleVideoEnd = () => {
-    setFadeClass('opacity-0')
-    setTimeout(() => {
-      setCurrentVideo(currentVideo === 'original' ? 'reverse' : 'original')
-      setFadeClass('opacity-40')
-      
-      // Play the next video
-      const nextVideoRef = currentVideo === 'original' ? reverseVideoRef : originalVideoRef
-      if (nextVideoRef.current) {
-        nextVideoRef.current.currentTime = 0
-        nextVideoRef.current.play()
-      }
-    }, 300) // 300ms fade transition
+    setCurrentVideo((prev) => (prev === 'original' ? 'reverse' : 'original'))
   }
+
+  useEffect(() => {
+    const original = originalVideoRef.current
+    const reverse = reverseVideoRef.current
+    if (!original || !reverse) return
+
+    if (currentVideo === 'original') {
+      reverse.pause()
+      reverse.currentTime = 0
+      original.play().catch(() => {})
+    } else {
+      original.pause()
+      original.currentTime = 0
+      reverse.play().catch(() => {})
+    }
+  }, [currentVideo])
 
   const getTextColor = () => {
     if (!hoveredButton) return "text-[hsl(var(--homepage-text))]"
@@ -65,10 +70,11 @@ const Index = () => {
             ref={originalVideoRef}
             autoPlay 
             muted 
+            playsInline
             preload="auto"
             poster="/lovable-uploads/918d2f07-eec2-4aea-9105-f29011a86707.png"
             onEnded={handleVideoEnd}
-            className={`w-full h-full object-cover transition-opacity duration-300 ${currentVideo === 'original' ? fadeClass : 'opacity-0'}`}
+            className={`w-full h-full object-cover pointer-events-none transition-opacity duration-500 ${currentVideo === 'original' ? 'opacity-40' : 'opacity-0'}`}
             onLoadedData={(e) => {
               const video = e.currentTarget;
               video.playbackRate = 0.8;
@@ -83,9 +89,10 @@ const Index = () => {
           <video 
             ref={reverseVideoRef}
             muted 
+            playsInline
             preload="auto"
             onEnded={handleVideoEnd}
-            className={`w-full h-full object-cover transition-opacity duration-300 ${currentVideo === 'reverse' ? fadeClass : 'opacity-0'}`}
+            className={`w-full h-full object-cover pointer-events-none transition-opacity duration-500 ${currentVideo === 'reverse' ? 'opacity-40' : 'opacity-0'}`}
             onLoadedData={(e) => {
               const video = e.currentTarget;
               video.playbackRate = 0.8;

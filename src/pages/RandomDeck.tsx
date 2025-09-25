@@ -149,10 +149,10 @@ const RandomDeck = () => {
             <Button
               variant="ghost"
               onClick={() => navigate('/')}
-              className="text-[hsl(var(--wave-light))] dark:text-[hsl(var(--wave-dark))] hover:bg-accent flex items-center gap-2"
+              className="text-foreground hover:bg-accent flex items-center gap-2"
             >
               <ArrowLeft className="w-4 h-4" />
-              Back to Home
+              Back to home
             </Button>
             <ThemeToggle className="text-foreground hover:bg-accent" />
           </div>

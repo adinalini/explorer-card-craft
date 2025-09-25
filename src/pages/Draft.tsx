@@ -247,7 +247,7 @@ const Draft = () => {
             className="bg-white/10 text-white hover:bg-white/20 transition-all font-semibold flex items-center gap-2"
           >
             <ArrowLeft className="h-4 w-4" />
-            Home
+            Back to home
           </Button>
         </div>
 

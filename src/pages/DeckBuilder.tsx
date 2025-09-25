@@ -235,18 +235,20 @@ const DeckBuilder = () => {
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-4">
-            <Button
-              onClick={() => navigate('/decks')}
-              variant="ghost"
-              size="sm"
-              className="text-foreground hover:bg-accent"
-            >
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Decks
-            </Button>
+          <Button
+            onClick={() => navigate('/')}
+            variant="ghost"
+            size="sm"
+            className="text-foreground hover:bg-accent"
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to home
+          </Button>
+          
+          <div className="text-center flex-1">
             <h1 className="text-4xl font-bold text-foreground">Create New Deck</h1>
           </div>
+          
           <ThemeToggle className="text-foreground hover:bg-accent" />
         </div>
 

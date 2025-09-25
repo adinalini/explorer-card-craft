@@ -274,17 +274,18 @@ const Decks = () => {
         <div className="container mx-auto px-4 py-8">
           {/* Header */}
           <div className="flex items-center justify-between mb-8 gap-4">
-            <div className="flex items-center gap-2 sm:gap-4">
-              <Button
-                onClick={() => navigate('/')}
-                variant="ghost"
-                size="sm"
-                className="text-foreground hover:bg-accent px-2 py-1 text-xs sm:text-sm sm:px-3 sm:py-2"
-              >
-                <ArrowLeft className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
-                <span className="hidden sm:inline">Back to Home</span>
-                <span className="sm:hidden">Back</span>
-              </Button>
+            <Button
+              onClick={() => navigate('/')}
+              variant="ghost"
+              size="sm"
+              className="text-foreground hover:bg-accent px-2 py-1 text-xs sm:text-sm sm:px-3 sm:py-2"
+            >
+              <ArrowLeft className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+              <span className="hidden sm:inline">Back to home</span>
+              <span className="sm:hidden">Back</span>
+            </Button>
+            
+            <div className="text-center flex-1">
               <h1 className="text-2xl sm:text-4xl font-bold text-foreground">Deck Builder</h1>
             </div>
             

@@ -616,8 +616,8 @@ const Index = () => {
 
         {/* Disclaimer */}
         <div className="absolute bottom-2 left-1/2 -translate-x-1/2 z-20">
-          <div className="bg-black/20 backdrop-blur-sm px-4 py-2 rounded-md">
-            <p className="text-xs text-slate-300 text-center leading-tight">
+          <div className="bg-black/20 backdrop-blur-sm px-6 py-2 rounded-md w-max">
+            <p className="text-xs text-slate-300 whitespace-nowrap">
               This is not an official Project O website. Project O Zone is a community initiative. All assets used with permission.
             </p>
           </div>

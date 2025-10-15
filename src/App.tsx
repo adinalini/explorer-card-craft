@@ -14,6 +14,7 @@ import Decks from "./pages/Decks";
 import DeckBuilder from "./pages/DeckBuilder";
 import DeckView from "./pages/DeckView";
 import NotFound from "./pages/NotFound";
+import { ProtectedRoute } from "./components/ProtectedRoute";
 
 const queryClient = new QueryClient();
 
@@ -33,13 +34,13 @@ const App = () => (
           <BrowserRouter>
           <Routes>
             <Route path="/" element={<Index />} />
-            <Route path="/draft" element={<Draft />} />
-            <Route path="/room/:roomId" element={<Room />} />
-            <Route path="/random" element={<RandomDeck />} />
-            <Route path="/cards" element={<Cards />} />
-            <Route path="/decks" element={<Decks />} />
-            <Route path="/deck-builder" element={<DeckBuilder />} />
-            <Route path="/deck/:id" element={<DeckView />} />
+            <Route path="/draft" element={<ProtectedRoute><Draft /></ProtectedRoute>} />
+            <Route path="/room/:roomId" element={<ProtectedRoute><Room /></ProtectedRoute>} />
+            <Route path="/random" element={<ProtectedRoute><RandomDeck /></ProtectedRoute>} />
+            <Route path="/cards" element={<ProtectedRoute><Cards /></ProtectedRoute>} />
+            <Route path="/decks" element={<ProtectedRoute><Decks /></ProtectedRoute>} />
+            <Route path="/deck-builder" element={<ProtectedRoute><DeckBuilder /></ProtectedRoute>} />
+            <Route path="/deck/:id" element={<ProtectedRoute><DeckView /></ProtectedRoute>} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

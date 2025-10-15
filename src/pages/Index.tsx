@@ -389,7 +389,7 @@ const Index = () => {
         </div>
 
         {/* Mobile Layout - Stacked vertically */}
-        <div className="block md:hidden relative z-10 h-[82vh] sm:h-[78vh] flex flex-col items-center justify-center px-4 space-y-8">
+        <div className="block md:hidden relative z-10 h-[82vh] sm:h-[78vh] flex flex-col items-center justify-center px-4 space-y-4 pt-8">
           {/* Buttons or Password Gate Section */}
           <div className="flex-shrink-0">
             {!isLoading && (
@@ -415,9 +415,9 @@ const Index = () => {
         </div>
 
         {/* Disclaimer */}
-        <div className="absolute bottom-2 left-1/2 -translate-x-1/2 z-20">
-          <div className="bg-black/20 backdrop-blur-sm px-6 py-2 rounded-md w-max">
-            <p className="text-xs text-slate-300 whitespace-nowrap">
+        <div className="absolute bottom-2 left-1/2 -translate-x-1/2 z-20 px-4 max-w-full">
+          <div className="bg-black/20 backdrop-blur-sm px-3 sm:px-6 py-2 rounded-md max-w-full">
+            <p className="text-[10px] sm:text-xs text-slate-300 text-center leading-tight">
               This is not an official Project O website. Project O Zone is a community initiative. All assets used with permission.
             </p>
           </div>

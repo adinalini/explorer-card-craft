@@ -5,7 +5,6 @@ import alibabaImg from '@/assets/cards/ali_baba.png'
 import aliceImg from '@/assets/cards/alice.png'
 import axethrowImg from '@/assets/cards/axe_throw.png'
 import balooImg from '@/assets/cards/baloo.png'
-
 import bandersnatchImg from '@/assets/cards/bandersnatch.png'
 import bansheeImg from '@/assets/cards/banshee.png'
 import beastImg from '@/assets/cards/beast.png'
@@ -20,7 +19,7 @@ import cardsoldierImg from '@/assets/cards/card_soldier.png'
 import cheshireImg from '@/assets/cards/cheshire.png'
 import concentrateImg from '@/assets/cards/concentrate.png'
 import cowardlylionImg from '@/assets/cards/cowardly_lion.png'
-import darkomenImg from '@/assets/cards/dark_omen.png'
+import darkomenImg from '@/assets/cards/Dark Omen.png'
 import deathImg from '@/assets/cards/death.png'
 import defensematrixImg from '@/assets/cards/defense_matrix.png'
 import donquixoteImg from '@/assets/cards/don_quixote.png'
@@ -32,13 +31,13 @@ import fairygodmotherImg from '@/assets/cards/fairy_godmother.png'
 import flyingmonkeyImg from '@/assets/cards/flying_monkey.png'
 import franksmonsterImg from '@/assets/cards/franks_monster.png'
 import freezeImg from '@/assets/cards/freeze.png'
-import friartuckImg from '@/assets/cards/friar_tuck.png'
+import tuckImg from '@/assets/cards/Tuck.png'
 import galahadImg from '@/assets/cards/galahad.png'
-import giantImg from '@/assets/cards/giant.png'
+import jacksgiantImg from '@/assets/cards/jacks_giant.png'
 import glindaImg from '@/assets/cards/glinda.png'
 import goldeneggImg from '@/assets/cards/golden_egg.png'
 import goldengooseImg from '@/assets/cards/golden_goose.png'
-import goldilocksImg from '@/assets/cards/goldilocks.png'
+import goldiImg from '@/assets/cards/Goldi.png'
 import grendelImg from '@/assets/cards/grendel.png'
 import guyofgisborneImg from '@/assets/cards/guy_of_gisborne.png'
 import headlesshorsmanImg from '@/assets/cards/headless_horseman.png'
@@ -77,11 +76,11 @@ import princecharmingImg from '@/assets/cards/prince_charming.png'
 import princessauroraImg from '@/assets/cards/princess_aurora.png'
 import quasimodoImg from '@/assets/cards/quasimodo.png'
 import queenguinevereImg from '@/assets/cards/queen_guinevere.png'
-import rainofarrowsImg from '@/assets/cards/rain_of_arrows.png'
+import rainofarrowsImg from '@/assets/cards/Rai_of_arrows.png'
 import redImg from '@/assets/cards/red.png'
-import redcapImg from '@/assets/cards/redcap.png'
+import redcapImg from '@/assets/cards/Red_cap.png'
 import reinforcementsImg from '@/assets/cards/reinforcements.png'
-import robinhoodImg from '@/assets/cards/robin_hood.png'
+import robinhoodImg from '@/assets/cards/Robinhood.png'
 import rooImg from '@/assets/cards/roo.png'
 import rumpleImg from '@/assets/cards/rumple.png'
 import scarecrowImg from '@/assets/cards/scarecrow.png'
@@ -122,12 +121,50 @@ import wukongImg from '@/assets/cards/wukong.png'
 import genieImg from '@/assets/cards/genie.png'
 import paulbunyanImg from '@/assets/cards/paul_bunyan.png'
 
+// New cards from October 2025 patch
+import animatedBroomstickImg from '@/assets/cards/Animated_Broomstick.png'
+import babeTheBlueOxImg from '@/assets/cards/Babe_the_blue_ox.png'
+import babyBearImg from '@/assets/cards/Baby_Bear.png'
+import bagheeraImg from '@/assets/cards/Bagheera.png'
+import bakerImg from '@/assets/cards/Baker.png'
+import bigfootImg from '@/assets/cards/Bigfoot.png'
+import brandyImg from '@/assets/cards/Brandy.png'
+import butcherImg from '@/assets/cards/Butcher.png'
+import cakeImg from '@/assets/cards/Cake.png'
+import captainAhabImg from '@/assets/cards/Captain_Ahab.png'
+import cerberusImg from '@/assets/cards/Cerberus.png'
+import chimeraImg from '@/assets/cards/Chimera.png'
+import dropBearImg from '@/assets/cards/Drop_Bear.png'
+import firstAidImg from '@/assets/cards/First_Aid.png'
+import flyingDutchmanImg from '@/assets/cards/Flying_Dutchman.png'
+import hareImg from '@/assets/cards/Hare.png'
+import herculesImg from '@/assets/cards/Hercules.png'
+import huckFinnImg from '@/assets/cards/Huck_Finn.png'
+import impunduluImg from '@/assets/cards/Impundulu.png'
+import koscheiImg from '@/assets/cards/KOschei.png'
+import maryImg from '@/assets/cards/Mary.png'
+import momotaroImg from '@/assets/cards/Momotaro.png'
+import morganLeFayImg from '@/assets/cards/Morgan_le_Fay.png'
+import mortalCoilImg from '@/assets/cards/Mortal_Coil.png'
+import mothmanImg from '@/assets/cards/Mothman.png'
+import obliterateImg from '@/assets/cards/Obliterate.png'
+import pigletImg from '@/assets/cards/Piglet.png'
+import popeyeImg from '@/assets/cards/Popeye.png'
+import runOverImg from '@/assets/cards/Run_Over.png'
+import sandmanImg from '@/assets/cards/Sandman.png'
+import sinbadImg from '@/assets/cards/Sinbad.png'
+import thumbelinaImg from '@/assets/cards/Thumbelina.png'
+import tinkerBellImg from '@/assets/cards/Tinker_Bell.png'
+import tortoiseImg from '@/assets/cards/Tortoise.png'
+import wickedStepmotherImg from '@/assets/cards/Wicked_Stepmother.png'
+import winnieThePoohImg from '@/assets/cards/Winnie_the_pooh.png'
+import yukiOnnaImg from '@/assets/cards/Yuki_onna.png'
+
 const cardImages: Record<string, string> = {
   'ali_baba': alibabaImg,
   'alice': aliceImg,
   'axe_throw': axethrowImg,
   'baloo': balooImg,
-  
   'bandersnatch': bandersnatchImg,
   'banshee': bansheeImg,
   'beast': beastImg,
@@ -154,13 +191,13 @@ const cardImages: Record<string, string> = {
   'flying_monkey': flyingmonkeyImg,
   'franks_monster': franksmonsterImg,
   'freeze': freezeImg,
-  'friar_tuck': friartuckImg,
+  'tuck': tuckImg,
   'galahad': galahadImg,
-  'giant': giantImg,
+  'jacks_giant': jacksgiantImg,
   'glinda': glindaImg,
   'golden_egg': goldeneggImg,
   'golden_goose': goldengooseImg,
-  'goldilocks': goldilocksImg,
+  'goldi': goldiImg,
   'grendel': grendelImg,
   'guy_of_gisborne': guyofgisborneImg,
   'headless_horseman': headlesshorsmanImg,
@@ -201,9 +238,9 @@ const cardImages: Record<string, string> = {
   'queen_guinevere': queenguinevereImg,
   'rain_of_arrows': rainofarrowsImg,
   'red': redImg,
-  'redcap': redcapImg,
+  'red_cap': redcapImg,
   'reinforcements': reinforcementsImg,
-  'robin_hood': robinhoodImg,
+  'robinhood': robinhoodImg,
   'roo': rooImg,
   'rumple': rumpleImg,
   'scarecrow': scarecrowImg,
@@ -243,6 +280,43 @@ const cardImages: Record<string, string> = {
   'wukong': wukongImg,
   'genie': genieImg,
   'paul_bunyan': paulbunyanImg,
+  'animated_broomstick': animatedBroomstickImg,
+  'babe_the_blue_ox': babeTheBlueOxImg,
+  'baby_bear': babyBearImg,
+  'bagheera': bagheeraImg,
+  'baker': bakerImg,
+  'bigfoot': bigfootImg,
+  'brandy': brandyImg,
+  'butcher': butcherImg,
+  'cake': cakeImg,
+  'captain_ahab': captainAhabImg,
+  'cerberus': cerberusImg,
+  'chimera': chimeraImg,
+  'drop_bear': dropBearImg,
+  'first_aid': firstAidImg,
+  'flying_dutchman': flyingDutchmanImg,
+  'hare': hareImg,
+  'hercules': herculesImg,
+  'huck_finn': huckFinnImg,
+  'impundulu': impunduluImg,
+  'koschei': koscheiImg,
+  'mary': maryImg,
+  'momotaro': momotaroImg,
+  'morgan_le_fay': morganLeFayImg,
+  'mortal_coil': mortalCoilImg,
+  'mothman': mothmanImg,
+  'obliterate': obliterateImg,
+  'piglet': pigletImg,
+  'popeye': popeyeImg,
+  'run_over': runOverImg,
+  'sandman': sandmanImg,
+  'sinbad': sinbadImg,
+  'thumbelina': thumbelinaImg,
+  'tinker_bell': tinkerBellImg,
+  'tortoise': tortoiseImg,
+  'wicked_stepmother': wickedStepmotherImg,
+  'winnie_the_pooh': winnieThePoohImg,
+  'yuki_onna': yukiOnnaImg,
 }
 
 interface CardImageProps {

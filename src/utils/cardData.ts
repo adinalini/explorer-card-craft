@@ -358,7 +358,7 @@ export const cardDatabase: Card[] = [
   {
     id: "dark_omen",
     name: "Dark Omen",
-    image: "/src/assets/cards/Dark Omen.png",
+    image: "/src/assets/cards/Dark_Omen.png",
     isLegendary: false,
     cost: 4,
     isSpell: true,

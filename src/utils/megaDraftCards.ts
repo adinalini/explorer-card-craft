@@ -12,7 +12,11 @@ const shuffleArray = <T>(array: T[]): T[] => {
 
 // Generate 36 cards for mega draft following the specified rules
 export const generateMegaDraftCards = (usedCardIds: string[]): Card[] => {
-  const availableCards = cardDatabase.filter(card => !usedCardIds.includes(card.id) && card.cost !== undefined)
+  const availableCards = cardDatabase.filter(card => 
+    !usedCardIds.includes(card.id) && 
+    card.cost !== undefined && 
+    card.inDraftPool !== false
+  )
   
   const selectedCards: Card[] = []
   const usedInSelection: Set<string> = new Set()

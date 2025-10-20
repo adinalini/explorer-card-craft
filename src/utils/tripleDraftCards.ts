@@ -12,7 +12,11 @@ const shuffleArray = <T>(array: T[]): T[] => {
 
 // Generate cards for triple draft following the specified rules
 export const generateTripleDraftChoices = (usedCardIds: string[]): Card[][] => {
-  const availableCards = cardDatabase.filter(card => !usedCardIds.includes(card.id) && card.cost !== undefined)
+  const availableCards = cardDatabase.filter(card => 
+    !usedCardIds.includes(card.id) && 
+    card.cost !== undefined && 
+    card.inDraftPool !== false
+  )
   
   const choices: Card[][] = []
   const usedInChoices: Set<string> = new Set()

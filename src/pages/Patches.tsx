@@ -204,21 +204,21 @@ const Patches = () => {
               {/* Card Updates Section */}
               <section>
                 <h2 className="text-3xl font-bold mb-6 text-foreground">Card Updates</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {cardUpdates.map((card, index) => (
-                    <div key={index} className="bg-card rounded-lg p-6 border border-border">
-                      <h3 className="text-xl font-semibold mb-4 text-center text-card-foreground">{card.name}</h3>
-                      <div className="flex items-center justify-center gap-4">
+                    <div key={index} className="bg-card rounded-lg p-4 border border-border">
+                      <h3 className="text-lg font-semibold mb-3 text-center text-card-foreground">{card.name}</h3>
+                      <div className="flex items-center justify-center gap-3">
                         <img
                           src={card.old}
                           alt={`Old ${card.name}`}
-                          className="w-32 h-auto rounded-lg border-2 border-border"
+                          className="w-40 sm:w-48 h-auto rounded-lg border-2 border-border"
                         />
-                        <div className="text-3xl text-primary">→</div>
+                        <div className="text-2xl text-primary">→</div>
                         <img
                           src={card.new}
                           alt={`New ${card.name}`}
-                          className="w-32 h-auto rounded-lg border-2 border-primary"
+                          className="w-40 sm:w-48 h-auto rounded-lg border-2 border-primary"
                         />
                       </div>
                     </div>

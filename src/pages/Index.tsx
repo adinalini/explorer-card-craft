@@ -391,14 +391,12 @@ const Index = () => {
         {/* Mobile Layout - Stacked vertically */}
         <div className="block md:hidden relative z-10 h-[82vh] sm:h-[78vh] flex flex-col items-center justify-center px-4 space-y-4 pt-8">
           {/* Buttons or Password Gate Section */}
-          <div className="flex-shrink-0">
+          <div className="flex-shrink-0 w-full flex justify-center">
             {!isLoading && (
               isAuthenticated ? (
                 <NavigationButtons sizeVariant="small" />
               ) : (
-                <div className="w-80" style={{ height: '320px' }}>
-                  <PasswordGate onPasswordSubmit={handlePasswordSubmit} isVerifying={isVerifying} />
-                </div>
+                <PasswordGate onPasswordSubmit={handlePasswordSubmit} isVerifying={isVerifying} />
               )
             )}
           </div>

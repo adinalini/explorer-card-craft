@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input"
 import { Blob } from "@/components/ui/blob"
 import { WaveDivider } from "@/components/ui/wave-divider"
 import { ThemeToggle } from "@/components/ui/theme-toggle"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, useLocation } from "react-router-dom"
 import { SEOHead } from "@/components/SEOHead"
 import { FloatingCards, FloatingBubbles, FloatingBubblesDown, FloatingQuestionMarksHorizontal } from "@/components/ui/homepage-animations"
 import { usePasswordProtection } from "@/hooks/usePasswordProtection"
@@ -17,6 +17,7 @@ import projectOLogo from "/lovable-uploads/219c067b-3ac3-4955-96d1-76dc64562ea1.
 const Index = () => {
   // Force rebuild to clear videoRef cache issue
   const navigate = useNavigate()
+  const location = useLocation()
   const { toast } = useToast()
   const { isAuthenticated, isLoading, verifyPassword } = usePasswordProtection()
   const [password, setPassword] = useState("")
@@ -152,6 +153,12 @@ const Index = () => {
         title: "Access granted",
         description: "Welcome to Project O Zone!"
       })
+      
+      // Redirect to intended destination if it exists
+      const from = (location.state as { from?: string })?.from
+      if (from && from !== "/") {
+        navigate(from, { replace: true })
+      }
     } else {
       toast({
         title: "Access denied",

@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { usePasswordProtection } from "@/hooks/usePasswordProtection";
 
 interface ProtectedRouteProps {
@@ -9,12 +9,14 @@ interface ProtectedRouteProps {
 export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   const { isAuthenticated, isLoading } = usePasswordProtection();
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
-      navigate("/", { replace: true });
+      // Store the intended destination
+      navigate("/", { replace: true, state: { from: location.pathname } });
     }
-  }, [isAuthenticated, isLoading, navigate]);
+  }, [isAuthenticated, isLoading, navigate, location]);
 
   if (isLoading) {
     return (

@@ -19,7 +19,7 @@ export const PasswordGate = ({ onPasswordSubmit, isVerifying }: PasswordGateProp
 
   return (
     <div 
-      className="relative w-full max-w-[320px] sm:max-w-[384px] md:max-w-[420px] lg:max-w-[480px] bg-black/20 backdrop-blur-sm p-6 sm:p-8 rounded-lg animate-fade-in"
+      className="relative w-full max-w-[320px] sm:max-w-[384px] md:max-w-[420px] lg:max-w-[480px] bg-black/20 backdrop-blur-sm p-6 sm:p-8 rounded-lg animate-fade-in pointer-events-auto"
       style={{ animationDelay: '0.3s' }}
     >
       <form onSubmit={handleSubmit} className="flex flex-col items-center justify-center gap-4 sm:gap-6">
@@ -37,12 +37,14 @@ export const PasswordGate = ({ onPasswordSubmit, isVerifying }: PasswordGateProp
             className="bg-black/30 border-slate-600 text-white placeholder:text-slate-400 touch-manipulation"
             disabled={isVerifying}
             autoComplete="current-password"
+            enterKeyHint="go"
           />
         </div>
         <Button 
           type="submit" 
           disabled={isVerifying || !password}
           className="bg-violet-600 hover:bg-violet-700 text-white w-full max-w-xs touch-manipulation active:scale-95 transition-transform"
+          onClick={(e) => e.currentTarget.form?.requestSubmit()}
           onTouchStart={(e) => e.currentTarget.style.transform = 'scale(0.95)'}
           onTouchEnd={(e) => e.currentTarget.style.transform = 'scale(1)'}
         >

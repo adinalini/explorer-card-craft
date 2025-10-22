@@ -187,7 +187,8 @@ const DeckView = () => {
                 )}
               </div>
               
-              <div className="mb-6">
+              {/* Description on desktop */}
+              <div className="mb-6 hidden md:block">
                 <h3 className="font-semibold text-card-foreground mb-2">Description</h3>
                 <p className="text-muted-foreground whitespace-pre-line">
                   {deck.description || 'N/A'}
@@ -195,8 +196,8 @@ const DeckView = () => {
               </div>
             </div>
             
-            {/* Right sidebar with toggle and validation */}
-            <div className="flex flex-col gap-3 min-w-[280px] flex-shrink-0">
+            {/* Right sidebar with toggle and validation on desktop */}
+            <div className="hidden md:flex flex-col gap-3 min-w-[280px] flex-shrink-0">
               <DeckVersionToggle
                 deckPatch={deck.patch}
                 cards={deck.cards}
@@ -207,6 +208,31 @@ const DeckView = () => {
                 cardIds={deck.cards.map(c => c.card_id)} 
               />
             </div>
+          </div>
+
+          {/* Mobile: Errors below badges, before description */}
+          <div className="md:hidden mb-4 space-y-2">
+            <div className="scale-90 origin-top-left -ml-2">
+              <DeckVersionToggle
+                deckPatch={deck.patch}
+                cards={deck.cards}
+                onToggle={handleVersionToggle}
+              />
+            </div>
+            <div className="scale-90 origin-top-left -ml-2">
+              <DeckValidationAlert 
+                deckPatch={deck.patch} 
+                cardIds={deck.cards.map(c => c.card_id)} 
+              />
+            </div>
+          </div>
+
+          {/* Mobile: Description */}
+          <div className="mb-6 md:hidden">
+            <h3 className="font-semibold text-card-foreground mb-2">Description</h3>
+            <p className="text-muted-foreground whitespace-pre-line">
+              {deck.description || 'N/A'}
+            </p>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">

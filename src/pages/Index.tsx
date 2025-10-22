@@ -215,6 +215,10 @@ const Index = () => {
               onEnded={handleVideoEnd}
               onTimeUpdate={(e) => handleTimeUpdate('original', e)}
               onError={(e) => handleVideoError('original', e)}
+              onCanPlay={(e) => {
+                const video = e.currentTarget;
+                video.play().catch(console.error);
+              }}
               className={`w-full h-full object-cover pointer-events-none transition-opacity duration-300 ${
                 currentVideo === 'original' ? 'opacity-40' : 'opacity-0'
               }`}
@@ -222,6 +226,7 @@ const Index = () => {
                 const video = e.currentTarget;
                 video.playbackRate = 0.8;
                 setVideosLoaded(true);
+                video.play().catch(console.error);
               }}
               style={{ position: 'absolute' }}
             >
@@ -396,8 +401,18 @@ const Index = () => {
         </div>
 
         {/* Mobile Layout - Stacked vertically */}
-        <div className="block md:hidden relative z-10 h-[82vh] sm:h-[78vh] flex flex-col items-center justify-center px-4 space-y-4 pt-8">
-          {/* Buttons or Password Gate Section */}
+        <div className="block md:hidden relative z-10 flex flex-col items-center px-4 pt-12 pb-8 space-y-8">
+          {/* Rabbit at top on mobile */}
+          <div className="flex-shrink-0 flex justify-center">
+            <img 
+              src={whiteRabbit} 
+              alt="White Rabbit Character" 
+              className="w-[280px] sm:w-[338px] object-contain animate-fade-in"
+              style={{ animationDelay: '0.5s' }}
+            />
+          </div>
+
+          {/* Buttons or Password Gate Section below rabbit */}
           <div className="flex-shrink-0 w-full flex justify-center">
             {!isLoading && (
               isAuthenticated ? (
@@ -406,16 +421,6 @@ const Index = () => {
                 <PasswordGate onPasswordSubmit={handlePasswordSubmit} isVerifying={isVerifying} />
               )
             )}
-          </div>
-
-          {/* Rabbit at bottom center on mobile */}
-          <div className="flex-shrink-0 flex justify-center">
-            <img 
-              src={whiteRabbit} 
-              alt="White Rabbit Character" 
-              className="w-[338px] object-contain animate-fade-in"
-              style={{ animationDelay: '0.7s' }}
-            />
           </div>
         </div>
 

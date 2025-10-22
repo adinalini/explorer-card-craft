@@ -68,7 +68,7 @@ import mowgliImg from "@/assets/cards/mowgli.png";
 import mummyImg from "@/assets/cards/mummy.png";
 import musketeerImg from "@/assets/cards/musketeer.png";
 import notsolitlepigImg from "@/assets/cards/not_so_little_pig.png";
-import ogreImg from "@/assets/cards/ogre.png";
+import ogreImg from "@/assets/cards/Old/v1.0.0.40/ogre.png";
 import pegasusImg from "@/assets/cards/pegasus.png";
 import phantomcoachmanImg from "@/assets/cards/phantom_coachman.png";
 import piggybankImg from "@/assets/cards/piggy_bank.png";
@@ -111,7 +111,7 @@ import watsonImg from "@/assets/cards/watson.png";
 import whiterabbitImg from "@/assets/cards/white_rabbit.png";
 import wickedwitchofthewestImg from "@/assets/cards/wicked_witch_of_the_west.png";
 import zorroImg from "@/assets/cards/zorro.png";
-import tinsoldierImg from "@/assets/cards/tin_soldier.png";
+import tinsoldierImg from "@/assets/cards/Old/v1.0.0.40/tin_soldier.png";
 import hanselgretelImg from "@/assets/cards/hansel_gretel.png";
 import beautyImg from "@/assets/cards/beauty.png";
 import wendyImg from "@/assets/cards/wendy.png";
@@ -132,13 +132,11 @@ import brandyImg from "@/assets/cards/Brandy.png";
 import butcherImg from "@/assets/cards/Butcher.png";
 import cakeImg from "@/assets/cards/Cake.png";
 import captainAhabImg from "@/assets/cards/Captain_Ahab.png";
-import cerberusImg from "@/assets/cards/Cerberus.png";
 import chimeraImg from "@/assets/cards/Chimera.png";
 import dropBearImg from "@/assets/cards/Drop_Bear.png";
 import firstAidImg from "@/assets/cards/First_Aid.png";
 import flyingDutchmanImg from "@/assets/cards/Flying_Dutchman.png";
 import hareImg from "@/assets/cards/Hare.png";
-import herculesImg from "@/assets/cards/Hercules.png";
 import huckFinnImg from "@/assets/cards/Huck_Finn.png";
 import impunduluImg from "@/assets/cards/Impundulu.png";
 import koscheiImg from "@/assets/cards/KOschei.png";
@@ -296,13 +294,11 @@ const cardImages: Record<string, string> = {
   butcher: butcherImg,
   cake: cakeImg,
   captain_ahab: captainAhabImg,
-  cerberus: cerberusImg,
   chimera: chimeraImg,
   drop_bear: dropBearImg,
   first_aid: firstAidImg,
   flying_dutchman: flyingDutchmanImg,
   hare: hareImg,
-  hercules: herculesImg,
   huck_finn: huckFinnImg,
   impundulu: impunduluImg,
   koschei: koscheiImg,

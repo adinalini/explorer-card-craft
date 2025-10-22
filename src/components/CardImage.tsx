@@ -192,12 +192,15 @@ const cardImages: Record<string, string> = {
   franks_monster: franksmonsterImg,
   freeze: freezeImg,
   tuck: tuckImg,
+  friar_tuck: tuckImg, // Alternate key for old name
   galahad: galahadImg,
   jacks_giant: jacksgiantImg,
+  giant: jacksgiantImg, // Alternate key for old name
   glinda: glindaImg,
   golden_egg: goldeneggImg,
   golden_goose: goldengooseImg,
   goldi: goldiImg,
+  goldilocks: goldiImg, // Alternate key for old name
   grendel: grendelImg,
   guy_of_gisborne: guyofgisborneImg,
   headless_horseman: headlesshorsmanImg,
@@ -237,10 +240,13 @@ const cardImages: Record<string, string> = {
   quasimodo: quasimodoImg,
   queen_guinevere: queenguinevereImg,
   rain_of_arrows: rainofarrowsImg,
+  rai_of_arrows: rainofarrowsImg, // Alternate key matching file name
   red: redImg,
   red_cap: redcapImg,
+  redcap: redcapImg, // Alternate key without underscore
   reinforcements: reinforcementsImg,
   robinhood: robinhoodImg,
+  robin_hood: robinhoodImg, // Alternate key with underscore for backward compatibility
   roo: rooImg,
   rumple: rumpleImg,
   scarecrow: scarecrowImg,
@@ -334,7 +340,23 @@ export function CardImage({ cardId, cardName, className, onError }: CardImagePro
     onError?.();
   };
 
-  const imageSrc = cardImages[cardId] || "/placeholder.svg";
+  // Try to find the image with the given cardId, or try with underscores replaced
+  let imageSrc = cardImages[cardId];
+  
+  // If not found, try alternate naming conventions
+  if (!imageSrc) {
+    // Try replacing underscores with nothing (e.g., red_cap -> redcap)
+    const withoutUnderscores = cardId.replace(/_/g, '');
+    imageSrc = cardImages[withoutUnderscores];
+    
+    // If still not found, try adding underscores to camelCase (e.g., redcap -> red_cap)
+    if (!imageSrc) {
+      const withUnderscores = cardId.replace(/([a-z])([A-Z])/g, '$1_$2').toLowerCase();
+      imageSrc = cardImages[withUnderscores];
+    }
+  }
+  
+  imageSrc = imageSrc || "/placeholder.svg";
 
   return (
     <img

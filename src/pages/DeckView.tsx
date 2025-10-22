@@ -186,10 +186,17 @@ const DeckView = () => {
                   </span>
                 )}
               </div>
+              
+              <div className="mb-6">
+                <h3 className="font-semibold text-card-foreground mb-2">Description</h3>
+                <p className="text-muted-foreground whitespace-pre-line">
+                  {deck.description || 'N/A'}
+                </p>
+              </div>
             </div>
             
             {/* Right sidebar with toggle and validation */}
-            <div className="flex flex-col gap-3 min-w-[280px]">
+            <div className="flex flex-col gap-3 min-w-[280px] flex-shrink-0">
               <DeckVersionToggle
                 deckPatch={deck.patch}
                 cards={deck.cards}
@@ -200,13 +207,6 @@ const DeckView = () => {
                 cardIds={deck.cards.map(c => c.card_id)} 
               />
             </div>
-          </div>
-          
-          <div className="mb-6">
-            <h3 className="font-semibold text-card-foreground mb-2">Description</h3>
-            <p className="text-muted-foreground whitespace-pre-line">
-              {deck.description || 'N/A'}
-            </p>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">

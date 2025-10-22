@@ -195,14 +195,14 @@ const Patches = () => {
               <span className="hidden sm:inline">Back to Home</span>
               <span className="sm:hidden">Back</span>
             </Button>
+            <h1 className="text-3xl sm:text-4xl font-bold text-foreground">Patch Notes</h1>
             <ThemeToggle />
           </div>
         </div>
 
         <div className="container mx-auto px-4 py-8">
-          {/* Header with Patch Notes title and selector */}
-          <div className="mb-8 flex items-center justify-center gap-6">
-            <h1 className="text-3xl sm:text-4xl font-bold text-foreground">Patch Notes</h1>
+          {/* Patch selector buttons */}
+          <div className="mb-8 flex items-center justify-center gap-4">
             <Button
               variant={selectedPatch === "october-2025" ? "default" : "outline"}
               onClick={() => setSelectedPatch("october-2025")}

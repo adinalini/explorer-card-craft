@@ -1,9 +1,10 @@
 import { Button } from "@/components/ui/button"
-import { Copy, Check } from "lucide-react"
+import { Copy, Check, AlertCircle } from "lucide-react"
 import { useState, useEffect } from "react"
 import { toast } from "@/hooks/use-toast"
 import { encodeDeck } from "@/utils/deckCodeGenerator"
 import { getCardKey } from "@/utils/cardKeyMapping"
+import { isDecKValid } from "@/components/DeckValidationAlert"
 
 interface DeckCodeDisplayProps {
   cards: Array<{
@@ -13,10 +14,14 @@ interface DeckCodeDisplayProps {
     is_legendary: boolean
     selection_order: number
   }>
+  deckPatch?: string
 }
 
-export function DeckCodeDisplay({ cards }: DeckCodeDisplayProps) {
+export function DeckCodeDisplay({ cards, deckPatch = 'v1.0.0.41 (latest)' }: DeckCodeDisplayProps) {
   const [copied, setCopied] = useState(false)
+  
+  const cardIds = cards.map(c => c.card_id)
+  const isDeckValid = isDecKValid(deckPatch, cardIds)
 
   const generateDeckCode = async () => {
     const cardKeys: string[] = []
@@ -36,6 +41,15 @@ export function DeckCodeDisplay({ cards }: DeckCodeDisplayProps) {
   }
 
   const handleCopyDeckCode = async () => {
+    if (!isDeckValid) {
+      toast({
+        title: "Cannot copy deck code",
+        description: "This deck contains invalid cards due to patch changes. Please check the warnings above.",
+        variant: "destructive"
+      })
+      return
+    }
+    
     const deckCode = await generateDeckCode()
     
     if (!deckCode) {
@@ -64,17 +78,20 @@ export function DeckCodeDisplay({ cards }: DeckCodeDisplayProps) {
 
   return (
     <Button
-      variant="orange"
+      variant={isDeckValid ? "orange" : "destructive"}
       size="sm"
       onClick={handleCopyDeckCode}
       className="flex items-center gap-2"
+      disabled={!isDeckValid}
     >
-      {copied ? (
+      {!isDeckValid ? (
+        <AlertCircle className="h-4 w-4" />
+      ) : copied ? (
         <Check className="h-4 w-4" />
       ) : (
         <Copy className="h-4 w-4" />
       )}
-      {copied ? "Copied!" : "Copy Deck Code"}
+      {!isDeckValid ? "Invalid Deck" : copied ? "Copied!" : "Copy Deck Code"}
     </Button>
   )
 }

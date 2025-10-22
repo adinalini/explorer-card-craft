@@ -1,36 +1,38 @@
 import { SEOHead } from "@/components/SEOHead";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
+import { ArrowLeft } from "lucide-react";
 
-// Old card images (from 19102025 folder)
-import oldAxeThrow from "@/assets/cards/Old/19102025/axe_throw.png";
-import oldBeast from "@/assets/cards/Old/19102025/beast.png";
-import oldBeauty from "@/assets/cards/Old/19102025/beauty.png";
-import oldBlowTheHouseDown from "@/assets/cards/Old/19102025/blow_the_house_down.png";
-import oldBridgeTroll from "@/assets/cards/Old/19102025/bridge_troll.png";
-import oldBullseye from "@/assets/cards/Old/19102025/bullseye.png";
-import oldCheshire from "@/assets/cards/Old/19102025/cheshire.png";
-import oldCowardlyLion from "@/assets/cards/Old/19102025/cowardly_lion.png";
-import oldDarkOmen from "@/assets/cards/Old/19102025/dark_omen.png";
-import oldFlyingMonkey from "@/assets/cards/Old/19102025/flying_monkey.png";
-import oldFriarTuck from "@/assets/cards/Old/19102025/friar_tuck.png";
-import oldGiant from "@/assets/cards/Old/19102025/giant.png";
-import oldGoldilocks from "@/assets/cards/Old/19102025/goldilocks.png";
-import oldJackInTheBox from "@/assets/cards/Old/19102025/jack_in_the_box.png";
-import oldLadyOfTheLake from "@/assets/cards/Old/19102025/lady_of_the_lake.png";
-import oldMorgiana from "@/assets/cards/Old/19102025/morgiana.png";
-import oldMummy from "@/assets/cards/Old/19102025/mummy.png";
-import oldPhantomCoachman from "@/assets/cards/Old/19102025/phantom_coachman.png";
-import oldQuasimodo from "@/assets/cards/Old/19102025/quasimodo.png";
-import oldRainOfArrows from "@/assets/cards/Old/19102025/rain_of_arrows.png";
-import oldRed from "@/assets/cards/Old/19102025/red.png";
-import oldRedcap from "@/assets/cards/Old/19102025/redcap.png";
-import oldRobinHood from "@/assets/cards/Old/19102025/robin_hood.png";
-import oldSheriffOfNottingham from "@/assets/cards/Old/19102025/sheriff_of_nottingham.png";
-import oldTheKraken from "@/assets/cards/Old/19102025/the_kraken.png";
-import oldThreeMusketeers from "@/assets/cards/Old/19102025/three_musketeers.png";
-import oldTinWoodman from "@/assets/cards/Old/19102025/tin_woodman.png";
+// Old card images (from v1.0.0.40 folder)
+import oldAxeThrow from "@/assets/cards/Old/v1.0.0.40/axe_throw.png";
+import oldBeast from "@/assets/cards/Old/v1.0.0.40/beast.png";
+import oldBeauty from "@/assets/cards/Old/v1.0.0.40/beauty.png";
+import oldBlowTheHouseDown from "@/assets/cards/Old/v1.0.0.40/blow_the_house_down.png";
+import oldBridgeTroll from "@/assets/cards/Old/v1.0.0.40/bridge_troll.png";
+import oldBullseye from "@/assets/cards/Old/v1.0.0.40/bullseye.png";
+import oldCheshire from "@/assets/cards/Old/v1.0.0.40/cheshire.png";
+import oldCowardlyLion from "@/assets/cards/Old/v1.0.0.40/cowardly_lion.png";
+import oldDarkOmen from "@/assets/cards/Old/v1.0.0.40/dark_omen.png";
+import oldFlyingMonkey from "@/assets/cards/Old/v1.0.0.40/flying_monkey.png";
+import oldFriarTuck from "@/assets/cards/Old/v1.0.0.40/friar_tuck.png";
+import oldGiant from "@/assets/cards/Old/v1.0.0.40/giant.png";
+import oldGoldilocks from "@/assets/cards/Old/v1.0.0.40/goldilocks.png";
+import oldJackInTheBox from "@/assets/cards/Old/v1.0.0.40/jack_in_the_box.png";
+import oldLadyOfTheLake from "@/assets/cards/Old/v1.0.0.40/lady_of_the_lake.png";
+import oldMorgiana from "@/assets/cards/Old/v1.0.0.40/morgiana.png";
+import oldMummy from "@/assets/cards/Old/v1.0.0.40/mummy.png";
+import oldPhantomCoachman from "@/assets/cards/Old/v1.0.0.40/phantom_coachman.png";
+import oldQuasimodo from "@/assets/cards/Old/v1.0.0.40/quasimodo.png";
+import oldRainOfArrows from "@/assets/cards/Old/v1.0.0.40/rain_of_arrows.png";
+import oldRed from "@/assets/cards/Old/v1.0.0.40/red.png";
+import oldRedcap from "@/assets/cards/Old/v1.0.0.40/redcap.png";
+import oldRobinHood from "@/assets/cards/Old/v1.0.0.40/robin_hood.png";
+import oldSheriffOfNottingham from "@/assets/cards/Old/v1.0.0.40/sheriff_of_nottingham.png";
+import oldTheKraken from "@/assets/cards/Old/v1.0.0.40/the_kraken.png";
+import oldThreeMusketeers from "@/assets/cards/Old/v1.0.0.40/three_musketeers.png";
+import oldTinWoodman from "@/assets/cards/Old/v1.0.0.40/tin_woodman.png";
 
 // New card images
 import newAxeThrow from "@/assets/cards/axe_throw.png";
@@ -102,6 +104,7 @@ import yukiOnna from "@/assets/cards/Yuki_onna.png";
 
 const Patches = () => {
   const [selectedPatch, setSelectedPatch] = useState("october-2025");
+  const navigate = useNavigate();
 
   const cardUpdates = [
     { name: "Axe Throw", old: oldAxeThrow, new: newAxeThrow },
@@ -180,13 +183,24 @@ const Patches = () => {
         description="View all patch notes and updates for Project O Zone card game"
       />
       <div className="min-h-screen bg-gradient-to-b from-background via-background to-primary/5">
-        <div className="container mx-auto px-4 py-8">
-          <div className="flex justify-between items-center mb-8">
-            <h1 className="text-4xl font-bold text-foreground">Patch Notes</h1>
-            <Link to="/">
-              <Button variant="outline">Back to Home</Button>
-            </Link>
+        {/* Header */}
+        <div className="border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+          <div className="container mx-auto px-4 py-4 flex justify-between items-center">
+            <Button
+              variant="ghost"
+              onClick={() => navigate("/")}
+              className="gap-2"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              <span className="hidden sm:inline">Back to Home</span>
+              <span className="sm:hidden">Back</span>
+            </Button>
+            <ThemeToggle />
           </div>
+        </div>
+
+        <div className="container mx-auto px-4 py-8">
+          <h1 className="text-4xl font-bold text-foreground text-center mb-8">Patch Notes</h1>
 
           {/* Patch Selector */}
           <div className="mb-8 flex gap-4">

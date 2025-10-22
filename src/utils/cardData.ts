@@ -1053,7 +1053,7 @@ export const cardDatabase: Card[] = [
     cost: 2,
     isSpell: false,
     cardKey: "C00166_MB",
-    inDraftPool: true,
+    inDraftPool: false, // Removed from pool in v1.0.0.41
   },
   {
     id: "pegasus",
@@ -1193,7 +1193,7 @@ export const cardDatabase: Card[] = [
     cost: 1,
     isSpell: false,
     cardKey: "C00191_MB",
-    inDraftPool: true,
+    inDraftPool: false, // Removed from pool in v1.0.0.41
   },
   {
     id: "hansel_gretel",
@@ -1276,7 +1276,7 @@ export const cardDatabase: Card[] = [
     inDraftPool: true,
   },
 
-  // New cards added in October 2025 patch (NOT in draft pool yet)
+  // New cards added in October 2025 patch (NOW in draft pool as of v1.0.0.41)
   {
     id: "huck_finn",
     name: "Huck Finn",
@@ -1285,7 +1285,7 @@ export const cardDatabase: Card[] = [
     cost: 3,
     isSpell: false,
     cardKey: "C00191_MB",
-    inDraftPool: false,
+    inDraftPool: true,
   },
   {
     id: "bagheera",
@@ -1295,7 +1295,7 @@ export const cardDatabase: Card[] = [
     cost: 3,
     isSpell: false,
     cardKey: "C00245_MB",
-    inDraftPool: false,
+    inDraftPool: true,
   },
   {
     id: "bigfoot",
@@ -1305,7 +1305,7 @@ export const cardDatabase: Card[] = [
     cost: 3,
     isSpell: false,
     cardKey: "C00258_MB",
-    inDraftPool: false,
+    inDraftPool: true,
   },
   {
     id: "thumbelina",
@@ -1315,7 +1315,7 @@ export const cardDatabase: Card[] = [
     cost: 3,
     isSpell: false,
     cardKey: "C00198_MB",
-    inDraftPool: false,
+    inDraftPool: true,
   },
   {
     id: "hare",
@@ -1325,7 +1325,7 @@ export const cardDatabase: Card[] = [
     cost: 3,
     isSpell: false,
     cardKey: "C00184_MB",
-    inDraftPool: false,
+    inDraftPool: true,
   },
   {
     id: "tortoise",
@@ -1335,7 +1335,7 @@ export const cardDatabase: Card[] = [
     cost: 3,
     isSpell: false,
     cardKey: "C00183_MB",
-    inDraftPool: false,
+    inDraftPool: true,
   },
   {
     id: "babe_the_blue_ox",
@@ -1345,7 +1345,7 @@ export const cardDatabase: Card[] = [
     cost: 4,
     isSpell: false,
     cardKey: "C00203_MB",
-    inDraftPool: false,
+    inDraftPool: true,
   },
   {
     id: "baby_bear",
@@ -1355,7 +1355,7 @@ export const cardDatabase: Card[] = [
     cost: 4,
     isSpell: false,
     cardKey: "C00147_MB",
-    inDraftPool: false,
+    inDraftPool: true,
   },
   {
     id: "mary",
@@ -1365,7 +1365,7 @@ export const cardDatabase: Card[] = [
     cost: 4,
     isSpell: false,
     cardKey: "C00208_MB",
-    inDraftPool: false,
+    inDraftPool: true,
   },
   {
     id: "piglet",
@@ -1375,7 +1375,7 @@ export const cardDatabase: Card[] = [
     cost: 4,
     isSpell: false,
     cardKey: "C00199_MB",
-    inDraftPool: false,
+    inDraftPool: true,
   },
   {
     id: "wicked_stepmother",
@@ -1385,7 +1385,7 @@ export const cardDatabase: Card[] = [
     cost: 4,
     isSpell: false,
     cardKey: "C00175_MB",
-    inDraftPool: false,
+    inDraftPool: true,
   },
   {
     id: "captain_ahab",
@@ -1395,7 +1395,7 @@ export const cardDatabase: Card[] = [
     cost: 5,
     isSpell: false,
     cardKey: "C00261_MB",
-    inDraftPool: false,
+    inDraftPool: true,
   },
   {
     id: "sinbad",
@@ -1405,7 +1405,7 @@ export const cardDatabase: Card[] = [
     cost: 5,
     isSpell: false,
     cardKey: "C00214_MB",
-    inDraftPool: false,
+    inDraftPool: true,
   },
   {
     id: "butcher",
@@ -1415,7 +1415,7 @@ export const cardDatabase: Card[] = [
     cost: 5,
     isSpell: false,
     cardKey: "C00229_MB",
-    inDraftPool: false,
+    inDraftPool: true,
   },
   {
     id: "baker",
@@ -1425,7 +1425,7 @@ export const cardDatabase: Card[] = [
     cost: 5,
     isSpell: false,
     cardKey: "C00259_MB",
-    inDraftPool: false,
+    inDraftPool: true,
   },
   {
     id: "mothman",
@@ -1435,7 +1435,7 @@ export const cardDatabase: Card[] = [
     cost: 5,
     isSpell: false,
     cardKey: "C00263_MB",
-    inDraftPool: false,
+    inDraftPool: true,
   },
   {
     id: "yuki_onna",
@@ -1445,7 +1445,7 @@ export const cardDatabase: Card[] = [
     cost: 5,
     isSpell: false,
     cardKey: "C00179_MB",
-    inDraftPool: false,
+    inDraftPool: true,
   },
   {
     id: "impundulu",
@@ -1455,7 +1455,7 @@ export const cardDatabase: Card[] = [
     cost: 5,
     isSpell: false,
     cardKey: "C00230_MB",
-    inDraftPool: false,
+    inDraftPool: true,
   },
   {
     id: "sandman",
@@ -1465,7 +1465,7 @@ export const cardDatabase: Card[] = [
     cost: 5,
     isSpell: false,
     cardKey: "C00275_MB",
-    inDraftPool: false,
+    inDraftPool: true,
   },
   {
     id: "chimera",
@@ -1475,7 +1475,7 @@ export const cardDatabase: Card[] = [
     cost: 6,
     isSpell: false,
     cardKey: "C00274_MB",
-    inDraftPool: false,
+    inDraftPool: true,
   },
   {
     id: "koschei",
@@ -1485,7 +1485,7 @@ export const cardDatabase: Card[] = [
     cost: 6,
     isSpell: false,
     cardKey: "C00132_MB",
-    inDraftPool: false,
+    inDraftPool: true,
   },
   {
     id: "morgan_le_fay",
@@ -1495,7 +1495,7 @@ export const cardDatabase: Card[] = [
     cost: 6,
     isSpell: false,
     cardKey: "C00056_MB",
-    inDraftPool: false,
+    inDraftPool: true,
   },
   {
     id: "momotaro",
@@ -1505,7 +1505,7 @@ export const cardDatabase: Card[] = [
     cost: 6,
     isSpell: false,
     cardKey: "C00128_MB",
-    inDraftPool: false,
+    inDraftPool: true,
   },
   {
     id: "tinker_bell",
@@ -1515,7 +1515,7 @@ export const cardDatabase: Card[] = [
     cost: 6,
     isSpell: false,
     cardKey: "C00053_MB",
-    inDraftPool: false,
+    inDraftPool: true,
   },
   {
     id: "flying_dutchman",
@@ -1525,7 +1525,7 @@ export const cardDatabase: Card[] = [
     cost: 7,
     isSpell: false,
     cardKey: "C00233_MB",
-    inDraftPool: false,
+    inDraftPool: true,
   },
   {
     id: "popeye",
@@ -1535,7 +1535,7 @@ export const cardDatabase: Card[] = [
     cost: 7,
     isSpell: false,
     cardKey: "C00282_MC",
-    inDraftPool: false,
+    inDraftPool: true,
   },
   {
     id: "hercules",
@@ -1544,7 +1544,7 @@ export const cardDatabase: Card[] = [
     isLegendary: false,
     cost: 8,
     isSpell: false,
-    inDraftPool: false,
+    inDraftPool: true,
   },
   {
     id: "cerberus",
@@ -1553,7 +1553,7 @@ export const cardDatabase: Card[] = [
     isLegendary: false,
     cost: 8,
     isSpell: false,
-    inDraftPool: false,
+    inDraftPool: true,
   },
   {
     id: "drop_bear",
@@ -1563,7 +1563,7 @@ export const cardDatabase: Card[] = [
     cost: 8,
     isSpell: false,
     cardKey: "C00226_MB",
-    inDraftPool: false,
+    inDraftPool: true,
   },
   {
     id: "winnie_the_pooh",
@@ -1573,7 +1573,7 @@ export const cardDatabase: Card[] = [
     cost: 5,
     isSpell: false,
     cardKey: "C00084_MC",
-    inDraftPool: false,
+    inDraftPool: true,
   },
   {
     id: "brandy",
@@ -1583,7 +1583,7 @@ export const cardDatabase: Card[] = [
     cost: 6,
     isSpell: false,
     cardKey: "C00282_MC",
-    inDraftPool: false,
+    inDraftPool: true,
   },
   {
     id: "cake",
@@ -1593,7 +1593,7 @@ export const cardDatabase: Card[] = [
     cost: 2,
     isSpell: true,
     cardKey: "C00206_SB",
-    inDraftPool: false,
+    inDraftPool: true,
   },
   {
     id: "run_over",
@@ -1603,7 +1603,7 @@ export const cardDatabase: Card[] = [
     cost: 3,
     isSpell: true,
     cardKey: "C00228_SB",
-    inDraftPool: false,
+    inDraftPool: true,
   },
   {
     id: "obliterate",
@@ -1613,7 +1613,7 @@ export const cardDatabase: Card[] = [
     cost: 4,
     isSpell: true,
     cardKey: "C00190_SB",
-    inDraftPool: false,
+    inDraftPool: true,
   },
   {
     id: "first_aid",
@@ -1623,7 +1623,7 @@ export const cardDatabase: Card[] = [
     cost: 4,
     isSpell: true,
     cardKey: "C00232_SB",
-    inDraftPool: false,
+    inDraftPool: true,
   },
   {
     id: "mortal_coil",
@@ -1633,7 +1633,7 @@ export const cardDatabase: Card[] = [
     cost: 5,
     isSpell: true,
     cardKey: "C00235_SB",
-    inDraftPool: false,
+    inDraftPool: true,
   },
   {
     id: "animated_broomstick",
@@ -1642,7 +1642,7 @@ export const cardDatabase: Card[] = [
     isLegendary: false,
     cost: 5,
     isSpell: false,
-    inDraftPool: false,
+    inDraftPool: true,
   },
 ];
 

@@ -189,7 +189,7 @@ const DeckBuilder = () => {
           description: description.trim() || null,
           author_name: authorName.trim() || null,
           is_featured: false,
-          patch: 'v1.0.0.40 (latest)'
+          patch: 'v1.0.0.41 (latest)'
         })
         .select()
         .single();

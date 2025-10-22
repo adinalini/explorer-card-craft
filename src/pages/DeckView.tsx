@@ -3,6 +3,8 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { WaveDivider } from "@/components/ui/wave-divider";
 import { DeckCodeDisplay } from "@/components/DeckCodeDisplay";
+import { DeckValidationAlert } from "@/components/DeckValidationAlert";
+import { DeckVersionToggle } from "@/components/DeckVersionToggle";
 import { CardImage } from "@/components/CardImage";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { supabase } from "@/integrations/supabase/client";
@@ -46,6 +48,8 @@ const DeckView = () => {
   const [deck, setDeck] = useState<Deck | null>(null);
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
+  const [showOriginalVersions, setShowOriginalVersions] = useState(false);
+  const [originalImages, setOriginalImages] = useState<Record<string, string>>({});
 
   useEffect(() => {
     if (id) {

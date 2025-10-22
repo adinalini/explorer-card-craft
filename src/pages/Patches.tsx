@@ -249,11 +249,11 @@ const Patches = () => {
                 <h2 className="text-3xl font-bold mb-6 text-foreground">Removed Cards</h2>
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
                   {removedCards.map((card, index) => (
-                    <div key={index} className="bg-card rounded-lg p-4 border border-destructive text-center">
+                    <div key={index} className="bg-card rounded-lg p-4 border border-border text-center">
                       <img
                         src={card.image}
                         alt={card.name}
-                        className="w-full h-auto rounded-lg border-2 border-destructive mb-2 opacity-60"
+                        className="w-full h-auto rounded-lg border-2 border-destructive mb-2"
                       />
                       <p className="text-sm font-medium text-card-foreground">{card.name}</p>
                     </div>

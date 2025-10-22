@@ -145,8 +145,8 @@ const generateTripleDraftChoices = (usedCardIds: string[], cardDatabase: Card[])
     choices.push(highRangeChoice)
   }
 
-  // 6. 1 guaranteed spell round- 3 random spells selected
-  const spellCards = availableCards.filter(card => card.isSpell && !usedInChoices.has(card.id))
+  // 6. 1 guaranteed spell round- 3 random spells selected (excluding legendaries)
+  const spellCards = availableCards.filter(card => card.isSpell && !card.isLegendary && !usedInChoices.has(card.id))
   if (spellCards.length >= 3) {
     const shuffled = shuffleArray(spellCards)
     const spellChoice = shuffled.slice(0, 3)
@@ -202,8 +202,8 @@ const generateMegaDraftCards = (usedCardIds: string[], cardDatabase: Card[]): Ca
     selected.forEach(card => usedInSelection.add(card.id))
   }
 
-  // 4. Add 2 random spells (2 cards total)
-  const spellCards = availableCards.filter(card => card.isSpell && !usedInSelection.has(card.id))
+  // 4. Add 2 random spells (excluding legendaries) (2 cards total)
+  const spellCards = availableCards.filter(card => card.isSpell && !card.isLegendary && !usedInSelection.has(card.id))
   
   if (spellCards.length >= 2) {
     const shuffled = shuffleArray(spellCards)
@@ -551,9 +551,9 @@ Deno.serve(async (req) => {
         }
         
       } else if (structure.type === 'spell') {
-        // Select 4 spells with cost balancing
+        // Select 4 spells with cost balancing (excluding legendaries)
         const availableSpells = cardDatabase.filter(card => 
-          card.isSpell && !usedIds.has(card.id)
+          card.isSpell && !card.isLegendary && !usedIds.has(card.id)
         )
         
         for (let i = 0; i < 4 && i < availableSpells.length; i++) {
@@ -848,7 +848,7 @@ Deno.serve(async (req) => {
           
         } else if (structure.type === 'spell') {
           const availableSpells = cardDatabase.filter(card => 
-            card.isSpell && !globalUsedIds.has(card.id)
+            card.isSpell && !card.isLegendary && !globalUsedIds.has(card.id)
           )
           
           console.log(`Round ${roundNum} (spell choice): Found ${availableSpells.length} available spells:`, 

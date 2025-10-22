@@ -58,8 +58,8 @@ export const generateMegaDraftCards = (usedCardIds: string[]): Card[] => {
     selected.forEach(card => usedInSelection.add(card.id))
   }
 
-  // 4. Add 2 random spells (2 cards total)
-  const spellCards = availableCards.filter(card => card.isSpell && !usedInSelection.has(card.id))
+  // 4. Add 2 random spells (excluding legendaries) (2 cards total)
+  const spellCards = availableCards.filter(card => card.isSpell && !card.isLegendary && !usedInSelection.has(card.id))
   
   if (spellCards.length >= 2) {
     const shuffled = shuffleArray(spellCards)

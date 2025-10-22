@@ -133,8 +133,8 @@ export const generateTripleDraftChoices = (usedCardIds: string[]): Card[][] => {
     choices.push(highRangeChoice)
   }
 
-  // 6. 1 guaranteed spell round- 3 random spells selected
-  const spellCards = availableCards.filter(card => card.isSpell && !usedInChoices.has(card.id))
+  // 6. 1 guaranteed spell round- 3 random spells selected (excluding legendaries)
+  const spellCards = availableCards.filter(card => card.isSpell && !card.isLegendary && !usedInChoices.has(card.id))
   if (spellCards.length >= 3) {
     const shuffled = shuffleArray(spellCards)
     const spellChoice = shuffled.slice(0, 3)

@@ -423,7 +423,7 @@ export const cardDatabase: Card[] = [
     isLegendary: true, // Changed from false to true in v1.0.0.41
     cost: 4,
     isSpell: false,
-    cardKey: "C00067_MB",
+    cardKey: "C00067_MC",
     inDraftPool: true,
   },
   {

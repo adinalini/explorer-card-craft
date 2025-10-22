@@ -68,7 +68,7 @@ const cardImports = {
   mummy: () => import("@/assets/cards/mummy.png"),
   musketeer: () => import("@/assets/cards/musketeer.png"),
   not_so_little_pig: () => import("@/assets/cards/not_so_little_pig.png"),
-  ogre: () => import("@/assets/cards/ogre.png"),
+  ogre: () => import("@/assets/cards/Old/v1.0.0.40/ogre.png"),
   pegasus: () => import("@/assets/cards/pegasus.png"),
   phantom_coachman: () => import("@/assets/cards/phantom_coachman.png"),
   piggy_bank: () => import("@/assets/cards/piggy_bank.png"),
@@ -111,7 +111,7 @@ const cardImports = {
   white_rabbit: () => import("@/assets/cards/white_rabbit.png"),
   wicked_witch_of_the_west: () => import("@/assets/cards/wicked_witch_of_the_west.png"),
   zorro: () => import("@/assets/cards/zorro.png"),
-  tin_soldier: () => import("@/assets/cards/tin_soldier.png"),
+  tin_soldier: () => import("@/assets/cards/Old/v1.0.0.40/tin_soldier.png"),
   hansel_gretel: () => import("@/assets/cards/hansel_gretel.png"),
   beauty: () => import("@/assets/cards/beauty.png"),
   wendy: () => import("@/assets/cards/wendy.png"),
@@ -1545,7 +1545,7 @@ export const cardDatabase: Card[] = [
     isLegendary: true,
     cost: 10,
     isSpell: false,
-    inDraftPool: true,
+    inDraftPool: false, // REMOVED - Not available in any game mode
   },
   {
     id: "cerberus",
@@ -1554,7 +1554,7 @@ export const cardDatabase: Card[] = [
     isLegendary: false,
     cost: 6,
     isSpell: false,
-    inDraftPool: true,
+    inDraftPool: false, // REMOVED - Not available in any game mode
   },
   {
     id: "drop_bear",

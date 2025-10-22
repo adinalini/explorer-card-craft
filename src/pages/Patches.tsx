@@ -76,13 +76,11 @@ import brandy from "@/assets/cards/Brandy.png";
 import butcher from "@/assets/cards/Butcher.png";
 import cake from "@/assets/cards/Cake.png";
 import captainAhab from "@/assets/cards/Captain_Ahab.png";
-import cerberus from "@/assets/cards/Cerberus.png";
 import chimera from "@/assets/cards/Chimera.png";
 import dropBear from "@/assets/cards/Drop_Bear.png";
 import firstAid from "@/assets/cards/First_Aid.png";
 import flyingDutchman from "@/assets/cards/Flying_Dutchman.png";
 import hare from "@/assets/cards/Hare.png";
-import hercules from "@/assets/cards/Hercules.png";
 import huckFinn from "@/assets/cards/Huck_Finn.png";
 import impundulu from "@/assets/cards/Impundulu.png";
 import koschei from "@/assets/cards/KOschei.png";
@@ -154,13 +152,11 @@ const Patches = () => {
     { name: "Butcher", image: butcher },
     { name: "Cake", image: cake },
     { name: "Captain Ahab", image: captainAhab },
-    { name: "Cerberus", image: cerberus },
     { name: "Chimera", image: chimera },
     { name: "Drop Bear", image: dropBear },
     { name: "First Aid", image: firstAid },
     { name: "Flying Dutchman", image: flyingDutchman },
     { name: "Hare", image: hare },
-    { name: "Hercules", image: hercules },
     { name: "Huck Finn", image: huckFinn },
     { name: "Impundulu", image: impundulu },
     { name: "Koschei", image: koschei },

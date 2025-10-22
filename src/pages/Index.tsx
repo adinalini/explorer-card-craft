@@ -402,17 +402,7 @@ const Index = () => {
 
         {/* Mobile Layout - Stacked vertically */}
         <div className="block md:hidden relative z-10 flex flex-col items-center px-4 pt-12 pb-8 space-y-8">
-          {/* Rabbit at top on mobile */}
-          <div className="flex-shrink-0 flex justify-center">
-            <img 
-              src={whiteRabbit} 
-              alt="White Rabbit Character" 
-              className="w-[280px] sm:w-[338px] object-contain animate-fade-in"
-              style={{ animationDelay: '0.5s' }}
-            />
-          </div>
-
-          {/* Buttons or Password Gate Section below rabbit */}
+          {/* Buttons or Password Gate Section */}
           <div className="flex-shrink-0 w-full flex justify-center">
             {!isLoading && (
               isAuthenticated ? (
@@ -421,6 +411,16 @@ const Index = () => {
                 <PasswordGate onPasswordSubmit={handlePasswordSubmit} isVerifying={isVerifying} />
               )
             )}
+          </div>
+
+          {/* Rabbit below buttons on mobile */}
+          <div className="flex-shrink-0 flex justify-center">
+            <img 
+              src={whiteRabbit} 
+              alt="White Rabbit Character" 
+              className="w-[280px] sm:w-[338px] object-contain animate-fade-in"
+              style={{ animationDelay: '0.5s' }}
+            />
           </div>
         </div>
 

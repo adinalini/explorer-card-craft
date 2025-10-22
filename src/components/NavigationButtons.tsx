@@ -8,12 +8,13 @@ export const NavigationButtons = ({ sizeVariant = "default" }: NavigationButtons
   const navigate = useNavigate();
   
   const isDefault = sizeVariant === "default";
-  const paddingClass = isDefault ? "p-4 sm:p-6 md:p-8" : "p-4";
-  const titleClass = isDefault ? "text-lg sm:text-xl md:text-2xl" : "text-lg";
+  const paddingClass = isDefault ? "p-4 sm:p-6 md:p-8" : "p-3";
+  const titleClass = isDefault ? "text-lg sm:text-xl md:text-2xl" : "text-base";
   const textClass = isDefault ? "text-xs sm:text-sm" : "text-xs";
+  const heightStyle = isDefault ? '459px' : '340px';
 
   return (
-    <div className="relative grid grid-cols-2 w-80 sm:w-96 md:w-[420px] lg:w-[480px]" style={{ height: '459px' }}>
+    <div className="relative grid grid-cols-2 w-80 sm:w-96 md:w-[420px] lg:w-[480px]" style={{ height: heightStyle }}>
       {/* Cross-style borders */}
       <div className="absolute inset-0 pointer-events-none">
         {/* Vertical line */}

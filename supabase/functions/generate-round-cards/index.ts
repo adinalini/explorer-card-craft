@@ -464,7 +464,8 @@ Deno.serve(async (req) => {
       { id: "the_kraken", name: "The Kraken", image: "the_kraken.png", cost: 8, isLegendary: true },
       
       // Cost 10+ cards
-      { id: "phantom_coachman", name: "Phantom Coachman", image: "phantom_coachman.png", cost: 10 }
+      { id: "phantom_coachman", name: "Phantom Coachman", image: "phantom_coachman.png", cost: 10 },
+      { id: "hercules", name: "Hercules", image: "Hercules.png", cost: 10, isLegendary: true }
     ]
 
     const excludeIds = usedCardIds || []

@@ -1542,7 +1542,7 @@ export const cardDatabase: Card[] = [
     id: "hercules",
     name: "Hercules",
     image: "/src/assets/cards/Hercules.png",
-    isLegendary: false,
+    isLegendary: true,
     cost: 10,
     isSpell: false,
     inDraftPool: true,

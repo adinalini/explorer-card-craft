@@ -93,11 +93,15 @@ const RandomDeck = () => {
           ).slice(0, 4)
         }
 
-        // If we don't have enough cards, use fallback like backend (cost 3-5 range)
+        // If we don't have enough cards, use progressive fallback strategy
         if (roundCards.length < 4) {
+          console.log(`Round ${round} only found ${roundCards.length} cards, using fallback`)
+          
+          // First fallback: cost 3-5 range (excluding legendaries for non-legendary rounds)
           const allCards = getRandomCards(1000, [...usedCardIds, ...roundCards.map(c => c.id)])
+          const isLegendaryRound = structure.type === 'legendary'
           const fallbackCards = allCards.filter(card => 
-            !card.isLegendary && card.cost >= 3 && card.cost <= 5
+            (isLegendaryRound || !card.isLegendary) && card.cost >= 3 && card.cost <= 5
           )
           
           while (roundCards.length < 4 && fallbackCards.length > 0) {
@@ -105,9 +109,32 @@ const RandomDeck = () => {
             const selected = fallbackCards.splice(randomIndex, 1)[0]
             roundCards.push(selected)
           }
+          
+          // Second fallback: any available card (excluding legendaries for non-legendary rounds)
+          if (roundCards.length < 4) {
+            console.log(`Round ${round} still needs more cards, using any available`)
+            const anyCards = getRandomCards(1000, [...usedCardIds, ...roundCards.map(c => c.id)])
+            const anyFallback = anyCards.filter(card => isLegendaryRound || !card.isLegendary)
+            
+            while (roundCards.length < 4 && anyFallback.length > 0) {
+              const randomIndex = Math.floor(Math.random() * anyFallback.length)
+              const selected = anyFallback.splice(randomIndex, 1)[0]
+              roundCards.push(selected)
+            }
+          }
         }
 
-        // Randomly select 1 card from the 4 generated for this round
+        // CRITICAL: Always ensure we have at least 1 card for this round
+        if (roundCards.length === 0) {
+          console.error(`CRITICAL: No cards available for round ${round}, using emergency fallback`)
+          // Emergency fallback: get ANY card that hasn't been used
+          const emergencyCards = getRandomCards(1000, usedCardIds)
+          if (emergencyCards.length > 0) {
+            roundCards.push(emergencyCards[0])
+          }
+        }
+
+        // Randomly select 1 card from the generated cards for this round
         if (roundCards.length > 0) {
           const selectedCard = roundCards[Math.floor(Math.random() * roundCards.length)]
           
@@ -122,11 +149,31 @@ const RandomDeck = () => {
           // Only mark the selected card as used
           usedCardIds.push(selectedCard.id)
         } else {
-          console.error(`No cards available for round ${round}`)
+          console.error(`FATAL: Could not generate card for round ${round}`)
         }
       }
 
       console.log('Generated deck with', deck.length, 'cards')
+      
+      // Validation: Ensure exactly 13 cards
+      if (deck.length !== 13) {
+        console.error(`ERROR: Deck has ${deck.length} cards instead of 13!`)
+      }
+      
+      // Validation: Check for duplicate legendaries
+      const legendaryCards = deck.filter(card => card.is_legendary)
+      if (legendaryCards.length > 1) {
+        console.error(`ERROR: Deck has ${legendaryCards.length} legendary cards:`, 
+          legendaryCards.map(c => c.card_name))
+      }
+      
+      // Validation: Check for duplicate cards
+      const cardIds = deck.map(card => card.card_id)
+      const uniqueIds = new Set(cardIds)
+      if (cardIds.length !== uniqueIds.size) {
+        console.error('ERROR: Deck has duplicate cards!')
+      }
+      
       setRandomDeck(deck)
     } catch (error) {
       console.error('Error generating random deck:', error)

@@ -828,7 +828,9 @@ Deno.serve(async (req) => {
 
         console.log(`Generating round ${roundNum}: ${structure.description}`)
 
-        if (structure.type === 'legendary') {
+        const isLegendaryRound = structure.type === 'legendary'
+        
+        if (isLegendaryRound) {
           const availableLegendary = cardDatabase.filter(card => 
             card.isLegendary && !globalUsedIds.has(card.id)
           )
@@ -843,23 +845,6 @@ Deno.serve(async (req) => {
             globalUsedIds.add(selected.id)
           }
           
-          // If we couldn't get 4 legendary cards, fill with cards from cost 3-5 range
-          if (roundCards.length < 4) {
-            console.log(`Only found ${roundCards.length} legendary cards, filling with cost 3-5 range cards`)
-            const fallbackCards = cardDatabase.filter(card => 
-              !card.isLegendary && 
-              card.cost && card.cost >= 3 && card.cost <= 5 && 
-              !globalUsedIds.has(card.id)
-            )
-            
-            while (roundCards.length < 4 && fallbackCards.length > 0) {
-              const randomIndex = Math.floor(Math.random() * fallbackCards.length)
-              const selected = fallbackCards.splice(randomIndex, 1)[0]
-              roundCards.push(selected)
-              globalUsedIds.add(selected.id)
-            }
-          }
-          
         } else if (structure.type === 'spell') {
           const availableSpells = cardDatabase.filter(card => 
             card.isSpell && !globalUsedIds.has(card.id)
@@ -868,43 +853,11 @@ Deno.serve(async (req) => {
           console.log(`Round ${roundNum} (spell choice): Found ${availableSpells.length} available spells:`, 
             availableSpells.map(c => `${c.name} (${c.cost})`))
           
-          if (availableSpells.length >= 4) {
-            // Sort spells by cost and try to pick a balanced set
-            const sortedSpells = [...availableSpells].sort((a, b) => (a.cost || 0) - (b.cost || 0))
-            
-            // Try to pick spells that can be balanced (total costs close to equal)
-            // Pick 4 spells with attempt at cost balancing
-            for (let i = 0; i < 4 && i < sortedSpells.length; i++) {
-              const randomIndex = Math.floor(Math.random() * sortedSpells.length)
-              const selected = sortedSpells.splice(randomIndex, 1)[0]
-              roundCards.push(selected)
-              globalUsedIds.add(selected.id)
-            }
-          } else {
-            // Fallback: just pick what's available
-            for (let i = 0; i < 4 && i < availableSpells.length; i++) {
-              const randomIndex = Math.floor(Math.random() * availableSpells.length)
-              const selected = availableSpells.splice(randomIndex, 1)[0]
-              roundCards.push(selected)
-              globalUsedIds.add(selected.id)
-            }
-          }
-          
-          // If we couldn't get 4 cards from spells, fill with cards from cost 3-5 range
-          if (roundCards.length < 4) {
-            console.log(`Only found ${roundCards.length} spell cards, filling with cost 3-5 range cards`)
-            const fallbackCards = cardDatabase.filter(card => 
-              !card.isLegendary && 
-              card.cost && card.cost >= 3 && card.cost <= 5 && 
-              !globalUsedIds.has(card.id)
-            )
-            
-            while (roundCards.length < 4 && fallbackCards.length > 0) {
-              const randomIndex = Math.floor(Math.random() * fallbackCards.length)
-              const selected = fallbackCards.splice(randomIndex, 1)[0]
-              roundCards.push(selected)
-              globalUsedIds.add(selected.id)
-            }
+          for (let i = 0; i < 4 && i < availableSpells.length; i++) {
+            const randomIndex = Math.floor(Math.random() * availableSpells.length)
+            const selected = availableSpells.splice(randomIndex, 1)[0]
+            roundCards.push(selected)
+            globalUsedIds.add(selected.id)
           }
           
         } else if (structure.type === 'cost') {
@@ -923,23 +876,6 @@ Deno.serve(async (req) => {
             globalUsedIds.add(selected.id)
           }
           
-          // If we couldn't get 4 cards for this cost, fill with cards from cost 3-5 range
-          if (roundCards.length < 4) {
-            console.log(`Only found ${roundCards.length} cards for cost ${structure.cost}, filling with cost 3-5 range cards`)
-            const fallbackCards = cardDatabase.filter(card => 
-              !card.isLegendary && 
-              card.cost && card.cost >= 3 && card.cost <= 5 && 
-              !globalUsedIds.has(card.id)
-            )
-            
-            while (roundCards.length < 4 && fallbackCards.length > 0) {
-              const randomIndex = Math.floor(Math.random() * fallbackCards.length)
-              const selected = fallbackCards.splice(randomIndex, 1)[0]
-              roundCards.push(selected)
-              globalUsedIds.add(selected.id)
-            }
-          }
-          
         } else if (structure.type === 'range') {
           const [minCost, maxCost] = structure.range!
           const availableInRange = cardDatabase.filter(card => 
@@ -949,7 +885,7 @@ Deno.serve(async (req) => {
           )
           
           console.log(`Round ${roundNum} (range ${minCost}-${maxCost}): Found ${availableInRange.length} available cards:`, 
-            availableInRange.map(c => `${c.name}${c.isLegendary ? ' (legendary)' : ''}${c.isSpell ? ' (spell)' : ''}`))
+            availableInRange.map(c => `${c.name}${c.isSpell ? ' (spell)' : ''}`))
           
           for (let i = 0; i < 4 && i < availableInRange.length; i++) {
             const randomIndex = Math.floor(Math.random() * availableInRange.length)
@@ -957,22 +893,53 @@ Deno.serve(async (req) => {
             roundCards.push(selected)
             globalUsedIds.add(selected.id)
           }
+        }
+        
+        // Progressive fallback strategy if we don't have 4 cards yet
+        if (roundCards.length < 4) {
+          console.log(`Round ${roundNum} only found ${roundCards.length} cards, using progressive fallback`)
           
-          // If we couldn't get 4 cards from the range, fill with cards from cost 3-5 range
+          // First fallback: cost 3-5 range (respecting legendary filtering)
+          const fallbackCards = cardDatabase.filter(card => 
+            (isLegendaryRound || !card.isLegendary) && 
+            card.cost && card.cost >= 3 && card.cost <= 5 && 
+            !globalUsedIds.has(card.id)
+          )
+          
+          while (roundCards.length < 4 && fallbackCards.length > 0) {
+            const randomIndex = Math.floor(Math.random() * fallbackCards.length)
+            const selected = fallbackCards.splice(randomIndex, 1)[0]
+            roundCards.push(selected)
+            globalUsedIds.add(selected.id)
+          }
+          
+          // Second fallback: any available card (respecting legendary filtering)
           if (roundCards.length < 4) {
-            console.log(`Only found ${roundCards.length} cards in range ${minCost}-${maxCost}, filling with cost 3-5 range cards`)
-            const fallbackCards = cardDatabase.filter(card => 
-              !card.isLegendary && 
-              card.cost && card.cost >= 3 && card.cost <= 5 && 
+            console.log(`Round ${roundNum} needs more cards, using any available cards`)
+            const anyCards = cardDatabase.filter(card => 
+              (isLegendaryRound || !card.isLegendary) && 
               !globalUsedIds.has(card.id)
             )
             
-            while (roundCards.length < 4 && fallbackCards.length > 0) {
-              const randomIndex = Math.floor(Math.random() * fallbackCards.length)
-              const selected = fallbackCards.splice(randomIndex, 1)[0]
+            while (roundCards.length < 4 && anyCards.length > 0) {
+              const randomIndex = Math.floor(Math.random() * anyCards.length)
+              const selected = anyCards.splice(randomIndex, 1)[0]
               roundCards.push(selected)
               globalUsedIds.add(selected.id)
             }
+          }
+        }
+        
+        // CRITICAL: Emergency fallback if still no cards
+        if (roundCards.length === 0) {
+          console.error(`CRITICAL: Round ${roundNum} has no cards, using emergency fallback`)
+          const emergencyCards = cardDatabase.filter(card => !globalUsedIds.has(card.id))
+          if (emergencyCards.length > 0) {
+            const selected = emergencyCards[0]
+            roundCards.push(selected)
+            globalUsedIds.add(selected.id)
+          } else {
+            console.error(`FATAL: No cards available at all for round ${roundNum}`)
           }
         }
 

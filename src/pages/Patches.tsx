@@ -185,18 +185,20 @@ const Patches = () => {
       <div className="min-h-screen bg-gradient-to-b from-background via-background to-primary/5">
         {/* Header */}
         <div className="border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-          <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-            <Button
-              variant="ghost"
-              onClick={() => navigate("/")}
-              className="gap-2"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              <span className="hidden sm:inline">Back to Home</span>
-              <span className="sm:hidden">Back</span>
-            </Button>
-            <h1 className="text-3xl sm:text-4xl font-bold text-foreground">Patch Notes</h1>
-            <ThemeToggle />
+          <div className="container mx-auto px-4 py-4 relative">
+            <div className="flex justify-between items-center">
+              <Button
+                variant="ghost"
+                onClick={() => navigate("/")}
+                className="gap-2"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                <span className="hidden sm:inline">Back to Home</span>
+                <span className="sm:hidden">Back</span>
+              </Button>
+              <ThemeToggle />
+            </div>
+            <h1 className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-3xl sm:text-4xl font-bold text-foreground">Patch Notes</h1>
           </div>
         </div>
 

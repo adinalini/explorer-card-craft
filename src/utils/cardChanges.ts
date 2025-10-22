@@ -313,12 +313,18 @@ function comparePatchVersions(v1: string, v2: string): number {
 }
 
 export function getOriginalCardImage(cardId: string, deckPatch: string, currentImage: string): string {
+  const { oldCardImages } = require('./oldCardImages');
+  
   const cardChangeHistory = cardChanges
     .filter(c => c.cardId === cardId && c.oldImagePath)
     .sort((a, b) => comparePatchVersions(b.patch, a.patch))
 
   for (const change of cardChangeHistory) {
     if (comparePatchVersions(change.patch, deckPatch) > 0 && change.oldImagePath) {
+      // Return the actual imported image if available
+      if (oldCardImages[cardId]) {
+        return oldCardImages[cardId]
+      }
       return change.oldImagePath
     }
   }

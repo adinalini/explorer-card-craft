@@ -200,10 +200,9 @@ const Patches = () => {
         </div>
 
         <div className="container mx-auto px-4 py-8">
-          <h1 className="text-4xl font-bold text-foreground text-center mb-8">Patch Notes</h1>
-
-          {/* Patch Selector */}
-          <div className="mb-8 flex gap-4">
+          {/* Header with Patch Notes title and selector */}
+          <div className="mb-8 flex items-center justify-center gap-6">
+            <h1 className="text-3xl sm:text-4xl font-bold text-foreground">Patch Notes</h1>
             <Button
               variant={selectedPatch === "october-2025" ? "default" : "outline"}
               onClick={() => setSelectedPatch("october-2025")}

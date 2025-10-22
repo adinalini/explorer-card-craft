@@ -53,6 +53,9 @@ const DeckBuilder = () => {
 
   const filteredCards = useMemo(() => {
     return cardDatabase.filter(card => {
+      // Filter out cards not in draft pool
+      if (card.inDraftPool === false) return false;
+      
       const matchesSearch = card.name.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesCost = card.cost >= costRange[0] && card.cost <= costRange[1];
       

@@ -51,6 +51,11 @@ const DeckView = () => {
   const [showOriginalVersions, setShowOriginalVersions] = useState(false);
   const [originalImages, setOriginalImages] = useState<Record<string, string>>({});
 
+  const handleVersionToggle = (showOriginal: boolean, images: Record<string, string>) => {
+    setShowOriginalVersions(showOriginal);
+    setOriginalImages(images);
+  };
+
   useEffect(() => {
     if (id) {
       fetchDeck();
@@ -167,17 +172,32 @@ const DeckView = () => {
 
         {/* Deck Info */}
         <div className="bg-card rounded-lg p-6 mb-8">
-          <div className="flex items-center gap-3 mb-4">
-            <TypeIcon className="h-6 w-6 text-primary" />
-            <h1 className="text-3xl font-bold text-card-foreground">{deck.name}</h1>
-            <span className="bg-secondary text-secondary-foreground px-3 py-1 rounded-full text-sm capitalize">
-              {deck.type}
-            </span>
-            {deck.is_featured && (
-              <span className="bg-yellow-500 text-yellow-900 px-3 py-1 rounded-full text-sm font-semibold">
-                Featured
+          <div className="flex items-center justify-between gap-3 mb-4">
+            <div className="flex items-center gap-3">
+              <TypeIcon className="h-6 w-6 text-primary" />
+              <h1 className="text-3xl font-bold text-card-foreground">{deck.name}</h1>
+              <span className="bg-secondary text-secondary-foreground px-3 py-1 rounded-full text-sm capitalize">
+                {deck.type}
               </span>
-            )}
+              {deck.is_featured && (
+                <span className="bg-yellow-500 text-yellow-900 px-3 py-1 rounded-full text-sm font-semibold">
+                  Featured
+                </span>
+              )}
+            </div>
+            <DeckVersionToggle
+              deckPatch={deck.patch}
+              cards={deck.cards}
+              onToggle={handleVersionToggle}
+            />
+          </div>
+          
+          {/* Validation Alerts */}
+          <div className="mb-4">
+            <DeckValidationAlert 
+              deckPatch={deck.patch} 
+              cardIds={deck.cards.map(c => c.card_id)} 
+            />
           </div>
           
           <div className="mb-6">
@@ -224,6 +244,7 @@ const DeckView = () => {
                 is_legendary: card.is_legendary,
                 selection_order: card.position
               }))}
+              deckPatch={deck.patch}
             />
           </div>
         </div>
@@ -247,11 +268,19 @@ const DeckView = () => {
             <div className="flex flex-col items-center justify-center">
               <div className="aspect-[3/4] max-w-sm">
                 {legendaryCard ? (
-                  <CardImage
-                    cardId={legendaryCard.card_id}
-                    cardName={legendaryCard.card_name}
-                    className="w-full h-full object-cover rounded border-2 border-yellow-400"
-                  />
+                  showOriginalVersions && originalImages[legendaryCard.card_id] ? (
+                    <img
+                      src={originalImages[legendaryCard.card_id]}
+                      alt={legendaryCard.card_name}
+                      className="w-full h-full object-cover rounded border-2 border-yellow-400"
+                    />
+                  ) : (
+                    <CardImage
+                      cardId={legendaryCard.card_id}
+                      cardName={legendaryCard.card_name}
+                      className="w-full h-full object-cover rounded border-2 border-yellow-400"
+                    />
+                  )
                 ) : (
                   <div className="w-full h-full border-2 border-dashed border-muted-foreground/30 rounded flex items-center justify-center">
                     <span className="text-muted-foreground">No Legendary Card</span>
@@ -266,11 +295,19 @@ const DeckView = () => {
                 {normalCards.concat(Array(12 - normalCards.length).fill(null)).map((card, index) => (
                   <div key={index} className="aspect-[3/4]">
                     {card ? (
-                      <CardImage
-                        cardId={card.card_id}
-                        cardName={card.card_name}
-                        className="w-full h-full object-cover rounded border"
-                      />
+                      showOriginalVersions && originalImages[card.card_id] ? (
+                        <img
+                          src={originalImages[card.card_id]}
+                          alt={card.card_name}
+                          className="w-full h-full object-cover rounded border"
+                        />
+                      ) : (
+                        <CardImage
+                          cardId={card.card_id}
+                          cardName={card.card_name}
+                          className="w-full h-full object-cover rounded border"
+                        />
+                      )
                     ) : (
                       <div className="w-full h-full border border-dashed border-muted-foreground/30 rounded flex items-center justify-center">
                         <span className="text-muted-foreground text-xs">{index + 1}</span>

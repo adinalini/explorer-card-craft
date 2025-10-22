@@ -243,6 +243,11 @@ const Decks = () => {
           )}
         </div>
         
+        {/* Show validation warnings */}
+        <div className="mb-3">
+          <DeckValidationAlert deckPatch={deck.patch} cardIds={cardIds} />
+        </div>
+        
         {showDescription && deck.description && (
           <p className="text-sm text-muted-foreground mb-3">{deck.description}</p>
         )}

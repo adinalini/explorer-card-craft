@@ -3,6 +3,8 @@
  * Tracks all card changes across patches for deck validation
  */
 
+import { oldCardImages } from './oldCardImages'
+
 export interface CardChange {
   cardId: string
   cardName: string
@@ -313,8 +315,6 @@ function comparePatchVersions(v1: string, v2: string): number {
 }
 
 export function getOriginalCardImage(cardId: string, deckPatch: string, currentImage: string): string {
-  const { oldCardImages } = require('./oldCardImages');
-  
   const cardChangeHistory = cardChanges
     .filter(c => c.cardId === cardId && c.oldImagePath)
     .sort((a, b) => comparePatchVersions(b.patch, a.patch))

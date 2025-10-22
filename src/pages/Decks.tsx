@@ -15,8 +15,6 @@ import { toast } from "@/hooks/use-toast";
 import { encodeDeck } from "@/utils/deckCodeGenerator";
 import { getCardKey } from "@/utils/cardKeyMapping";
 import { SEOHead } from "@/components/SEOHead";
-import { DeckValidationAlert, isDecKValid } from "@/components/DeckValidationAlert";
-import { AlertCircle } from "lucide-react";
 
 interface Deck {
   id: string;
@@ -137,19 +135,6 @@ const Decks = () => {
   const handleCopyDeckCode = async (deck: Deck, event: React.MouseEvent) => {
     event.stopPropagation(); // Prevent deck navigation
     
-    // Check deck validity first
-    const cardIds = deck.cards.map(c => c.card_id);
-    const isDeckValid = isDecKValid(deck.patch, cardIds);
-    
-    if (!isDeckValid) {
-      toast({
-        title: "Invalid Deck",
-        description: "This deck contains invalid cards due to patch changes.",
-        variant: "destructive"
-      });
-      return;
-    }
-    
     const cardKeys: string[] = [];
     for (const card of deck.cards) {
       const rawKey = getCardKey(card.card_id);
@@ -224,8 +209,6 @@ const Decks = () => {
 
   const DeckCard = ({ deck, showDescription = false }: { deck: Deck; showDescription?: boolean }) => {
     const TypeIcon = deckTypeIcons[deck.type];
-    const cardIds = deck.cards.map(c => c.card_id);
-    const isDeckValid = isDecKValid(deck.patch, cardIds);
     
     return (
       <div 
@@ -238,14 +221,6 @@ const Decks = () => {
           <span className="text-xs bg-secondary text-secondary-foreground px-2 py-1 rounded capitalize">
             {deck.type}
           </span>
-          {!isDeckValid && (
-            <AlertCircle className="h-4 w-4 text-red-500" />
-          )}
-        </div>
-        
-        {/* Show validation warnings */}
-        <div className="mb-3">
-          <DeckValidationAlert deckPatch={deck.patch} cardIds={cardIds} />
         </div>
         
         {showDescription && deck.description && (

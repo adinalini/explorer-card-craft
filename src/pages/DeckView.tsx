@@ -172,32 +172,34 @@ const DeckView = () => {
 
         {/* Deck Info */}
         <div className="bg-card rounded-lg p-6 mb-8">
-          <div className="flex items-center justify-between gap-3 mb-4">
-            <div className="flex items-center gap-3">
-              <TypeIcon className="h-6 w-6 text-primary" />
-              <h1 className="text-3xl font-bold text-card-foreground">{deck.name}</h1>
-              <span className="bg-secondary text-secondary-foreground px-3 py-1 rounded-full text-sm capitalize">
-                {deck.type}
-              </span>
-              {deck.is_featured && (
-                <span className="bg-yellow-500 text-yellow-900 px-3 py-1 rounded-full text-sm font-semibold">
-                  Featured
+          <div className="flex items-start gap-6 mb-4">
+            <div className="flex-1">
+              <div className="flex items-center gap-3 mb-4">
+                <TypeIcon className="h-6 w-6 text-primary" />
+                <h1 className="text-3xl font-bold text-card-foreground">{deck.name}</h1>
+                <span className="bg-secondary text-secondary-foreground px-3 py-1 rounded-full text-sm capitalize">
+                  {deck.type}
                 </span>
-              )}
+                {deck.is_featured && (
+                  <span className="bg-yellow-500 text-yellow-900 px-3 py-1 rounded-full text-sm font-semibold">
+                    Featured
+                  </span>
+                )}
+              </div>
             </div>
-            <DeckVersionToggle
-              deckPatch={deck.patch}
-              cards={deck.cards}
-              onToggle={handleVersionToggle}
-            />
-          </div>
-          
-          {/* Validation Alerts */}
-          <div className="mb-4">
-            <DeckValidationAlert 
-              deckPatch={deck.patch} 
-              cardIds={deck.cards.map(c => c.card_id)} 
-            />
+            
+            {/* Right sidebar with toggle and validation */}
+            <div className="flex flex-col gap-3 min-w-[280px]">
+              <DeckVersionToggle
+                deckPatch={deck.patch}
+                cards={deck.cards}
+                onToggle={handleVersionToggle}
+              />
+              <DeckValidationAlert 
+                deckPatch={deck.patch} 
+                cardIds={deck.cards.map(c => c.card_id)} 
+              />
+            </div>
           </div>
           
           <div className="mb-6">

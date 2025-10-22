@@ -11,6 +11,7 @@ import { usePasswordProtection } from "@/hooks/usePasswordProtection"
 import { useToast } from "@/hooks/use-toast"
 import { PasswordGate } from "@/components/PasswordGate"
 import { NavigationButtons } from "@/components/NavigationButtons"
+import whiteRabbit from "@/assets/white_rabbit_optimized.webp"
 import projectOLogo from "/lovable-uploads/219c067b-3ac3-4955-96d1-76dc64562ea1.png"
 
 const Index = () => {
@@ -330,11 +331,8 @@ const Index = () => {
           {/* Left Side - Rabbit (hidden on xl and smaller when space is tight) */}
           <div className="absolute bottom-0 left-0 z-5 hidden 2xl:block">
             <img 
-              src="/white_rabbit_optimized.webp" 
+              src={whiteRabbit} 
               alt="White Rabbit Character" 
-              width="800"
-              height="850"
-              fetchPriority="high"
               className="w-[729px] object-contain animate-fade-in transform -translate-x-24"
               style={{ animationDelay: '0.2s' }}
             />
@@ -356,11 +354,8 @@ const Index = () => {
           {/* Rabbit only layout (when red is hidden but rabbit fits) - buttons moved to right */}
           <div className="absolute bottom-0 left-0 z-5 hidden xl:block 2xl:hidden">
             <img 
-              src="/white_rabbit_optimized.webp" 
+              src={whiteRabbit} 
               alt="White Rabbit Character" 
-              width="800"
-              height="850"
-              fetchPriority="high"
               className="w-[729px] object-contain animate-fade-in transform -translate-x-12"
               style={{ animationDelay: '0.2s' }}
             />
@@ -416,11 +411,8 @@ const Index = () => {
           {/* Rabbit at bottom center on mobile */}
           <div className="flex-shrink-0 flex justify-center">
             <img 
-              src="/white_rabbit_optimized.webp" 
+              src={whiteRabbit} 
               alt="White Rabbit Character" 
-              width="800"
-              height="850"
-              fetchPriority="high"
               className="w-[338px] object-contain animate-fade-in"
               style={{ animationDelay: '0.7s' }}
             />

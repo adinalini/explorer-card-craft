@@ -11,7 +11,7 @@ import { usePasswordProtection } from "@/hooks/usePasswordProtection"
 import { useToast } from "@/hooks/use-toast"
 import { PasswordGate } from "@/components/PasswordGate"
 import { NavigationButtons } from "@/components/NavigationButtons"
-import whiteRabbit from "@/assets/white_rabbit.webp"
+import whiteRabbit from "@/assets/white_rabbit_optimized.webp"
 import projectOLogo from "/lovable-uploads/219c067b-3ac3-4955-96d1-76dc64562ea1.png"
 
 const Index = () => {
@@ -199,7 +199,7 @@ const Index = () => {
               videosLoaded ? 'opacity-0' : 'opacity-40'
             }`}
             style={{
-              backgroundImage: 'url(/lovable-uploads/3bc78144-de54-443f-8b86-d8f5835966a1.png)'
+              backgroundImage: 'url(/lovable-uploads/3bc78144-de54-443f-8b86-d8f5835966a1.webp)'
             }}
           />
           
@@ -211,7 +211,7 @@ const Index = () => {
               muted 
               playsInline
               preload="auto"
-              poster="/lovable-uploads/3bc78144-de54-443f-8b86-d8f5835966a1.png"
+              poster="/lovable-uploads/3bc78144-de54-443f-8b86-d8f5835966a1.webp"
               onEnded={handleVideoEnd}
               onTimeUpdate={(e) => handleTimeUpdate('original', e)}
               onError={(e) => handleVideoError('original', e)}
@@ -237,7 +237,7 @@ const Index = () => {
               muted 
               playsInline
               preload="auto"
-              poster="/lovable-uploads/3bc78144-de54-443f-8b86-d8f5835966a1.png"
+              poster="/lovable-uploads/3bc78144-de54-443f-8b86-d8f5835966a1.webp"
               onEnded={handleVideoEnd}
               onTimeUpdate={(e) => handleTimeUpdate('reverse', e)}
               onError={(e) => handleVideoError('reverse', e)}
@@ -310,7 +310,7 @@ const Index = () => {
         {/* Skull and Arrows Image - Positioned absolutely to not affect button layout */}
         <div className="absolute top-[18vh] sm:top-[22vh] left-1/2 -translate-x-1/2 z-5">
           <img 
-            src="/lovable-uploads/skull-arrows.png" 
+            src="/lovable-uploads/skull-arrows.webp" 
             alt="Skull with crossed arrows decoration" 
             className="w-14 h-14 sm:w-19 sm:h-19 md:w-24 md:h-24 object-contain animate-fade-in"
             style={{ animationDelay: '0.1s' }}
@@ -322,7 +322,7 @@ const Index = () => {
           {/* Sketch Pattern - Left side, middle height */}
           <div className="absolute left-4 top-1/2 -translate-y-1/2 z-5 hidden xl:block">
             <img 
-              src="/lovable-uploads/sketch-pattern.png" 
+              src="/lovable-uploads/sketch-pattern.webp" 
               alt="Sketch pattern decoration" 
               className="w-32 h-32 lg:w-40 lg:h-40 object-contain animate-fade-in opacity-60"
               style={{ animationDelay: '0.4s' }}

@@ -342,8 +342,9 @@ export function CardImage({ cardId, cardName, className, onError }: CardImagePro
       alt={cardName}
       className={className}
       onError={handleImageError}
-      loading="lazy"
+      loading="eager"
       decoding="async"
+      fetchPriority="high"
     />
   );
 }

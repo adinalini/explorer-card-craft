@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { WaveDivider } from "@/components/ui/wave-divider";
@@ -11,7 +11,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { ArrowLeft, Share, Copy, Check, Flame, Droplet, Cloud, Bomb, Plus, CreditCard, Sparkles, TrendingUp } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { SEOHead } from "@/components/SEOHead";
-import { useImagePreloader, useOldCardImagePreloader } from "@/hooks/use-image-preloader";
 
 interface Deck {
   id: string;
@@ -56,21 +55,6 @@ const DeckView = () => {
     setShowOriginalVersions(showOriginal);
     setOriginalImages(images);
   };
-
-  // Memoize card IDs that have old versions to avoid recalculation
-  const cardsWithOldVersions = useMemo(() => {
-    if (!deck) return [];
-    return deck.cards
-      .map(c => c.card_id)
-      .filter(id => Object.keys(originalImages).length > 0 || deck.patch !== 'v1.0.0.41');
-  }, [deck, originalImages]);
-
-  // Preload old card images after main images load
-  useOldCardImagePreloader(
-    cardsWithOldVersions,
-    deck !== null && deck.patch !== 'v1.0.0.41',
-    'low'
-  );
 
   useEffect(() => {
     if (id) {
@@ -203,28 +187,26 @@ const DeckView = () => {
                 )}
               </div>
             </div>
-          </div>
-          
-          {/* Right sidebar with toggle and validation */}
-          <div className="absolute right-6 top-20 flex flex-col gap-3 w-[280px]">
-            <DeckVersionToggle
-              deckPatch={deck.patch}
-              cards={deck.cards}
-              onToggle={handleVersionToggle}
-            />
-            <DeckValidationAlert 
-              deckPatch={deck.patch} 
-              cardIds={deck.cards.map(c => c.card_id)} 
-            />
-          </div>
-          
-          <div className="mb-6 relative">
-            <h3 className="font-semibold text-card-foreground mb-2">Description</h3>
-            <div className="flex gap-6">
-              <p className="text-muted-foreground whitespace-pre-line flex-1">
-                {deck.description || 'N/A'}
-              </p>
+            
+            {/* Right sidebar with toggle and validation */}
+            <div className="flex flex-col gap-3 min-w-[280px]">
+              <DeckVersionToggle
+                deckPatch={deck.patch}
+                cards={deck.cards}
+                onToggle={handleVersionToggle}
+              />
+              <DeckValidationAlert 
+                deckPatch={deck.patch} 
+                cardIds={deck.cards.map(c => c.card_id)} 
+              />
             </div>
+          </div>
+          
+          <div className="mb-6">
+            <h3 className="font-semibold text-card-foreground mb-2">Description</h3>
+            <p className="text-muted-foreground whitespace-pre-line">
+              {deck.description || 'N/A'}
+            </p>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">

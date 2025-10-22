@@ -200,15 +200,24 @@ const Patches = () => {
         </div>
 
         <div className="container mx-auto px-4 py-8">
-          {/* Header with Patch Notes title and selector */}
-          <div className="mb-8 flex items-center justify-center gap-6">
-            <h1 className="text-3xl sm:text-4xl font-bold text-foreground">Patch Notes</h1>
+          {/* Header with Patch Notes title and selector in one row */}
+          <div className="mb-8 flex items-center justify-between">
             <Button
-              variant={selectedPatch === "october-2025" ? "default" : "outline"}
-              onClick={() => setSelectedPatch("october-2025")}
+              variant="ghost"
+              onClick={() => navigate("/")}
+              className="invisible"
             >
-              October 2025 (latest)
+              Placeholder
             </Button>
+            <h1 className="text-3xl sm:text-4xl font-bold text-foreground whitespace-nowrap">Patch Notes</h1>
+            <div className="flex gap-2">
+              <Button
+                variant={selectedPatch === "october-2025" ? "default" : "outline"}
+                onClick={() => setSelectedPatch("october-2025")}
+              >
+                October 2025
+              </Button>
+            </div>
           </div>
 
           {/* October 2025 Patch Content */}

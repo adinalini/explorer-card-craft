@@ -33,6 +33,8 @@ import oldSheriffOfNottingham from "@/assets/cards/Old/v1.0.0.40/sheriff_of_nott
 import oldTheKraken from "@/assets/cards/Old/v1.0.0.40/the_kraken.png";
 import oldThreeMusketeers from "@/assets/cards/Old/v1.0.0.40/three_musketeers.png";
 import oldTinWoodman from "@/assets/cards/Old/v1.0.0.40/tin_woodman.png";
+import oldTinSoldier from "@/assets/cards/Old/v1.0.0.40/tin_soldier.png";
+import oldOgre from "@/assets/cards/Old/v1.0.0.40/ogre.png";
 
 // New card images
 import newAxeThrow from "@/assets/cards/axe_throw.png";
@@ -136,6 +138,11 @@ const Patches = () => {
     { name: "Tin Woodman", old: oldTinWoodman, new: newTinWoodman },
   ];
 
+  const removedCards = [
+    { name: "Tin Soldier", image: oldTinSoldier },
+    { name: "Ogre", image: oldOgre },
+  ];
+
   const newCards = [
     { name: "Animated Broomstick", image: animatedBroomstick },
     { name: "Babe the Blue Ox", image: babeTheBlueOx },
@@ -236,6 +243,23 @@ const Patches = () => {
                           className="w-40 sm:w-48 h-auto rounded-lg border-2 border-primary"
                         />
                       </div>
+                    </div>
+                  ))}
+                </div>
+              </section>
+
+              {/* Removed Cards Section */}
+              <section>
+                <h2 className="text-3xl font-bold mb-6 text-foreground">Removed Cards</h2>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
+                  {removedCards.map((card, index) => (
+                    <div key={index} className="bg-card rounded-lg p-4 border border-destructive text-center">
+                      <img
+                        src={card.image}
+                        alt={card.name}
+                        className="w-full h-auto rounded-lg border-2 border-destructive mb-2 opacity-60"
+                      />
+                      <p className="text-sm font-medium text-card-foreground">{card.name}</p>
                     </div>
                   ))}
                 </div>

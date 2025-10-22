@@ -107,6 +107,14 @@ export const cardChanges: CardChange[] = [
     oldImagePath: '/src/assets/cards/Old/v1.0.0.40/giant.png'
   },
   {
+    cardId: 'giant',
+    cardName: "Jack's Giant",
+    patch: 'v1.0.0.41',
+    changeType: 'warning',
+    description: "card's cost has been changed",
+    oldImagePath: '/src/assets/cards/Old/v1.0.0.40/giant.png'
+  },
+  {
     cardId: 'jack_in_the_box',
     cardName: 'Jack in the Box',
     patch: 'v1.0.0.41',
@@ -205,6 +213,14 @@ export const cardChanges: CardChange[] = [
     oldImagePath: '/src/assets/cards/Old/v1.0.0.40/redcap.png'
   },
   {
+    cardId: 'redcap',
+    cardName: 'Redcap',
+    patch: 'v1.0.0.41',
+    changeType: 'warning',
+    description: 'card has undergone some changes',
+    oldImagePath: '/src/assets/cards/Old/v1.0.0.40/redcap.png'
+  },
+  {
     cardId: 'sheriff_of_nottingham',
     cardName: 'Sheriff of Nottingham',
     patch: 'v1.0.0.41',
@@ -225,6 +241,14 @@ export const cardChanges: CardChange[] = [
   {
     cardId: 'tuck',
     cardName: 'Tuck',
+    patch: 'v1.0.0.41',
+    changeType: 'warning',
+    description: 'card has undergone significant changes',
+    oldImagePath: '/src/assets/cards/Old/v1.0.0.40/friar_tuck.png'
+  },
+  {
+    cardId: 'friar_tuck',
+    cardName: 'Friar Tuck',
     patch: 'v1.0.0.41',
     changeType: 'warning',
     description: 'card has undergone significant changes',

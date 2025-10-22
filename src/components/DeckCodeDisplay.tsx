@@ -43,8 +43,8 @@ export function DeckCodeDisplay({ cards, deckPatch = 'v1.0.0.41 (latest)' }: Dec
   const handleCopyDeckCode = async () => {
     if (!isDeckValid) {
       toast({
-        title: "Cannot copy deck code",
-        description: "This deck contains invalid cards due to patch changes. Please check the warnings above.",
+        title: "Invalid Deck",
+        description: "This deck contains invalid cards due to patch changes.",
         variant: "destructive"
       })
       return

@@ -162,6 +162,13 @@ export const cardChanges: CardChange[] = [
     description: "card's cost has been changed",
     oldImagePath: '/src/assets/cards/Old/v1.0.0.40/tin_woodman.png'
   },
+  {
+    cardId: 'flying_dutchman',
+    cardName: 'Flying Dutchman',
+    patch: 'v1.0.0.41',
+    changeType: 'warning',
+    description: "card's cost has been changed"
+  },
   
   // v1.0.0.41 - SOME CHANGES
   {

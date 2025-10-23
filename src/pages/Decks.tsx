@@ -284,7 +284,7 @@ const Decks = () => {
         image="/og-images/decks.jpg"
         url="/decks"
       />
-      <div className="min-h-screen bg-gradient-to-br from-[hsl(var(--background-start))] to-[hsl(var(--background-end))] flex flex-col overflow-y-scroll">
+      <div className="min-h-screen bg-gradient-to-br from-[hsl(var(--background-start))] to-[hsl(var(--background-end))] flex flex-col">
       <div className="flex-1">
         <div className="container mx-auto px-4 py-8">
           {/* Header */}

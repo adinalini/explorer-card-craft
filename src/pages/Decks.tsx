@@ -406,63 +406,59 @@ const Decks = () => {
 
           {/* Tabs */}
           <Tabs defaultValue="featured" className="w-full" onValueChange={(value) => setActiveTab(value as 'featured' | 'community')}>
-            <div className="flex flex-col md:flex-row md:items-center gap-4 mb-6">
-              <TabsList className="grid w-full grid-cols-2 max-w-md">
-                <TabsTrigger value="featured" className="flex items-center gap-2">
-                  <Star className="h-4 w-4" />
-                  Featured Decks
-                </TabsTrigger>
-                <TabsTrigger value="community" className="flex items-center gap-2">
-                  <Users className="h-4 w-4" />
-                  Community Decks
-                </TabsTrigger>
-              </TabsList>
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+              <div className="flex flex-col md:flex-row md:items-center gap-4">
+                <TabsList className="grid w-full grid-cols-2 max-w-md">
+                  <TabsTrigger value="featured" className="flex items-center gap-2">
+                    <Star className="h-4 w-4" />
+                    Featured Decks
+                  </TabsTrigger>
+                  <TabsTrigger value="community" className="flex items-center gap-2">
+                    <Users className="h-4 w-4" />
+                    Community Decks
+                  </TabsTrigger>
+                </TabsList>
 
-              {/* Tournament Winners Checkbox - Only for Featured Decks */}
-              {activeTab === 'featured' && (
-                <div className="flex items-center space-x-2 px-2">
-                  <Checkbox 
-                    id="tournament-winners" 
-                    checked={showTournamentWinners}
-                    onCheckedChange={(checked) => setShowTournamentWinners(checked === true)}
-                  />
-                  <Label 
-                    htmlFor="tournament-winners" 
-                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 flex items-center gap-2 cursor-pointer"
-                  >
-                    <Trophy className="h-4 w-4 text-primary" />
-                    Tournament Winners
-                  </Label>
-                </div>
-              )}
+                {/* Tournament Winners Checkbox - Only for Featured Decks */}
+                {activeTab === 'featured' && (
+                  <div className="flex items-center space-x-2 px-2">
+                    <Checkbox 
+                      id="tournament-winners" 
+                      checked={showTournamentWinners}
+                      onCheckedChange={(checked) => setShowTournamentWinners(checked === true)}
+                    />
+                    <Label 
+                      htmlFor="tournament-winners" 
+                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 flex items-center gap-2 cursor-pointer"
+                    >
+                      <Trophy className="h-4 w-4 text-primary" />
+                      Tournament Winners
+                    </Label>
+                  </div>
+                )}
+              </div>
 
               {/* Patch Filter Toggle */}
-              <TabsList className="grid w-full grid-cols-2 max-w-md">
-                <TabsTrigger 
-                  value="latest-patch" 
-                  className="flex items-center gap-2"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    setPatchFilter('latest');
-                  }}
-                  data-state={patchFilter === 'latest' ? 'active' : 'inactive'}
+              <div className="inline-flex h-10 items-center justify-center rounded-md bg-muted p-1 text-muted-foreground max-w-md grid grid-cols-2">
+                <button
+                  onClick={() => setPatchFilter('latest')}
+                  className={`inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 gap-2 ${
+                    patchFilter === 'latest' ? 'bg-background text-foreground shadow-sm' : ''
+                  }`}
                 >
                   <Calendar className="h-4 w-4" />
                   Latest Patch
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="all-patches" 
-                  className="flex items-center gap-2"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    setPatchFilter('all');
-                  }}
-                  data-state={patchFilter === 'all' ? 'active' : 'inactive'}
+                </button>
+                <button
+                  onClick={() => setPatchFilter('all')}
+                  className={`inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 gap-2 ${
+                    patchFilter === 'all' ? 'bg-background text-foreground shadow-sm' : ''
+                  }`}
                 >
                   <History className="h-4 w-4" />
                   All Patches
-                </TabsTrigger>
-              </TabsList>
+                </button>
+              </div>
             </div>
 
             <TabsContent value="featured">

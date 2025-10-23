@@ -408,7 +408,7 @@ const Decks = () => {
           <Tabs defaultValue="featured" className="w-full" onValueChange={(value) => setActiveTab(value as 'featured' | 'community')}>
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
               <div className="flex flex-col md:flex-row md:items-center gap-4 min-h-[40px]">
-                <TabsList className="grid w-full grid-cols-2 max-w-md">
+                <TabsList className="grid w-full grid-cols-2 max-w-md h-10">
                   <TabsTrigger value="featured" className="flex items-center gap-2">
                     <Star className="h-4 w-4" />
                     Featured Decks

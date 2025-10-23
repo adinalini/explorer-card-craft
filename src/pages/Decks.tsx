@@ -10,7 +10,8 @@ import { WaveDivider } from "@/components/ui/wave-divider";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { CardImage } from "@/components/CardImage";
 import { supabase } from "@/integrations/supabase/client";
-import { Star, Users, ArrowLeft, Flame, Droplet, Cloud, Bomb, Plus, CreditCard, ChevronLeft, ChevronRight, Copy, Check, Sparkles, TrendingUp } from "lucide-react";
+import { Star, Users, ArrowLeft, Flame, Droplet, Cloud, Bomb, Plus, CreditCard, ChevronLeft, ChevronRight, Copy, Check, Sparkles, TrendingUp, Calendar, History, Trophy } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "@/hooks/use-toast";
 import { encodeDeck } from "@/utils/deckCodeGenerator";
 import { getCardKey } from "@/utils/cardKeyMapping";
@@ -54,6 +55,9 @@ const Decks = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [copiedDeckId, setCopiedDeckId] = useState<string | null>(null);
+  const [patchFilter, setPatchFilter] = useState<'latest' | 'all'>('latest');
+  const [showTournamentWinners, setShowTournamentWinners] = useState(true);
+  const [activeTab, setActiveTab] = useState<'featured' | 'community'>('featured');
 
   useEffect(() => {
     fetchDecks();
@@ -106,9 +110,20 @@ const Decks = () => {
       
       const matchesType = selectedType === "all" || deck.type === selectedType;
       
-      return matchesSearch && matchesType;
+      // Patch filtering
+      let matchesPatch = true;
+      if (patchFilter === 'latest') {
+        // For featured decks with tournament winners enabled, show decks with notes regardless of patch
+        if (activeTab === 'featured' && showTournamentWinners && deck.notes && deck.notes.trim() !== '') {
+          matchesPatch = true;
+        } else {
+          matchesPatch = deck.patch.includes('(latest)');
+        }
+      }
+      
+      return matchesSearch && matchesType && matchesPatch;
     });
-  }, [decks, searchQuery, selectedType]);
+  }, [decks, searchQuery, selectedType, patchFilter, activeTab, showTournamentWinners]);
 
   const featuredDecks = filteredDecks.filter(deck => deck.is_featured);
   const communityDecks = filteredDecks; // Show all decks in community section
@@ -130,7 +145,7 @@ const Decks = () => {
   // Reset to page 1 when filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchQuery, selectedType, itemsPerPage]);
+  }, [searchQuery, selectedType, itemsPerPage, patchFilter, showTournamentWinners, activeTab]);
 
   const handleCopyDeckCode = async (deck: Deck, event: React.MouseEvent) => {
     event.stopPropagation(); // Prevent deck navigation
@@ -390,17 +405,65 @@ const Decks = () => {
           </div>
 
           {/* Tabs */}
-          <Tabs defaultValue="featured" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 max-w-md mb-6">
-              <TabsTrigger value="featured" className="flex items-center gap-2">
-                <Star className="h-4 w-4" />
-                Featured Decks
-              </TabsTrigger>
-              <TabsTrigger value="community" className="flex items-center gap-2">
-                <Users className="h-4 w-4" />
-                Community Decks
-              </TabsTrigger>
-            </TabsList>
+          <Tabs defaultValue="featured" className="w-full" onValueChange={(value) => setActiveTab(value as 'featured' | 'community')}>
+            <div className="flex flex-col md:flex-row md:items-center gap-4 mb-6">
+              <TabsList className="grid w-full grid-cols-2 max-w-md">
+                <TabsTrigger value="featured" className="flex items-center gap-2">
+                  <Star className="h-4 w-4" />
+                  Featured Decks
+                </TabsTrigger>
+                <TabsTrigger value="community" className="flex items-center gap-2">
+                  <Users className="h-4 w-4" />
+                  Community Decks
+                </TabsTrigger>
+              </TabsList>
+
+              {/* Tournament Winners Checkbox - Only for Featured Decks */}
+              {activeTab === 'featured' && (
+                <div className="flex items-center space-x-2 px-2">
+                  <Checkbox 
+                    id="tournament-winners" 
+                    checked={showTournamentWinners}
+                    onCheckedChange={(checked) => setShowTournamentWinners(checked === true)}
+                  />
+                  <Label 
+                    htmlFor="tournament-winners" 
+                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 flex items-center gap-2 cursor-pointer"
+                  >
+                    <Trophy className="h-4 w-4 text-primary" />
+                    Tournament Winners
+                  </Label>
+                </div>
+              )}
+
+              {/* Patch Filter Toggle */}
+              <TabsList className="grid w-full grid-cols-2 max-w-md">
+                <TabsTrigger 
+                  value="latest-patch" 
+                  className="flex items-center gap-2"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setPatchFilter('latest');
+                  }}
+                  data-state={patchFilter === 'latest' ? 'active' : 'inactive'}
+                >
+                  <Calendar className="h-4 w-4" />
+                  Latest Patch
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="all-patches" 
+                  className="flex items-center gap-2"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setPatchFilter('all');
+                  }}
+                  data-state={patchFilter === 'all' ? 'active' : 'inactive'}
+                >
+                  <History className="h-4 w-4" />
+                  All Patches
+                </TabsTrigger>
+              </TabsList>
+            </div>
 
             <TabsContent value="featured">
               <div className="space-y-4">

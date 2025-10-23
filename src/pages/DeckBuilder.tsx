@@ -50,6 +50,7 @@ const DeckBuilder = () => {
   const [showUnits, setShowUnits] = useState(true);
   const [showLegendary, setShowLegendary] = useState(true);
   const [showSpells, setShowSpells] = useState(true);
+  const [showItems, setShowItems] = useState(true);
 
   const filteredCards = useMemo(() => {
     return cardDatabase.filter(card => {
@@ -59,17 +60,18 @@ const DeckBuilder = () => {
       const matchesSearch = card.name.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesCost = card.cost >= costRange[0] && card.cost <= costRange[1];
       
-        const matchesType = 
-          (card.isLegendary && showLegendary) ||
-          (!card.isLegendary && card.isSpell && showSpells) ||
-          (!card.isLegendary && !card.isSpell && showUnits);
+      const matchesType = 
+        (card.isLegendary && showLegendary) ||
+        (!card.isLegendary && card.isItem && showItems) ||
+        (!card.isLegendary && card.isSpell && showSpells) ||
+        (!card.isLegendary && !card.isSpell && !card.isItem && showUnits);
       
       return matchesSearch && matchesCost && matchesType;
     }).sort((a, b) => {
       if (a.cost !== b.cost) return a.cost - b.cost;
       return a.name.localeCompare(b.name);
     });
-  }, [searchQuery, costRange, showUnits, showLegendary, showSpells]);
+  }, [searchQuery, costRange, showUnits, showLegendary, showSpells, showItems]);
 
   const handleCardSelect = (card: any) => {
     // Check if card is already selected
@@ -237,7 +239,7 @@ const DeckBuilder = () => {
     <div className="min-h-screen bg-gradient-to-br from-[hsl(var(--background-start))] to-[hsl(var(--background-end))]">
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center justify-between mb-8 gap-2">
           <Button
             onClick={() => navigate('/')}
             variant="ghost"
@@ -245,11 +247,12 @@ const DeckBuilder = () => {
             className="text-foreground hover:bg-accent"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to home
+            <span className="hidden sm:inline">Back to home</span>
+            <span className="sm:hidden">Back</span>
           </Button>
           
           <div className="text-center flex-1">
-            <h1 className="text-4xl font-bold text-foreground">Create New Deck</h1>
+            <h1 className="text-2xl sm:text-4xl font-bold text-foreground">Create New Deck</h1>
           </div>
           
           <ThemeToggle className="text-foreground hover:bg-accent" />
@@ -419,7 +422,7 @@ const DeckBuilder = () => {
                 />
               </div>
               
-              <div className="flex gap-4">
+              <div className="flex gap-4 flex-wrap">
                 <div className="flex items-center space-x-2">
                   <Checkbox
                     id="units"
@@ -443,6 +446,14 @@ const DeckBuilder = () => {
                     onCheckedChange={(checked) => setShowSpells(checked === true)}
                   />
                   <Label htmlFor="spells" className="text-sm">Spells</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="items"
+                    checked={showItems}
+                    onCheckedChange={(checked) => setShowItems(checked === true)}
+                  />
+                  <Label htmlFor="items" className="text-sm">Items</Label>
                 </div>
               </div>
             </div>

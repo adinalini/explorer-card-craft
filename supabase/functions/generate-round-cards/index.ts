@@ -14,6 +14,7 @@ interface Card {
   cost?: number
   isLegendary?: boolean
   isSpell?: boolean
+  isItem?: boolean
 }
 
 // Triple Draft Card Generation Logic
@@ -145,8 +146,8 @@ const generateTripleDraftChoices = (usedCardIds: string[], cardDatabase: Card[])
     choices.push(highRangeChoice)
   }
 
-  // 6. 1 guaranteed spell round- 3 random spells selected (excluding legendaries)
-  const spellCards = availableCards.filter(card => card.isSpell && !card.isLegendary && !usedInChoices.has(card.id))
+  // 6. 1 guaranteed spell round- 3 random spells selected (including items, excluding legendaries)
+  const spellCards = availableCards.filter(card => (card.isSpell || card.isItem) && !card.isLegendary && !usedInChoices.has(card.id))
   if (spellCards.length >= 3) {
     const shuffled = shuffleArray(spellCards)
     const spellChoice = shuffled.slice(0, 3)
@@ -202,8 +203,8 @@ const generateMegaDraftCards = (usedCardIds: string[], cardDatabase: Card[]): Ca
     selected.forEach(card => usedInSelection.add(card.id))
   }
 
-  // 4. Add 2 random spells (excluding legendaries) (2 cards total)
-  const spellCards = availableCards.filter(card => card.isSpell && !card.isLegendary && !usedInSelection.has(card.id))
+  // 4. Add 2 random spells (including items, excluding legendaries) (2 cards total)
+  const spellCards = availableCards.filter(card => (card.isSpell || card.isItem) && !card.isLegendary && !usedInSelection.has(card.id))
   
   if (spellCards.length >= 2) {
     const shuffled = shuffleArray(spellCards)
@@ -349,6 +350,7 @@ Deno.serve(async (req) => {
       { id: "reinforcements", name: "Reinforcements", image: "reinforcements.png", cost: 1, isSpell: true },
       { id: "trash_for_treasure", name: "Trash for Treasure", image: "trash_for_treasure.png", cost: 1, isSpell: true },
       { id: "twister_toss", name: "Twister Toss", image: "twister_toss.png", cost: 1, isSpell: true },
+      { id: "mortal_coil", name: "Mortal Coil", image: "mortal_coil.png", cost: 1, isItem: true },
       
       // Cost 2 cards
       { id: "banshee", name: "Banshee", image: "banshee.png", cost: 2 },
@@ -375,6 +377,7 @@ Deno.serve(async (req) => {
       { id: "concentrate", name: "Concentrate", image: "concentrate.png", cost: 2, isSpell: true },
       { id: "soul_surge", name: "Soul Surge", image: "soul_surge.png", cost: 2, isSpell: true },
       { id: "underworld_flare", name: "Underworld Flare", image: "underworld_flare.png", cost: 2, isSpell: true },
+      { id: "cake", name: "Cake", image: "cake.png", cost: 2, isItem: true },
       
       // Cost 3 cards
       { id: "alice", name: "Alice", image: "alice.png", cost: 3 },

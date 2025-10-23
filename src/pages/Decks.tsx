@@ -386,8 +386,9 @@ const Decks = () => {
                 </RadioGroup>
               </div>
               
-              <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-                <Label className="text-sm font-medium text-foreground">Decks per page:</Label>
+              {/* Decks per page - Mobile: row layout, Desktop: shifted left */}
+              <div className="flex flex-row items-center gap-2 sm:gap-4 md:mr-auto md:pr-10">
+                <Label className="text-sm font-medium text-foreground whitespace-nowrap">Decks per page:</Label>
                 <RadioGroup
                   value={itemsPerPage.toString()}
                   onValueChange={(value) => setItemsPerPage(parseInt(value))}
@@ -407,7 +408,66 @@ const Decks = () => {
           {/* Tabs */}
           <Tabs defaultValue="featured" className="w-full" onValueChange={(value) => setActiveTab(value as 'featured' | 'community')}>
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
-              <div className="flex flex-col md:flex-row md:items-center gap-4 min-h-[40px]">
+              {/* Mobile: Stack tabs, patch filter, and tournament checkbox */}
+              <div className="flex flex-col gap-4 md:hidden">
+                <TabsList className="grid w-full grid-cols-2 h-10">
+                  <TabsTrigger value="featured" className="flex items-center gap-2 text-xs">
+                    <Star className="h-3 w-3" />
+                    Featured
+                  </TabsTrigger>
+                  <TabsTrigger value="community" className="flex items-center gap-2 text-xs">
+                    <Users className="h-3 w-3" />
+                    Community
+                  </TabsTrigger>
+                </TabsList>
+
+                {/* Patch Filter for Mobile */}
+                <div className="inline-flex h-10 items-center justify-center rounded-md bg-muted p-1 text-muted-foreground w-full grid grid-cols-2">
+                  <button
+                    onClick={() => setPatchFilter('latest')}
+                    className={`inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-xs font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 ${
+                      patchFilter === 'latest'
+                        ? 'bg-background text-foreground shadow-sm'
+                        : 'text-muted-foreground hover:bg-background/50 hover:text-foreground'
+                    }`}
+                  >
+                    <Calendar className="h-3 w-3 mr-1" />
+                    Latest
+                  </button>
+                  <button
+                    onClick={() => setPatchFilter('all')}
+                    className={`inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-xs font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 ${
+                      patchFilter === 'all'
+                        ? 'bg-background text-foreground shadow-sm'
+                        : 'text-muted-foreground hover:bg-background/50 hover:text-foreground'
+                    }`}
+                  >
+                    <History className="h-3 w-3 mr-1" />
+                    All Patches
+                  </button>
+                </div>
+
+                {/* Tournament Winners Checkbox for Mobile */}
+                {activeTab === 'featured' && (
+                  <div className="flex items-center space-x-2 px-2">
+                    <Checkbox 
+                      id="tournament-winners-mobile" 
+                      checked={showTournamentWinners}
+                      onCheckedChange={(checked) => setShowTournamentWinners(checked === true)}
+                    />
+                    <Label 
+                      htmlFor="tournament-winners-mobile" 
+                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 flex items-center gap-2 cursor-pointer whitespace-nowrap"
+                    >
+                      <Trophy className="h-4 w-4 text-primary" />
+                      Tournament Winners
+                    </Label>
+                  </div>
+                )}
+              </div>
+
+              {/* Desktop: Horizontal layout */}
+              <div className="hidden md:flex md:flex-row md:items-center gap-4 min-h-[40px]">
                 <TabsList className="grid w-full grid-cols-2 max-w-md h-10 min-w-[28rem]">
                   <TabsTrigger value="featured" className="flex items-center gap-2">
                     <Star className="h-4 w-4" />
@@ -419,7 +479,7 @@ const Decks = () => {
                   </TabsTrigger>
                 </TabsList>
 
-                {/* Tournament Winners Checkbox - Placeholder to maintain layout */}
+                {/* Tournament Winners Checkbox - Desktop */}
                 <div className="flex items-center space-x-2 px-2 min-w-[180px]">
                   {activeTab === 'featured' && (
                     <>
@@ -440,8 +500,8 @@ const Decks = () => {
                 </div>
               </div>
 
-              {/* Patch Filter Toggle */}
-              <div className="inline-flex h-10 items-center justify-center rounded-md bg-muted p-1 text-muted-foreground w-full md:w-auto max-w-md grid grid-cols-2 md:mr-10">
+              {/* Patch Filter Toggle - Desktop only */}
+              <div className="hidden md:inline-flex h-10 items-center justify-center rounded-md bg-muted p-1 text-muted-foreground w-auto max-w-md grid-cols-2 md:mr-10">
                 <button
                   onClick={() => setPatchFilter('latest')}
                   className={`inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 gap-2 ${

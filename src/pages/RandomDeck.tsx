@@ -75,9 +75,9 @@ const RandomDeck = () => {
           const allCards = getRandomCards(1000, usedCardIds)
           roundCards = allCards.filter(card => card.isLegendary).slice(0, 4)
         } else if (structure.type === 'spell') {
-          // Get spell cards (excluding legendaries)
+          // Get spell cards (including items, excluding legendaries)
           const allCards = getRandomCards(1000, usedCardIds)
-          roundCards = allCards.filter(card => card.isSpell && !card.isLegendary).slice(0, 4)
+          roundCards = allCards.filter(card => (card.isSpell || card.isItem) && !card.isLegendary).slice(0, 4)
         } else if (structure.type === 'cost') {
           // Get cards of exact cost (excluding legendaries like backend)
           const allCards = getRandomCards(1000, usedCardIds)

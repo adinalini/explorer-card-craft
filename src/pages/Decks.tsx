@@ -387,7 +387,7 @@ const Decks = () => {
               </div>
               
               {/* Decks per page - Mobile: row layout, Desktop: aligned right */}
-              <div className="flex flex-row items-center gap-2 sm:gap-4 md:ml-auto">
+              <div className="flex flex-row items-center justify-end gap-2 sm:gap-4">
                 <Label className="text-sm font-medium text-foreground whitespace-nowrap">Decks per page:</Label>
                 <RadioGroup
                   value={itemsPerPage.toString()}

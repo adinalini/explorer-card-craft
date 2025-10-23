@@ -245,11 +245,12 @@ const DeckBuilder = () => {
             className="text-foreground hover:bg-accent"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to home
+            <span className="hidden sm:inline">Back to home</span>
+            <span className="sm:hidden">Back</span>
           </Button>
           
           <div className="text-center flex-1">
-            <h1 className="text-4xl font-bold text-foreground">Create New Deck</h1>
+            <h1 className="text-2xl sm:text-4xl font-bold text-foreground">Create New Deck</h1>
           </div>
           
           <ThemeToggle className="text-foreground hover:bg-accent" />

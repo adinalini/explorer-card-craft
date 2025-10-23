@@ -386,7 +386,7 @@ const Decks = () => {
                 </RadioGroup>
               </div>
               
-              <div className="flex flex-row items-center gap-4">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-4">
                 <Label className="text-sm font-medium text-foreground">Decks per page:</Label>
                 <RadioGroup
                   value={itemsPerPage.toString()}
@@ -406,10 +406,9 @@ const Decks = () => {
 
           {/* Tabs */}
           <Tabs defaultValue="featured" className="w-full" onValueChange={(value) => setActiveTab(value as 'featured' | 'community')}>
-            <div className="flex flex-col gap-4 mb-6">
-              {/* First row: Featured/Community tabs and Latest/All filter */}
-              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                <TabsList className="grid w-full grid-cols-2 max-w-md h-10 md:min-w-[28rem]">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+              <div className="flex flex-col md:flex-row md:items-center gap-4 min-h-[40px]">
+                <TabsList className="grid w-full grid-cols-2 max-w-md h-10 min-w-[28rem]">
                   <TabsTrigger value="featured" className="flex items-center gap-2">
                     <Star className="h-4 w-4" />
                     Featured Decks
@@ -420,65 +419,47 @@ const Decks = () => {
                   </TabsTrigger>
                 </TabsList>
 
-                {/* Patch Filter Toggle */}
-                <div className="inline-flex h-10 items-center justify-center rounded-md bg-muted p-1 text-muted-foreground w-full md:w-auto max-w-md grid grid-cols-2 md:mr-10">
-                  <button
-                    onClick={() => setPatchFilter('latest')}
-                    className={`inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 gap-2 ${
-                      patchFilter === 'latest' ? 'bg-background text-foreground shadow-sm' : ''
-                    }`}
-                  >
-                    <Calendar className="h-4 w-4" />
-                    Latest Patch
-                  </button>
-                  <button
-                    onClick={() => setPatchFilter('all')}
-                    className={`inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 gap-2 ${
-                      patchFilter === 'all' ? 'bg-background text-foreground shadow-sm' : ''
-                    }`}
-                  >
-                    <History className="h-4 w-4" />
-                    All Patches
-                  </button>
+                {/* Tournament Winners Checkbox - Placeholder to maintain layout */}
+                <div className="flex items-center space-x-2 px-2 min-w-[180px]">
+                  {activeTab === 'featured' && (
+                    <>
+                      <Checkbox 
+                        id="tournament-winners" 
+                        checked={showTournamentWinners}
+                        onCheckedChange={(checked) => setShowTournamentWinners(checked === true)}
+                      />
+                      <Label 
+                        htmlFor="tournament-winners" 
+                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 flex items-center gap-2 cursor-pointer whitespace-nowrap"
+                      >
+                        <Trophy className="h-4 w-4 text-primary" />
+                        Tournament Winners
+                      </Label>
+                    </>
+                  )}
                 </div>
               </div>
 
-              {/* Second row: Tournament Winners Checkbox (mobile only, below Latest/All) */}
-              {activeTab === 'featured' && (
-                <div className="flex items-center space-x-2 px-2 md:hidden">
-                  <Checkbox 
-                    id="tournament-winners" 
-                    checked={showTournamentWinners}
-                    onCheckedChange={(checked) => setShowTournamentWinners(checked === true)}
-                  />
-                  <Label 
-                    htmlFor="tournament-winners" 
-                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 flex items-center gap-2 cursor-pointer whitespace-nowrap"
-                  >
-                    <Trophy className="h-4 w-4 text-primary" />
-                    Tournament Winners
-                  </Label>
-                </div>
-              )}
-
-              {/* Tournament Winners Checkbox for desktop (next to tabs) */}
-              <div className="hidden md:flex md:items-center md:space-x-2 md:px-2 md:min-w-[180px] md:-mt-14 md:ml-[30rem]">
-                {activeTab === 'featured' && (
-                  <>
-                    <Checkbox 
-                      id="tournament-winners-desktop" 
-                      checked={showTournamentWinners}
-                      onCheckedChange={(checked) => setShowTournamentWinners(checked === true)}
-                    />
-                    <Label 
-                      htmlFor="tournament-winners-desktop" 
-                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 flex items-center gap-2 cursor-pointer whitespace-nowrap"
-                    >
-                      <Trophy className="h-4 w-4 text-primary" />
-                      Tournament Winners
-                    </Label>
-                  </>
-                )}
+              {/* Patch Filter Toggle */}
+              <div className="inline-flex h-10 items-center justify-center rounded-md bg-muted p-1 text-muted-foreground w-full md:w-auto max-w-md grid grid-cols-2 md:mr-10">
+                <button
+                  onClick={() => setPatchFilter('latest')}
+                  className={`inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 gap-2 ${
+                    patchFilter === 'latest' ? 'bg-background text-foreground shadow-sm' : ''
+                  }`}
+                >
+                  <Calendar className="h-4 w-4" />
+                  Latest Patch
+                </button>
+                <button
+                  onClick={() => setPatchFilter('all')}
+                  className={`inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 gap-2 ${
+                    patchFilter === 'all' ? 'bg-background text-foreground shadow-sm' : ''
+                  }`}
+                >
+                  <History className="h-4 w-4" />
+                  All Patches
+                </button>
               </div>
             </div>
 

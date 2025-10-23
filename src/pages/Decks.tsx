@@ -56,7 +56,7 @@ const Decks = () => {
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [copiedDeckId, setCopiedDeckId] = useState<string | null>(null);
   const [patchFilter, setPatchFilter] = useState<'latest' | 'all'>('latest');
-  const [showTournamentWinners, setShowTournamentWinners] = useState(true);
+  const [showTournamentWinners, setShowTournamentWinners] = useState(false);
   const [activeTab, setActiveTab] = useState<'featured' | 'community'>('featured');
 
   useEffect(() => {

@@ -387,6 +387,7 @@ const Decks = () => {
               </div>
               
               <div className="flex flex-row items-center gap-4">
+                <Label className="text-sm font-medium text-foreground">Decks per page:</Label>
                 <RadioGroup
                   value={itemsPerPage.toString()}
                   onValueChange={(value) => setItemsPerPage(parseInt(value))}
@@ -399,7 +400,6 @@ const Decks = () => {
                     </div>
                   ))}
                 </RadioGroup>
-                <Label className="text-sm font-medium text-foreground">Decks per page</Label>
               </div>
             </div>
           </div>

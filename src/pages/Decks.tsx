@@ -386,7 +386,7 @@ const Decks = () => {
                 </RadioGroup>
               </div>
               
-              <div className="flex flex-row items-center gap-4 md:justify-end md:mr-10">
+              <div className="flex flex-row items-center gap-4">
                 <Label className="text-sm font-medium text-foreground">Decks per page:</Label>
                 <RadioGroup
                   value={itemsPerPage.toString()}
@@ -405,7 +405,7 @@ const Decks = () => {
           </div>
 
           {/* Tabs */}
-          <Tabs defaultValue="featured" className="w-full mt-8" onValueChange={(value) => setActiveTab(value as 'featured' | 'community')}>
+          <Tabs defaultValue="featured" className="w-full" onValueChange={(value) => setActiveTab(value as 'featured' | 'community')}>
             <div className="flex flex-col gap-4 mb-6">
               {/* First row: Featured/Community tabs and Latest/All filter */}
               <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">

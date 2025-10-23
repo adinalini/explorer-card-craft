@@ -1523,7 +1523,7 @@ export const cardDatabase: Card[] = [
     name: "The Flying Dutchman",
     image: "/src/assets/cards/Flying_Dutchman.png",
     isLegendary: false,
-    cost: 7,
+    cost: 5,
     isSpell: false,
     cardKey: "C00233_MB",
     inDraftPool: true,

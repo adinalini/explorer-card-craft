@@ -11,6 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { ArrowLeft, Share, Copy, Check, Flame, Droplet, Cloud, Bomb, Plus, CreditCard, Sparkles, TrendingUp } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { SEOHead } from "@/components/SEOHead";
+import { getOriginalCardImage, getDeckValidationIssues } from "@/utils/cardChanges";
 
 interface Deck {
   id: string;
@@ -196,18 +197,29 @@ const DeckView = () => {
               </div>
             </div>
             
-            {/* Right sidebar with toggle and validation on desktop */}
-            <div className="hidden md:flex flex-col gap-3 min-w-[280px] flex-shrink-0">
-              <DeckVersionToggle
-                deckPatch={deck.patch}
-                cards={deck.cards}
-                onToggle={handleVersionToggle}
-              />
-              <DeckValidationAlert 
-                deckPatch={deck.patch} 
-                cardIds={deck.cards.map(c => c.card_id)} 
-              />
-            </div>
+            {/* Right sidebar with toggle and validation on desktop - only show if there's content */}
+            {(() => {
+              const hasOldVersions = deck.cards.some(card => {
+                const originalImage = getOriginalCardImage(card.card_id, deck.patch, card.card_image);
+                return originalImage !== card.card_image;
+              });
+              const validationIssues = getDeckValidationIssues(deck.patch, deck.cards.map(c => c.card_id));
+              const hasValidationIssues = validationIssues.invalidIssues.length > 0 || validationIssues.warningIssues.length > 0;
+              
+              return (hasOldVersions || hasValidationIssues) ? (
+                <div className="hidden md:flex flex-col gap-3 min-w-[280px] flex-shrink-0">
+                  <DeckVersionToggle
+                    deckPatch={deck.patch}
+                    cards={deck.cards}
+                    onToggle={handleVersionToggle}
+                  />
+                  <DeckValidationAlert 
+                    deckPatch={deck.patch} 
+                    cardIds={deck.cards.map(c => c.card_id)} 
+                  />
+                </div>
+              ) : null;
+            })()}
           </div>
 
           {/* Mobile: Errors below badges, before description */}

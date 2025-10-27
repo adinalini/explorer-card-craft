@@ -2,6 +2,7 @@ import { useState } from "react"
 import { SEOHead } from "@/components/SEOHead"
 import { CardImage } from "@/components/CardImage"
 import { DeckCodeDisplay } from "@/components/DeckCodeDisplay"
+import { DeckDisplay } from "@/components/DeckDisplay"
 import { Button } from "@/components/ui/button"
 import { generateHalloweenDeck } from "@/utils/halloweenDeckGenerator"
 import { getCardById } from "@/utils/cardData"
@@ -78,8 +79,20 @@ const Halloween = () => {
           </p>
 
           <div className="max-w-7xl mx-auto flex-1 flex flex-col">
-            {/* Custom Deck Display */}
-            <div className="flex items-start gap-8 mb-8">
+            {/* Mobile view - use DeckDisplay component */}
+            <div className="md:hidden flex justify-center mb-8">
+              <div className="w-full max-w-2xl transform scale-80 origin-top">
+                <DeckDisplay
+                  cards={deck}
+                  playerName="Halloween"
+                  isOwn={true}
+                  isDraftComplete={true}
+                />
+              </div>
+            </div>
+
+            {/* Desktop view - Custom Deck Display */}
+            <div className="hidden md:flex items-start gap-8 mb-8">
               {/* Deck List - Left side */}
               <div className="space-y-1 w-56 flex-shrink-0">
                 <h4 className="font-semibold text-orange-300 mb-3 text-lg">Deck List</h4>
@@ -146,7 +159,7 @@ const Halloween = () => {
                 onClick={handleReroll}
                 variant="orange"
                 size="lg"
-                className="text-lg font-bold shadow-lg hover:shadow-orange-500/50 transition-all bg-orange-600/40 hover:bg-orange-600/60"
+                className="text-lg font-bold shadow-lg hover:shadow-orange-500/50 transition-all bg-orange-600/50 hover:bg-orange-600/70"
               >
                 🎃 Give me something more evil 🎃
               </Button>

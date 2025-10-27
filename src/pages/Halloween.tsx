@@ -70,19 +70,19 @@ const Halloween = () => {
         <div className="absolute inset-0 bg-[url('/lovable-uploads/skull-arrows.png')] opacity-5 bg-repeat bg-center" />
         
         {/* Header - fixed at top */}
-        <div className="relative z-10 flex-shrink-0 px-4 pt-8 pb-4">
-          <h1 className="text-5xl md:text-7xl font-bold text-center mb-4 bg-gradient-to-r from-orange-500 via-orange-600 to-red-600 bg-clip-text text-transparent drop-shadow-[0_0_20px_rgba(255,119,0,0.5)]">
+        <div className="relative z-10 flex-shrink-0 px-4 pt-4 pb-2">
+          <h1 className="text-5xl md:text-6xl font-bold text-center mb-2 bg-gradient-to-r from-orange-500 via-orange-600 to-red-600 bg-clip-text text-transparent drop-shadow-[0_0_20px_rgba(255,119,0,0.5)]">
             🎃 Halloween Event 🎃
           </h1>
           
-          <p className="text-2xl md:text-3xl text-center mb-4 text-orange-300 font-bold drop-shadow-lg">
+          <p className="text-2xl md:text-2xl text-center mb-2 text-orange-300 font-bold drop-shadow-lg">
             Are you EVIL enough?
           </p>
         </div>
 
         {/* Content area - scrollable on mobile, conditional scroll on desktop */}
         <div className="relative z-10 flex-1 overflow-y-auto px-4">
-          <div className="max-w-7xl mx-auto py-8 md:py-4">
+          <div className="max-w-7xl mx-auto py-4 md:py-2">
             {/* Mobile view - use DeckDisplay component */}
             <div className="md:hidden flex justify-center">
               <div className="w-full max-w-2xl transform scale-80 origin-top">
@@ -161,7 +161,7 @@ const Halloween = () => {
         </div>
 
         {/* Button - fixed at bottom */}
-        <div className="relative z-10 flex-shrink-0 p-4 md:pb-8">
+        <div className="relative z-10 flex-shrink-0 p-4 md:pb-4">
           <div className="flex justify-center">
             <Button
               onClick={handleReroll}

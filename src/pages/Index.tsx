@@ -176,6 +176,10 @@ const Index = () => {
     const reverse = reverseVideoRef.current
     
     if (original && reverse) {
+      // Force load both videos to ensure they're ready
+      original.load()
+      reverse.load()
+      
       // Prepare the reverse video (paused and ready)
       reverse.currentTime = 0
       reverse.pause()
@@ -246,12 +250,19 @@ const Index = () => {
               onEnded={handleVideoEnd}
               onTimeUpdate={(e) => handleTimeUpdate('reverse', e)}
               onError={(e) => handleVideoError('reverse', e)}
+              onCanPlay={(e) => {
+                const video = e.currentTarget;
+                if (currentVideo === 'reverse') {
+                  video.play().catch(console.error);
+                }
+              }}
               className={`w-full h-full object-cover pointer-events-none transition-opacity duration-300 ${
                 currentVideo === 'reverse' ? 'opacity-40' : 'opacity-0'
               }`}
               onLoadedData={(e) => {
                 const video = e.currentTarget;
                 video.playbackRate = 0.8;
+                setVideosLoaded(true);
               }}
               style={{ position: 'absolute' }}
             >

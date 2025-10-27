@@ -326,9 +326,9 @@ const Index = () => {
         {!isLoading && isAuthenticated && (
           <div 
             onClick={() => navigate('/halloween')}
-            className="hidden md:block absolute top-8 left-8 z-20 cursor-pointer group"
+            className="hidden md:block absolute top-[9vh] sm:top-[11vh] left-8 z-20 cursor-pointer group"
           >
-            <div className="relative text-[200px] hover:scale-105 transition-transform duration-500">
+            <div className="relative text-[150px] hover:scale-105 transition-transform duration-500">
               🎃
               <div className="absolute inset-0 blur-2xl bg-orange-500/40 group-hover:bg-orange-400/60 transition-all duration-500 animate-[pulse_3s_ease-in-out_infinite]" />
             </div>
@@ -432,7 +432,7 @@ const Index = () => {
               onClick={() => navigate('/halloween')}
               className="flex-shrink-0 cursor-pointer group"
             >
-              <div className="relative text-[120px] active:scale-95 transition-transform duration-500">
+              <div className="relative text-[90px] active:scale-95 transition-transform duration-500">
                 🎃
                 <div className="absolute inset-0 blur-2xl bg-orange-500/40 group-active:bg-orange-400/60 transition-all duration-500 animate-[pulse_3s_ease-in-out_infinite]" />
               </div>

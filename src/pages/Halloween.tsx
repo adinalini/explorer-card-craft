@@ -80,8 +80,8 @@ const Halloween = () => {
           </p>
         </div>
 
-        {/* Content area - scrollable on mobile, fixed on desktop */}
-        <div className="relative z-10 flex-1 overflow-y-auto md:overflow-hidden px-4">
+        {/* Content area - scrollable on mobile, conditional scroll on desktop */}
+        <div className="relative z-10 flex-1 overflow-y-auto px-4">
           <div className="max-w-7xl mx-auto h-full flex flex-col justify-center">
             {/* Mobile view - use DeckDisplay component */}
             <div className="md:hidden flex justify-center">
@@ -91,6 +91,7 @@ const Halloween = () => {
                   playerName="Halloween"
                   isOwn={true}
                   isDraftComplete={true}
+                  hideTitle={true}
                 />
               </div>
             </div>

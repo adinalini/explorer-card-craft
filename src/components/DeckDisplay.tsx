@@ -15,9 +15,10 @@ interface DeckDisplayProps {
   playerName: string
   isOwn: boolean
   isDraftComplete?: boolean
+  hideTitle?: boolean
 }
 
-export function DeckDisplay({ cards, playerName, isOwn, isDraftComplete = false }: DeckDisplayProps) {
+export function DeckDisplay({ cards, playerName, isOwn, isDraftComplete = false, hideTitle = false }: DeckDisplayProps) {
   // First separate legendary and normal cards
   const legendaryCard = cards.find(card => card.is_legendary)
   const normalCardsRaw = cards.filter(card => !card.is_legendary)
@@ -42,9 +43,11 @@ export function DeckDisplay({ cards, playerName, isOwn, isDraftComplete = false 
 
   return (
     <div className="space-y-4">
-      <h3 className="text-xl font-bold text-center text-primary">
-        {isOwn ? "Your Deck" : `${playerName}'s Deck`}
-      </h3>
+      {!hideTitle && (
+        <h3 className="text-xl font-bold text-center text-primary">
+          {isOwn ? "Your Deck" : `${playerName}'s Deck`}
+        </h3>
+      )}
       
       <div className="flex items-start gap-4">
         {/* Deck List - Left side for creator, Right side for opponent */}

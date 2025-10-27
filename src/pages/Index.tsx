@@ -312,25 +312,15 @@ const Index = () => {
           </div>
         </div>
 
-        {/* Skull and Arrows Image - Positioned absolutely to not affect button layout */}
-        <div className="absolute top-[18vh] sm:top-[22vh] left-1/2 -translate-x-1/2 z-5">
-          <img 
-            src="/lovable-uploads/skull-arrows.png" 
-            alt="Skull with crossed arrows decoration" 
-            className="w-14 h-14 sm:w-19 sm:h-19 md:w-24 md:h-24 object-contain animate-fade-in"
-            style={{ animationDelay: '0.1s' }}
-          />
-        </div>
-
-        {/* Glowing Pumpkin - Desktop: top-left, Mobile: below buttons */}
+        {/* Glowing Pumpkin - Desktop: center between title and buttons, Mobile: below buttons */}
         {!isLoading && isAuthenticated && (
           <div 
             onClick={() => navigate('/halloween')}
-            className="hidden md:block absolute top-[9vh] sm:top-[11vh] left-8 z-20 cursor-pointer group"
+            className="hidden md:block absolute top-[18vh] sm:top-[22vh] left-1/2 -translate-x-1/2 z-20 cursor-pointer group"
           >
-            <div className="relative text-[150px] hover:scale-105 transition-transform duration-500">
+            <div className="relative text-[128px] hover:scale-105 transition-transform duration-500">
               🎃
-              <div className="absolute inset-0 blur-2xl bg-orange-500/40 group-hover:bg-orange-400/60 transition-all duration-500 animate-[pulse_3s_ease-in-out_infinite]" />
+              <div className="absolute inset-0 blur-2xl bg-orange-500/40 group-hover:bg-orange-400/60 transition-all duration-500 animate-[pulse_6s_ease-in-out_infinite]" />
             </div>
           </div>
         )}
@@ -434,7 +424,7 @@ const Index = () => {
             >
               <div className="relative text-[90px] active:scale-95 transition-transform duration-500">
                 🎃
-                <div className="absolute inset-0 blur-2xl bg-orange-500/40 group-active:bg-orange-400/60 transition-all duration-500 animate-[pulse_3s_ease-in-out_infinite]" />
+                <div className="absolute inset-0 blur-2xl bg-orange-500/40 group-active:bg-orange-400/60 transition-all duration-500 animate-[pulse_6s_ease-in-out_infinite]" />
               </div>
             </div>
           )}

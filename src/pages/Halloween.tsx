@@ -82,7 +82,7 @@ const Halloween = () => {
 
         {/* Content area - scrollable on mobile, conditional scroll on desktop */}
         <div className="relative z-10 flex-1 overflow-y-auto px-4">
-          <div className="max-w-7xl mx-auto h-full flex flex-col justify-center">
+          <div className="max-w-7xl mx-auto py-8 md:py-4">
             {/* Mobile view - use DeckDisplay component */}
             <div className="md:hidden flex justify-center">
               <div className="w-full max-w-2xl transform scale-80 origin-top">

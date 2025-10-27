@@ -316,7 +316,7 @@ const Index = () => {
         {!isLoading && isAuthenticated && (
           <div 
             onClick={() => navigate('/halloween')}
-            className="hidden md:block absolute top-[16vh] sm:top-[20vh] left-1/2 -translate-x-1/2 z-20 cursor-pointer group"
+            className="hidden md:block absolute top-[14vh] sm:top-[18vh] left-1/2 -translate-x-1/2 z-20 cursor-pointer group"
           >
             <div className="relative text-[115px] hover:scale-105 transition-transform duration-500">
               🎃

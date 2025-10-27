@@ -65,22 +65,26 @@ const Halloween = () => {
         image="/og-images/deck-default.jpg"
         url="/halloween"
       />
-      <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-[hsl(25_100%_10%)] to-[hsl(0_100%_5%)]">
+      <div className="h-screen flex flex-col overflow-hidden bg-gradient-to-br from-[hsl(25_100%_10%)] to-[hsl(0_100%_5%)]">
         {/* Halloween themed background */}
         <div className="absolute inset-0 bg-[url('/lovable-uploads/skull-arrows.png')] opacity-5 bg-repeat bg-center" />
         
-        <div className="relative z-10 container mx-auto px-4 py-8 min-h-screen flex flex-col">
+        {/* Header - fixed at top */}
+        <div className="relative z-10 flex-shrink-0 px-4 pt-8 pb-4">
           <h1 className="text-5xl md:text-7xl font-bold text-center mb-4 bg-gradient-to-r from-orange-500 via-orange-600 to-red-600 bg-clip-text text-transparent drop-shadow-[0_0_20px_rgba(255,119,0,0.5)]">
             🎃 Halloween Event 🎃
           </h1>
           
-          <p className="text-2xl md:text-3xl text-center mb-8 text-orange-300 font-bold drop-shadow-lg">
+          <p className="text-2xl md:text-3xl text-center mb-4 text-orange-300 font-bold drop-shadow-lg">
             Are you EVIL enough?
           </p>
+        </div>
 
-          <div className="max-w-7xl mx-auto flex-1 flex flex-col">
+        {/* Content area - scrollable on mobile, fixed on desktop */}
+        <div className="relative z-10 flex-1 overflow-y-auto md:overflow-hidden px-4">
+          <div className="max-w-7xl mx-auto h-full flex flex-col justify-center">
             {/* Mobile view - use DeckDisplay component */}
-            <div className="md:hidden flex justify-center mb-8">
+            <div className="md:hidden flex justify-center">
               <div className="w-full max-w-2xl transform scale-80 origin-top">
                 <DeckDisplay
                   cards={deck}
@@ -92,7 +96,7 @@ const Halloween = () => {
             </div>
 
             {/* Desktop view - Custom Deck Display */}
-            <div className="hidden md:flex items-start gap-8 mb-8">
+            <div className="hidden md:flex items-start gap-8">
               {/* Deck List - Left side */}
               <div className="space-y-1 w-56 flex-shrink-0">
                 <h4 className="font-semibold text-orange-300 mb-3 text-lg">Deck List</h4>
@@ -152,18 +156,20 @@ const Halloween = () => {
                 </div>
               </div>
             </div>
+          </div>
+        </div>
 
-            {/* Button at bottom */}
-            <div className="flex justify-center mt-auto pb-8">
-              <Button
-                onClick={handleReroll}
-                variant="orange"
-                size="lg"
-                className="text-lg font-bold shadow-lg hover:shadow-orange-500/50 transition-all bg-orange-600/50 hover:bg-orange-600/70"
-              >
-                🎃 Give me something more evil 🎃
-              </Button>
-            </div>
+        {/* Button - fixed at bottom */}
+        <div className="relative z-10 flex-shrink-0 p-4 md:pb-8">
+          <div className="flex justify-center">
+            <Button
+              onClick={handleReroll}
+              variant="orange"
+              size="lg"
+              className="text-lg font-bold shadow-lg hover:shadow-orange-500/50 transition-all bg-orange-600/50 hover:bg-orange-600/70"
+            >
+              🎃 Give me something more evil 🎃
+            </Button>
           </div>
         </div>
       </div>

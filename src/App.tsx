@@ -14,6 +14,7 @@ import Decks from "./pages/Decks";
 import DeckBuilder from "./pages/DeckBuilder";
 import DeckView from "./pages/DeckView";
 import Patches from "./pages/Patches";
+import Halloween from "./pages/Halloween";
 import NotFound from "./pages/NotFound";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 
@@ -43,6 +44,7 @@ const App = () => (
             <Route path="/deck-builder" element={<ProtectedRoute><DeckBuilder /></ProtectedRoute>} />
             <Route path="/deck/:id" element={<ProtectedRoute><DeckView /></ProtectedRoute>} />
             <Route path="/patches" element={<ProtectedRoute><Patches /></ProtectedRoute>} />
+            <Route path="/halloween" element={<ProtectedRoute><Halloween /></ProtectedRoute>} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

@@ -322,6 +322,17 @@ const Index = () => {
           />
         </div>
 
+        {/* Glowing Pumpkin - Desktop: to the left of skull, Mobile: below buttons */}
+        <div 
+          onClick={() => navigate('/halloween')}
+          className="hidden md:block absolute top-[18vh] sm:top-[22vh] left-[calc(50%-120px)] -translate-x-full z-5 cursor-pointer group"
+        >
+          <div className="relative text-5xl animate-pulse hover:scale-110 transition-transform duration-300">
+            🎃
+            <div className="absolute inset-0 blur-xl bg-orange-500/50 group-hover:bg-orange-400/70 transition-all duration-300 animate-glow-pulse" />
+          </div>
+        </div>
+
         {/* Desktop Layout - Rabbit Left, Red Character Right, Buttons Center */}
         <div className="hidden md:block relative z-10 h-[82vh] sm:h-[78vh]">
           {/* Sketch Pattern - Left side, middle height */}
@@ -411,6 +422,17 @@ const Index = () => {
                 <PasswordGate onPasswordSubmit={handlePasswordSubmit} isVerifying={isVerifying} />
               )
             )}
+          </div>
+
+          {/* Glowing Pumpkin - Mobile: below buttons */}
+          <div 
+            onClick={() => navigate('/halloween')}
+            className="flex-shrink-0 cursor-pointer group"
+          >
+            <div className="relative text-5xl animate-pulse active:scale-95 transition-transform duration-300">
+              🎃
+              <div className="absolute inset-0 blur-xl bg-orange-500/50 group-active:bg-orange-400/70 transition-all duration-300 animate-glow-pulse" />
+            </div>
           </div>
 
           {/* Rabbit below buttons on mobile */}

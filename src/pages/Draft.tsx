@@ -123,7 +123,7 @@ const Draft = () => {
         .from('rooms')
         .select('*')
         .eq('id', roomId.toUpperCase())
-        .single()
+        .maybeSingle()
 
       console.log('Fetched room data:', { room, fetchError })
 

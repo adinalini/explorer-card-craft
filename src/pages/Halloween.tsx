@@ -146,7 +146,7 @@ const Halloween = () => {
                 onClick={handleReroll}
                 variant="orange"
                 size="lg"
-                className="text-lg font-bold shadow-lg hover:shadow-orange-500/50 transition-all opacity-50 hover:opacity-100"
+                className="text-lg font-bold shadow-lg hover:shadow-orange-500/50 transition-all bg-orange-600/40 hover:bg-orange-600/60"
               >
                 🎃 Give me something more evil 🎃
               </Button>

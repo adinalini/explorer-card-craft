@@ -631,7 +631,7 @@ export const cardDatabase: Card[] = [
     name: "Mummy",
     image: "/src/assets/cards/mummy.png",
     isLegendary: false,
-    cost: 3,
+    cost: 1, // Changed from 3 in v1.0.0.41
     isSpell: false,
     cardKey: "C00031_MB",
     inDraftPool: true,

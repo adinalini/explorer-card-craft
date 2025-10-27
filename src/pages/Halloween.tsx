@@ -77,12 +77,12 @@ const Halloween = () => {
             Are you EVIL enough?
           </p>
 
-          <div className="max-w-6xl mx-auto flex-1 flex flex-col">
+          <div className="max-w-7xl mx-auto flex-1 flex flex-col">
             {/* Custom Deck Display */}
-            <div className="flex items-start gap-6 mb-8">
+            <div className="flex items-start gap-8 mb-8">
               {/* Deck List - Left side */}
-              <div className="space-y-1 w-48">
-                <h4 className="font-semibold text-orange-300 mb-2 text-base">Deck List</h4>
+              <div className="space-y-1 w-56 flex-shrink-0">
+                <h4 className="font-semibold text-orange-300 mb-3 text-lg">Deck List</h4>
                 <div className="space-y-0.5 overflow-hidden">
                   {legendaryCard && (
                     <div className="text-yellow-400 font-medium border-l-2 border-yellow-500 pl-2 py-0.5 leading-tight text-sm">
@@ -101,12 +101,13 @@ const Halloween = () => {
               </div>
 
               {/* Deck Visual - Right side */}
-              <div className="flex-1 space-y-3">
-                {/* First row: Legendary + 3 normal cards */}
-                <div className="flex justify-start gap-2">
+              <div className="flex gap-6">
+                {/* Legendary Card */}
+                <div className="flex-shrink-0">
+                  <h4 className="font-semibold text-orange-300 mb-3 text-lg">Legendary</h4>
                   {legendaryCard && (
-                    <div className="relative w-24 h-[8.4rem]">
-                      <div className="w-full h-full bg-white border-2 border-yellow-500 rounded overflow-hidden shadow-lg shadow-yellow-500/20">
+                    <div className="relative w-[200px] h-[280px]">
+                      <div className="w-full h-full bg-white border-2 border-yellow-500 rounded-lg overflow-hidden shadow-lg shadow-yellow-500/30">
                         <CardImage
                           cardId={legendaryCard.card_id}
                           cardName={legendaryCard.card_name}
@@ -115,44 +116,25 @@ const Halloween = () => {
                       </div>
                     </div>
                   )}
-                  {normalCards.slice(0, 3).map((card, index) => (
-                    <div key={index} className="relative w-[4.8rem] h-24">
-                      <div className="w-full h-full bg-white border border-orange-500/30 rounded overflow-hidden shadow-md">
-                        <CardImage
-                          cardId={card.card_id}
-                          cardName={card.card_name}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                    </div>
-                  ))}
                 </div>
 
-                {/* Remaining 3 rows of 4 */}
-                {[3, 7, 11].map((startIndex, rowIndex) => (
-                  <div key={rowIndex} className="flex justify-start gap-2">
-                    {[0, 1, 2, 3].map((col) => {
-                      const cardIndex = startIndex + col
-                      const card = normalCards[cardIndex]
-                      
-                      return (
-                        <div key={col} className="relative w-[4.8rem] h-24">
-                          {card ? (
-                            <div className="w-full h-full bg-white border border-orange-500/30 rounded overflow-hidden shadow-md">
-                              <CardImage
-                                cardId={card.card_id}
-                                cardName={card.card_name}
-                                className="w-full h-full object-cover"
-                              />
-                            </div>
-                          ) : (
-                            <div className="w-full h-full border border-dashed border-orange-500/20 rounded"></div>
-                          )}
+                {/* Normal Cards Grid */}
+                <div className="flex-1">
+                  <h4 className="font-semibold text-orange-300 mb-3 text-lg">Cards</h4>
+                  <div className="grid grid-cols-4 gap-3">
+                    {normalCards.map((card, index) => (
+                      <div key={index} className="relative w-[150px] h-[210px]">
+                        <div className="w-full h-full bg-white border border-orange-500/30 rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow">
+                          <CardImage
+                            cardId={card.card_id}
+                            cardName={card.card_name}
+                            className="w-full h-full object-cover"
+                          />
                         </div>
-                      )
-                    })}
+                      </div>
+                    ))}
                   </div>
-                ))}
+                </div>
               </div>
             </div>
 

@@ -80,10 +80,14 @@ export function generateHalloweenDeck(): Card[] {
   const highCost = getRandomCards(cost7to10, 2, usedCards);
   deck.push(...highCost);
 
-  // 8. One random card not already picked from cost 0-10
-  const allAvailable = halloweenCards.filter(c => !usedCards.has(c.id));
-  const random = getRandomCards(allAvailable, 1, usedCards);
-  deck.push(...random);
+  // 8. One random card not already picked from cost 0-10 (non-legendary)
+  const allAvailable = halloweenCards.filter(c => !usedCards.has(c.id) && !c.isLegendary);
+  if (allAvailable.length > 0) {
+    const random = getRandomCards(allAvailable, 1, usedCards);
+    deck.push(...random);
+  } else {
+    console.error('No cards available for final random pick. UsedCards:', usedCards.size, 'Total Halloween cards:', halloweenCards.length);
+  }
 
   // Sort by cost
   return deck.sort((a, b) => a.cost - b.cost);

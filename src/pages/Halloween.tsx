@@ -102,20 +102,22 @@ const Halloween = () => {
 
               {/* Deck Visual - Right side */}
               <div className="flex gap-6">
-                {/* Legendary Card */}
-                <div className="flex-shrink-0">
-                  <h4 className="font-semibold text-orange-300 mb-3 text-lg">Legendary</h4>
-                  {legendaryCard && (
-                    <div className="relative w-[200px] h-[280px]">
-                      <div className="w-full h-full bg-white border-2 border-yellow-500 rounded-lg overflow-hidden shadow-lg shadow-yellow-500/30">
-                        <CardImage
-                          cardId={legendaryCard.card_id}
-                          cardName={legendaryCard.card_name}
-                          className="w-full h-full object-cover"
-                        />
+                {/* Legendary Card - Vertically centered */}
+                <div className="flex-shrink-0 flex items-center">
+                  <div>
+                    <h4 className="font-semibold text-orange-300 mb-3 text-lg">Legendary</h4>
+                    {legendaryCard && (
+                      <div className="relative w-[200px] h-[280px]">
+                        <div className="w-full h-full bg-white border-2 border-yellow-500 rounded-lg overflow-hidden shadow-lg shadow-yellow-500/30">
+                          <CardImage
+                            cardId={legendaryCard.card_id}
+                            cardName={legendaryCard.card_name}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
                       </div>
-                    </div>
-                  )}
+                    )}
+                  </div>
                 </div>
 
                 {/* Normal Cards Grid */}
@@ -144,7 +146,7 @@ const Halloween = () => {
                 onClick={handleReroll}
                 variant="orange"
                 size="lg"
-                className="text-lg font-bold shadow-lg hover:shadow-orange-500/50 transition-all opacity-90 hover:opacity-100"
+                className="text-lg font-bold shadow-lg hover:shadow-orange-500/50 transition-all opacity-50 hover:opacity-100"
               >
                 🎃 Give me something more evil 🎃
               </Button>

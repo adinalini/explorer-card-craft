@@ -259,7 +259,7 @@ export const cardChanges: CardChange[] = [
     cardName: 'Mummy',
     patch: 'v1.0.0.41',
     changeType: 'warning',
-    description: 'card has undergone significant changes',
+    description: "card's cost has been changed",
     oldImagePath: '/src/assets/cards/Old/v1.0.0.40/mummy.png'
   },
   {

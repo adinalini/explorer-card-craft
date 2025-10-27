@@ -322,16 +322,18 @@ const Index = () => {
           />
         </div>
 
-        {/* Glowing Pumpkin - Desktop: to the left of skull, Mobile: below buttons */}
-        <div 
-          onClick={() => navigate('/halloween')}
-          className="hidden md:block absolute top-[18vh] sm:top-[22vh] left-[calc(50%-120px)] -translate-x-full z-5 cursor-pointer group"
-        >
-          <div className="relative text-5xl animate-pulse hover:scale-110 transition-transform duration-300">
-            🎃
-            <div className="absolute inset-0 blur-xl bg-orange-500/50 group-hover:bg-orange-400/70 transition-all duration-300 animate-glow-pulse" />
+        {/* Glowing Pumpkin - Desktop: top-left, Mobile: below buttons */}
+        {!isLoading && isAuthenticated && (
+          <div 
+            onClick={() => navigate('/halloween')}
+            className="hidden md:block absolute top-8 left-8 z-20 cursor-pointer group"
+          >
+            <div className="relative text-[200px] hover:scale-105 transition-transform duration-500">
+              🎃
+              <div className="absolute inset-0 blur-2xl bg-orange-500/40 group-hover:bg-orange-400/60 transition-all duration-500 animate-[pulse_3s_ease-in-out_infinite]" />
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Desktop Layout - Rabbit Left, Red Character Right, Buttons Center */}
         <div className="hidden md:block relative z-10 h-[82vh] sm:h-[78vh]">
@@ -425,15 +427,17 @@ const Index = () => {
           </div>
 
           {/* Glowing Pumpkin - Mobile: below buttons */}
-          <div 
-            onClick={() => navigate('/halloween')}
-            className="flex-shrink-0 cursor-pointer group"
-          >
-            <div className="relative text-5xl animate-pulse active:scale-95 transition-transform duration-300">
-              🎃
-              <div className="absolute inset-0 blur-xl bg-orange-500/50 group-active:bg-orange-400/70 transition-all duration-300 animate-glow-pulse" />
+          {!isLoading && isAuthenticated && (
+            <div 
+              onClick={() => navigate('/halloween')}
+              className="flex-shrink-0 cursor-pointer group"
+            >
+              <div className="relative text-[120px] active:scale-95 transition-transform duration-500">
+                🎃
+                <div className="absolute inset-0 blur-2xl bg-orange-500/40 group-active:bg-orange-400/60 transition-all duration-500 animate-[pulse_3s_ease-in-out_infinite]" />
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Rabbit below buttons on mobile */}
           <div className="flex-shrink-0 flex justify-center">

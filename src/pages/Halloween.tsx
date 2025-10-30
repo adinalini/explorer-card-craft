@@ -1,4 +1,6 @@
 import { useState } from "react"
+import { useNavigate } from "react-router-dom"
+import { ArrowLeft } from "lucide-react"
 import { SEOHead } from "@/components/SEOHead"
 import { CardImage } from "@/components/CardImage"
 import { DeckCodeDisplay } from "@/components/DeckCodeDisplay"
@@ -6,6 +8,7 @@ import { DeckDisplay } from "@/components/DeckDisplay"
 import { Button } from "@/components/ui/button"
 import { generateHalloweenDeck } from "@/utils/halloweenDeckGenerator"
 import { getCardById } from "@/utils/cardData"
+import { useIsMobile } from "@/hooks/use-mobile"
 
 interface DeckCard {
   card_id: string
@@ -16,6 +19,8 @@ interface DeckCard {
 }
 
 const Halloween = () => {
+  const navigate = useNavigate()
+  const isMobile = useIsMobile()
   const [deck, setDeck] = useState<DeckCard[]>(() => {
     const cards = generateHalloweenDeck()
     return cards.map((card, index) => ({
@@ -71,6 +76,18 @@ const Halloween = () => {
         
         {/* Header - fixed at top */}
         <div className="relative z-10 flex-shrink-0 px-4 pt-4 pb-2">
+          <div className="absolute top-4 left-4">
+            <Button
+              onClick={() => navigate('/')}
+              variant="ghost"
+              size="sm"
+              className="text-orange-300 hover:text-orange-200 hover:bg-orange-500/10"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              <span className="ml-2">{isMobile ? 'Back' : 'Back to Home'}</span>
+            </Button>
+          </div>
+          
           <h1 className="text-5xl md:text-6xl font-bold text-center mb-2 bg-gradient-to-r from-orange-500 via-orange-600 to-red-600 bg-clip-text text-transparent drop-shadow-[0_0_20px_rgba(255,119,0,0.5)]">
             🎃 Halloween Event 🎃
           </h1>

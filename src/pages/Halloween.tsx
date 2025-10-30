@@ -84,7 +84,7 @@ const Halloween = () => {
               className="text-orange-300 hover:text-orange-200 hover:bg-orange-500/10"
             >
               <ArrowLeft className="h-4 w-4" />
-              <span className="ml-2">{isMobile ? 'Back' : 'Back to Home'}</span>
+              {!isMobile && <span className="ml-2">Back to Home</span>}
             </Button>
           </div>
           

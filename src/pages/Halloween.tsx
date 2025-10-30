@@ -76,7 +76,7 @@ const Halloween = () => {
         
         {/* Header - fixed at top */}
         <div className="relative z-10 flex-shrink-0 px-4 pt-4 pb-2">
-          <div className="absolute top-4 left-4">
+          <div className="absolute top-4 left-4 z-20">
             <Button
               onClick={() => navigate('/')}
               variant="ghost"

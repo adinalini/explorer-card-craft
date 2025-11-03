@@ -18,7 +18,7 @@ const Draft = () => {
   const navigate = useNavigate()
   const [createDialogOpen, setCreateDialogOpen] = useState(false)
   const [joinDialogOpen, setJoinDialogOpen] = useState(false)
-  const [draftType, setDraftType] = useState("default")
+  const [draftType, setDraftType] = useState("triple")
   const [creatorName, setCreatorName] = useState("")
   const [joinerName, setJoinerName] = useState("")
   const [roomId, setRoomId] = useState("")
@@ -303,14 +303,14 @@ const Draft = () => {
                     <div className="space-y-4">
                       <Label className="text-lg font-semibold text-primary">Draft Type:</Label>
                        <RadioGroup value={draftType} onValueChange={setDraftType} className="grid grid-cols-1 gap-3">
-                         <label className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-accent/20 hover:scale-105 transition-all cursor-pointer">
-                           <RadioGroupItem value="default" id="default" />
-                           <span className="text-lg text-primary font-semibold">Default</span>
-                         </label>
                           <label className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-accent/20 hover:scale-105 transition-all cursor-pointer">
                             <RadioGroupItem value="triple" id="triple" />
-                            <span className="text-lg text-primary font-semibold">Triple Draft</span>
+                            <span className="text-lg text-primary font-semibold">Triple Draft (default)</span>
                           </label>
+                         <label className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-accent/20 hover:scale-105 transition-all cursor-pointer">
+                           <RadioGroupItem value="default" id="default" />
+                           <span className="text-lg text-primary font-semibold">Double Draft</span>
+                         </label>
                           <label className="flex items-center space-x-3 p-3 border rounded-lg opacity-60 cursor-not-allowed">
                             <RadioGroupItem value="mega" id="mega" disabled />
                             <span className="text-lg text-primary font-semibold">Mega Draft (Not Available)</span>

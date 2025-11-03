@@ -319,15 +319,18 @@ const Patches = () => {
                     {/* Death */}
                     <div className="mb-8">
                       <h4 className="text-xl font-medium mb-3 text-foreground">1. Death</h4>
-                      <div className="space-y-4">
+                      <div className="flex flex-col md:flex-row gap-4 items-center">
                         <img
                           src="/patches/october/miscellaneous/death.png"
                           alt="Death Legendary Power"
-                          className="w-full max-w-2xl mx-auto rounded-lg border-2 border-primary"
+                          className="w-full md:w-96 rounded-lg border-2 border-primary"
                         />
                         <video
-                          controls
-                          className="w-full max-w-2xl mx-auto rounded-lg border-2 border-primary"
+                          autoPlay
+                          loop
+                          muted
+                          playsInline
+                          className="w-full md:flex-1 rounded-lg border-2 border-primary"
                         >
                           <source src="/patches/october/miscellaneous/death.mp4" type="video/mp4" />
                           Your browser does not support the video tag.
@@ -338,15 +341,18 @@ const Patches = () => {
                     {/* Dorothy */}
                     <div className="mb-8">
                       <h4 className="text-xl font-medium mb-3 text-foreground">2. Dorothy</h4>
-                      <div className="space-y-4">
+                      <div className="flex flex-col md:flex-row gap-4 items-center">
                         <img
                           src="/patches/october/miscellaneous/dorothy.png"
                           alt="Dorothy Legendary Power"
-                          className="w-full max-w-2xl mx-auto rounded-lg border-2 border-primary"
+                          className="w-full md:w-96 rounded-lg border-2 border-primary"
                         />
                         <video
-                          controls
-                          className="w-full max-w-2xl mx-auto rounded-lg border-2 border-primary"
+                          autoPlay
+                          loop
+                          muted
+                          playsInline
+                          className="w-full md:flex-1 rounded-lg border-2 border-primary"
                         >
                           <source src="/patches/october/miscellaneous/dorothy.mp4" type="video/mp4" />
                           Your browser does not support the video tag.
@@ -357,15 +363,18 @@ const Patches = () => {
                     {/* Dracula */}
                     <div className="mb-8">
                       <h4 className="text-xl font-medium mb-3 text-foreground">3. Dracula</h4>
-                      <div className="space-y-4">
+                      <div className="flex flex-col md:flex-row gap-4 items-center">
                         <img
                           src="/patches/october/miscellaneous/dracula.png"
                           alt="Dracula Legendary Power"
-                          className="w-full max-w-2xl mx-auto rounded-lg border-2 border-primary"
+                          className="w-full md:w-96 rounded-lg border-2 border-primary"
                         />
                         <video
-                          controls
-                          className="w-full max-w-2xl mx-auto rounded-lg border-2 border-primary"
+                          autoPlay
+                          loop
+                          muted
+                          playsInline
+                          className="w-full md:flex-1 rounded-lg border-2 border-primary"
                         >
                           <source src="/patches/october/miscellaneous/dracula.mp4" type="video/mp4" />
                           Your browser does not support the video tag.
@@ -373,16 +382,48 @@ const Patches = () => {
                       </div>
                     </div>
 
-                    {/* Red - placeholder */}
+                    {/* Red */}
                     <div className="mb-8">
                       <h4 className="text-xl font-medium mb-3 text-foreground">4. Red</h4>
-                      <p className="text-muted-foreground italic">(Coming soon - image and video to be added)</p>
+                      <div className="flex flex-col md:flex-row gap-4 items-center">
+                        <img
+                          src="/patches/october/miscellaneous/red.png"
+                          alt="Red Legendary Power"
+                          className="w-full md:w-96 rounded-lg border-2 border-primary"
+                        />
+                        <video
+                          autoPlay
+                          loop
+                          muted
+                          playsInline
+                          className="w-full md:flex-1 rounded-lg border-2 border-primary"
+                        >
+                          <source src="/patches/october/miscellaneous/red.mp4" type="video/mp4" />
+                          Your browser does not support the video tag.
+                        </video>
+                      </div>
                     </div>
 
-                    {/* Robinhood - placeholder */}
+                    {/* Robinhood */}
                     <div className="mb-8">
                       <h4 className="text-xl font-medium mb-3 text-foreground">5. Robinhood</h4>
-                      <p className="text-muted-foreground italic">(Coming soon - image and video to be added)</p>
+                      <div className="flex flex-col md:flex-row gap-4 items-center">
+                        <img
+                          src="/patches/october/miscellaneous/robinhood.png"
+                          alt="Robinhood Legendary Power"
+                          className="w-full md:w-96 rounded-lg border-2 border-primary"
+                        />
+                        <video
+                          autoPlay
+                          loop
+                          muted
+                          playsInline
+                          className="w-full md:flex-1 rounded-lg border-2 border-primary"
+                        >
+                          <source src="/patches/october/miscellaneous/robinhood.mp4" type="video/mp4" />
+                          Your browser does not support the video tag.
+                        </video>
+                      </div>
                     </div>
                   </div>
                 </div>

@@ -1535,8 +1535,7 @@ export const cardDatabase: Card[] = [
     isLegendary: false,
     cost: 2,
     isSpell: false,
-    cardKey: "C00281_MB",
-    inDraftPool: true,
+    inDraftPool: false, // No card key - not in draft pool
   },
   {
     id: "hercules",
@@ -1545,8 +1544,7 @@ export const cardDatabase: Card[] = [
     isLegendary: true,
     cost: 10,
     isSpell: false,
-    cardKey: "C00283_MC",
-    inDraftPool: true,
+    inDraftPool: false, // Not available in draft modes
   },
   {
     id: "cerberus",
@@ -1555,8 +1553,7 @@ export const cardDatabase: Card[] = [
     isLegendary: false,
     cost: 6,
     isSpell: false,
-    cardKey: "C00274_MB",
-    inDraftPool: true,
+    inDraftPool: false, // Not available in draft modes
   },
   {
     id: "drop_bear",
@@ -1647,8 +1644,7 @@ export const cardDatabase: Card[] = [
     isLegendary: false,
     cost: 2,
     isSpell: false,
-    cardKey: "C00270_MB",
-    inDraftPool: true,
+    inDraftPool: false, // No card key - not in draft pool
   },
 ];
 

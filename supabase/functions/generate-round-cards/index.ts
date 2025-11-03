@@ -417,7 +417,6 @@ Deno.serve(async (req) => {
       { id: "christopher", name: "Christopher Robin", image: "christopher.png", cost: 4 },
       { id: "dracula", name: "Dracula", image: "dracula.png", cost: 4, isLegendary: true },
       { id: "glinda", name: "Glinda", image: "glinda.png", cost: 4 },
-      { id: "goldilocks", name: "Goldilocks", image: "goldilocks.png", cost: 4, isLegendary: true },
       { id: "imhotep", name: "Imhotep", image: "imhotep.png", cost: 4 },
       { id: "jekyll", name: "Jekyll", image: "jekyll.png", cost: 4 },
       { id: "lancelot", name: "Lancelot", image: "lancelot.png", cost: 4 },
@@ -467,7 +466,40 @@ Deno.serve(async (req) => {
       
       // Cost 10+ cards
       { id: "phantom_coachman", name: "Phantom Coachman", image: "phantom_coachman.png", cost: 10 },
-      { id: "hercules", name: "Hercules", image: "Hercules.png", cost: 10, isLegendary: true }
+      { id: "brandy", name: "Brandy", image: "Brandy.png", cost: 10, isLegendary: true },
+      
+      // October 2025 New Cards
+      { id: "baby_bear", name: "Baby Bear", image: "Baby_Bear.png", cost: 2 },
+      { id: "hare", name: "Hare", image: "Hare.png", cost: 5 },
+      { id: "tortoise", name: "Tortoise", image: "Tortoise.png", cost: 6 },
+      { id: "drop_bear", name: "Drop Bear", image: "Drop_Bear.png", cost: 4 },
+      { id: "babe_the_blue_ox", name: "Babe the Blue Ox", image: "Babe_the_blue_ox.png", cost: 7 },
+      { id: "winnie_the_pooh", name: "Winnie the Pooh", image: "Winnie_the_pooh.png", cost: 5, isLegendary: true },
+      { id: "goldi", name: "Goldilocks", image: "Goldi.png", cost: 4, isLegendary: true },
+      { id: "piglet", name: "Piglet", image: "Piglet.png", cost: 0 },
+      { id: "thumbelina", name: "Thumbelina", image: "Thumbelina.png", cost: 0 },
+      { id: "mary", name: "Mary", image: "Mary.png", cost: 1 },
+      { id: "sinbad", name: "Sinbad", image: "Sinbad.png", cost: 5 },
+      { id: "butcher", name: "Butcher", image: "Butcher.png", cost: 5 },
+      { id: "baker", name: "Baker", image: "Baker.png", cost: 5 },
+      { id: "captain_ahab", name: "Captain Ahab", image: "Captain_Ahab.png", cost: 4 },
+      { id: "bigfoot", name: "Bigfoot", image: "Bigfoot.png", cost: 7 },
+      { id: "bagheera", name: "Bagheera", image: "Bagheera.png", cost: 3 },
+      { id: "wicked_stepmother", name: "Wicked Stepmother", image: "Wicked_Stepmother.png", cost: 4 },
+      { id: "impundulu", name: "Impundulu", image: "Impundulu.png", cost: 6 },
+      { id: "sandman", name: "Sandman", image: "Sandman.png", cost: 6 },
+      { id: "chimera", name: "Chimera", image: "Chimera.png", cost: 6 },
+      { id: "koschei", name: "Koschei", image: "KOschei.png", cost: 6 },
+      { id: "momotaro", name: "Momotaro", image: "Momotaro.png", cost: 2 },
+      { id: "tinker_bell", name: "Tinker Bell", image: "Tinker_Bell.png", cost: 1 },
+      { id: "flying_dutchman", name: "The Flying Dutchman", image: "Flying_Dutchman.png", cost: 5 },
+      { id: "yuki_onna", name: "Yuki-onna", image: "Yuki_onna.png", cost: 2 },
+      { id: "mothman", name: "Mothman", image: "Mothman.png", cost: 2 },
+      { id: "cake", name: "Cake", image: "Cake.png", cost: 2, isItem: true },
+      { id: "run_over", name: "Run Over", image: "Run_Over.png", cost: 1, isSpell: true },
+      { id: "obliterate", name: "Obliterate", image: "Obliterate.png", cost: 10, isSpell: true },
+      { id: "first_aid", name: "First Aid", image: "First_Aid.png", cost: 1, isSpell: true },
+      { id: "mortal_coil", name: "Mortal Coil", image: "Mortal_Coil.png", cost: 1, isItem: true }
     ]
 
     const excludeIds = usedCardIds || []

@@ -165,10 +165,7 @@ export const cardKeyMapping: Record<string, string> = {
   'obliterate': 'C00190_SB',
   'chimera': 'C00273_MB',
   'tinker_bell': 'C00053_MB',
-  'yuki_onna': 'C00179_MB',
-  'animated_broomstick': 'C00270_MB',
-  'popeye': 'C00281_MB',
-  'hercules': 'C00283_MC'
+  'yuki_onna': 'C00179_MB'
 }
 
 export function getCardKey(cardId: string): string | undefined {

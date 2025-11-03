@@ -1475,7 +1475,7 @@ export const cardDatabase: Card[] = [
     isLegendary: false,
     cost: 6,
     isSpell: false,
-    cardKey: "C00273_MB",
+    cardKey: "C00274_MB",
     inDraftPool: true,
   },
   {

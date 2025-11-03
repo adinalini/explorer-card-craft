@@ -163,7 +163,7 @@ export const cardKeyMapping: Record<string, string> = {
   'huck_finn': 'C00191_MB',
   'tortoise': 'C00183_MB',
   'obliterate': 'C00190_SB',
-  'chimera': 'C00273_MB',
+  'chimera': 'C00274_MB',
   'tinker_bell': 'C00053_MB',
   'yuki_onna': 'C00179_MB'
 }

@@ -342,7 +342,6 @@ Deno.serve(async (req) => {
       // Cost 1 cards
       { id: "ali_baba", name: "Ali Baba", image: "ali_baba.png", cost: 1 },
       { id: "friar_tuck", name: "Friar Tuck", image: "friar_tuck.png", cost: 1 },
-      { id: "tin_soldier", name: "Tin Soldier", image: "tin_soldier.png", cost: 1 },
       { id: "ugly_duckling", name: "Ugly Duckling", image: "ugly_duckling.png", cost: 1 },
       { id: "white_rabbit", name: "White Rabbit", image: "white_rabbit.png", cost: 1 },
       { id: "defense_matrix", name: "Defense Matrix", image: "defense_matrix.png", cost: 1, isSpell: true },
@@ -365,7 +364,6 @@ Deno.serve(async (req) => {
       { id: "lady_of_the_lake", name: "Lady of the Lake", image: "lady_of_the_lake.png", cost: 2 },
       { id: "mad_hatter", name: "Mad Hatter", image: "mad_hatter.png", cost: 2 },
       { id: "morgiana", name: "Morgiana", image: "morgiana.png", cost: 2 },
-      { id: "ogre", name: "Ogre", image: "ogre.png", cost: 2 },
       { id: "pegasus", name: "Pegasus", image: "pegasus.png", cost: 2 },
       { id: "prince_charming", name: "Prince Charming", image: "prince_charming.png", cost: 2 },
       { id: "quasimodo", name: "Quasimodo", image: "quasimodo.png", cost: 2 },

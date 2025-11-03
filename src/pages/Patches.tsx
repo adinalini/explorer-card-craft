@@ -277,6 +277,116 @@ const Patches = () => {
                   ))}
                 </div>
               </section>
+
+              {/* Miscellaneous Updates Section */}
+              <section>
+                <h2 className="text-3xl font-bold mb-6 text-foreground">Miscellaneous Updates</h2>
+                <div className="space-y-6">
+                  {/* Bullet points */}
+                  <ul className="list-disc list-inside space-y-3 text-foreground text-lg">
+                    <li>Hand size increased from 8 to 10.</li>
+                    <li>Deckbuilder has been updated ingame, you can now inspect cards and their variants.</li>
+                    <li>2 New mechanics: Graveyard play and First Reveal. Cards and abilities can now be used in/on graveyard (Destroyed/Discarded cards) and First Reveal always reveal first regardless of priority.</li>
+                  </ul>
+
+                  {/* New Locations Mini Section */}
+                  <div className="mt-8">
+                    <h3 className="text-2xl font-semibold mb-4 text-foreground">New Locations</h3>
+                    <div className="space-y-4">
+                      <img
+                        src="/patches/october/miscellaneous/location_1.png"
+                        alt="New Locations Set 1"
+                        className="w-full max-w-4xl mx-auto rounded-lg border-2 border-primary"
+                      />
+                      <img
+                        src="/patches/october/miscellaneous/location_2.png"
+                        alt="New Locations Set 2"
+                        className="w-full max-w-4xl mx-auto rounded-lg border-2 border-primary"
+                      />
+                    </div>
+                  </div>
+
+                  {/* New Mechanic (Legendary Powers) Mini Section */}
+                  <div className="mt-8">
+                    <h3 className="text-2xl font-semibold mb-4 text-foreground">New Mechanic (Legendary Powers)</h3>
+                    <p className="text-foreground text-lg mb-6">
+                      Legendaries now have a one time effect at the start of the game, all legendaries will eventually have one.
+                    </p>
+                    <p className="text-foreground text-lg mb-6">
+                      In the first batch, these 5 legendaries got a power:
+                    </p>
+
+                    {/* Death */}
+                    <div className="mb-8">
+                      <h4 className="text-xl font-medium mb-3 text-foreground">1. Death</h4>
+                      <div className="space-y-4">
+                        <img
+                          src="/patches/october/miscellaneous/death.png"
+                          alt="Death Legendary Power"
+                          className="w-full max-w-2xl mx-auto rounded-lg border-2 border-primary"
+                        />
+                        <video
+                          controls
+                          className="w-full max-w-2xl mx-auto rounded-lg border-2 border-primary"
+                        >
+                          <source src="/patches/october/miscellaneous/death.mp4" type="video/mp4" />
+                          Your browser does not support the video tag.
+                        </video>
+                      </div>
+                    </div>
+
+                    {/* Dorothy */}
+                    <div className="mb-8">
+                      <h4 className="text-xl font-medium mb-3 text-foreground">2. Dorothy</h4>
+                      <div className="space-y-4">
+                        <img
+                          src="/patches/october/miscellaneous/dorothy.png"
+                          alt="Dorothy Legendary Power"
+                          className="w-full max-w-2xl mx-auto rounded-lg border-2 border-primary"
+                        />
+                        <video
+                          controls
+                          className="w-full max-w-2xl mx-auto rounded-lg border-2 border-primary"
+                        >
+                          <source src="/patches/october/miscellaneous/dorothy.mp4" type="video/mp4" />
+                          Your browser does not support the video tag.
+                        </video>
+                      </div>
+                    </div>
+
+                    {/* Dracula */}
+                    <div className="mb-8">
+                      <h4 className="text-xl font-medium mb-3 text-foreground">3. Dracula</h4>
+                      <div className="space-y-4">
+                        <img
+                          src="/patches/october/miscellaneous/dracula.png"
+                          alt="Dracula Legendary Power"
+                          className="w-full max-w-2xl mx-auto rounded-lg border-2 border-primary"
+                        />
+                        <video
+                          controls
+                          className="w-full max-w-2xl mx-auto rounded-lg border-2 border-primary"
+                        >
+                          <source src="/patches/october/miscellaneous/dracula.mp4" type="video/mp4" />
+                          Your browser does not support the video tag.
+                        </video>
+                      </div>
+                    </div>
+
+                    {/* Red - placeholder */}
+                    <div className="mb-8">
+                      <h4 className="text-xl font-medium mb-3 text-foreground">4. Red</h4>
+                      <p className="text-muted-foreground italic">(Coming soon - image and video to be added)</p>
+                    </div>
+
+                    {/* Robinhood - placeholder */}
+                    <div className="mb-8">
+                      <h4 className="text-xl font-medium mb-3 text-foreground">5. Robinhood</h4>
+                      <p className="text-muted-foreground italic">(Coming soon - image and video to be added)</p>
+                    </div>
+                  </div>
+                </div>
+              </section>
             </div>
           )}
         </div>

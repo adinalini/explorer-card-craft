@@ -324,7 +324,7 @@ const Patches = () => {
                           <img
                             src="/patches/october/miscellaneous/death.png"
                             alt="Death Legendary Power"
-                            className="w-full lg:w-[28rem] rounded-lg border-2 border-primary"
+                            className="w-full lg:w-[21rem] rounded-lg border-2 border-primary"
                           />
                           <video
                             autoPlay
@@ -346,7 +346,7 @@ const Patches = () => {
                           <img
                             src="/patches/october/miscellaneous/dorothy.png"
                             alt="Dorothy Legendary Power"
-                            className="w-full lg:w-[28rem] rounded-lg border-2 border-primary"
+                            className="w-full lg:w-[21rem] rounded-lg border-2 border-primary"
                           />
                           <video
                             autoPlay
@@ -368,7 +368,7 @@ const Patches = () => {
                           <img
                             src="/patches/october/miscellaneous/dracula.png"
                             alt="Dracula Legendary Power"
-                            className="w-full lg:w-[28rem] rounded-lg border-2 border-primary"
+                            className="w-full lg:w-[21rem] rounded-lg border-2 border-primary"
                           />
                           <video
                             autoPlay
@@ -390,7 +390,7 @@ const Patches = () => {
                           <img
                             src="/patches/october/miscellaneous/red.png"
                             alt="Red Legendary Power"
-                            className="w-full lg:w-[28rem] rounded-lg border-2 border-primary"
+                            className="w-full lg:w-[21rem] rounded-lg border-2 border-primary"
                           />
                           <video
                             autoPlay
@@ -412,7 +412,7 @@ const Patches = () => {
                           <img
                             src="/patches/october/miscellaneous/robinhood.png"
                             alt="Robinhood Legendary Power"
-                            className="w-full lg:w-[28rem] rounded-lg border-2 border-primary"
+                            className="w-full lg:w-[21rem] rounded-lg border-2 border-primary"
                           />
                           <video
                             autoPlay

@@ -324,14 +324,14 @@ const Patches = () => {
                           <img
                             src="/patches/october/miscellaneous/death.png"
                             alt="Death Legendary Power"
-                            className="w-full lg:w-72 rounded-lg border-2 border-primary"
+                            className="w-full lg:w-96 rounded-lg border-2 border-primary"
                           />
                           <video
                             autoPlay
                             loop
                             muted
                             playsInline
-                            className="w-full lg:w-96 rounded-lg border-2 border-primary"
+                            className="w-full lg:w-[32rem] rounded-lg border-2 border-primary"
                           >
                             <source src="/patches/october/miscellaneous/death.mp4" type="video/mp4" />
                             Your browser does not support the video tag.
@@ -346,14 +346,14 @@ const Patches = () => {
                           <img
                             src="/patches/october/miscellaneous/dorothy.png"
                             alt="Dorothy Legendary Power"
-                            className="w-full lg:w-72 rounded-lg border-2 border-primary"
+                            className="w-full lg:w-96 rounded-lg border-2 border-primary"
                           />
                           <video
                             autoPlay
                             loop
                             muted
                             playsInline
-                            className="w-full lg:w-96 rounded-lg border-2 border-primary"
+                            className="w-full lg:w-[32rem] rounded-lg border-2 border-primary"
                           >
                             <source src="/patches/october/miscellaneous/dorothy.mp4" type="video/mp4" />
                             Your browser does not support the video tag.
@@ -368,14 +368,14 @@ const Patches = () => {
                           <img
                             src="/patches/october/miscellaneous/dracula.png"
                             alt="Dracula Legendary Power"
-                            className="w-full lg:w-72 rounded-lg border-2 border-primary"
+                            className="w-full lg:w-96 rounded-lg border-2 border-primary"
                           />
                           <video
                             autoPlay
                             loop
                             muted
                             playsInline
-                            className="w-full lg:w-96 rounded-lg border-2 border-primary"
+                            className="w-full lg:w-[32rem] rounded-lg border-2 border-primary"
                           >
                             <source src="/patches/october/miscellaneous/dracula.mp4" type="video/mp4" />
                             Your browser does not support the video tag.
@@ -390,14 +390,14 @@ const Patches = () => {
                           <img
                             src="/patches/october/miscellaneous/red.png"
                             alt="Red Legendary Power"
-                            className="w-full lg:w-72 rounded-lg border-2 border-primary"
+                            className="w-full lg:w-96 rounded-lg border-2 border-primary"
                           />
                           <video
                             autoPlay
                             loop
                             muted
                             playsInline
-                            className="w-full lg:w-96 rounded-lg border-2 border-primary"
+                            className="w-full lg:w-[32rem] rounded-lg border-2 border-primary"
                           >
                             <source src="/patches/october/miscellaneous/red.mp4" type="video/mp4" />
                             Your browser does not support the video tag.
@@ -412,14 +412,14 @@ const Patches = () => {
                           <img
                             src="/patches/october/miscellaneous/robinhood.png"
                             alt="Robinhood Legendary Power"
-                            className="w-full lg:w-72 rounded-lg border-2 border-primary"
+                            className="w-full lg:w-96 rounded-lg border-2 border-primary"
                           />
                           <video
                             autoPlay
                             loop
                             muted
                             playsInline
-                            className="w-full lg:w-96 rounded-lg border-2 border-primary"
+                            className="w-full lg:w-[32rem] rounded-lg border-2 border-primary"
                           >
                             <source src="/patches/october/miscellaneous/robinhood.mp4" type="video/mp4" />
                             Your browser does not support the video tag.

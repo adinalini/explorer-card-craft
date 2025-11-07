@@ -67,10 +67,17 @@ export function TripleDraftCards({
               showOverlay = !isMyTurn
             }
           } else if (currentPhase === 2 && isSelectionLocked) {
-            // Phase 2 reveal: Show all selections
+            // Phase 2 reveal: Show all selections correctly
+            // CRITICAL FIX: Only show tick/cross for cards that are actually selected
+            // If there are exactly 2 selections, both should show appropriately
             if (isCardSelected) {
               showSelectedTick = isMySelection
-              showSelectedCross = !isMySelection
+              // Only show cross if this is NOT my selection and someone else selected it
+              showSelectedCross = !isMySelection && !!card.selected_by
+            } else {
+              // Card not selected by anyone - don't show anything special
+              showSelectedTick = false
+              showSelectedCross = false
             }
             isDisabled = true
           }

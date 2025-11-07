@@ -1110,45 +1110,31 @@ const Room = () => {
       
       const supabaseWithToken = getSupabaseWithSession()
       
-      // Update the card selection in database
-      const updateQuery = {
-        room_id: roomId,
-        card_id: card.card_id,
-        round_number: room?.draft_type === 'mega' ? 1 : room?.current_round
-      }
-      
-      console.log('🔄 AUTO-SELECT: Database update query:', updateQuery)
-      
-      const { data: updateResult, error: updateError } = await supabaseWithToken
+      // CRITICAL FIX: Single atomic update with proper filters
+      let updateQuery = supabaseWithToken
         .from('room_cards')
         .update({ selected_by: userRole })
         .eq('room_id', roomId)
         .eq('card_id', card.card_id)
         .eq('round_number', room?.draft_type === 'mega' ? 1 : room?.current_round)
-        .select()
+      
+      // For triple draft, add side filter to ensure we only update the correct card
+      if (room?.draft_type === 'triple') {
+        updateQuery = updateQuery.eq('side', 'both')
+      }
+      
+      console.log('🔄 AUTO-SELECT: Database update initiated')
+      const { data: updateResult, error: updateError } = await updateQuery.select()
         
       console.log('🔄 AUTO-SELECT: Database update result:', updateResult)
       if (updateError) {
         console.error('🔄 AUTO-SELECT: Database update error:', updateError)
         return
       }
-        
-      // For triple draft, also check the side
-      if (room?.draft_type === 'triple') {
-        console.log('🔄 AUTO-SELECT: Triple draft - updating side=both')
-        const { data: sideUpdateResult, error: sideUpdateError } = await supabaseWithToken
-          .from('room_cards')
-          .update({ selected_by: userRole })
-          .eq('room_id', roomId)
-          .eq('card_id', card.card_id)
-          .eq('round_number', room?.current_round)
-          .eq('side', 'both')
-          .select()
-          
-        console.log('🔄 AUTO-SELECT: Side update result:', sideUpdateResult)
-        if (sideUpdateError) {
-          console.error('🔄 AUTO-SELECT: Side update error:', sideUpdateError)
-        }
+      
+      if (!updateResult || updateResult.length === 0) {
+        console.error('🔄 AUTO-SELECT: No cards updated - card may not exist or wrong filters')
+        return
       }
       
       // Verify the selection was actually set
@@ -1553,7 +1539,7 @@ const Room = () => {
           .eq('selection_order', currentRound)
         
         if (!existingDeck || existingDeck.length === 0) {
-            await supabaseWithToken
+            const { error: insertError } = await supabaseWithToken
               .from('player_decks')
               .insert({
                 room_id: roomId,
@@ -1564,6 +1550,12 @@ const Room = () => {
                 is_legendary: phase1Card.is_legendary,
                 card_image: phase1Card.card_image
               })
+            
+            if (insertError) {
+              console.error('🔷 TRIPLE: ❌ CRITICAL - Failed to insert phase 1 card:', insertError)
+              // Don't proceed to phase 2 if deck insertion failed
+              return
+            }
             console.log('🔷 TRIPLE: Phase 1 card added to deck successfully')
           } else {
             console.log('🔷 TRIPLE: Phase 1 card already in deck, skipping duplicate')
@@ -1572,7 +1564,9 @@ const Room = () => {
 
           // REMOVED RETRY LOGIC to prevent duplicate insertions
         } catch (error) {
-          console.error('🔷 TRIPLE: Error adding phase 1 card to deck:', error)
+          console.error('🔷 TRIPLE: ❌ CRITICAL - Error adding phase 1 card to deck:', error)
+          // Don't proceed to phase 2 if deck insertion failed
+          return
         }
         
         // Move to phase 2 immediately without additional reveal
@@ -1613,41 +1607,52 @@ const Room = () => {
         const firstPickPlayer = (room.triple_draft_first_pick as 'creator' | 'joiner')
         const secondPickPlayer = firstPickPlayer === 'creator' ? 'joiner' : 'creator'
         const phase2Card = selectedCards.find(card => card.selected_by === secondPickPlayer)
-        if (phase2Card) {
-          console.log('🔷 TRIPLE: Adding phase 2 card to deck:', phase2Card.card_id, 'by', phase2Card.selected_by)
+        if (!phase2Card) {
+          console.error('🔷 TRIPLE PHASE END: ❌ CRITICAL - No phase 2 card found for', secondPickPlayer)
+          console.error('🔷 TRIPLE PHASE END: Selected cards:', selectedCards)
+          // Don't proceed to next round if phase 2 card insertion failed
+          return
+        }
+        
+        console.log('🔷 TRIPLE: Adding phase 2 card to deck:', phase2Card.card_id, 'by', phase2Card.selected_by)
+        
+        try {
+          // ENHANCED DUPLICATE CHECK: Check by card_id AND player_side AND selection_order
+          const { data: existingDeck } = await supabaseWithToken
+            .from('player_decks')
+            .select('id, card_id, player_side, selection_order')
+            .eq('room_id', roomId)
+            .eq('card_id', phase2Card.card_id)
+            .eq('player_side', phase2Card.selected_by)
+            .eq('selection_order', currentRound)
           
-          try {
-            // ENHANCED DUPLICATE CHECK: Check by card_id AND player_side AND selection_order
-            const { data: existingDeck } = await supabaseWithToken
+          if (!existingDeck || existingDeck.length === 0) {
+            const { error: insertError } = await supabaseWithToken
               .from('player_decks')
-              .select('id, card_id, player_side, selection_order')
-              .eq('room_id', roomId)
-              .eq('card_id', phase2Card.card_id)
-              .eq('player_side', phase2Card.selected_by)
-              .eq('selection_order', currentRound)
+              .insert({
+                room_id: roomId,
+                card_id: phase2Card.card_id,
+                card_name: phase2Card.card_name,
+                player_side: phase2Card.selected_by as 'creator' | 'joiner',
+                selection_order: currentRound,
+                is_legendary: phase2Card.is_legendary,
+                card_image: phase2Card.card_image
+              })
             
-            if (!existingDeck || existingDeck.length === 0) {
-              await supabaseWithToken
-                .from('player_decks')
-                .insert({
-                  room_id: roomId,
-                  card_id: phase2Card.card_id,
-                  card_name: phase2Card.card_name,
-                  player_side: phase2Card.selected_by as 'creator' | 'joiner',
-                  selection_order: currentRound,
-                  is_legendary: phase2Card.is_legendary,
-                  card_image: phase2Card.card_image
-                })
-              console.log('🔷 TRIPLE: Phase 2 card added to deck successfully')
-            } else {
-              console.log('🔷 TRIPLE: Phase 2 card already in deck, skipping duplicate')
-              console.log('🔷 TRIPLE: Existing deck entries:', existingDeck.length)
+            if (insertError) {
+              console.error('🔷 TRIPLE: ❌ CRITICAL - Failed to insert phase 2 card:', insertError)
+              // Don't proceed to next round if deck insertion failed
+              return
             }
-
-            // REMOVED RETRY LOGIC to prevent duplicate insertions
-          } catch (error) {
-            console.error('🔷 TRIPLE: Error adding phase 2 card to deck:', error)
+            console.log('🔷 TRIPLE: Phase 2 card added to deck successfully')
+          } else {
+            console.log('🔷 TRIPLE: Phase 2 card already in deck, skipping duplicate')
+            console.log('🔷 TRIPLE: Existing deck entries:', existingDeck.length)
           }
+        } catch (error) {
+          console.error('🔷 TRIPLE: ❌ CRITICAL - Error adding phase 2 card to deck:', error)
+          // Don't proceed to next round if deck insertion failed
+          return
         }
         
         // Move to next round immediately without additional reveal  

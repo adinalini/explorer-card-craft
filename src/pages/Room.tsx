@@ -1653,13 +1653,19 @@ const Room = () => {
           if (nextRound <= 13) {
             console.log('🔷 TRIPLE: Moving to round', nextRound)
             
+            // Collect all card IDs used in previous rounds to avoid duplicates
+            const usedCardIds = roomCards
+              .filter(card => card.round_number < nextRound)
+              .map(card => card.card_id)
+            console.log(`🔷 TRIPLE: Tracked ${usedCardIds.length} used cards from previous rounds`)
+            
             // Generate cards for the next round
             console.log('🔷 TRIPLE: Generating cards for next round:', nextRound)
             const { data: cardGenResponse, error: cardGenError } = await supabase.functions.invoke('generate-round-cards', {
               body: { 
                 roomId,
                 round: nextRound.toString(),
-                usedCardIds: [],
+                usedCardIds,
                 draftType: 'triple'
               }
             })

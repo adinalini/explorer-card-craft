@@ -304,22 +304,42 @@ Deno.serve(async (req) => {
 
     console.log(`🚀 EDGE FUNCTION: Starting card generation for round ${round} in room ${roomId}`)
     
-    // Check if cards already exist for this room to prevent duplicates
+    // Check if cards already exist for this specific round to prevent duplicates
     const { data: existingCards, error: checkError } = await supabase
       .from('room_cards')
-      .select('id, round_number')
+      .select('id, round_number, card_id')
       .eq('room_id', roomId)
     
     if (checkError) {
       console.error('🚨 EDGE FUNCTION: Error checking existing cards:', checkError)
     } else {
       console.log(`🔍 EDGE FUNCTION: Found ${existingCards?.length || 0} existing cards in room`)
-      if (existingCards && existingCards.length > 0) {
+      
+      // For single round generation, check if THIS round already has cards
+      if (round !== 'all' && existingCards && existingCards.length > 0) {
+        const roundNumber = parseInt(round)
+        const existingForRound = existingCards.filter(c => c.round_number === roundNumber)
+        if (existingForRound.length > 0) {
+          console.log(`⚠️ EDGE FUNCTION: Cards already exist for round ${round}!`)
+          return new Response(
+            JSON.stringify({ 
+              message: `Cards already exist for round ${round}`,
+              success: true,
+              cardsGenerated: 0
+            }),
+            { 
+              status: 200,
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+            }
+          )
+        }
+      }
+      
+      // For 'all' generation, return early if ANY cards exist
+      if (round === 'all' && existingCards && existingCards.length > 0) {
         console.log(`⚠️ EDGE FUNCTION: Cards already exist! Existing rounds:`, 
           [...new Set(existingCards.map(card => card.round_number))].sort()
         )
-        
-        // Return early if cards already exist
         return new Response(
           JSON.stringify({ 
             message: 'Cards already exist for this room',

@@ -792,29 +792,6 @@ Deno.serve(async (req) => {
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
-
-      
-      const { error } = await supabase
-        .from('room_cards')
-        .insert(tripleCardsToInsert)
-
-      if (error) {
-        console.error('Error inserting triple draft cards:', error)
-        throw error
-      }
-
-      console.log(`Successfully generated triple draft with ${tripleCardsToInsert.length} cards, first pick: ${firstPickPlayer}`)
-
-      return new Response(
-        JSON.stringify({ 
-          success: true, 
-          draftType: 'triple',
-          totalCards: tripleCardsToInsert.length,
-          firstPickPlayer
-        }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
-    }
     
     if (draftType === 'mega') {
       // Generate 36 cards for mega draft

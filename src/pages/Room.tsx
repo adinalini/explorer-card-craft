@@ -270,14 +270,16 @@ const Room = () => {
       
       let roundDuration = room.round_duration_seconds || 15
       if (room.draft_type === 'mega') roundDuration = 10
-      if (room.draft_type === 'triple') roundDuration = 8 // 8 seconds total for the round (both phases)
+      if (room.draft_type === 'triple') roundDuration = 8 // 8 seconds total for each phase
       
-      const remaining = Math.max(0, roundDuration - elapsed)
-      setTimeRemaining(Math.floor(remaining))
+      // CRITICAL FIX: Display remaining time with latency buffer consideration
+      // Show 0 only when grace period is truly exhausted
+      const DISPLAY_BUFFER = 0.5 // Show timer as 0 half a second before hard cutoff
+      const remaining = Math.max(0, roundDuration - elapsed + DISPLAY_BUFFER)
+      setTimeRemaining(Math.max(0, Math.floor(remaining)))
       
-      // CRITICAL FIX: For triple draft, timer should NOT reset during phase transitions
-      // The timer continues from the same round_start_time for both phases
-      if (remaining <= 0 && !isProcessingRoundRef.current) {
+      // Trigger time-up only when grace period exhausted
+      if (elapsed >= roundDuration + 1.0 && !isProcessingRoundRef.current) {
         handleTimeUp()
       }
     }
@@ -1787,6 +1789,7 @@ const Room = () => {
     }
 
     // Additional check: verify time hasn't expired even if isSelectionLocked hasn't been updated yet
+    // CRITICAL FIX: Add latency buffer (1 second grace period) to account for network lag
     if (room?.status === 'drafting' && room.round_start_time) {
       const now = new Date()
       const roundStart = new Date(room.round_start_time)
@@ -1795,10 +1798,13 @@ const Room = () => {
       if (room.draft_type === 'triple') roundDuration = 8
       if (room.draft_type === 'mega') roundDuration = 10
       const remaining = roundDuration - elapsed
+      
+      // Add 1 second grace period for high-latency connections
+      const LATENCY_BUFFER = 1.0
 
-      if (remaining <= 0) {
+      if (remaining <= -LATENCY_BUFFER) {
         if (room?.draft_type === 'triple') {
-          console.log('🔷 TRIPLE: Selection blocked - time has expired')
+          console.log('🔷 TRIPLE: Selection blocked - time has expired (grace period exhausted)')
         }
         return
       }

@@ -155,8 +155,18 @@ const generateTripleDraftChoices = (usedCardIds: string[], cardDatabase: Card[])
     spellChoice.forEach(card => usedInChoices.add(card.id))
   }
 
-  // Shuffle all choices to randomize order
-  return shuffleArray(choices)
+  // Fallback: ensure we always return exactly 13 choices to avoid modulo reuse
+  while (choices.length < 13) {
+    const pool = availableCards.filter(c => !c.isLegendary && !usedInChoices.has(c.id))
+    if (pool.length < 3) break
+    const shuffled = shuffleArray(pool)
+    const filler = [shuffled[0], shuffled[1], shuffled[2]]
+    choices.push(filler)
+    filler.forEach(c => usedInChoices.add(c.id))
+  }
+
+  // Shuffle all choices to randomize order, clamp to 13
+  return shuffleArray(choices).slice(0, 13)
 }
 
 // Mega Draft Card Generation Logic  
@@ -716,18 +726,18 @@ Deno.serve(async (req) => {
 
     // Handle different draft types
     if (draftType === 'triple') {
-      // Generate all 13 triple draft choices
+      // Generate all 13 triple draft choices with strict uniqueness and guaranteed length
       const tripleChoices = generateTripleDraftChoices(excludeIds, cardDatabase)
+      console.log(`Triple draft: generated ${tripleChoices.length} choice sets`)
       
-      if (!tripleChoices || tripleChoices.length === 0) {
-        throw new Error('Unable to generate triple draft choices')
+      if (!tripleChoices || tripleChoices.length < 13) {
+        throw new Error(`Unable to generate triple draft choices (got ${tripleChoices?.length || 0})`)
       }
       
       const tripleCardsToInsert = []
       
       for (let roundNum = 1; roundNum <= 13; roundNum++) {
-        const choiceIndex = (roundNum - 1) % tripleChoices.length
-        const choice = tripleChoices[choiceIndex]
+        const choice = tripleChoices[roundNum - 1]
         
         if (choice && choice.length >= 3) {
           // Only add the first 3 cards for each round
@@ -745,6 +755,8 @@ Deno.serve(async (req) => {
               turn_order: cardIndex + 1
             })
           }
+        } else {
+          console.warn(`Triple draft: missing or incomplete choice for round ${roundNum}`)
         }
       }
       
@@ -758,6 +770,29 @@ Deno.serve(async (req) => {
           current_phase: 'first_pick'
         })
         .eq('id', roomId)
+
+      const { error } = await supabase
+        .from('room_cards')
+        .insert(tripleCardsToInsert)
+
+      if (error) {
+        console.error('Error inserting triple draft cards:', error)
+        throw error
+      }
+
+      console.log(`Successfully generated triple draft with ${tripleCardsToInsert.length} cards, first pick: ${firstPickPlayer}`)
+
+      return new Response(
+        JSON.stringify({ 
+          success: true, 
+          draftType: 'triple',
+          totalCards: tripleCardsToInsert.length,
+          firstPickPlayer
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
       
       const { error } = await supabase
         .from('room_cards')

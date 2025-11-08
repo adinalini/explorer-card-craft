@@ -2278,7 +2278,7 @@ const Room = () => {
                   <h2 className="text-2xl font-bold text-[hsl(260_90%_10%)] dark:text-[hsl(240_10%_85%)]">
                     Round {room.current_round} of 13
                   </h2>
-                  <div className="space-y-4">
+                  <div className="space-y-4 min-h-[7rem]">
                     {/* Player Names with Turn Arrow */}
                     <div className="flex items-center justify-center gap-4 max-w-2xl mx-auto">
                       <div className="text-center flex-1">
@@ -2345,7 +2345,7 @@ const Room = () => {
                       Progress: {Math.min((room.mega_draft_turn_count || 0) + 1, 23)}/23 cards selected
                     </div>
                   </div>
-                  <div className="space-y-4">
+                  <div className="space-y-4 min-h-[7rem]">
                     {/* Player Names with Turn Arrow */}
                     <div className="flex items-center justify-center gap-4 max-w-2xl mx-auto">
                       <div className="text-center flex-1">

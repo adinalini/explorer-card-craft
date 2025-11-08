@@ -1507,27 +1507,18 @@ const Room = () => {
         console.log('🔷 TRIPLE PHASE END: ✅ PHASE 1 → 2 TRANSITION TRIGGERED')
         console.log('🔷 TRIPLE PHASE END: 🎯 Phase 1 complete - transitioning to phase 2')
         
-      // CRITICAL FIX: Check for multiple selections in Phase 1
+        // CRITICAL FIX: Check for multiple selections in Phase 1 (shouldn't happen with proper generation)
         if (selectedCards.length > 1) {
-          console.log('🔷 TRIPLE PHASE END: 🚨 WARNING: Multiple cards selected in Phase 1!')
-          console.log('🔷 TRIPLE PHASE END: 📋 Multiple selections details:')
+          console.error('🔷 TRIPLE PHASE END: 🚨 ERROR: Multiple cards selected in Phase 1!')
+          console.error('🔷 TRIPLE PHASE END: This indicates a card generation bug - reporting details:')
           selectedCards.forEach((card, i) => {
-            console.log(`🔷 TRIPLE PHASE END:   ${i+1}. ${card.card_id} (${card.card_name}) by ${card.selected_by}`)
+            console.error(`🔷 TRIPLE PHASE END:   ${i+1}. ${card.card_id} (${card.card_name}) by ${card.selected_by}`)
           })
           
-          // Keep only the first selection to prevent issues
+          // Use first selection and report the issue
           const firstSelection = selectedCards[0]
-          console.log('🔷 TRIPLE PHASE END: 🎯 Using first selection:', firstSelection.card_id, 'by', firstSelection.selected_by)
-          
-          // CRITICAL FIX: Clear duplicate selections in the database
-          console.log('🔷 TRIPLE PHASE END: 🧹 Clearing duplicate selections from database')
-          const duplicateIds = selectedCards.slice(1).map(c => c.id)
-          if (duplicateIds.length > 0) {
-            await supabaseWithToken
-              .from('room_cards')
-              .update({ selected_by: null })
-              .in('id', duplicateIds)
-          }
+          console.error('🔷 TRIPLE PHASE END: Using first selection:', firstSelection.card_id, 'by', firstSelection.selected_by)
+          console.error('🔷 TRIPLE PHASE END: PLEASE REPORT THIS BUG - duplicates should never occur')
         }
         
         // Add phase 1 selected card to player deck: must be the first pick player's selection

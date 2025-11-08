@@ -34,6 +34,19 @@ const generateTripleDraftChoices = (usedCardIds: string[], cardDatabase: Card[])
   const choices: Card[][] = []
   const usedInChoices: Set<string> = new Set()
 
+  // Helper function to validate no duplicates within a choice
+  const validateChoice = (choice: Card[], roundDescription: string): boolean => {
+    const ids = new Set<string>()
+    for (const card of choice) {
+      if (ids.has(card.id)) {
+        console.error(`🚨 DUPLICATE DETECTED in ${roundDescription}: ${card.id} (${card.name})`)
+        return false
+      }
+      ids.add(card.id)
+    }
+    return true
+  }
+
   // 1. Guaranteed cost rounds - 1,2,3,4,5 (5 rounds) - allow spells
   const guaranteedCosts = [1, 2, 3, 4, 5]
   for (const cost of guaranteedCosts) {
@@ -44,6 +57,12 @@ const generateTripleDraftChoices = (usedCardIds: string[], cardDatabase: Card[])
     if (cardsOfCost.length >= 3) {
       const shuffled = shuffleArray(cardsOfCost)
       const costChoice = shuffled.slice(0, 3)
+      
+      if (!validateChoice(costChoice, `Guaranteed Cost ${cost}`)) {
+        console.error(`Skipping round due to duplicates`)
+        continue
+      }
+      
       choices.push(costChoice)
       costChoice.forEach(card => usedInChoices.add(card.id))
     }
@@ -54,25 +73,30 @@ const generateTripleDraftChoices = (usedCardIds: string[], cardDatabase: Card[])
   if (legendaryCards.length >= 3) {
     const shuffled = shuffleArray(legendaryCards)
     const legendaryChoice = shuffled.slice(0, 3)
-    choices.push(legendaryChoice)
-    legendaryChoice.forEach(card => usedInChoices.add(card.id))
+    
+    if (validateChoice(legendaryChoice, 'Legendary Round')) {
+      choices.push(legendaryChoice)
+      legendaryChoice.forEach(card => usedInChoices.add(card.id))
+    }
   }
 
   // 3. 3 rounds where cards are in cost range (1-3) - randomly select costs first
   for (let i = 0; i < 3; i++) {
     const rangeChoice: Card[] = []
     
-    // Randomly select 3 costs from range 1-3 (with repeats allowed)
-    const selectedCosts = [
-      Math.floor(Math.random() * 3) + 1, // Random 1-3
-      Math.floor(Math.random() * 3) + 1, // Random 1-3
-      Math.floor(Math.random() * 3) + 1  // Random 1-3
-    ]
+    // Try to get 3 unique cards from the range
+    let attempts = 0
+    const maxAttempts = 20
     
-    // For each selected cost, pick one random card
-    for (const cost of selectedCosts) {
+    while (rangeChoice.length < 3 && attempts < maxAttempts) {
+      attempts++
+      const cost = Math.floor(Math.random() * 3) + 1
+      
       const cardsOfCost = availableCards.filter(card => 
-        card.cost === cost && !card.isLegendary && !usedInChoices.has(card.id)
+        card.cost === cost && 
+        !card.isLegendary && 
+        !usedInChoices.has(card.id) &&
+        !rangeChoice.find(c => c.id === card.id) // CRITICAL: Check against cards already in this choice
       )
       
       if (cardsOfCost.length > 0) {
@@ -83,8 +107,10 @@ const generateTripleDraftChoices = (usedCardIds: string[], cardDatabase: Card[])
       }
     }
     
-    if (rangeChoice.length === 3) {
+    if (rangeChoice.length === 3 && validateChoice(rangeChoice, `Range 1-3 Round ${i + 1}`)) {
       choices.push(rangeChoice)
+    } else if (rangeChoice.length < 3) {
+      console.warn(`Range 1-3 Round ${i + 1}: Only got ${rangeChoice.length} cards after ${attempts} attempts`)
     }
   }
 
@@ -92,17 +118,19 @@ const generateTripleDraftChoices = (usedCardIds: string[], cardDatabase: Card[])
   for (let i = 0; i < 2; i++) {
     const rangeChoice: Card[] = []
     
-    // Randomly select 3 costs from range 4-6 (with repeats allowed)
-    const selectedCosts = [
-      Math.floor(Math.random() * 3) + 4, // Random 4-6
-      Math.floor(Math.random() * 3) + 4, // Random 4-6
-      Math.floor(Math.random() * 3) + 4  // Random 4-6
-    ]
+    // Try to get 3 unique cards from the range
+    let attempts = 0
+    const maxAttempts = 20
     
-    // For each selected cost, pick one random card
-    for (const cost of selectedCosts) {
+    while (rangeChoice.length < 3 && attempts < maxAttempts) {
+      attempts++
+      const cost = Math.floor(Math.random() * 3) + 4
+      
       const cardsOfCost = availableCards.filter(card => 
-        card.cost === cost && !card.isLegendary && !usedInChoices.has(card.id)
+        card.cost === cost && 
+        !card.isLegendary && 
+        !usedInChoices.has(card.id) &&
+        !rangeChoice.find(c => c.id === card.id) // CRITICAL: Check against cards already in this choice
       )
       
       if (cardsOfCost.length > 0) {
@@ -113,25 +141,27 @@ const generateTripleDraftChoices = (usedCardIds: string[], cardDatabase: Card[])
       }
     }
     
-    if (rangeChoice.length === 3) {
+    if (rangeChoice.length === 3 && validateChoice(rangeChoice, `Range 4-6 Round ${i + 1}`)) {
       choices.push(rangeChoice)
+    } else if (rangeChoice.length < 3) {
+      console.warn(`Range 4-6 Round ${i + 1}: Only got ${rangeChoice.length} cards after ${attempts} attempts`)
     }
   }
 
   // 5. 1 round where cards are in cost range (7-10) - randomly select costs first
   const highRangeChoice: Card[] = []
+  let highAttempts = 0
+  const maxHighAttempts = 20
   
-  // Randomly select 3 costs from range 7-10 (with repeats allowed)
-  const selectedHighCosts = [
-    Math.floor(Math.random() * 4) + 7, // Random 7-10
-    Math.floor(Math.random() * 4) + 7, // Random 7-10
-    Math.floor(Math.random() * 4) + 7  // Random 7-10
-  ]
-  
-  // For each selected cost, pick one random card
-  for (const cost of selectedHighCosts) {
+  while (highRangeChoice.length < 3 && highAttempts < maxHighAttempts) {
+    highAttempts++
+    const cost = Math.floor(Math.random() * 4) + 7
+    
     const cardsOfCost = availableCards.filter(card => 
-      card.cost === cost && !card.isLegendary && !usedInChoices.has(card.id)
+      card.cost === cost && 
+      !card.isLegendary && 
+      !usedInChoices.has(card.id) &&
+      !highRangeChoice.find(c => c.id === card.id) // CRITICAL: Check against cards already in this choice
     )
     
     if (cardsOfCost.length > 0) {
@@ -142,8 +172,10 @@ const generateTripleDraftChoices = (usedCardIds: string[], cardDatabase: Card[])
     }
   }
   
-  if (highRangeChoice.length === 3) {
+  if (highRangeChoice.length === 3 && validateChoice(highRangeChoice, 'Range 7-10 Round')) {
     choices.push(highRangeChoice)
+  } else if (highRangeChoice.length < 3) {
+    console.warn(`Range 7-10 Round: Only got ${highRangeChoice.length} cards after ${highAttempts} attempts`)
   }
 
   // 6. 1 guaranteed spell round- 3 random spells selected (including items, excluding legendaries)
@@ -151,8 +183,11 @@ const generateTripleDraftChoices = (usedCardIds: string[], cardDatabase: Card[])
   if (spellCards.length >= 3) {
     const shuffled = shuffleArray(spellCards)
     const spellChoice = shuffled.slice(0, 3)
-    choices.push(spellChoice)
-    spellChoice.forEach(card => usedInChoices.add(card.id))
+    
+    if (validateChoice(spellChoice, 'Spell Round')) {
+      choices.push(spellChoice)
+      spellChoice.forEach(card => usedInChoices.add(card.id))
+    }
   }
 
   // Fallback: ensure we always return exactly 13 choices to avoid modulo reuse
@@ -161,12 +196,38 @@ const generateTripleDraftChoices = (usedCardIds: string[], cardDatabase: Card[])
     if (pool.length < 3) break
     const shuffled = shuffleArray(pool)
     const filler = [shuffled[0], shuffled[1], shuffled[2]]
-    choices.push(filler)
-    filler.forEach(c => usedInChoices.add(c.id))
+    
+    if (validateChoice(filler, `Fallback Round ${choices.length + 1}`)) {
+      choices.push(filler)
+      filler.forEach(c => usedInChoices.add(c.id))
+    } else {
+      console.error(`Fallback round validation failed, breaking`)
+      break
+    }
+  }
+
+  // CRITICAL: Final validation - ensure all choices have exactly 3 unique cards
+  const validatedChoices = choices.filter((choice, idx) => {
+    if (choice.length !== 3) {
+      console.error(`🚨 Choice ${idx + 1} has ${choice.length} cards instead of 3`)
+      return false
+    }
+    
+    const ids = new Set(choice.map(c => c.id))
+    if (ids.size !== 3) {
+      console.error(`🚨 Choice ${idx + 1} has duplicate cards:`, choice.map(c => c.id))
+      return false
+    }
+    
+    return true
+  })
+  
+  if (validatedChoices.length < 13) {
+    console.error(`🚨 CRITICAL: Only ${validatedChoices.length} valid choices generated out of ${choices.length} total`)
   }
 
   // Shuffle all choices to randomize order, clamp to 13
-  return shuffleArray(choices).slice(0, 13)
+  return shuffleArray(validatedChoices).slice(0, 13)
 }
 
 // Mega Draft Card Generation Logic  
@@ -735,30 +796,14 @@ Deno.serve(async (req) => {
       }
       
       const tripleCardsToInsert = []
-      const seenCardsPerRound: Map<number, Set<string>> = new Map()
       
       for (let roundNum = 1; roundNum <= 13; roundNum++) {
         const choice = tripleChoices[roundNum - 1]
         
-        if (!seenCardsPerRound.has(roundNum)) {
-          seenCardsPerRound.set(roundNum, new Set())
-        }
-        const roundCardIds = seenCardsPerRound.get(roundNum)!
-        
-        if (choice && choice.length >= 3) {
-          // Only add the first 3 cards for each round
-          // CRITICAL: Check for and skip duplicates within the same round
+        if (choice && choice.length === 3) {
+          // Insert all 3 cards for this round
           for (let cardIndex = 0; cardIndex < 3; cardIndex++) {
             const card = choice[cardIndex]
-            
-            // Validation: Check if this card_id already exists in this round
-            if (roundCardIds.has(card.id)) {
-              console.error(`🚨 CRITICAL: Duplicate card detected in round ${roundNum}: ${card.id} (${card.name})`)
-              console.error(`🚨 Skipping duplicate to prevent selection bug`)
-              continue
-            }
-            
-            roundCardIds.add(card.id)
             tripleCardsToInsert.push({
               room_id: roomId,
               round_number: roundNum,
@@ -771,14 +816,8 @@ Deno.serve(async (req) => {
               turn_order: cardIndex + 1
             })
           }
-          
-          // Validation: Ensure we have exactly 3 unique cards per round
-          if (roundCardIds.size < 3) {
-            console.error(`🚨 CRITICAL: Round ${roundNum} has only ${roundCardIds.size} unique cards after filtering duplicates`)
-            console.error(`🚨 Original choice:`, choice.map(c => `${c.id} (${c.name})`))
-          }
         } else {
-          console.warn(`Triple draft: missing or incomplete choice for round ${roundNum}`)
+          console.error(`🚨 Round ${roundNum} has invalid choice:`, choice)
         }
       }
       

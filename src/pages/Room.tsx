@@ -1507,7 +1507,7 @@ const Room = () => {
         console.log('🔷 TRIPLE PHASE END: ✅ PHASE 1 → 2 TRANSITION TRIGGERED')
         console.log('🔷 TRIPLE PHASE END: 🎯 Phase 1 complete - transitioning to phase 2')
         
-        // CRITICAL FIX: Check for multiple selections in Phase 1
+      // CRITICAL FIX: Check for multiple selections in Phase 1
         if (selectedCards.length > 1) {
           console.log('🔷 TRIPLE PHASE END: 🚨 WARNING: Multiple cards selected in Phase 1!')
           console.log('🔷 TRIPLE PHASE END: 📋 Multiple selections details:')
@@ -1518,6 +1518,16 @@ const Room = () => {
           // Keep only the first selection to prevent issues
           const firstSelection = selectedCards[0]
           console.log('🔷 TRIPLE PHASE END: 🎯 Using first selection:', firstSelection.card_id, 'by', firstSelection.selected_by)
+          
+          // CRITICAL FIX: Clear duplicate selections in the database
+          console.log('🔷 TRIPLE PHASE END: 🧹 Clearing duplicate selections from database')
+          const duplicateIds = selectedCards.slice(1).map(c => c.id)
+          if (duplicateIds.length > 0) {
+            await supabaseWithToken
+              .from('room_cards')
+              .update({ selected_by: null })
+              .in('id', duplicateIds)
+          }
         }
         
         // Add phase 1 selected card to player deck: must be the first pick player's selection
@@ -1844,7 +1854,17 @@ const Room = () => {
     await extendSession()
 
     try {
-      const selectedCardData = roomCards.find(card => card.card_id === cardId)
+      // CRITICAL FIX: Find the specific card instance in the current round
+      const currentRoundNumber = room?.draft_type === 'mega' ? 1 : room?.current_round
+      const currentRoundCards = roomCards.filter(card => 
+        card.round_number === currentRoundNumber &&
+        card.card_id === cardId
+      )
+      
+      // CRITICAL: If there are multiple cards with the same card_id (duplicates),
+      // select the first unselected one
+      const selectedCardData = currentRoundCards.find(card => !card.selected_by) || currentRoundCards[0]
+      
       if (!selectedCardData) {
         console.log('Card data not found')
         return
@@ -1878,15 +1898,13 @@ const Room = () => {
           .eq('selected_by', userRole)
       }
 
-      // Set new selection
-      console.log('Setting new selection in database')
-      const roundToUpdate = room?.draft_type === 'mega' ? 1 : room?.current_round
+      // CRITICAL FIX: Set new selection using the unique card instance ID
+      // This ensures we only update ONE card even if there are duplicates
+      console.log('Setting new selection in database for card instance ID:', selectedCardData.id)
       const { error } = await supabaseWithToken
         .from('room_cards')
         .update({ selected_by: userRole })
-        .eq('room_id', roomId)
-        .eq('card_id', cardId)
-        .eq('round_number', roundToUpdate)
+        .eq('id', selectedCardData.id) // Use unique ID instead of card_id
 
       if (error) {
         console.error('Error updating card selection:', error)

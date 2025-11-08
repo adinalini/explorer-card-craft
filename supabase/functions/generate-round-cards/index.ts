@@ -735,14 +735,30 @@ Deno.serve(async (req) => {
       }
       
       const tripleCardsToInsert = []
+      const seenCardsPerRound: Map<number, Set<string>> = new Map()
       
       for (let roundNum = 1; roundNum <= 13; roundNum++) {
         const choice = tripleChoices[roundNum - 1]
         
+        if (!seenCardsPerRound.has(roundNum)) {
+          seenCardsPerRound.set(roundNum, new Set())
+        }
+        const roundCardIds = seenCardsPerRound.get(roundNum)!
+        
         if (choice && choice.length >= 3) {
           // Only add the first 3 cards for each round
+          // CRITICAL: Check for and skip duplicates within the same round
           for (let cardIndex = 0; cardIndex < 3; cardIndex++) {
             const card = choice[cardIndex]
+            
+            // Validation: Check if this card_id already exists in this round
+            if (roundCardIds.has(card.id)) {
+              console.error(`🚨 CRITICAL: Duplicate card detected in round ${roundNum}: ${card.id} (${card.name})`)
+              console.error(`🚨 Skipping duplicate to prevent selection bug`)
+              continue
+            }
+            
+            roundCardIds.add(card.id)
             tripleCardsToInsert.push({
               room_id: roomId,
               round_number: roundNum,
@@ -754,6 +770,12 @@ Deno.serve(async (req) => {
               selected_by: null,
               turn_order: cardIndex + 1
             })
+          }
+          
+          // Validation: Ensure we have exactly 3 unique cards per round
+          if (roundCardIds.size < 3) {
+            console.error(`🚨 CRITICAL: Round ${roundNum} has only ${roundCardIds.size} unique cards after filtering duplicates`)
+            console.error(`🚨 Original choice:`, choice.map(c => `${c.id} (${c.name})`))
           }
         } else {
           console.warn(`Triple draft: missing or incomplete choice for round ${roundNum}`)

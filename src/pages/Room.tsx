@@ -2184,16 +2184,18 @@ const Room = () => {
                   <h2 className="text-2xl font-bold text-[hsl(260_90%_10%)] dark:text-[hsl(240_10%_85%)]">
                     Round {room.current_round} of 13
                   </h2>
-                  {!isSelectionLocked ? (
-                    <div className="space-y-2">
-                      <p className="text-lg text-[hsl(260_90%_10%)] dark:text-[hsl(240_10%_85%)]">Choose your card!</p>
-                      <div className="text-2xl font-bold text-primary">
-                        {Math.ceil(timeRemaining)}s remaining
+                  <div className="min-h-[4rem]">
+                    {!isSelectionLocked ? (
+                      <div className="space-y-2">
+                        <p className="text-lg text-[hsl(260_90%_10%)] dark:text-[hsl(240_10%_85%)]">Choose your card!</p>
+                        <div className="text-2xl font-bold text-primary">
+                          {Math.ceil(timeRemaining)}s remaining
+                        </div>
                       </div>
-                    </div>
-                  ) : (
-                    <p className="text-lg text-[hsl(260_90%_10%)] dark:text-[hsl(240_10%_85%)]">Revealing selections...</p>
-                  )}
+                    ) : (
+                      <p className="text-lg text-[hsl(260_90%_10%)] dark:text-[hsl(240_10%_85%)]">Revealing selections...</p>
+                    )}
+                  </div>
                 </div>
 
                 {/* Card Selection - Mobile responsive */}
@@ -2294,7 +2296,7 @@ const Room = () => {
                          ) : (
                            <div className="text-6xl text-muted"></div>
                          )}
-                         <div className="text-sm text-primary font-medium mt-1">
+                         <div className="text-sm text-primary font-medium mt-1 min-h-[1.25rem]">
                            {currentTurnPlayer === 'creator' ? `${room.creator_name}'s turn` : 
                             currentTurnPlayer === 'joiner' ? `${room.joiner_name}'s turn` : 
                             'Revealing...'}
@@ -2308,13 +2310,15 @@ const Room = () => {
                       </div>
                     </div>
                     
-                      {!(isSelectionLocked || isRevealing || uiMirrorReveal || uiRevealActive) ? (
-                        <div className="text-2xl font-bold text-primary">
-                          {Math.ceil(timeRemaining)}s remaining
-                        </div>
-                      ) : (
-                        <p className="text-lg text-[hsl(260_90%_10%)] dark:text-[hsl(240_10%_85%)]">Revealing selection...</p>
-                      )}
+                      <div className="min-h-[2.5rem]">
+                        {!(isSelectionLocked || isRevealing || uiMirrorReveal || uiRevealActive) ? (
+                          <div className="text-2xl font-bold text-primary">
+                            {Math.ceil(timeRemaining)}s remaining
+                          </div>
+                        ) : (
+                          <p className="text-lg text-[hsl(260_90%_10%)] dark:text-[hsl(240_10%_85%)]">Revealing selection...</p>
+                        )}
+                      </div>
                   </div>
                 </div>
 
@@ -2361,7 +2365,7 @@ const Room = () => {
                         ) : (
                           <div className="text-6xl text-primary animate-pulse">←</div>
                         )}
-                        <div className="text-sm text-primary font-medium mt-1">
+                        <div className="text-sm text-primary font-medium mt-1 min-h-[1.25rem]">
                           {isMyTurn ? 'Your turn' : 'Opponent\'s turn'}
                         </div>
                       </div>
@@ -2373,13 +2377,15 @@ const Room = () => {
                       </div>
                     </div>
                     
-                    {!isSelectionLocked ? (
-                      <div className="text-2xl font-bold text-primary">
-                        {Math.ceil(timeRemaining)}s remaining
-                      </div>
-                    ) : (
-                      <p className="text-lg text-[hsl(260_90%_10%)] dark:text-[hsl(240_10%_85%)]">Processing selection...</p>
-                    )}
+                    <div className="min-h-[2.5rem]">
+                      {!isSelectionLocked ? (
+                        <div className="text-2xl font-bold text-primary">
+                          {Math.ceil(timeRemaining)}s remaining
+                        </div>
+                      ) : (
+                        <p className="text-lg text-[hsl(260_90%_10%)] dark:text-[hsl(240_10%_85%)]">Processing selection...</p>
+                      )}
+                    </div>
                   </div>
                 </div>
 

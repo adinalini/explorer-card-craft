@@ -1112,7 +1112,7 @@ export const cardDatabase: Card[] = [
     name: "Searing Light",
     image: "/src/assets/cards/searing_light.png",
     isLegendary: false,
-    cost: 0,
+    cost: 1, // Changed from 0 in v1.0.0.41
     isSpell: true,
     cardKey: "C00026_SB",
     inDraftPool: true,

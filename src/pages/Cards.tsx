@@ -134,7 +134,7 @@ const Cards = () => {
       />
 
       {/* Header */}
-      <div className="bg-background border-b border-border sticky top-0 z-50">
+      <div className="bg-background border-b border-border">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
@@ -338,11 +338,7 @@ const Cards = () => {
       </div>
 
       {/* Wave Divider at bottom */}
-      <div className="mt-auto">
-        <WaveDivider />
-      </div>
-
-      <div className="h-20 bg-background" />
+      <WaveDivider />
     </>
   );
 };

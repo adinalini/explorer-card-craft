@@ -23,17 +23,17 @@ export const NavigationButtons = ({ sizeVariant = "default" }: NavigationButtons
         <div className="absolute top-1/2 left-0 right-0 h-px bg-black/30 -translate-y-0.5"></div>
       </div>
       
-      {/* Cards Button - Greyed Out */}
+      {/* Cards Button */}
       <div 
-        className={`flex flex-col items-center justify-center ${paddingClass} bg-black/20 backdrop-blur-sm cursor-not-allowed opacity-50 transition-all duration-300 animate-fade-in`}
+        onClick={() => navigate('/cards')}
+        className={`flex flex-col items-center justify-center ${paddingClass} bg-black/20 backdrop-blur-sm cursor-pointer hover:bg-black/30 transition-all duration-300 animate-fade-in`}
         style={{ animationDelay: '0.3s' }}
-        title="This page is currently unavailable"
       >
         <div className={`${titleClass} font-bold text-white mb-2`}>
           Cards
         </div>
         <div className={`${textClass} text-slate-300 text-center leading-tight`}>
-          Currently unavailable
+          Browse all available cards.
         </div>
       </div>
 

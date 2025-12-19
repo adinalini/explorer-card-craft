@@ -13,6 +13,16 @@ import { cardDatabase } from "@/utils/cardData"
 import { toast } from "@/hooks/use-toast"
 import { SEOHead } from "@/components/SEOHead"
 
+// Variant images - display only, not valid for decks
+import CerberusVariant from "@/assets/cards/variants/Cerberus_variant.png"
+import HerculesVariant from "@/assets/cards/variants/Hercules_variant.png"
+
+// Display-only variant cards (not in card database, just for browsing)
+const variantCards = [
+  { id: "cerberus_variant", name: "Cerberus (Variant)", cost: 6, isLegendary: false, isSpell: false, isVariant: true, variantImage: CerberusVariant },
+  { id: "hercules_variant", name: "Hercules (Variant)", cost: 10, isLegendary: true, isSpell: false, isVariant: true, variantImage: HerculesVariant },
+]
+
 const Cards = () => {
   const navigate = useNavigate()
   const [searchQuery, setSearchQuery] = useState("")
@@ -24,7 +34,7 @@ const Cards = () => {
 
   // Filter cards based on search and filters
   const filteredCards = useMemo(() => {
-    return cardDatabase.filter(card => {
+    const databaseCards = cardDatabase.filter(card => {
       const matchesSearch = card.name.toLowerCase().includes(searchQuery.toLowerCase())
       const matchesCost = card.cost >= costRange[0] && card.cost <= costRange[1]
       
@@ -35,7 +45,20 @@ const Cards = () => {
                          (showSpells && card.isSpell)
       
       return matchesSearch && matchesCost && matchesType
-    }).sort((a, b) => {
+    })
+
+    // Filter variant cards the same way
+    const filteredVariants = variantCards.filter(card => {
+      const matchesSearch = card.name.toLowerCase().includes(searchQuery.toLowerCase())
+      const matchesCost = card.cost >= costRange[0] && card.cost <= costRange[1]
+      const isUnit = !card.isSpell && !card.isLegendary
+      const matchesType = (showUnits && isUnit) || 
+                         (showLegendary && card.isLegendary) || 
+                         (showSpells && card.isSpell)
+      return matchesSearch && matchesCost && matchesType
+    })
+
+    return [...databaseCards, ...filteredVariants].sort((a, b) => {
       // Sort by cost first, then by name
       if (a.cost !== b.cost) {
         return a.cost - b.cost
@@ -46,11 +69,16 @@ const Cards = () => {
 
   const downloadCardImage = async (card: any) => {
     try {
-      // Import the cardImages mapping from CardImage component
-      const { cardImages } = await import('@/components/CardImage')
+      let imageUrl: string
       
-      // Get the actual image URL using the cardImages mapping
-      const imageUrl = cardImages[card.id]
+      // Handle variant cards differently
+      if (card.isVariant && card.variantImage) {
+        imageUrl = card.variantImage
+      } else {
+        // Import the cardImages mapping from CardImage component
+        const { cardImages } = await import('@/components/CardImage')
+        imageUrl = cardImages[card.id]
+      }
       
       if (!imageUrl) {
         throw new Error('Image not found for card: ' + card.id)
@@ -234,17 +262,21 @@ const Cards = () => {
           {/* Results Summary */}
           <div className="mt-4 pt-4 border-t border-border">
             <p className="text-sm text-muted-foreground">
-              Showing {filteredCards.length} of {cardDatabase.length} cards
+              Showing {filteredCards.length} of {cardDatabase.length + variantCards.length} cards
             </p>
           </div>
         </div>
 
         {/* Cards Grid */}
         <div className={`grid ${getGridCols()} gap-4`}>
-          {filteredCards.map((card) => (
+          {filteredCards.map((card: any) => (
             <div key={card.id} className="group relative bg-card rounded-lg overflow-hidden border border-border hover:border-primary/50 transition-all duration-200">
               <div className="aspect-[3/4] relative">
-                <CardImage cardId={card.id} cardName={card.name} className="w-full h-full object-cover" />
+                {card.isVariant && card.variantImage ? (
+                  <img src={card.variantImage} alt={card.name} className="w-full h-full object-cover" />
+                ) : (
+                  <CardImage cardId={card.id} cardName={card.name} className="w-full h-full object-cover" />
+                )}
               </div>
               
               <div className="p-3 space-y-2">
@@ -255,6 +287,11 @@ const Cards = () => {
                 <div className="flex items-center justify-between text-xs text-muted-foreground">
                   <span>Cost: {card.cost}</span>
                   <div className="flex gap-1">
+                    {card.isVariant && (
+                      <span className="px-1.5 py-0.5 bg-purple-500/20 text-purple-600 dark:text-purple-400 rounded text-[10px]">
+                        Variant
+                      </span>
+                    )}
                     {card.isLegendary && (
                       <span className="px-1.5 py-0.5 bg-yellow-500/20 text-yellow-600 dark:text-yellow-400 rounded text-[10px]">
                         Legendary

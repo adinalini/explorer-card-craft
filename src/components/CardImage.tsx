@@ -157,6 +157,7 @@ import tortoiseImg from "@/assets/cards/Tortoise.png";
 import wickedStepmotherImg from "@/assets/cards/Wicked_Stepmother.png";
 import winnieThePoohImg from "@/assets/cards/Winnie_the_pooh.png";
 import yukiOnnaImg from "@/assets/cards/Yuki_onna.png";
+import shahrazadImg from "@/assets/cards/shahrazad.png";
 
 const cardImages: Record<string, string> = {
   ali_baba: alibabaImg,
@@ -319,6 +320,7 @@ const cardImages: Record<string, string> = {
   wicked_stepmother: wickedStepmotherImg,
   winnie_the_pooh: winnieThePoohImg,
   yuki_onna: yukiOnnaImg,
+  shahrazad: shahrazadImg,
 };
 
 interface CardImageProps {

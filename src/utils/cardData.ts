@@ -158,6 +158,7 @@ const cardImports = {
   wicked_stepmother: () => import("@/assets/cards/Wicked_Stepmother.png"),
   winnie_the_pooh: () => import("@/assets/cards/Winnie_the_pooh.png"),
   yuki_onna: () => import("@/assets/cards/Yuki_onna.png"),
+  shahrazad: () => import("@/assets/cards/shahrazad.png"),
 };
 
 export interface Card {
@@ -1645,6 +1646,16 @@ export const cardDatabase: Card[] = [
     cost: 2,
     isSpell: false,
     inDraftPool: false, // No card key - not in draft pool
+  },
+  {
+    id: "shahrazad",
+    name: "Shahrazad",
+    image: "/src/assets/cards/shahrazad.png",
+    isLegendary: false,
+    cost: 2,
+    isSpell: false,
+    cardKey: "C00127_MB",
+    inDraftPool: true,
   },
 ];
 

@@ -1645,7 +1645,8 @@ export const cardDatabase: Card[] = [
     isLegendary: false,
     cost: 2,
     isSpell: false,
-    inDraftPool: false, // No card key - not in draft pool
+    cardKey: "C00209_MB",
+    inDraftPool: true,
   },
   {
     id: "shahrazad",

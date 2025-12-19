@@ -13,17 +13,6 @@ import { ArrowLeft, Download, Search } from "lucide-react"
 import { cardDatabase } from "@/utils/cardData"
 import { toast } from "@/hooks/use-toast"
 import { SEOHead } from "@/components/SEOHead"
-import { oldCardImages } from "@/utils/oldCardImages"
-
-// Variant images - display only, not valid for decks
-import CerberusVariant from "@/assets/cards/variants/Cerberus_variant.png"
-import HerculesVariant from "@/assets/cards/variants/Hercules_variant.png"
-
-// Display-only variant cards (not in card database, just for browsing)
-const variantCards = [
-  { id: "cerberus_variant", name: "Cerberus (Variant)", cost: 6, isLegendary: false, isSpell: false, isVariant: true, variantImage: CerberusVariant },
-  { id: "hercules_variant", name: "Hercules (Variant)", cost: 10, isLegendary: true, isSpell: false, isVariant: true, variantImage: HerculesVariant },
-]
 
 const Cards = () => {
   const navigate = useNavigate()
@@ -51,18 +40,8 @@ const Cards = () => {
       return matchesSearch && matchesCost && matchesType
     })
 
-    // Filter variant cards the same way
-    const filteredVariants = variantCards.filter(card => {
-      const matchesSearch = card.name.toLowerCase().includes(searchQuery.toLowerCase())
-      const matchesCost = card.cost >= costRange[0] && card.cost <= costRange[1]
-      const isUnit = !card.isSpell && !card.isLegendary
-      const matchesType = (showUnits && isUnit) || 
-                         (showLegendary && card.isLegendary) || 
-                         (showSpells && card.isSpell)
-      return matchesSearch && matchesCost && matchesType
-    })
 
-    return [...databaseCards, ...filteredVariants].sort((a, b) => {
+    return databaseCards.sort((a, b) => {
       // Sort by cost first, then by name
       if (a.cost !== b.cost) {
         return a.cost - b.cost
@@ -76,10 +55,7 @@ const Cards = () => {
       let imageUrl: string
       let fileName = card.name.replace(/\s+/g, '_').toLowerCase()
       
-      // Handle variant cards differently
-      if (card.isVariant && card.variantImage) {
-        imageUrl = card.variantImage
-      } else if (selectedVersion && selectedVersion !== "current") {
+      if (selectedVersion && selectedVersion !== "current") {
         // Use old version image
         const oldImage = getOldCardImage(card.id, selectedVersion)
         if (oldImage) {
@@ -283,7 +259,7 @@ const Cards = () => {
           {/* Results Summary */}
           <div className="mt-4 pt-4 border-t border-border">
             <p className="text-sm text-muted-foreground">
-              Showing {filteredCards.length} of {cardDatabase.length + variantCards.length} cards
+              Showing {filteredCards.length} of {cardDatabase.length} cards
             </p>
           </div>
         </div>
@@ -297,9 +273,7 @@ const Cards = () => {
             return (
               <div key={card.id} className="group relative bg-card rounded-lg overflow-hidden border border-border hover:border-primary/50 transition-all duration-200">
                 <div className="aspect-[3/4] relative">
-                  {card.isVariant && card.variantImage ? (
-                    <img src={card.variantImage} alt={card.name} className="w-full h-full object-cover" />
-                  ) : oldImage ? (
+                  {oldImage ? (
                     <img src={oldImage} alt={`${card.name} (${selectedVersion})`} className="w-full h-full object-cover" />
                   ) : (
                     <CardImage cardId={card.id} cardName={card.name} className="w-full h-full object-cover" />
@@ -316,23 +290,16 @@ const Cards = () => {
                     <h3 className="font-semibold text-sm text-foreground truncate flex-1">
                       {card.name}
                     </h3>
-                    {!card.isVariant && (
-                      <CardVersionSelector
-                        cardId={card.id}
-                        selectedVersion={selectedVersion}
-                        onVersionChange={(version) => handleVersionChange(card.id, version)}
-                      />
-                    )}
+                    <CardVersionSelector
+                      cardId={card.id}
+                      selectedVersion={selectedVersion}
+                      onVersionChange={(version) => handleVersionChange(card.id, version)}
+                    />
                   </div>
                   
                   <div className="flex items-center justify-between text-xs text-muted-foreground">
                     <span>Cost: {card.cost}</span>
                     <div className="flex gap-1">
-                      {card.isVariant && (
-                        <span className="px-1.5 py-0.5 bg-purple-500/20 text-purple-600 dark:text-purple-400 rounded text-[10px]">
-                          Variant
-                        </span>
-                      )}
                       {card.isLegendary && (
                         <span className="px-1.5 py-0.5 bg-yellow-500/20 text-yellow-600 dark:text-yellow-400 rounded text-[10px]">
                           Legendary

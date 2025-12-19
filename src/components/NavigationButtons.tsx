@@ -33,7 +33,7 @@ export const NavigationButtons = ({ sizeVariant = "default" }: NavigationButtons
           Cards
         </div>
         <div className={`${textClass} text-slate-300 text-center leading-tight`}>
-          Browse all available cards.
+          Browse through all the cards/variants.
         </div>
       </div>
 

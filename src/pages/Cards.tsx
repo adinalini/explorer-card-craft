@@ -136,19 +136,17 @@ const Cards = () => {
       {/* Header */}
       <div className="bg-background border-b border-border">
         <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-              <Button
-                onClick={() => navigate('/')}
-                variant="ghost"
-                size="sm"
-                className="flex items-center gap-2 text-foreground hover:bg-accent/20"
-              >
-                <ArrowLeft className="w-4 h-4" />
-                Back to Home
-              </Button>
-            </div>
-            <h1 className="text-2xl font-bold text-foreground">Card Explorer</h1>
+          <div className="flex items-center justify-between relative">
+            <Button
+              onClick={() => navigate('/')}
+              variant="ghost"
+              size="sm"
+              className="flex items-center gap-2 text-foreground hover:bg-accent/20"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Back to Home
+            </Button>
+            <h1 className="text-2xl font-bold text-foreground absolute left-1/2 -translate-x-1/2">Card Explorer</h1>
             <ThemeToggle />
           </div>
         </div>

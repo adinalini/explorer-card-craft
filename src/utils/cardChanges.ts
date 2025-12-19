@@ -282,7 +282,7 @@ export const cardChanges: CardChange[] = [
     cardId: 'searing_light',
     cardName: 'Searing Light',
     patch: 'v1.0.0.41',
-    changeType: 'invalid',
+    changeType: 'warning',
     description: "card's cost has been changed",
     oldImagePath: '/src/assets/cards/Old/v1.0.0.40/searing_light.png'
   },

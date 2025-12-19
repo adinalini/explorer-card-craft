@@ -1,228 +1,304 @@
-import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
-import { useNavigate } from "react-router-dom";
-import { SEOHead } from "@/components/SEOHead";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
-import { useState, useEffect } from "react";
-import { cardDatabase, Card } from "@/utils/cardData";
+import { useState, useMemo } from "react"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Slider } from "@/components/ui/slider"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { ThemeToggle } from "@/components/ui/theme-toggle"
+import { CardImage } from "@/components/CardImage"
+import { WaveDivider } from "@/components/ui/wave-divider"
+import { useNavigate } from "react-router-dom"
+import { ArrowLeft, Download, Search } from "lucide-react"
+import { cardDatabase } from "@/utils/cardData"
+import { toast } from "@/hooks/use-toast"
+import { SEOHead } from "@/components/SEOHead"
 
 const Cards = () => {
-  const navigate = useNavigate();
-  const [showUnits, setShowUnits] = useState(true);
-  const [showLegendary, setShowLegendary] = useState(true);
-  const [showSpells, setShowSpells] = useState(true);
-  const [showItems, setShowItems] = useState(true);
-  const [cardImages, setCardImages] = useState<Record<string, string>>({});
-  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate()
+  const [searchQuery, setSearchQuery] = useState("")
+  const [costRange, setCostRange] = useState([0, 10])
+  const [showUnits, setShowUnits] = useState(true)
+  const [showLegendary, setShowLegendary] = useState(true)
+  const [showSpells, setShowSpells] = useState(true)
+  const [viewMode, setViewMode] = useState("5")
 
-  // Load all card images
-  useEffect(() => {
-    const loadImages = async () => {
-      const images: Record<string, string> = {};
+  // Filter cards based on search and filters
+  const filteredCards = useMemo(() => {
+    return cardDatabase.filter(card => {
+      const matchesSearch = card.name.toLowerCase().includes(searchQuery.toLowerCase())
+      const matchesCost = card.cost >= costRange[0] && card.cost <= costRange[1]
       
-      for (const card of cardDatabase) {
-        try {
-          // Dynamic import based on card id
-          const module = await import(`../assets/cards/${getCardFileName(card.id)}.png`);
-          images[card.id] = module.default;
-        } catch (error) {
-          // Try alternate naming conventions
-          try {
-            const altModule = await import(`../assets/cards/${card.id}.png`);
-            images[card.id] = altModule.default;
-          } catch {
-            console.warn(`Could not load image for ${card.id}`);
-          }
-        }
+      // Card type filtering - must show at least one type
+      const isUnit = !card.isSpell && !card.isLegendary
+      const matchesType = (showUnits && isUnit) || 
+                         (showLegendary && card.isLegendary) || 
+                         (showSpells && card.isSpell)
+      
+      return matchesSearch && matchesCost && matchesType
+    }).sort((a, b) => {
+      // Sort by cost first, then by name
+      if (a.cost !== b.cost) {
+        return a.cost - b.cost
+      }
+      return a.name.localeCompare(b.name)
+    })
+  }, [searchQuery, costRange, showUnits, showLegendary, showSpells])
+
+  const downloadCardImage = async (card: any) => {
+    try {
+      // Import the cardImages mapping from CardImage component
+      const { cardImages } = await import('@/components/CardImage')
+      
+      // Get the actual image URL using the cardImages mapping
+      const imageUrl = cardImages[card.id]
+      
+      if (!imageUrl) {
+        throw new Error('Image not found for card: ' + card.id)
       }
       
-      setCardImages(images);
-      setLoading(false);
-    };
+      // Fetch the image as a blob to ensure it downloads properly
+      const response = await fetch(imageUrl)
+      if (!response.ok) {
+        throw new Error('Failed to fetch image')
+      }
+      
+      const blob = await response.blob()
+      const url = URL.createObjectURL(blob)
+      
+      // Create a temporary link to download the image
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `${card.name.replace(/\s+/g, '_').toLowerCase()}.png`
+      
+      // Trigger download
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      
+      // Clean up the blob URL
+      URL.revokeObjectURL(url)
+      
+      toast({
+        title: "Download Started",
+        description: `Downloading ${card.name} image...`,
+      })
+    } catch (error) {
+      console.error('Download error:', error)
+      toast({
+        title: "Download Failed",
+        description: "Failed to download card image. Please try again.",
+        variant: "destructive"
+      })
+    }
+  }
 
-    loadImages();
-  }, []);
-
-  // Helper to get the correct file name
-  const getCardFileName = (id: string): string => {
-    const specialCases: Record<string, string> = {
-      dark_omen: "Dark_Omen",
-      goldi: "Goldi",
-      tuck: "Tuck",
-      rain_of_arrows: "Rai_of_arrows",
-      red_cap: "Red_cap",
-      robinhood: "Robinhood",
-      animated_broomstick: "Animated_Broomstick",
-      babe_the_blue_ox: "Babe_the_blue_ox",
-      baby_bear: "Baby_Bear",
-      bagheera: "Bagheera",
-      baker: "Baker",
-      bigfoot: "Bigfoot",
-      brandy: "Brandy",
-      butcher: "Butcher",
-      cake: "Cake",
-      captain_ahab: "Captain_Ahab",
-      cerberus: "Cerberus",
-      chimera: "Chimera",
-      drop_bear: "Drop_Bear",
-      first_aid: "First_Aid",
-      flying_dutchman: "Flying_Dutchman",
-      hare: "Hare",
-      hercules: "Hercules",
-      huck_finn: "Huck_Finn",
-      impundulu: "Impundulu",
-      koschei: "KOschei",
-      mary: "Mary",
-      momotaro: "Momotaro",
-      morgan_le_fay: "Morgan_le_Fay",
-      mortal_coil: "Mortal_Coil",
-      mothman: "Mothman",
-      obliterate: "Obliterate",
-      piglet: "Piglet",
-      popeye: "Popeye",
-      run_over: "Run_Over",
-      sandman: "Sandman",
-      sinbad: "Sinbad",
-      thumbelina: "Thumbelina",
-      tinker_bell: "Tinker_Bell",
-      tortoise: "Tortoise",
-      wicked_stepmother: "Wicked_Stepmother",
-      winnie_the_pooh: "Winnie_the_pooh",
-      yuki_onna: "Yuki_onna",
-    };
-    return specialCases[id] || id;
-  };
-
-  // Filter cards based on checkboxes
-  const filteredCards = cardDatabase.filter((card) => {
-    if (card.isItem && !showItems) return false;
-    if (card.isSpell && !card.isItem && !showSpells) return false;
-    if (card.isLegendary && !card.isSpell && !card.isItem && !showLegendary) return false;
-    if (!card.isLegendary && !card.isSpell && !card.isItem && !showUnits) return false;
-    return true;
-  });
-
-  // Sort cards alphabetically
-  const sortedCards = [...filteredCards].sort((a, b) => a.name.localeCompare(b.name));
+  const getGridCols = () => {
+    switch (viewMode) {
+      case "4": return "grid-cols-2 md:grid-cols-4"
+      case "5": return "grid-cols-2 md:grid-cols-3 lg:grid-cols-5"
+      case "6": return "grid-cols-2 md:grid-cols-3 lg:grid-cols-6"
+      default: return "grid-cols-2 md:grid-cols-3 lg:grid-cols-5"
+    }
+  }
 
   return (
     <>
       <SEOHead 
-        title="Card Explorer - Project O Zone"
-        description="Explore all cards in Project O Zone. Browse, search, and filter through our extensive card collection with detailed stats and artwork."
-        image="/og-images/cards.jpg"
+        title="Card Explorer | Evolved"
+        description="Browse and explore all cards in Evolved. Filter by cost, type, and search by name."
       />
-      <div className="min-h-screen bg-gradient-to-br from-[hsl(var(--background-start))] to-[hsl(var(--background-end))] py-8 px-4">
-        <div className="max-w-7xl mx-auto">
-          {/* Header */}
-          <div className="flex items-center justify-between mb-8">
-            <Button
-              onClick={() => navigate('/')}
-              variant="outline"
-              className="flex items-center gap-2"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              Back
-            </Button>
-            <h1 className="text-3xl md:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-violet-400 to-fuchsia-400">
-              Card Explorer
-            </h1>
-            <div className="w-20" /> {/* Spacer for alignment */}
+
+      {/* Header */}
+      <div className="bg-background border-b border-border sticky top-0 z-50">
+        <div className="container mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <Button
+                onClick={() => navigate('/')}
+                variant="ghost"
+                size="sm"
+                className="flex items-center gap-2 text-foreground hover:bg-accent/20"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                Back to Home
+              </Button>
+              <h1 className="text-2xl font-bold text-foreground">Card Explorer</h1>
+            </div>
+            <ThemeToggle />
           </div>
-
-          {/* Filter toggles */}
-          <div className="flex flex-wrap gap-4 justify-center mb-8 p-4 bg-black/20 backdrop-blur-sm rounded-lg">
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="units-cards"
-                checked={showUnits}
-                onCheckedChange={(checked) => setShowUnits(checked === true)}
-              />
-              <Label htmlFor="units-cards" className="text-sm text-slate-200">Units</Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="legendary-cards"
-                checked={showLegendary}
-                onCheckedChange={(checked) => setShowLegendary(checked === true)}
-              />
-              <Label htmlFor="legendary-cards" className="text-sm text-slate-200">Legendary</Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="spells-cards"
-                checked={showSpells}
-                onCheckedChange={(checked) => setShowSpells(checked === true)}
-              />
-              <Label htmlFor="spells-cards" className="text-sm text-slate-200">Spells</Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="items-cards"
-                checked={showItems}
-                onCheckedChange={(checked) => setShowItems(checked === true)}
-              />
-              <Label htmlFor="items-cards" className="text-sm text-slate-200">Items</Label>
-            </div>
-          </div>
-
-          {/* Card count */}
-          <p className="text-center text-slate-400 mb-6">
-            Showing {sortedCards.length} cards
-          </p>
-
-          {/* Cards grid */}
-          {loading ? (
-            <div className="flex justify-center items-center py-20">
-              <div className="text-slate-400">Loading cards...</div>
-            </div>
-          ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-              {sortedCards.map((card) => (
-                <div
-                  key={card.id}
-                  className="group relative bg-black/20 backdrop-blur-sm rounded-lg overflow-hidden transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-violet-500/20"
-                >
-                  {cardImages[card.id] ? (
-                    <img
-                      src={cardImages[card.id]}
-                      alt={card.name}
-                      className="w-full h-auto object-cover"
-                      loading="lazy"
-                    />
-                  ) : (
-                    <div className="w-full aspect-[3/4] bg-slate-800 flex items-center justify-center">
-                      <span className="text-slate-500 text-xs text-center p-2">{card.name}</span>
-                    </div>
-                  )}
-                  
-                  {/* Card info overlay */}
-                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 to-transparent p-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    <p className="text-white text-xs font-medium truncate">{card.name}</p>
-                    <div className="flex gap-1 mt-1">
-                      {card.isLegendary && (
-                        <span className="text-[10px] px-1 py-0.5 bg-amber-500/80 text-white rounded">Legendary</span>
-                      )}
-                      {card.isSpell && (
-                        <span className="text-[10px] px-1 py-0.5 bg-blue-500/80 text-white rounded">Spell</span>
-                      )}
-                      {card.isItem && (
-                        <span className="text-[10px] px-1 py-0.5 bg-green-500/80 text-white rounded">Item</span>
-                      )}
-                      {card.cost !== undefined && (
-                        <span className="text-[10px] px-1 py-0.5 bg-violet-500/80 text-white rounded">Cost: {card.cost}</span>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
         </div>
       </div>
+
+      <div className="container mx-auto px-4 py-8">
+        {/* Filters Section */}
+        <div className="bg-card rounded-lg p-6 mb-8 border border-border">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {/* Search */}
+            <div className="space-y-2">
+              <Label className="text-foreground">Search by Name</Label>
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search cards..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10 border-muted-foreground/30"
+                />
+              </div>
+            </div>
+
+            {/* Cost Range */}
+            <div className="space-y-2">
+              <Label className="text-foreground">
+                Cost Range: {costRange[0]} - {costRange[1]}
+              </Label>
+              <Slider
+                value={costRange}
+                onValueChange={setCostRange}
+                min={0}
+                max={10}
+                step={1}
+                className="w-full"
+              />
+            </div>
+
+            {/* Card Type Toggles */}
+            <div className="space-y-2">
+              <Label className="text-foreground">Card Types</Label>
+              <div className="flex flex-wrap gap-4">
+                <label className="flex items-center gap-2 text-sm text-foreground">
+                  <input
+                    type="checkbox"
+                    checked={showUnits}
+                    onChange={(e) => {
+                      const newValue = e.target.checked
+                      // Ensure at least one type is selected
+                      if (!newValue && !showLegendary && !showSpells) return
+                      setShowUnits(newValue)
+                    }}
+                    className="rounded border-border"
+                  />
+                  Show Units
+                </label>
+                <label className="flex items-center gap-2 text-sm text-foreground">
+                  <input
+                    type="checkbox"
+                    checked={showLegendary}
+                    onChange={(e) => {
+                      const newValue = e.target.checked
+                      // Ensure at least one type is selected
+                      if (!newValue && !showUnits && !showSpells) return
+                      setShowLegendary(newValue)
+                    }}
+                    className="rounded border-border"
+                  />
+                  Show Legendary
+                </label>
+                <label className="flex items-center gap-2 text-sm text-foreground">
+                  <input
+                    type="checkbox"
+                    checked={showSpells}
+                    onChange={(e) => {
+                      const newValue = e.target.checked
+                      // Ensure at least one type is selected
+                      if (!newValue && !showUnits && !showLegendary) return
+                      setShowSpells(newValue)
+                    }}
+                    className="rounded border-border"
+                  />
+                  Show Spells
+                </label>
+              </div>
+            </div>
+
+            {/* View Mode */}
+            <div className="space-y-2">
+              <Label className="text-foreground">Cards per Row</Label>
+              <RadioGroup value={viewMode} onValueChange={setViewMode} className="flex gap-4">
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="4" id="view-4" />
+                  <Label htmlFor="view-4" className="text-foreground">4</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="5" id="view-5" />
+                  <Label htmlFor="view-5" className="text-foreground">5</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="6" id="view-6" />
+                  <Label htmlFor="view-6" className="text-foreground">6</Label>
+                </div>
+              </RadioGroup>
+            </div>
+          </div>
+
+          {/* Results Summary */}
+          <div className="mt-4 pt-4 border-t border-border">
+            <p className="text-sm text-muted-foreground">
+              Showing {filteredCards.length} of {cardDatabase.length} cards
+            </p>
+          </div>
+        </div>
+
+        {/* Cards Grid */}
+        <div className={`grid ${getGridCols()} gap-4`}>
+          {filteredCards.map((card) => (
+            <div key={card.id} className="group relative bg-card rounded-lg overflow-hidden border border-border hover:border-primary/50 transition-all duration-200">
+              <div className="aspect-[3/4] relative">
+                <CardImage cardId={card.id} cardName={card.name} className="w-full h-full object-cover" />
+              </div>
+              
+              <div className="p-3 space-y-2">
+                <h3 className="font-semibold text-sm text-foreground truncate">
+                  {card.name}
+                </h3>
+                
+                <div className="flex items-center justify-between text-xs text-muted-foreground">
+                  <span>Cost: {card.cost}</span>
+                  <div className="flex gap-1">
+                    {card.isLegendary && (
+                      <span className="px-1.5 py-0.5 bg-yellow-500/20 text-yellow-600 dark:text-yellow-400 rounded text-[10px]">
+                        Legendary
+                      </span>
+                    )}
+                    {card.isSpell && (
+                      <span className="px-1.5 py-0.5 bg-blue-500/20 text-blue-600 dark:text-blue-400 rounded text-[10px]">
+                        Spell
+                      </span>
+                    )}
+                  </div>
+                </div>
+                
+                <Button
+                  onClick={() => downloadCardImage(card)}
+                  size="sm"
+                  variant="outline"
+                  className="w-full flex items-center gap-2 text-xs hover:bg-accent/20"
+                >
+                  <Download className="w-3 h-3" />
+                  Download Image
+                </Button>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* No Results */}
+        {filteredCards.length === 0 && (
+          <div className="text-center py-12">
+            <p className="text-lg text-muted-foreground">No cards found matching your filters.</p>
+            <p className="text-sm text-muted-foreground mt-2">Try adjusting your search criteria.</p>
+          </div>
+        )}
+      </div>
+
+      {/* Wave Divider at bottom */}
+      <div className="mt-auto">
+        <WaveDivider />
+      </div>
+
+      <div className="h-20 bg-background" />
     </>
   );
 };
 
-export default Cards;
+export default Cards

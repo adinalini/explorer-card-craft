@@ -161,7 +161,7 @@ const Cards = () => {
       <div className="bg-background border-b border-border sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4">
               <Button
                 onClick={() => navigate('/')}
                 variant="ghost"
@@ -171,8 +171,8 @@ const Cards = () => {
                 <ArrowLeft className="w-4 h-4" />
                 Back to Home
               </Button>
-              <h1 className="text-2xl font-bold text-foreground">Card Explorer</h1>
             </div>
+            <h1 className="text-2xl font-bold text-foreground">Card Explorer</h1>
             <ThemeToggle />
           </div>
         </div>

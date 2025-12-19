@@ -35,6 +35,7 @@ import oldThreeMusketeers from "@/assets/cards/Old/v1.0.0.40/three_musketeers.pn
 import oldTinWoodman from "@/assets/cards/Old/v1.0.0.40/tin_woodman.png";
 import oldTinSoldier from "@/assets/cards/Old/v1.0.0.40/tin_soldier.png";
 import oldOgre from "@/assets/cards/Old/v1.0.0.40/ogre.png";
+import oldSearingLight from "@/assets/cards/Old/v1.0.0.40/searing_light.png";
 
 // New card images
 import newAxeThrow from "@/assets/cards/axe_throw.png";
@@ -64,6 +65,7 @@ import newSheriffOfNottingham from "@/assets/cards/sheriff_of_nottingham.png";
 import newTheKraken from "@/assets/cards/the_kraken.png";
 import newThreeMusketeers from "@/assets/cards/three_musketeers.png";
 import newTinWoodman from "@/assets/cards/tin_woodman.png";
+import newSearingLight from "@/assets/cards/searing_light.png";
 
 // Import all new cards (added in this patch)
 import animatedBroomstick from "@/assets/cards/Animated_Broomstick.png";
@@ -135,6 +137,7 @@ const Patches = () => {
     { name: "The Kraken", old: oldTheKraken, new: newTheKraken },
     { name: "Three Musketeers", old: oldThreeMusketeers, new: newThreeMusketeers },
     { name: "Tin Woodman", old: oldTinWoodman, new: newTinWoodman },
+    { name: "Searing Light", old: oldSearingLight, new: newSearingLight },
   ];
 
   const removedCards = [

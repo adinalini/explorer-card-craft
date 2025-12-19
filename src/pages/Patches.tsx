@@ -101,6 +101,7 @@ import tortoise from "@/assets/cards/Tortoise.png";
 import wickedStepmother from "@/assets/cards/Wicked_Stepmother.png";
 import winnieThePooh from "@/assets/cards/Winnie_the_pooh.png";
 import yukiOnna from "@/assets/cards/Yuki_onna.png";
+import shahrazad from "@/assets/cards/shahrazad.png";
 
 const Patches = () => {
   const [selectedPatch, setSelectedPatch] = useState("october-2025");
@@ -177,6 +178,7 @@ const Patches = () => {
     { name: "Wicked Stepmother", image: wickedStepmother },
     { name: "Winnie the Pooh", image: winnieThePooh },
     { name: "Yuki-onna", image: yukiOnna },
+    { name: "Shahrazad", image: shahrazad },
   ];
 
   return (

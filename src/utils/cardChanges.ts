@@ -277,6 +277,22 @@ export const cardChanges: CardChange[] = [
     changeType: 'warning',
     description: 'card has undergone significant changes',
     oldImagePath: '/src/assets/cards/Old/v1.0.0.40/three_musketeers.png'
+  },
+  {
+    cardId: 'searing_light',
+    cardName: 'Searing Light',
+    patch: 'v1.0.0.41',
+    changeType: 'warning',
+    description: 'card has undergone some changes',
+    oldImagePath: '/src/assets/cards/Old/v1.0.0.40/searing_light.png'
+  },
+  {
+    cardId: 'lancelot',
+    cardName: 'Lancelot',
+    patch: 'v1.0.0.41',
+    changeType: 'warning',
+    description: 'card has undergone some changes',
+    oldImagePath: '/src/assets/cards/Old/v1.0.0.40/lancelot.png'
   }
 ]
 

@@ -132,6 +132,8 @@ import brandyImg from "@/assets/cards/Brandy.png";
 import butcherImg from "@/assets/cards/Butcher.png";
 import cakeImg from "@/assets/cards/Cake.png";
 import captainAhabImg from "@/assets/cards/Captain_Ahab.png";
+import cerberusImg from "@/assets/cards/Cerberus.png";
+import herculesImg from "@/assets/cards/Hercules.png";
 import chimeraImg from "@/assets/cards/Chimera.png";
 import dropBearImg from "@/assets/cards/Drop_Bear.png";
 import firstAidImg from "@/assets/cards/First_Aid.png";
@@ -295,6 +297,8 @@ const cardImages: Record<string, string> = {
   butcher: butcherImg,
   cake: cakeImg,
   captain_ahab: captainAhabImg,
+  cerberus: cerberusImg,
+  hercules: herculesImg,
   chimera: chimeraImg,
   drop_bear: dropBearImg,
   first_aid: firstAidImg,

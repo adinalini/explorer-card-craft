@@ -6,12 +6,14 @@ import { Slider } from "@/components/ui/slider"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { ThemeToggle } from "@/components/ui/theme-toggle"
 import { CardImage } from "@/components/CardImage"
+import { CardVersionSelector, cardsWithHistory, getOldCardImage } from "@/components/CardVersionSelector"
 import { WaveDivider } from "@/components/ui/wave-divider"
 import { useNavigate } from "react-router-dom"
 import { ArrowLeft, Download, Search } from "lucide-react"
 import { cardDatabase } from "@/utils/cardData"
 import { toast } from "@/hooks/use-toast"
 import { SEOHead } from "@/components/SEOHead"
+import { oldCardImages } from "@/utils/oldCardImages"
 
 // Variant images - display only, not valid for decks
 import CerberusVariant from "@/assets/cards/variants/Cerberus_variant.png"
@@ -31,6 +33,8 @@ const Cards = () => {
   const [showLegendary, setShowLegendary] = useState(true)
   const [showSpells, setShowSpells] = useState(true)
   const [viewMode, setViewMode] = useState("5")
+  // Track selected version for each card (cardId -> version)
+  const [selectedVersions, setSelectedVersions] = useState<Record<string, string | null>>({})
 
   // Filter cards based on search and filters
   const filteredCards = useMemo(() => {
@@ -67,13 +71,23 @@ const Cards = () => {
     })
   }, [searchQuery, costRange, showUnits, showLegendary, showSpells])
 
-  const downloadCardImage = async (card: any) => {
+  const downloadCardImage = async (card: any, selectedVersion: string | null) => {
     try {
       let imageUrl: string
+      let fileName = card.name.replace(/\s+/g, '_').toLowerCase()
       
       // Handle variant cards differently
       if (card.isVariant && card.variantImage) {
         imageUrl = card.variantImage
+      } else if (selectedVersion && selectedVersion !== "current") {
+        // Use old version image
+        const oldImage = getOldCardImage(card.id, selectedVersion)
+        if (oldImage) {
+          imageUrl = oldImage
+          fileName = `${fileName}_${selectedVersion}`
+        } else {
+          throw new Error('Old version image not found')
+        }
       } else {
         // Import the cardImages mapping from CardImage component
         const { cardImages } = await import('@/components/CardImage')
@@ -96,7 +110,7 @@ const Cards = () => {
       // Create a temporary link to download the image
       const link = document.createElement('a')
       link.href = url
-      link.download = `${card.name.replace(/\s+/g, '_').toLowerCase()}.png`
+      link.download = `${fileName}.png`
       
       // Trigger download
       document.body.appendChild(link)
@@ -108,7 +122,7 @@ const Cards = () => {
       
       toast({
         title: "Download Started",
-        description: `Downloading ${card.name} image...`,
+        description: `Downloading ${card.name}${selectedVersion ? ` (${selectedVersion})` : ''} image...`,
       })
     } catch (error) {
       console.error('Download error:', error)
@@ -118,6 +132,13 @@ const Cards = () => {
         variant: "destructive"
       })
     }
+  }
+
+  const handleVersionChange = (cardId: string, version: string | null) => {
+    setSelectedVersions(prev => ({
+      ...prev,
+      [cardId]: version
+    }))
   }
 
   const getGridCols = () => {
@@ -269,54 +290,75 @@ const Cards = () => {
 
         {/* Cards Grid */}
         <div className={`grid ${getGridCols()} gap-4`}>
-          {filteredCards.map((card: any) => (
-            <div key={card.id} className="group relative bg-card rounded-lg overflow-hidden border border-border hover:border-primary/50 transition-all duration-200">
-              <div className="aspect-[3/4] relative">
-                {card.isVariant && card.variantImage ? (
-                  <img src={card.variantImage} alt={card.name} className="w-full h-full object-cover" />
-                ) : (
-                  <CardImage cardId={card.id} cardName={card.name} className="w-full h-full object-cover" />
-                )}
-              </div>
-              
-              <div className="p-3 space-y-2">
-                <h3 className="font-semibold text-sm text-foreground truncate">
-                  {card.name}
-                </h3>
-                
-                <div className="flex items-center justify-between text-xs text-muted-foreground">
-                  <span>Cost: {card.cost}</span>
-                  <div className="flex gap-1">
-                    {card.isVariant && (
-                      <span className="px-1.5 py-0.5 bg-purple-500/20 text-purple-600 dark:text-purple-400 rounded text-[10px]">
-                        Variant
-                      </span>
-                    )}
-                    {card.isLegendary && (
-                      <span className="px-1.5 py-0.5 bg-yellow-500/20 text-yellow-600 dark:text-yellow-400 rounded text-[10px]">
-                        Legendary
-                      </span>
-                    )}
-                    {card.isSpell && (
-                      <span className="px-1.5 py-0.5 bg-blue-500/20 text-blue-600 dark:text-blue-400 rounded text-[10px]">
-                        Spell
-                      </span>
-                    )}
-                  </div>
+          {filteredCards.map((card: any) => {
+            const selectedVersion = selectedVersions[card.id] || null
+            const oldImage = selectedVersion ? getOldCardImage(card.id, selectedVersion) : null
+            
+            return (
+              <div key={card.id} className="group relative bg-card rounded-lg overflow-hidden border border-border hover:border-primary/50 transition-all duration-200">
+                <div className="aspect-[3/4] relative">
+                  {card.isVariant && card.variantImage ? (
+                    <img src={card.variantImage} alt={card.name} className="w-full h-full object-cover" />
+                  ) : oldImage ? (
+                    <img src={oldImage} alt={`${card.name} (${selectedVersion})`} className="w-full h-full object-cover" />
+                  ) : (
+                    <CardImage cardId={card.id} cardName={card.name} className="w-full h-full object-cover" />
+                  )}
+                  {selectedVersion && (
+                    <div className="absolute top-2 left-2 px-2 py-0.5 bg-black/70 text-white text-[10px] rounded">
+                      {selectedVersion}
+                    </div>
+                  )}
                 </div>
                 
-                <Button
-                  onClick={() => downloadCardImage(card)}
-                  size="sm"
-                  variant="outline"
-                  className="w-full flex items-center gap-2 text-xs hover:bg-accent/20"
-                >
-                  <Download className="w-3 h-3" />
-                  Download Image
-                </Button>
+                <div className="p-3 space-y-2">
+                  <div className="flex items-center justify-between gap-1">
+                    <h3 className="font-semibold text-sm text-foreground truncate flex-1">
+                      {card.name}
+                    </h3>
+                    {!card.isVariant && (
+                      <CardVersionSelector
+                        cardId={card.id}
+                        selectedVersion={selectedVersion}
+                        onVersionChange={(version) => handleVersionChange(card.id, version)}
+                      />
+                    )}
+                  </div>
+                  
+                  <div className="flex items-center justify-between text-xs text-muted-foreground">
+                    <span>Cost: {card.cost}</span>
+                    <div className="flex gap-1">
+                      {card.isVariant && (
+                        <span className="px-1.5 py-0.5 bg-purple-500/20 text-purple-600 dark:text-purple-400 rounded text-[10px]">
+                          Variant
+                        </span>
+                      )}
+                      {card.isLegendary && (
+                        <span className="px-1.5 py-0.5 bg-yellow-500/20 text-yellow-600 dark:text-yellow-400 rounded text-[10px]">
+                          Legendary
+                        </span>
+                      )}
+                      {card.isSpell && (
+                        <span className="px-1.5 py-0.5 bg-blue-500/20 text-blue-600 dark:text-blue-400 rounded text-[10px]">
+                          Spell
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  
+                  <Button
+                    onClick={() => downloadCardImage(card, selectedVersion)}
+                    size="sm"
+                    variant="outline"
+                    className="w-full flex items-center gap-2 text-xs hover:bg-accent/20"
+                  >
+                    <Download className="w-3 h-3" />
+                    Download Image
+                  </Button>
+                </div>
               </div>
-            </div>
-          ))}
+            )
+          })}
         </div>
 
         {/* No Results */}

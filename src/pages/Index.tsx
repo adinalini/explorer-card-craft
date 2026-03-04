@@ -7,6 +7,8 @@ import { ThemeToggle } from "@/components/ui/theme-toggle"
 import { useNavigate, useLocation } from "react-router-dom"
 import { SEOHead } from "@/components/SEOHead"
 import { FloatingCards, FloatingBubbles, FloatingBubblesDown, FloatingQuestionMarksHorizontal } from "@/components/ui/homepage-animations"
+import { HomepageNewsWidget } from "@/components/HomepageNewsWidget"
+import { HomepageArticlesWidget } from "@/components/HomepageArticlesWidget"
 import { usePasswordProtection } from "@/hooks/usePasswordProtection"
 import { useToast } from "@/hooks/use-toast"
 import { PasswordGate } from "@/components/PasswordGate"
@@ -357,35 +359,71 @@ const Index = () => {
           </div>
 
           {/* Center - Buttons or Password Gate (when both characters visible) */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10 hidden 2xl:block">
-            {!isLoading && (
-              isAuthenticated ? (
-                <NavigationButtons />
-              ) : (
-                <PasswordGate onPasswordSubmit={handlePasswordSubmit} isVerifying={isVerifying} />
-              )
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10 hidden 2xl:flex items-start gap-6">
+            <div>
+              {!isLoading && (
+                isAuthenticated ? (
+                  <NavigationButtons />
+                ) : (
+                  <PasswordGate onPasswordSubmit={handlePasswordSubmit} isVerifying={isVerifying} />
+                )
+              )}
+            </div>
+            {isAuthenticated && !isLoading && (
+              <div className="flex flex-col gap-4" style={{ width: "260px", height: "505px" }}>
+                <div className="flex-1">
+                  <HomepageNewsWidget />
+                </div>
+                <div className="flex-1">
+                  <HomepageArticlesWidget />
+                </div>
+              </div>
             )}
           </div>
 
           {/* Right-aligned Buttons (when only rabbit visible) */}
-          <div className="absolute top-1/2 right-0 -translate-y-1/2 transform translate-x-[-120px] z-10 hidden xl:block 2xl:hidden">
-            {!isLoading && (
-              isAuthenticated ? (
-                <NavigationButtons />
-              ) : (
-                <PasswordGate onPasswordSubmit={handlePasswordSubmit} isVerifying={isVerifying} />
-              )
+          <div className="absolute top-1/2 right-0 -translate-y-1/2 transform translate-x-[-120px] z-10 hidden xl:flex 2xl:hidden items-start gap-6">
+            <div>
+              {!isLoading && (
+                isAuthenticated ? (
+                  <NavigationButtons />
+                ) : (
+                  <PasswordGate onPasswordSubmit={handlePasswordSubmit} isVerifying={isVerifying} />
+                )
+              )}
+            </div>
+            {isAuthenticated && !isLoading && (
+              <div className="flex flex-col gap-4" style={{ width: "220px", height: "505px" }}>
+                <div className="flex-1">
+                  <HomepageNewsWidget />
+                </div>
+                <div className="flex-1">
+                  <HomepageArticlesWidget />
+                </div>
+              </div>
             )}
           </div>
 
           {/* Center Buttons (when no characters visible) */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10 hidden md:block xl:hidden">
-            {!isLoading && (
-              isAuthenticated ? (
-                <NavigationButtons />
-              ) : (
-                <PasswordGate onPasswordSubmit={handlePasswordSubmit} isVerifying={isVerifying} />
-              )
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10 hidden md:flex xl:hidden items-start gap-6">
+            <div>
+              {!isLoading && (
+                isAuthenticated ? (
+                  <NavigationButtons />
+                ) : (
+                  <PasswordGate onPasswordSubmit={handlePasswordSubmit} isVerifying={isVerifying} />
+                )
+              )}
+            </div>
+            {isAuthenticated && !isLoading && (
+              <div className="flex flex-col gap-4" style={{ width: "220px", height: "505px" }}>
+                <div className="flex-1">
+                  <HomepageNewsWidget />
+                </div>
+                <div className="flex-1">
+                  <HomepageArticlesWidget />
+                </div>
+              </div>
             )}
           </div>
         </div>
@@ -402,6 +440,18 @@ const Index = () => {
               )
             )}
           </div>
+
+          {/* News & Articles widgets on mobile */}
+          {isAuthenticated && !isLoading && (
+            <div className="flex gap-3 w-full max-w-sm">
+              <div className="flex-1 h-40">
+                <HomepageNewsWidget />
+              </div>
+              <div className="flex-1 h-40">
+                <HomepageArticlesWidget />
+              </div>
+            </div>
+          )}
 
 
           {/* Rabbit below buttons on mobile */}

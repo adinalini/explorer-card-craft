@@ -84,8 +84,12 @@ export const generatedPatchNotes: Record<string, GeneratedPatchNote> = {
       { cardId: 'sheriff_of_nottingham', name: 'Sheriff of Nottingham', changeType: 'modified', statChanges: [{ field: 'power', oldValue: 3, newValue: 2 }], severity: 'some' },
       { cardId: 'three_musketeers', name: 'Three Musketeers', changeType: 'modified', severity: 'significant' },
       { cardId: 'tin_woodman', name: 'Tin Woodman', changeType: 'modified', statChanges: [{ field: 'cost', oldValue: 4, newValue: 2 }, { field: 'power', oldValue: 3, newValue: 2 }, { field: 'defense', oldValue: 5, newValue: 1 }] },
+      // Legendary status changes
+      { cardId: 'goldi', name: 'Goldilocks', changeType: 'modified', statChanges: [{ field: 'legendary', oldValue: false, newValue: true }] },
+      { cardId: 'the_kraken', name: 'The Kraken', changeType: 'modified', statChanges: [{ field: 'legendary', oldValue: true, newValue: false }] },
     ],
     newCards: [
+      { cardId: 'cerberus', name: 'Cerberus' },
       { cardId: 'animated_broomstick', name: 'Animated Broomstick' },
       { cardId: 'babe_the_blue_ox', name: 'Babe the Blue Ox' },
       { cardId: 'baby_bear', name: 'Baby Bear' },
@@ -101,6 +105,7 @@ export const generatedPatchNotes: Record<string, GeneratedPatchNote> = {
       { cardId: 'first_aid', name: 'First Aid' },
       { cardId: 'flying_dutchman', name: 'Flying Dutchman' },
       { cardId: 'hare', name: 'Hare' },
+      { cardId: 'hercules', name: 'Hercules' },
       { cardId: 'huck_finn', name: 'Huck Finn' },
       { cardId: 'impundulu', name: 'Impundulu' },
       { cardId: 'koschei', name: 'Koschei' },
@@ -127,10 +132,7 @@ export const generatedPatchNotes: Record<string, GeneratedPatchNote> = {
       { cardId: 'tin_soldier', name: 'Tin Soldier' },
       { cardId: 'ogre', name: 'Ogre' },
     ],
-    legendaryChanges: [
-      { cardId: 'goldi', name: 'Goldilocks', becameLegendary: true },
-      { cardId: 'the_kraken', name: 'The Kraken', becameLegendary: false },
-    ],
+    legendaryChanges: [],
   },
   'gdc-2026': {
     patchId: 'gdc-2026',

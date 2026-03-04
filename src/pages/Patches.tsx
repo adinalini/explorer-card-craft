@@ -102,23 +102,6 @@ const Patches = () => {
                 </section>
               )}
 
-              {/* Legendary Changes */}
-              {patchData.legendaryChanges.length > 0 && (
-                <section>
-                  <h2 className="text-3xl font-bold mb-6 text-foreground">Legendary Status Changes</h2>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
-                    {patchData.legendaryChanges.map((card) => (
-                      <div key={card.cardId} className="bg-card rounded-lg p-4 border border-border text-center">
-                        <CardImage cardId={card.cardId} cardName={card.name} className="w-full h-auto rounded-lg border-2 border-primary mb-2" />
-                        <p className="text-sm font-medium text-card-foreground">{card.name}</p>
-                        <p className="text-xs text-muted-foreground mt-1">
-                          {card.becameLegendary ? 'Now Legendary' : 'No longer Legendary'}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                </section>
-              )}
 
               {/* Removed Cards */}
               {patchData.removedCards.length > 0 && (

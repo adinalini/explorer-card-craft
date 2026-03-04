@@ -11,16 +11,16 @@ export const NavigationButtons = ({ sizeVariant = "default" }: NavigationButtons
   const [showTools, setShowTools] = useState(false);
   
   const isDefault = sizeVariant === "default";
-  const paddingClass = isDefault ? "p-4 sm:p-6 md:p-8" : "p-3";
-  const titleClass = isDefault ? "text-lg sm:text-xl md:text-2xl" : "text-base";
-  const textClass = isDefault ? "text-xs sm:text-sm" : "text-xs";
-  const heightStyle = isDefault ? '459px' : '340px';
+  const paddingClass = isDefault ? "p-5 sm:p-7 md:p-9" : "p-3";
+  const titleClass = isDefault ? "text-xl sm:text-2xl md:text-[1.7rem]" : "text-base";
+  const textClass = isDefault ? "text-sm sm:text-base" : "text-xs";
+  const heightStyle = isDefault ? '505px' : '340px';
 
   const cellClass = `flex flex-col items-center justify-center ${paddingClass} bg-black/20 backdrop-blur-sm cursor-pointer hover:bg-black/30 transition-all duration-300 animate-fade-in`;
 
   if (showTools) {
     return (
-      <div className="relative grid grid-cols-2 w-80 sm:w-96 md:w-[420px] lg:w-[480px]" style={{ height: heightStyle }}>
+      <div className="relative grid grid-cols-2 w-80 sm:w-96 md:w-[462px] lg:w-[528px]" style={{ height: heightStyle }}>
         {/* Cross-style borders */}
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute left-1/2 top-0 bottom-0 w-px bg-black/30 -translate-x-0.5"></div>
@@ -75,7 +75,7 @@ export const NavigationButtons = ({ sizeVariant = "default" }: NavigationButtons
   }
 
   return (
-    <div className="relative grid grid-cols-2 w-80 sm:w-96 md:w-[420px] lg:w-[480px]" style={{ height: heightStyle }}>
+    <div className="relative grid grid-cols-2 w-80 sm:w-96 md:w-[462px] lg:w-[528px]" style={{ height: heightStyle }}>
       {/* Cross-style borders */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute left-1/2 top-0 bottom-0 w-px bg-black/30 -translate-x-0.5"></div>

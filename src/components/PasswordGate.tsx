@@ -26,7 +26,7 @@ export const PasswordGate = ({ onPasswordSubmit, isVerifying }: PasswordGateProp
         <Lock className="w-12 h-12 sm:w-16 sm:h-16 text-slate-300" />
         <div className="text-center">
           <h2 className="text-xl sm:text-2xl font-bold text-white mb-2">Enter Password</h2>
-          <p className="text-xs sm:text-sm text-slate-300">Please enter the password to access World of Origins</p>
+          <p className="text-xs sm:text-sm text-slate-300">Please enter the password to access Project O Zone</p>
         </div>
         <div className="w-full max-w-xs">
           <Input

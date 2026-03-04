@@ -227,7 +227,7 @@ const Draft = () => {
   return (
     <>
       <SEOHead 
-        title="Draft - World of Origins"
+        title="Draft - Project O Zone"
         description="Create or join draft battles! Start multiplayer drafting sessions in this epic gaming experience."
         image="/og-images/homepage.jpg"
         url="/draft"
@@ -260,7 +260,7 @@ const Draft = () => {
         <div className="relative z-10 min-h-screen flex flex-col items-center justify-center px-4">
           <div className="text-center space-y-12">
             <h1 className="text-6xl md:text-8xl font-bold text-foreground mb-16 drop-shadow-2xl">
-              Origins Draft Battler
+              Project O Draft Battler
             </h1>
             
             <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">

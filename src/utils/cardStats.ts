@@ -11,11 +11,12 @@ export type CardType = 'minion' | 'spell' | 'item'
 export interface CardStats {
   name: string
   cost: number
-  power?: number       // undefined for spells
-  defence?: number     // undefined for spells
+  power?: number       // undefined for spells/items
+  defense?: number     // undefined for spells/items
   cardType: CardType
   isLegendary: boolean
   status: 'active' | 'removed'
+  formerName?: string  // If this card was renamed from a previous name
 }
 
 export type PatchCardStats = Record<string, CardStats> // cardId -> stats
@@ -23,17 +24,281 @@ export type PatchCardStats = Record<string, CardStats> // cardId -> stats
 /**
  * Card stats indexed by patch ID.
  * Each entry contains the COMPLETE state of all cards in that patch.
- * This will be populated as the user provides card data.
  */
 export const patchCardStats: Record<string, PatchCardStats> = {
-  // Summer 2025 stats will be derived from Winter 2025 by reversing the known changes
-  // For now, placeholder - will be populated when user provides full data
+  'summer-2025': {
+    ali_baba: { name: 'Ali Baba', cost: 1, power: 1, defense: 1, cardType: 'minion', isLegendary: false, status: 'active' },
+    alice: { name: 'Alice', cost: 3, power: 2, defense: 4, cardType: 'minion', isLegendary: false, status: 'active' },
+    axe_throw: { name: 'Axe Throw', cost: 3, cardType: 'spell', isLegendary: false, status: 'active' },
+    baba_yaga: { name: 'Baba Yaga', cost: 4, power: 3, defense: 3, cardType: 'minion', isLegendary: false, status: 'active' },
+    baloo: { name: 'Baloo', cost: 5, power: 6, defense: 6, cardType: 'minion', isLegendary: false, status: 'active' },
+    bandersnatch: { name: 'Bandersnatch', cost: 8, power: 9, defense: 9, cardType: 'minion', isLegendary: false, status: 'active' },
+    banshee: { name: 'Banshee', cost: 2, power: 1, defense: 1, cardType: 'minion', isLegendary: false, status: 'active' },
+    beast: { name: 'Beast', cost: 4, power: 3, defense: 4, cardType: 'minion', isLegendary: false, status: 'active' },
+    beauty: { name: 'Beauty', cost: 3, power: 2, defense: 2, cardType: 'minion', isLegendary: false, status: 'active' },
+    big_bad_wolf: { name: 'Big Bad Wolf', cost: 3, power: 3, defense: 3, cardType: 'minion', isLegendary: false, status: 'active' },
+    billy: { name: 'Billy', cost: 2, power: 2, defense: 2, cardType: 'minion', isLegendary: false, status: 'active' },
+    black_knight: { name: 'Black Knight', cost: 3, power: 2, defense: 2, cardType: 'minion', isLegendary: false, status: 'active' },
+    blow_the_house_down: { name: 'Blow the House Down', cost: 7, cardType: 'spell', isLegendary: false, status: 'active' },
+    bridge_troll: { name: 'Bridge Troll', cost: 5, power: 1, defense: 5, cardType: 'minion', isLegendary: false, status: 'active' },
+    bullseye: { name: 'Bullseye', cost: 2, cardType: 'spell', isLegendary: false, status: 'active' },
+    card_soldier: { name: 'Card Soldier', cost: 2, power: 2, defense: 2, cardType: 'minion', isLegendary: false, status: 'active' },
+    cerberus: { name: 'Cerberus', cost: 6, power: 3, defense: 6, cardType: 'minion', isLegendary: false, status: 'active' },
+    cheshire: { name: 'Cheshire Cat', cost: 4, power: 4, defense: 4, cardType: 'minion', isLegendary: false, status: 'active' },
+    christopher: { name: 'Christopher Robin', cost: 4, power: 5, defense: 4, cardType: 'minion', isLegendary: false, status: 'active' },
+    concentrate: { name: 'Concentrate', cost: 2, cardType: 'spell', isLegendary: false, status: 'active' },
+    cowardly_lion: { name: 'Cowardly Lion', cost: 3, power: 4, defense: 4, cardType: 'minion', isLegendary: false, status: 'active' },
+    dark_omen: { name: 'Dark Omen', cost: 4, cardType: 'spell', isLegendary: false, status: 'active' },
+    death: { name: 'Death', cost: 5, power: 1, defense: 1, cardType: 'minion', isLegendary: true, status: 'active' },
+    defense_matrix: { name: 'Defense Matrix', cost: 1, cardType: 'spell', isLegendary: false, status: 'active' },
+    don_quixote: { name: 'Don Quixote', cost: 2, power: 2, defense: 3, cardType: 'minion', isLegendary: false, status: 'active' },
+    dorothy: { name: 'Dorothy', cost: 5, power: 4, defense: 4, cardType: 'minion', isLegendary: true, status: 'active' },
+    dr_frank: { name: 'Dr. Frankenstein', cost: 2, power: 1, defense: 1, cardType: 'minion', isLegendary: false, status: 'active' },
+    dracula: { name: 'Dracula', cost: 4, power: 3, defense: 3, cardType: 'minion', isLegendary: true, status: 'active' },
+    en_passant: { name: 'En Passant', cost: 3, cardType: 'spell', isLegendary: false, status: 'active' },
+    fairy_godmother: { name: 'Fairy Godmother', cost: 5, power: 3, defense: 3, cardType: 'minion', isLegendary: false, status: 'active' },
+    flying_monkey: { name: 'Flying Monkey', cost: 3, power: 3, defense: 3, cardType: 'minion', isLegendary: false, status: 'active' },
+    franks_monster: { name: "Frank's Monster", cost: 2, power: 4, defense: 4, cardType: 'minion', isLegendary: false, status: 'active' },
+    freeze: { name: 'Freeze', cost: 1, cardType: 'spell', isLegendary: false, status: 'active' },
+    friar_tuck: { name: 'Friar Tuck', cost: 1, power: 1, defense: 2, cardType: 'minion', isLegendary: false, status: 'active' },
+    galahad: { name: 'Sir Galahad', cost: 5, power: 4, defense: 3, cardType: 'minion', isLegendary: false, status: 'active' },
+    genie: { name: 'Genie', cost: 5, power: 3, defense: 3, cardType: 'minion', isLegendary: false, status: 'active' },
+    giant: { name: 'Giant', cost: 6, power: 7, defense: 7, cardType: 'minion', isLegendary: false, status: 'active' },
+    glinda: { name: 'Glinda', cost: 4, power: 2, defense: 5, cardType: 'minion', isLegendary: false, status: 'active' },
+    golden_egg: { name: 'Golden Egg', cost: 3, power: 0, defense: 1, cardType: 'minion', isLegendary: false, status: 'active' },
+    goldi: { name: 'Goldilocks', cost: 4, power: 2, defense: 4, cardType: 'minion', isLegendary: false, status: 'active' },
+    grendel: { name: 'Grendel', cost: 5, power: 5, defense: 5, cardType: 'minion', isLegendary: false, status: 'active' },
+    guy_of_gisborne: { name: 'Guy of Gisborne', cost: 2, power: 2, defense: 2, cardType: 'minion', isLegendary: false, status: 'active' },
+    hansel_gretel: { name: 'Hansel & Gretel', cost: 2, power: 1, defense: 1, cardType: 'minion', isLegendary: false, status: 'active' },
+    headless_horseman: { name: 'Headless Horseman', cost: 5, power: 0, defense: 5, cardType: 'minion', isLegendary: false, status: 'active' },
+    hercules: { name: 'Hercules', cost: 10, power: 20, defense: 20, cardType: 'minion', isLegendary: true, status: 'active' },
+    heroic_charge: { name: 'Heroic Charge', cost: 6, cardType: 'spell', isLegendary: false, status: 'active' },
+    huntsman: { name: 'Huntsman', cost: 2, power: 2, defense: 1, cardType: 'minion', isLegendary: false, status: 'active' },
+    hyde: { name: 'Hyde', cost: 4, power: 3, defense: 6, cardType: 'minion', isLegendary: false, status: 'active' },
+    imhotep: { name: 'Imhotep', cost: 4, power: 2, defense: 3, cardType: 'minion', isLegendary: false, status: 'active' },
+    its_alive: { name: "It's Alive!", cost: 3, cardType: 'spell', isLegendary: false, status: 'active' },
+    jack: { name: 'Jack', cost: 3, power: 4, defense: 2, cardType: 'minion', isLegendary: false, status: 'active' },
+    jack_in_the_box: { name: 'Jack in the Box', cost: 3, power: 2, defense: 1, cardType: 'minion', isLegendary: false, status: 'active' },
+    jekyll: { name: 'Dr. Jekyll', cost: 4, power: 3, defense: 6, cardType: 'minion', isLegendary: false, status: 'active' },
+    kanga: { name: 'Kanga', cost: 3, power: 2, defense: 4, cardType: 'minion', isLegendary: false, status: 'active' },
+    king_arthur: { name: 'King Arthur', cost: 7, power: 5, defense: 5, cardType: 'minion', isLegendary: true, status: 'active' },
+    king_shahryar: { name: 'King Shahryar', cost: 3, power: 1, defense: 4, cardType: 'minion', isLegendary: false, status: 'active' },
+    lady_of_the_lake: { name: 'Lady of the Lake', cost: 4, power: 3, defense: 4, cardType: 'minion', isLegendary: false, status: 'active' },
+    lancelot: { name: 'Sir Lancelot', cost: 4, power: 3, defense: 2, cardType: 'minion', isLegendary: false, status: 'active' },
+    legion_of_the_dead: { name: 'Legion of the Dead', cost: 7, cardType: 'spell', isLegendary: true, status: 'active' },
+    lightning_strike: { name: 'Lightning Strike', cost: 3, cardType: 'spell', isLegendary: false, status: 'active' },
+    little_john: { name: 'Little John', cost: 4, power: 4, defense: 4, cardType: 'minion', isLegendary: false, status: 'active' },
+    mad_hatter: { name: 'Mad Hatter', cost: 2, power: 2, defense: 3, cardType: 'minion', isLegendary: false, status: 'active' },
+    marian: { name: 'Maid Marian', cost: 4, power: 3, defense: 4, cardType: 'minion', isLegendary: false, status: 'active' },
+    merlin: { name: 'Merlin', cost: 6, power: 3, defense: 5, cardType: 'minion', isLegendary: true, status: 'active' },
+    moby: { name: 'Moby Dick', cost: 4, power: 4, defense: 4, cardType: 'minion', isLegendary: false, status: 'active' },
+    morgiana: { name: 'Morgiana', cost: 2, power: 1, defense: 4, cardType: 'minion', isLegendary: false, status: 'active' },
+    moriarty: { name: 'Professor Moriarty', cost: 7, power: 3, defense: 3, cardType: 'minion', isLegendary: false, status: 'active' },
+    mowgli: { name: 'Mowgli', cost: 6, power: 1, defense: 1, cardType: 'minion', isLegendary: false, status: 'active' },
+    mummy: { name: 'Mummy', cost: 3, power: 3, defense: 1, cardType: 'minion', isLegendary: false, status: 'active' },
+    musketeer: { name: 'Musketeer', cost: 2, power: 2, defense: 1, cardType: 'minion', isLegendary: false, status: 'active' },
+    ogre: { name: 'Ogre', cost: 2, power: 4, defense: 2, cardType: 'minion', isLegendary: false, status: 'active' },
+    paul_bunyan: { name: 'Paul Bunyan', cost: 7, power: 10, defense: 10, cardType: 'minion', isLegendary: false, status: 'active' },
+    pegasus: { name: 'Pegasus', cost: 2, power: 1, defense: 3, cardType: 'minion', isLegendary: false, status: 'active' },
+    phantom_coachman: { name: 'Phantom Coachman', cost: 10, power: 5, defense: 5, cardType: 'minion', isLegendary: false, status: 'active' },
+    piggy_bank: { name: 'Piggy Bank', cost: 3, cardType: 'spell', isLegendary: false, status: 'active' },
+    prince_charming: { name: 'Prince Charming', cost: 2, power: 2, defense: 1, cardType: 'minion', isLegendary: false, status: 'active' },
+    princess_aurora: { name: 'Princess Aurora', cost: 3, power: 5, defense: 5, cardType: 'minion', isLegendary: false, status: 'active' },
+    quasimodo: { name: 'Quasimodo', cost: 2, power: 3, defense: 3, cardType: 'minion', isLegendary: false, status: 'active' },
+    queen_guinevere: { name: 'Queen Guinevere', cost: 4, power: 2, defense: 3, cardType: 'minion', isLegendary: false, status: 'active' },
+    rain_of_arrows: { name: 'Rain of Arrows', cost: 4, cardType: 'spell', isLegendary: false, status: 'active' },
+    red: { name: 'Little Red Riding Hood', cost: 3, power: 4, defense: 3, cardType: 'minion', isLegendary: true, status: 'active' },
+    red_cap: { name: 'Redcap', cost: 2, power: 5, defense: 1, cardType: 'minion', isLegendary: false, status: 'active' },
+    reinforcements: { name: 'Reinforcements', cost: 1, cardType: 'spell', isLegendary: false, status: 'active' },
+    robinhood: { name: 'Robin Hood', cost: 5, power: 4, defense: 4, cardType: 'minion', isLegendary: true, status: 'active' },
+    roo: { name: 'Roo', cost: 2, power: 2, defense: 3, cardType: 'minion', isLegendary: false, status: 'active' },
+    rumple: { name: 'Rumpelstiltskin', cost: 2, power: 1, defense: 1, cardType: 'minion', isLegendary: false, status: 'active' },
+    scarecrow: { name: 'Scarecrow', cost: 2, power: 1, defense: 2, cardType: 'minion', isLegendary: false, status: 'active' },
+    scorpion: { name: 'Scorpion', cost: 3, power: 2, defense: 1, cardType: 'minion', isLegendary: false, status: 'active' },
+    sea_witch: { name: 'Sea Witch', cost: 3, power: 2, defense: 4, cardType: 'minion', isLegendary: false, status: 'active' },
+    searing_light: { name: 'Searing Light', cost: 0, cardType: 'spell', isLegendary: false, status: 'active' },
+    sheriff_of_nottingham: { name: 'Sheriff of Nottingham', cost: 3, power: 3, defense: 3, cardType: 'minion', isLegendary: false, status: 'active' },
+    sherlock: { name: 'Sherlock Holmes', cost: 4, power: 2, defense: 3, cardType: 'minion', isLegendary: false, status: 'active' },
+    shield_maiden: { name: 'Shield Maiden', cost: 3, power: 3, defense: 1, cardType: 'minion', isLegendary: false, status: 'active' },
+    siren: { name: 'Siren', cost: 3, power: 2, defense: 4, cardType: 'minion', isLegendary: false, status: 'active' },
+    snow_white: { name: 'Snow White', cost: 7, power: 5, defense: 4, cardType: 'minion', isLegendary: true, status: 'active' },
+    soldier: { name: 'Soldier', cost: 2, power: 2, defense: 1, cardType: 'minion', isLegendary: false, status: 'active' },
+    soul_surge: { name: 'Soul Surge', cost: 2, cardType: 'spell', isLegendary: false, status: 'active' },
+    stryga: { name: 'Stryga', cost: 3, power: 5, defense: 5, cardType: 'minion', isLegendary: false, status: 'active' },
+    the_green_knight: { name: 'The Green Knight', cost: 5, power: 5, defense: 5, cardType: 'minion', isLegendary: false, status: 'active' },
+    the_kraken: { name: 'The Kraken', cost: 8, power: 8, defense: 8, cardType: 'minion', isLegendary: true, status: 'active' },
+    the_white_queen: { name: 'The White Queen', cost: 2, power: 2, defense: 3, cardType: 'minion', isLegendary: false, status: 'active' },
+    three_blind_mice: { name: 'Three Blind Mice', cost: 2, power: 1, defense: 1, cardType: 'minion', isLegendary: false, status: 'active' },
+    three_musketeers: { name: 'Three Musketeers', cost: 5, power: 2, defense: 1, cardType: 'minion', isLegendary: false, status: 'active' },
+    three_not_so_little_pigs: { name: 'Three Not So Little Pigs', cost: 7, power: 4, defense: 4, cardType: 'minion', isLegendary: false, status: 'active' },
+    tin_soldier: { name: 'Tin Soldier', cost: 1, power: 2, defense: 1, cardType: 'minion', isLegendary: false, status: 'active' },
+    tin_woodman: { name: 'Tin Woodman', cost: 4, power: 3, defense: 5, cardType: 'minion', isLegendary: false, status: 'active' },
+    trash_for_treasure: { name: 'Trash for Treasure', cost: 1, cardType: 'spell', isLegendary: false, status: 'active' },
+    trojan_horse: { name: 'Trojan Horse', cost: 4, power: 0, defense: 1, cardType: 'minion', isLegendary: false, status: 'active' },
+    twister_toss: { name: 'Twister Toss', cost: 1, cardType: 'spell', isLegendary: false, status: 'active' },
+    ugly_duckling: { name: 'Ugly Duckling', cost: 1, power: 1, defense: 1, cardType: 'minion', isLegendary: false, status: 'active' },
+    underworld_flare: { name: 'Underworld Flare', cost: 2, cardType: 'spell', isLegendary: false, status: 'active' },
+    watson: { name: 'Watson', cost: 2, power: 2, defense: 3, cardType: 'minion', isLegendary: false, status: 'active' },
+    wendy: { name: 'Wendy Darling', cost: 3, power: 4, defense: 3, cardType: 'minion', isLegendary: false, status: 'active' },
+    white_rabbit: { name: 'White Rabbit', cost: 1, power: 1, defense: 2, cardType: 'minion', isLegendary: false, status: 'active' },
+    wicked_witch_of_the_west: { name: 'Wicked Witch of the West', cost: 4, power: 2, defense: 5, cardType: 'minion', isLegendary: false, status: 'active' },
+    wukong: { name: 'Sun Wukong', cost: 4, power: 3, defense: 3, cardType: 'minion', isLegendary: true, status: 'active' },
+    zorro: { name: 'Zorro', cost: 3, power: 2, defense: 4, cardType: 'minion', isLegendary: false, status: 'active' },
+  },
 
   'winter-2025': {
-    // User's card stats go here - only 2 provided so far, rest will come
-    ali_baba: { name: 'Ali Baba', cost: 1, power: 1, defence: 1, cardType: 'minion', isLegendary: false, status: 'active' },
-    alice: { name: 'Alice', cost: 3, power: 2, defence: 4, cardType: 'minion', isLegendary: false, status: 'active' },
-    // ... remaining cards will be added when user sends full list
+    ali_baba: { name: 'Ali Baba', cost: 1, power: 1, defense: 1, cardType: 'minion', isLegendary: false, status: 'active' },
+    alice: { name: 'Alice', cost: 3, power: 2, defense: 4, cardType: 'minion', isLegendary: false, status: 'active' },
+    animated_broomstick: { name: 'Animated Broomstick', cost: 2, power: 2, defense: 1, cardType: 'minion', isLegendary: false, status: 'active' },
+    axe_throw: { name: 'Axe Throw', cost: 2, cardType: 'spell', isLegendary: false, status: 'active' },
+    baba_yaga: { name: 'Baba Yaga', cost: 4, power: 3, defense: 3, cardType: 'minion', isLegendary: false, status: 'active' },
+    babe_the_blue_ox: { name: 'Babe the Blue Ox', cost: 7, power: 6, defense: 6, cardType: 'minion', isLegendary: false, status: 'active' },
+    baby_bear: { name: 'Baby Bear', cost: 2, power: 1, defense: 1, cardType: 'minion', isLegendary: false, status: 'active' },
+    bagheera: { name: 'Bagheera', cost: 1, power: 1, defense: 2, cardType: 'minion', isLegendary: false, status: 'active' },
+    baker: { name: 'Baker', cost: 3, power: 3, defense: 3, cardType: 'minion', isLegendary: false, status: 'active' },
+    baloo: { name: 'Baloo', cost: 5, power: 6, defense: 6, cardType: 'minion', isLegendary: false, status: 'active' },
+    bandersnatch: { name: 'Bandersnatch', cost: 8, power: 9, defense: 9, cardType: 'minion', isLegendary: false, status: 'active' },
+    banshee: { name: 'Banshee', cost: 2, power: 1, defense: 1, cardType: 'minion', isLegendary: false, status: 'active' },
+    beast: { name: 'Beast', cost: 3, power: 2, defense: 3, cardType: 'minion', isLegendary: false, status: 'active' },
+    beauty: { name: 'Beauty', cost: 4, power: 2, defense: 2, cardType: 'minion', isLegendary: false, status: 'active' },
+    big_bad_wolf: { name: 'Big Bad Wolf', cost: 3, power: 3, defense: 3, cardType: 'minion', isLegendary: false, status: 'active' },
+    bigfoot: { name: 'Bigfoot', cost: 5, power: 5, defense: 4, cardType: 'minion', isLegendary: false, status: 'active' },
+    billy: { name: 'Billy', cost: 2, power: 2, defense: 2, cardType: 'minion', isLegendary: false, status: 'active' },
+    black_knight: { name: 'Black Knight', cost: 3, power: 2, defense: 2, cardType: 'minion', isLegendary: false, status: 'active' },
+    blow_the_house_down: { name: 'Blow the House Down', cost: 7, cardType: 'spell', isLegendary: false, status: 'active' },
+    brandy: { name: 'Brandy', cost: 10, power: 8, defense: 10, cardType: 'minion', isLegendary: false, status: 'active' },
+    bridge_troll: { name: 'Bridge Troll', cost: 5, power: 4, defense: 6, cardType: 'minion', isLegendary: false, status: 'active' },
+    bullseye: { name: 'Bullseye', cost: 1, cardType: 'spell', isLegendary: false, status: 'active' },
+    butcher: { name: 'Butcher', cost: 3, power: 3, defense: 3, cardType: 'minion', isLegendary: false, status: 'active' },
+    cake: { name: 'Cake', cost: 2, cardType: 'item', isLegendary: false, status: 'active' },
+    captain_ahab: { name: 'Captain Ahab', cost: 4, power: 3, defense: 1, cardType: 'minion', isLegendary: false, status: 'active' },
+    card_soldier: { name: 'Card Soldier', cost: 2, power: 2, defense: 2, cardType: 'minion', isLegendary: false, status: 'active' },
+    cerberus: { name: 'Cerberus', cost: 6, power: 3, defense: 6, cardType: 'minion', isLegendary: false, status: 'active' },
+    cheshire: { name: 'Cheshire Cat', cost: 3, power: 4, defense: 2, cardType: 'minion', isLegendary: false, status: 'active' },
+    chimera: { name: 'Chimera', cost: 6, power: 6, defense: 6, cardType: 'minion', isLegendary: false, status: 'active' },
+    christopher: { name: 'Christopher Robin', cost: 4, power: 5, defense: 4, cardType: 'minion', isLegendary: false, status: 'active' },
+    concentrate: { name: 'Concentrate', cost: 2, cardType: 'spell', isLegendary: false, status: 'active' },
+    cowardly_lion: { name: 'Cowardly Lion', cost: 3, power: 2, defense: 5, cardType: 'minion', isLegendary: false, status: 'active' },
+    dark_omen: { name: 'Dark Omen', cost: 3, cardType: 'spell', isLegendary: false, status: 'active' },
+    death: { name: 'Death', cost: 5, power: 1, defense: 1, cardType: 'minion', isLegendary: true, status: 'active' },
+    defense_matrix: { name: 'Defense Matrix', cost: 1, cardType: 'spell', isLegendary: false, status: 'active' },
+    don_quixote: { name: 'Don Quixote', cost: 2, power: 2, defense: 3, cardType: 'minion', isLegendary: false, status: 'active' },
+    dorothy: { name: 'Dorothy', cost: 5, power: 4, defense: 4, cardType: 'minion', isLegendary: true, status: 'active' },
+    dr_frank: { name: 'Dr. Frankenstein', cost: 2, power: 1, defense: 1, cardType: 'minion', isLegendary: false, status: 'active' },
+    dracula: { name: 'Dracula', cost: 4, power: 3, defense: 3, cardType: 'minion', isLegendary: true, status: 'active' },
+    drop_bear: { name: 'Drop Bear', cost: 4, power: 3, defense: 2, cardType: 'minion', isLegendary: false, status: 'active' },
+    en_passant: { name: 'En Passant', cost: 3, cardType: 'spell', isLegendary: false, status: 'active' },
+    fairy_godmother: { name: 'Fairy Godmother', cost: 5, power: 3, defense: 3, cardType: 'minion', isLegendary: false, status: 'active' },
+    first_aid: { name: 'First Aid', cost: 1, cardType: 'spell', isLegendary: false, status: 'active' },
+    flying_dutchman: { name: 'The Flying Dutchman', cost: 5, power: 0, defense: 5, cardType: 'minion', isLegendary: false, status: 'active' },
+    flying_monkey: { name: 'Flying Monkey', cost: 3, power: 2, defense: 3, cardType: 'minion', isLegendary: false, status: 'active' },
+    franks_monster: { name: "Frank's Monster", cost: 2, power: 4, defense: 4, cardType: 'minion', isLegendary: false, status: 'active' },
+    freeze: { name: 'Freeze', cost: 1, cardType: 'spell', isLegendary: false, status: 'active' },
+    galahad: { name: 'Sir Galahad', cost: 5, power: 4, defense: 3, cardType: 'minion', isLegendary: false, status: 'active' },
+    genie: { name: 'Genie', cost: 5, power: 3, defense: 3, cardType: 'minion', isLegendary: false, status: 'active' },
+    glinda: { name: 'Glinda', cost: 4, power: 2, defense: 5, cardType: 'minion', isLegendary: false, status: 'active' },
+    golden_egg: { name: 'Golden Egg', cost: 3, power: 0, defense: 1, cardType: 'minion', isLegendary: false, status: 'active' },
+    goldi: { name: 'Goldilocks', cost: 4, power: 2, defense: 4, cardType: 'minion', isLegendary: true, status: 'active' },
+    grendel: { name: 'Grendel', cost: 5, power: 5, defense: 5, cardType: 'minion', isLegendary: false, status: 'active' },
+    guy_of_gisborne: { name: 'Guy of Gisborne', cost: 2, power: 2, defense: 2, cardType: 'minion', isLegendary: false, status: 'active' },
+    hansel_gretel: { name: 'Hansel & Gretel', cost: 2, power: 1, defense: 1, cardType: 'minion', isLegendary: false, status: 'active' },
+    hare: { name: 'Hare', cost: 5, power: 4, defense: 1, cardType: 'minion', isLegendary: false, status: 'active' },
+    headless_horseman: { name: 'Headless Horseman', cost: 5, power: 0, defense: 5, cardType: 'minion', isLegendary: false, status: 'active' },
+    hercules: { name: 'Hercules', cost: 10, power: 20, defense: 20, cardType: 'minion', isLegendary: true, status: 'active' },
+    heroic_charge: { name: 'Heroic Charge', cost: 6, cardType: 'spell', isLegendary: false, status: 'active' },
+    huck_finn: { name: 'Huck Finn', cost: 1, power: 2, defense: 1, cardType: 'minion', isLegendary: false, status: 'active' },
+    huntsman: { name: 'Huntsman', cost: 2, power: 2, defense: 1, cardType: 'minion', isLegendary: false, status: 'active' },
+    hyde: { name: 'Hyde', cost: 4, power: 3, defense: 6, cardType: 'minion', isLegendary: false, status: 'active' },
+    imhotep: { name: 'Imhotep', cost: 4, power: 2, defense: 3, cardType: 'minion', isLegendary: false, status: 'active' },
+    impundulu: { name: 'Impundulu', cost: 6, power: 3, defense: 6, cardType: 'minion', isLegendary: false, status: 'active' },
+    its_alive: { name: "It's Alive!", cost: 3, cardType: 'spell', isLegendary: false, status: 'active' },
+    jack: { name: 'Jack', cost: 3, power: 4, defense: 2, cardType: 'minion', isLegendary: false, status: 'active' },
+    jack_in_the_box: { name: 'Jack in the Box', cost: 2, power: 2, defense: 1, cardType: 'minion', isLegendary: false, status: 'active' },
+    jacks_giant: { name: "Jack's Giant", cost: 7, power: 8, defense: 8, cardType: 'minion', isLegendary: false, status: 'active', formerName: 'Giant' },
+    jekyll: { name: 'Dr. Jekyll', cost: 4, power: 3, defense: 6, cardType: 'minion', isLegendary: false, status: 'active' },
+    kanga: { name: 'Kanga', cost: 3, power: 2, defense: 4, cardType: 'minion', isLegendary: false, status: 'active' },
+    king_arthur: { name: 'King Arthur', cost: 7, power: 5, defense: 5, cardType: 'minion', isLegendary: true, status: 'active' },
+    king_shahryar: { name: 'King Shahryar', cost: 3, power: 1, defense: 4, cardType: 'minion', isLegendary: false, status: 'active' },
+    koschei: { name: 'Koschei', cost: 6, power: 3, defense: 3, cardType: 'minion', isLegendary: false, status: 'active' },
+    lady_of_the_lake: { name: 'Lady of the Lake', cost: 2, power: 2, defense: 2, cardType: 'minion', isLegendary: false, status: 'active' },
+    lancelot: { name: 'Sir Lancelot', cost: 4, power: 2, defense: 2, cardType: 'minion', isLegendary: false, status: 'active' },
+    legion_of_the_dead: { name: 'Legion of the Dead', cost: 7, cardType: 'spell', isLegendary: true, status: 'active' },
+    lightning_strike: { name: 'Lightning Strike', cost: 3, cardType: 'spell', isLegendary: false, status: 'active' },
+    little_john: { name: 'Little John', cost: 4, power: 4, defense: 4, cardType: 'minion', isLegendary: false, status: 'active' },
+    mad_hatter: { name: 'Mad Hatter', cost: 2, power: 2, defense: 3, cardType: 'minion', isLegendary: false, status: 'active' },
+    marian: { name: 'Maid Marian', cost: 4, power: 3, defense: 4, cardType: 'minion', isLegendary: false, status: 'active' },
+    mary: { name: 'Mary', cost: 3, power: 1, defense: 1, cardType: 'minion', isLegendary: false, status: 'active' },
+    merlin: { name: 'Merlin', cost: 6, power: 3, defense: 5, cardType: 'minion', isLegendary: true, status: 'active' },
+    moby: { name: 'Moby Dick', cost: 4, power: 4, defense: 4, cardType: 'minion', isLegendary: false, status: 'active' },
+    momotaro: { name: 'Momotaro', cost: 2, power: 1, defense: 1, cardType: 'minion', isLegendary: false, status: 'active' },
+    morgan_le_fay: { name: 'Morgan le Fay', cost: 4, power: 4, defense: 4, cardType: 'minion', isLegendary: false, status: 'active' },
+    morgiana: { name: 'Morgiana', cost: 2, power: 2, defense: 2, cardType: 'minion', isLegendary: false, status: 'active' },
+    moriarty: { name: 'Professor Moriarty', cost: 7, power: 3, defense: 3, cardType: 'minion', isLegendary: false, status: 'active' },
+    mortal_coil: { name: 'Mortal Coil', cost: 1, cardType: 'item', isLegendary: false, status: 'active' },
+    mothman: { name: 'Mothman', cost: 2, power: 3, defense: 2, cardType: 'minion', isLegendary: false, status: 'active' },
+    mowgli: { name: 'Mowgli', cost: 6, power: 1, defense: 1, cardType: 'minion', isLegendary: false, status: 'active' },
+    mummy: { name: 'Mummy', cost: 1, power: 1, defense: 1, cardType: 'minion', isLegendary: false, status: 'active' },
+    musketeer: { name: 'Musketeer', cost: 2, power: 2, defense: 1, cardType: 'minion', isLegendary: false, status: 'active' },
+    obliterate: { name: 'Obliterate', cost: 10, cardType: 'spell', isLegendary: false, status: 'active' },
+    // ogre removed in winter-2025
+    paul_bunyan: { name: 'Paul Bunyan', cost: 7, power: 10, defense: 10, cardType: 'minion', isLegendary: false, status: 'active' },
+    pegasus: { name: 'Pegasus', cost: 2, power: 1, defense: 3, cardType: 'minion', isLegendary: false, status: 'active' },
+    phantom_coachman: { name: 'Phantom Coachman', cost: 10, power: 5, defense: 5, cardType: 'minion', isLegendary: false, status: 'active' },
+    piggy_bank: { name: 'Piggy Bank', cost: 3, cardType: 'spell', isLegendary: false, status: 'active' },
+    piglet: { name: 'Piglet', cost: 1, power: 1, defense: 1, cardType: 'minion', isLegendary: false, status: 'active' },
+    popeye: { name: 'Popeye', cost: 2, power: 3, defense: 2, cardType: 'minion', isLegendary: false, status: 'active' },
+    prince_charming: { name: 'Prince Charming', cost: 2, power: 2, defense: 1, cardType: 'minion', isLegendary: false, status: 'active' },
+    princess_aurora: { name: 'Princess Aurora', cost: 3, power: 5, defense: 5, cardType: 'minion', isLegendary: false, status: 'active' },
+    quasimodo: { name: 'Quasimodo', cost: 2, power: 3, defense: 4, cardType: 'minion', isLegendary: false, status: 'active' },
+    queen_guinevere: { name: 'Queen Guinevere', cost: 4, power: 2, defense: 3, cardType: 'minion', isLegendary: false, status: 'active' },
+    rain_of_arrows: { name: 'Rain of Arrows', cost: 5, cardType: 'spell', isLegendary: false, status: 'active' },
+    red: { name: 'Little Red Riding Hood', cost: 5, power: 5, defense: 4, cardType: 'minion', isLegendary: true, status: 'active' },
+    red_cap: { name: 'Redcap', cost: 2, power: 4, defense: 1, cardType: 'minion', isLegendary: false, status: 'active' },
+    reinforcements: { name: 'Reinforcements', cost: 1, cardType: 'spell', isLegendary: false, status: 'active' },
+    robinhood: { name: 'Robin Hood', cost: 7, power: 4, defense: 4, cardType: 'minion', isLegendary: true, status: 'active' },
+    roo: { name: 'Roo', cost: 2, power: 2, defense: 3, cardType: 'minion', isLegendary: false, status: 'active' },
+    rumple: { name: 'Rumpelstiltskin', cost: 2, power: 1, defense: 1, cardType: 'minion', isLegendary: false, status: 'active' },
+    run_over: { name: 'Run Over', cost: 1, cardType: 'spell', isLegendary: false, status: 'active' },
+    sandman: { name: 'Sandman', cost: 6, power: 5, defense: 5, cardType: 'minion', isLegendary: false, status: 'active' },
+    scarecrow: { name: 'Scarecrow', cost: 2, power: 1, defense: 2, cardType: 'minion', isLegendary: false, status: 'active' },
+    scorpion: { name: 'Scorpion', cost: 3, power: 2, defense: 1, cardType: 'minion', isLegendary: false, status: 'active' },
+    sea_witch: { name: 'Sea Witch', cost: 3, power: 2, defense: 4, cardType: 'minion', isLegendary: false, status: 'active' },
+    searing_light: { name: 'Searing Light', cost: 1, cardType: 'spell', isLegendary: false, status: 'active' },
+    shahrazad: { name: 'Shahrazad', cost: 2, power: 1, defense: 4, cardType: 'minion', isLegendary: false, status: 'active' },
+    sheriff_of_nottingham: { name: 'Sheriff of Nottingham', cost: 3, power: 2, defense: 3, cardType: 'minion', isLegendary: false, status: 'active' },
+    sherlock: { name: 'Sherlock Holmes', cost: 4, power: 2, defense: 3, cardType: 'minion', isLegendary: false, status: 'active' },
+    shield_maiden: { name: 'Shield Maiden', cost: 3, power: 3, defense: 1, cardType: 'minion', isLegendary: false, status: 'active' },
+    sinbad: { name: 'Sinbad', cost: 5, power: 3, defense: 5, cardType: 'minion', isLegendary: false, status: 'active' },
+    siren: { name: 'Siren', cost: 3, power: 2, defense: 4, cardType: 'minion', isLegendary: false, status: 'active' },
+    snow_white: { name: 'Snow White', cost: 7, power: 5, defense: 4, cardType: 'minion', isLegendary: true, status: 'active' },
+    soldier: { name: 'Soldier', cost: 2, power: 2, defense: 1, cardType: 'minion', isLegendary: false, status: 'active' },
+    soul_surge: { name: 'Soul Surge', cost: 2, cardType: 'spell', isLegendary: false, status: 'active' },
+    stryga: { name: 'Stryga', cost: 3, power: 5, defense: 5, cardType: 'minion', isLegendary: false, status: 'active' },
+    the_green_knight: { name: 'The Green Knight', cost: 5, power: 5, defense: 5, cardType: 'minion', isLegendary: false, status: 'active' },
+    the_kraken: { name: 'The Kraken', cost: 8, power: 8, defense: 8, cardType: 'minion', isLegendary: false, status: 'active' },
+    the_white_queen: { name: 'The White Queen', cost: 2, power: 2, defense: 3, cardType: 'minion', isLegendary: false, status: 'active' },
+    three_blind_mice: { name: 'Three Blind Mice', cost: 2, power: 1, defense: 1, cardType: 'minion', isLegendary: false, status: 'active' },
+    three_musketeers: { name: 'Three Musketeers', cost: 5, power: 2, defense: 1, cardType: 'minion', isLegendary: false, status: 'active' },
+    three_not_so_little_pigs: { name: 'Three Not So Little Pigs', cost: 7, power: 4, defense: 4, cardType: 'minion', isLegendary: false, status: 'active' },
+    thumbelina: { name: 'Thumbelina', cost: 0, power: 1, defense: 1, cardType: 'minion', isLegendary: false, status: 'active' },
+    tin_woodman: { name: 'Tin Woodman', cost: 2, power: 2, defense: 1, cardType: 'minion', isLegendary: false, status: 'active' },
+    tinker_bell: { name: 'Tinker Bell', cost: 1, power: 1, defense: 1, cardType: 'minion', isLegendary: false, status: 'active' },
+    tortoise: { name: 'Tortoise', cost: 6, power: 0, defense: 5, cardType: 'minion', isLegendary: false, status: 'active' },
+    trash_for_treasure: { name: 'Trash for Treasure', cost: 1, cardType: 'spell', isLegendary: false, status: 'active' },
+    trojan_horse: { name: 'Trojan Horse', cost: 4, power: 0, defense: 1, cardType: 'minion', isLegendary: false, status: 'active' },
+    tuck: { name: 'Tuck', cost: 3, power: 3, defense: 3, cardType: 'minion', isLegendary: false, status: 'active', formerName: 'Friar Tuck' },
+    twister_toss: { name: 'Twister Toss', cost: 1, cardType: 'spell', isLegendary: false, status: 'active' },
+    ugly_duckling: { name: 'Ugly Duckling', cost: 1, power: 1, defense: 1, cardType: 'minion', isLegendary: false, status: 'active' },
+    underworld_flare: { name: 'Underworld Flare', cost: 2, cardType: 'spell', isLegendary: false, status: 'active' },
+    watson: { name: 'Watson', cost: 2, power: 2, defense: 3, cardType: 'minion', isLegendary: false, status: 'active' },
+    wendy: { name: 'Wendy Darling', cost: 3, power: 4, defense: 3, cardType: 'minion', isLegendary: false, status: 'active' },
+    white_rabbit: { name: 'White Rabbit', cost: 1, power: 1, defense: 2, cardType: 'minion', isLegendary: false, status: 'active' },
+    wicked_stepmother: { name: 'Wicked Stepmother', cost: 4, power: 2, defense: 4, cardType: 'minion', isLegendary: false, status: 'active' },
+    wicked_witch_of_the_west: { name: 'Wicked Witch of the West', cost: 4, power: 2, defense: 5, cardType: 'minion', isLegendary: false, status: 'active' },
+    winnie_the_pooh: { name: 'Winnie the Pooh', cost: 5, power: 5, defense: 5, cardType: 'minion', isLegendary: true, status: 'active' },
+    wukong: { name: 'Sun Wukong', cost: 4, power: 3, defense: 3, cardType: 'minion', isLegendary: true, status: 'active' },
+    yuki_onna: { name: 'Yuki-onna', cost: 2, power: 2, defense: 2, cardType: 'minion', isLegendary: false, status: 'active' },
+    zorro: { name: 'Zorro', cost: 3, power: 2, defense: 4, cardType: 'minion', isLegendary: false, status: 'active' },
   },
 }
 
@@ -48,17 +313,63 @@ export interface CardDiff {
     oldValue: any
     newValue: any
   }>
-  changeType: 'added' | 'removed' | 'modified'
+  changeType: 'added' | 'removed' | 'modified' | 'renamed'
+  formerName?: string
+  // Former card ID (for cards that were renamed and got a new ID)
+  formerCardId?: string
+}
+
+/**
+ * Name change mappings between patches.
+ * Maps old cardId -> new cardId for cards that were renamed with a new ID.
+ */
+export const cardIdRenames: Record<string, Record<string, string>> = {
+  'winter-2025': {
+    // old card ID -> new card ID
+    'friar_tuck': 'tuck',
+    'giant': 'jacks_giant',
+  },
 }
 
 export function computePatchDiff(oldPatchId: string, newPatchId: string): CardDiff[] {
   const oldStats = patchCardStats[oldPatchId] || {}
   const newStats = patchCardStats[newPatchId] || {}
+  const renames = cardIdRenames[newPatchId] || {}
+  const reverseRenames: Record<string, string> = {}
+  for (const [oldId, newId] of Object.entries(renames)) {
+    reverseRenames[newId] = oldId
+  }
   const diffs: CardDiff[] = []
+  const processedOldIds = new Set<string>()
+
+  // Check renamed cards first
+  for (const [oldId, newId] of Object.entries(renames)) {
+    processedOldIds.add(oldId)
+    const oldCard = oldStats[oldId]
+    const newCard = newStats[newId]
+    if (!oldCard || !newCard) continue
+
+    const changes: CardDiff['changes'] = []
+    if (oldCard.cost !== newCard.cost) changes.push({ field: 'cost', oldValue: oldCard.cost, newValue: newCard.cost })
+    if (oldCard.power !== newCard.power) changes.push({ field: 'power', oldValue: oldCard.power, newValue: newCard.power })
+    if (oldCard.defense !== newCard.defense) changes.push({ field: 'defense', oldValue: oldCard.defense, newValue: newCard.defense })
+    if (oldCard.cardType !== newCard.cardType) changes.push({ field: 'type', oldValue: oldCard.cardType, newValue: newCard.cardType })
+    if (oldCard.isLegendary !== newCard.isLegendary) changes.push({ field: 'legendary', oldValue: oldCard.isLegendary, newValue: newCard.isLegendary })
+
+    diffs.push({
+      cardId: newId,
+      cardName: newCard.name,
+      changes,
+      changeType: 'renamed',
+      formerName: oldCard.name,
+      formerCardId: oldId,
+    })
+  }
 
   // Check for removed and modified cards
   for (const [cardId, oldCard] of Object.entries(oldStats)) {
     if (oldCard.status === 'removed') continue
+    if (processedOldIds.has(cardId)) continue
 
     const newCard = newStats[cardId]
     if (!newCard || newCard.status === 'removed') {
@@ -73,21 +384,11 @@ export function computePatchDiff(oldPatchId: string, newPatchId: string): CardDi
 
     // Check for modifications
     const changes: CardDiff['changes'] = []
-    if (oldCard.cost !== newCard.cost) {
-      changes.push({ field: 'cost', oldValue: oldCard.cost, newValue: newCard.cost })
-    }
-    if (oldCard.power !== newCard.power) {
-      changes.push({ field: 'power', oldValue: oldCard.power, newValue: newCard.power })
-    }
-    if (oldCard.defence !== newCard.defence) {
-      changes.push({ field: 'defence', oldValue: oldCard.defence, newValue: newCard.defence })
-    }
-    if (oldCard.cardType !== newCard.cardType) {
-      changes.push({ field: 'type', oldValue: oldCard.cardType, newValue: newCard.cardType })
-    }
-    if (oldCard.isLegendary !== newCard.isLegendary) {
-      changes.push({ field: 'legendary', oldValue: oldCard.isLegendary, newValue: newCard.isLegendary })
-    }
+    if (oldCard.cost !== newCard.cost) changes.push({ field: 'cost', oldValue: oldCard.cost, newValue: newCard.cost })
+    if (oldCard.power !== newCard.power) changes.push({ field: 'power', oldValue: oldCard.power, newValue: newCard.power })
+    if (oldCard.defense !== newCard.defense) changes.push({ field: 'defense', oldValue: oldCard.defense, newValue: newCard.defense })
+    if (oldCard.cardType !== newCard.cardType) changes.push({ field: 'type', oldValue: oldCard.cardType, newValue: newCard.cardType })
+    if (oldCard.isLegendary !== newCard.isLegendary) changes.push({ field: 'legendary', oldValue: oldCard.isLegendary, newValue: newCard.isLegendary })
 
     if (changes.length > 0) {
       diffs.push({
@@ -99,9 +400,10 @@ export function computePatchDiff(oldPatchId: string, newPatchId: string): CardDi
     }
   }
 
-  // Check for new cards
+  // Check for new cards (not in old patch and not a rename target)
   for (const [cardId, newCard] of Object.entries(newStats)) {
     if (newCard.status === 'removed') continue
+    if (reverseRenames[cardId]) continue // handled as rename
     if (!oldStats[cardId] || oldStats[cardId].status === 'removed') {
       diffs.push({
         cardId,
@@ -117,7 +419,6 @@ export function computePatchDiff(oldPatchId: string, newPatchId: string): CardDi
 
 /**
  * Get the stats for a card at a specific patch.
- * Falls back to the latest available patch that has stats for this card.
  */
 export function getCardStatsAtPatch(cardId: string, patchId: string): CardStats | undefined {
   const stats = patchCardStats[patchId]

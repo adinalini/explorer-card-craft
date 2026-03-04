@@ -1,0 +1,1 @@
+UPDATE public.site_settings SET setting_value = 'origins2026' WHERE setting_key = 'site_password';

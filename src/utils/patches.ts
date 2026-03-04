@@ -38,7 +38,7 @@ export const PATCHES: PatchDefinition[] = [
 export const LATEST_PATCH = PATCHES[PATCHES.length - 1]
 
 /** Get the latest patch that has cards (i.e., is released / has data) */
-export const CURRENT_PATCH = PATCHES.find(p => p.id === 'winter-2025')!
+export const CURRENT_PATCH = PATCHES.find(p => p.id === 'gdc-2026')!
 
 /** Get a patch by its ID */
 export function getPatchById(id: string): PatchDefinition | undefined {

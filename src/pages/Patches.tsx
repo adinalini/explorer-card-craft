@@ -24,8 +24,8 @@ const Patches = () => {
   return (
     <>
       <SEOHead
-        title="Patch Notes - Project O Zone"
-        description="View all patch notes and updates for Project O Zone card game"
+        title="Patch Notes - World of Origins"
+        description="View all patch notes and updates for World of Origins"
       />
       <div className="min-h-screen bg-gradient-to-b from-background via-background to-primary/5">
         {/* Header */}

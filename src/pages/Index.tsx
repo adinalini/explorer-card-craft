@@ -13,6 +13,7 @@ import { PasswordGate } from "@/components/PasswordGate"
 import { NavigationButtons } from "@/components/NavigationButtons"
 import whiteRabbit from "@/assets/white_rabbit.webp"
 import projectOLogo from "/lovable-uploads/219c067b-3ac3-4955-96d1-76dc64562ea1.png"
+import originsLogo from "@/assets/origins-logo.png"
 
 const Index = () => {
   // Force rebuild to clear videoRef cache issue
@@ -151,7 +152,7 @@ const Index = () => {
     if (isValid) {
       toast({
         title: "Access granted",
-        description: "Welcome to Project O Zone!"
+        description: "Welcome to World of Origins!"
       })
       
       // Redirect to intended destination if it exists
@@ -189,8 +190,8 @@ const Index = () => {
   return (
     <>
       <SEOHead 
-        title="Project O Zone"
-        description="Master the cards, build decks, battle in drafts, and explore random strategies! Your complete Project O gaming hub."
+        title="World of Origins"
+        description="Master the cards, build decks, battle in drafts, and explore random strategies! Your complete Origins TCG gaming hub."
         image="/og-images/homepage.jpg"
         url="/"
       />
@@ -275,51 +276,75 @@ const Index = () => {
         {/* Abstract Blobs - Removed as requested */}
         
 
-        {/* Top - Project O Zone Title with Logo */}
+        {/* Top - World of Origins Title */}
         <div className="relative z-10 h-[18vh] sm:h-[22vh] flex flex-col items-center justify-center px-4 py-4">
-          <div className={`flex items-center justify-center text-5xl sm:text-6xl md:text-8xl font-bold transition-colors duration-500 drop-shadow-2xl leading-[1.05] ${videosLoaded ? 'opacity-75' : ''}`}>
-            <span 
-              className="inline-block bg-gradient-to-r leading-none align-baseline pb-[0.18em]"
-              style={{ 
-                background: 'var(--title-gradient)',
-                WebkitBackgroundClip: 'text',
-                backgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundSize: '100% 200%',
-                backgroundPosition: '50% 0%'
-              }}
-            >
-              Project{" "}
-            </span>
-            {/* Logo O with CSS masking */}
-            <div 
-              aria-label="Project O Logo"
-              className="inline-block w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 lg:w-24 lg:h-24 mx-1 sm:mx-2 md:mx-3"
-              style={{
-                background: 'var(--title-gradient)',
-                WebkitMaskImage: `url(${projectOLogo})`,
-                maskImage: `url(${projectOLogo})`,
-                WebkitMaskRepeat: 'no-repeat',
-                maskRepeat: 'no-repeat',
-                WebkitMaskSize: 'contain',
-                maskSize: 'contain',
-                WebkitMaskPosition: 'center',
-                maskPosition: 'center',
-              }}
-            />
-            <span 
-              className="inline-block bg-gradient-to-r leading-none align-baseline pb-[0.18em]"
-              style={{ 
-                background: 'var(--title-gradient)',
-                WebkitBackgroundClip: 'text',
-                backgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundSize: '100% 200%',
-                backgroundPosition: '50% 0%'
-              }}
-            >
-              Zone
-            </span>
+          <div className={`logo-container transition-all duration-500 ${videosLoaded ? 'opacity-75' : ''}`} style={{ maxWidth: '900px', width: '90vw' }}>
+            <svg viewBox="0 0 1200 280" xmlns="http://www.w3.org/2000/svg" className="w-full h-auto drop-shadow-2xl">
+              <defs>
+                <filter id="bevel" x="-50%" y="-50%" width="200%" height="200%">
+                  <feGaussianBlur in="SourceAlpha" stdDeviation="3" result="blur"/>
+                  <feOffset in="blur" dx="-6" dy="-6" result="offsetBlur"/>
+                  <feComponentTransfer>
+                    <feFuncA type="linear" slope="0.4"/>
+                  </feComponentTransfer>
+                  <feMerge>
+                    <feMergeNode/>
+                    <feMergeNode in="SourceGraphic"/>
+                  </feMerge>
+                </filter>
+                <filter id="outline" x="-50%" y="-50%" width="200%" height="200%">
+                  <feMorphology operator="dilate" radius="5" in="SourceAlpha" result="thick"/>
+                  <feFlood floodColor="#0a0e1f" result="color"/>
+                  <feComposite in="color" in2="thick" operator="in" result="outline"/>
+                  <feMerge>
+                    <feMergeNode in="outline"/>
+                    <feMergeNode in="SourceGraphic"/>
+                  </feMerge>
+                </filter>
+                <linearGradient id="cyanGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#00ffea"/>
+                  <stop offset="50%" stopColor="#00f8d8"/>
+                  <stop offset="100%" stopColor="#00e0c0"/>
+                </linearGradient>
+              </defs>
+              <g filter="url(#outline)">
+                <text
+                  filter="url(#bevel)"
+                  x="600"
+                  y="180"
+                  fontFamily="Impact, Arial Black, sans-serif"
+                  fontSize="165"
+                  fontWeight="900"
+                  fill="url(#cyanGrad)"
+                  textAnchor="middle"
+                  letterSpacing="-0.02em"
+                  stroke="#0a0e1f"
+                  strokeWidth="8"
+                  paintOrder="stroke fill"
+                  fontStyle="italic"
+                >
+                  WORLD OF ORIGINS
+                </text>
+              </g>
+              <g opacity="0.25">
+                <text
+                  x="600"
+                  y="180"
+                  fontFamily="Impact, Arial Black, sans-serif"
+                  fontSize="165"
+                  fontWeight="900"
+                  fill="none"
+                  stroke="#ffffff"
+                  strokeWidth="12"
+                  strokeDasharray="0 25 0 25"
+                  textAnchor="middle"
+                  letterSpacing="-0.02em"
+                  opacity="0.4"
+                >
+                  WORLD OF ORIGINS
+                </text>
+              </g>
+            </svg>
           </div>
         </div>
 
@@ -455,7 +480,7 @@ const Index = () => {
         <div className="absolute bottom-2 left-1/2 -translate-x-1/2 z-20 px-4 max-w-full pointer-events-none">
           <div className="bg-black/20 backdrop-blur-sm px-3 sm:px-6 py-2 rounded-md max-w-full">
             <p className="text-[10px] sm:text-xs text-slate-300 text-center leading-tight">
-              This is not an official Project O website. Project O Zone is a community initiative. All assets used with permission.
+              This is not an official Origins TCG website. World of Origins is a community initiative. All assets used with permission.
             </p>
           </div>
         </div>

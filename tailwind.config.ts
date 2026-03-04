@@ -18,6 +18,9 @@ export default {
 			}
 		},
 		extend: {
+			screens: {
+				'3xl': '1920px',
+			},
 			gridTemplateColumns: {
 				'13': 'repeat(13, minmax(0, 1fr))',
 			},

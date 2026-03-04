@@ -276,7 +276,21 @@ const Index = () => {
         
 
         {/* Top - World of Origins Title with Logo */}
-        <div className="relative z-10 h-[18vh] sm:h-[22vh] flex flex-col items-center justify-center px-4 py-4">
+      <div className="relative z-10 h-[18vh] sm:h-[22vh] flex flex-col items-center justify-center px-4 py-4">
+          {/* SVG filter for scratched/scarred text effect */}
+          <svg width="0" height="0" className="absolute">
+            <defs>
+              <filter id="scar-filter" x="-5%" y="-5%" width="110%" height="110%">
+                <feTurbulence type="fractalNoise" baseFrequency="0.03 0.15" numOctaves="3" seed="2" result="noise" />
+                <feColorMatrix type="luminanceToAlpha" in="noise" result="noiseAlpha" />
+                <feComponentTransfer in="noiseAlpha" result="scars">
+                  <feFuncA type="linear" slope="3" intercept="-1" />
+                </feComponentTransfer>
+                <feGaussianBlur in="scars" stdDeviation="0.3" result="blurredScars" />
+                <feComposite in="SourceGraphic" in2="blurredScars" operator="out" result="scarredText" />
+              </filter>
+            </defs>
+          </svg>
           <div className={`flex items-center justify-center text-5xl sm:text-6xl md:text-8xl font-bold transition-colors duration-500 drop-shadow-2xl leading-[1.05] ${videosLoaded ? 'opacity-75' : ''}`}>
             <span 
               className="inline-block bg-gradient-to-r leading-none align-baseline pb-[0.18em]"
@@ -286,7 +300,8 @@ const Index = () => {
                 backgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
                 backgroundSize: '100% 200%',
-                backgroundPosition: '50% 0%'
+                backgroundPosition: '50% 0%',
+                filter: 'url(#scar-filter)'
               }}
             >
               World of
@@ -315,7 +330,8 @@ const Index = () => {
                 backgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
                 backgroundSize: '100% 200%',
-                backgroundPosition: '50% 0%'
+                backgroundPosition: '50% 0%',
+                filter: 'url(#scar-filter)'
               }}
             >
               rigins

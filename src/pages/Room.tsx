@@ -2076,7 +2076,7 @@ const Room = () => {
               Back to Home
             </Button>
             <div className="text-center text-white">
-              <h1 className="text-xl md:text-2xl font-bold mb-1">Project O Draft Battle</h1>
+              <h1 className="text-xl md:text-2xl font-bold mb-1">Origins TCG Draft Battle</h1>
               <p className="text-sm md:text-base">Draft Type: {getDraftTypeDisplay(room.draft_type)}</p>
             </div>
             <div className="flex items-center gap-2">

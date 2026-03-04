@@ -323,18 +323,6 @@ const Index = () => {
           </div>
         </div>
 
-        {/* Glowing Pumpkin - Desktop: center between title and buttons, Mobile: below buttons */}
-        {!isLoading && isAuthenticated && (
-          <div 
-            onClick={() => navigate('/halloween')}
-            className="hidden md:block absolute top-[14vh] sm:top-[18vh] left-1/2 -translate-x-1/2 z-20 cursor-pointer group"
-          >
-            <div className="relative text-[115px] hover:scale-105 transition-transform duration-500">
-              🎃
-              <div className="absolute inset-0 blur-2xl bg-orange-500/40 group-hover:bg-orange-400/60 transition-all duration-500 animate-[pulse_6s_ease-in-out_infinite]" />
-            </div>
-          </div>
-        )}
 
         {/* Desktop Layout - Rabbit Left, Red Character Right, Buttons Center */}
         <div className="hidden md:block relative z-10 h-[82vh] sm:h-[78vh]">
@@ -357,18 +345,6 @@ const Index = () => {
             />
           </div>
 
-          {/* Right Side - Red Character (hidden first when space is tight, centered to rabbit height) */}
-          <div className="absolute bottom-0 right-0 z-5 hidden 2xl:block">
-            <img 
-              src="/lovable-uploads/eba0e4ff-4de0-48d3-89b7-2c962d6b6c27.png" 
-              alt="Red Character" 
-              className="w-[551px] object-contain animate-fade-in transform translate-x-24"
-              style={{ 
-                animationDelay: '0.2s',
-                transform: 'translateX(96px) translateY(-46px)' // Center to rabbit height + translate out
-              }}
-            />
-          </div>
 
           {/* Rabbit only layout (when red is hidden but rabbit fits) - buttons moved to right */}
           <div className="absolute bottom-0 left-0 z-5 hidden xl:block 2xl:hidden">
@@ -427,18 +403,6 @@ const Index = () => {
             )}
           </div>
 
-          {/* Glowing Pumpkin - Mobile: below buttons */}
-          {!isLoading && isAuthenticated && (
-            <div 
-              onClick={() => navigate('/halloween')}
-              className="flex-shrink-0 cursor-pointer group"
-            >
-              <div className="relative text-[90px] active:scale-95 transition-transform duration-500">
-                🎃
-                <div className="absolute inset-0 blur-2xl bg-orange-500/40 group-active:bg-orange-400/60 transition-all duration-500 animate-[pulse_6s_ease-in-out_infinite]" />
-              </div>
-            </div>
-          )}
 
           {/* Rabbit below buttons on mobile */}
           <div className="flex-shrink-0 flex justify-center">

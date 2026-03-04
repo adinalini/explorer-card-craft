@@ -92,9 +92,14 @@ const News = () => {
                 <h2 className="text-2xl md:text-3xl font-bold text-white mb-4">{selected.title}</h2>
                 <div className="prose prose-invert prose-sm max-w-none">
                   {selected.content.split("\n\n").map((p, i) => (
-                    <p key={i} className="text-slate-300 mb-3 leading-relaxed">
-                      {p}
-                    </p>
+                    <p key={i} className="text-slate-300 mb-3 leading-relaxed"
+                      dangerouslySetInnerHTML={{
+                        __html: p.replace(
+                          /\[([^\]]+)\]\((https?:\/\/[^)]+)\)/g,
+                          '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-primary underline hover:text-primary/80">$1</a>'
+                        )
+                      }}
+                    />
                   ))}
                 </div>
                 {selected.images && selected.images.length > 0 && (

@@ -1,10 +1,13 @@
 import { useState, useRef, useEffect } from "react"
 import { History } from "lucide-react"
 import { oldCardImages } from "@/utils/oldCardImages"
+import { getAllPatchesOrdered, CURRENT_PATCH } from "@/utils/patches"
 
-// Define which patches exist and which cards have changes in them
+// Build version options from the patch registry
 const patchVersions = [
-  { patch: "v1.0.0.40", label: "v1.0.0.40" },
+  ...getAllPatchesOrdered()
+    .filter(p => p.id !== CURRENT_PATCH.id) // exclude current (it's added as "Current")
+    .map(p => ({ patch: p.id, label: p.displayName })),
   { patch: "current", label: "Current" },
 ]
 
@@ -85,7 +88,7 @@ export function CardVersionSelector({ cardId, onVersionChange, selectedVersion }
 }
 
 export function getOldCardImage(cardId: string, version: string): string | null {
-  if (version === "v1.0.0.40") {
+  if (version === "summer-2025" || version === "v1.0.0.40") {
     return oldCardImages[cardId] || null
   }
   return null

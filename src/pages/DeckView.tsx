@@ -12,6 +12,7 @@ import { ArrowLeft, Share, Copy, Check, Flame, Droplet, Cloud, Bomb, Plus, Credi
 import { toast } from "@/hooks/use-toast";
 import { SEOHead } from "@/components/SEOHead";
 import { getOriginalCardImage, getDeckValidationIssues } from "@/utils/cardChanges";
+import { getPatchDisplayName } from "@/utils/patches";
 
 interface Deck {
   id: string;
@@ -258,7 +259,7 @@ const DeckView = () => {
             <div>
               <h3 className="font-semibold text-card-foreground mb-2">Patch</h3>
               <p className="text-muted-foreground">
-                {deck.patch}
+                {getPatchDisplayName(deck.patch)}
               </p>
             </div>
           </div>

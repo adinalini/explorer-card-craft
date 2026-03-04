@@ -17,7 +17,7 @@ interface DeckCodeDisplayProps {
   deckPatch?: string
 }
 
-export function DeckCodeDisplay({ cards, deckPatch = 'v1.0.0.41 (latest)' }: DeckCodeDisplayProps) {
+export function DeckCodeDisplay({ cards, deckPatch = 'winter-2025' }: DeckCodeDisplayProps) {
   const [copied, setCopied] = useState(false)
   
   const cardIds = cards.map(c => c.card_id)

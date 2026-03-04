@@ -47,31 +47,34 @@ const DeckBuilder = () => {
   // Card filtering states
   const [searchQuery, setSearchQuery] = useState("");
   const [costRange, setCostRange] = useState([0, 10]);
-  const [showUnits, setShowUnits] = useState(true);
+  const [showMinions, setShowMinions] = useState(true);
   const [showLegendary, setShowLegendary] = useState(true);
   const [showSpells, setShowSpells] = useState(true);
   const [showItems, setShowItems] = useState(true);
 
   const filteredCards = useMemo(() => {
     return cardDatabase.filter(card => {
-      // Filter out cards not in draft pool
       if (card.inDraftPool === false) return false;
       
       const matchesSearch = card.name.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesCost = card.cost >= costRange[0] && card.cost <= costRange[1];
       
+      // Type filtering: minions, spells, items are types; legendary is a status
+      const isMinion = !card.isSpell && !card.isItem;
       const matchesType = 
-        (card.isLegendary && showLegendary) ||
-        (!card.isLegendary && card.isItem && showItems) ||
-        (!card.isLegendary && card.isSpell && showSpells) ||
-        (!card.isLegendary && !card.isSpell && !card.isItem && showUnits);
+        (isMinion && showMinions) ||
+        (card.isSpell && showSpells) ||
+        (card.isItem && showItems);
       
-      return matchesSearch && matchesCost && matchesType;
+      // Legendary status filter
+      const matchesLegendary = !card.isLegendary || showLegendary;
+      
+      return matchesSearch && matchesCost && matchesType && matchesLegendary;
     }).sort((a, b) => {
       if (a.cost !== b.cost) return a.cost - b.cost;
       return a.name.localeCompare(b.name);
     });
-  }, [searchQuery, costRange, showUnits, showLegendary, showSpells, showItems]);
+  }, [searchQuery, costRange, showMinions, showLegendary, showSpells, showItems]);
 
   const handleCardSelect = (card: any) => {
     // Check if card is already selected
@@ -194,7 +197,7 @@ const DeckBuilder = () => {
           description: description.trim() || null,
           author_name: authorName.trim() || null,
           is_featured: false,
-          patch: 'v1.0.0.41 (latest)'
+          patch: 'winter-2025'
         })
         .select()
         .single();
@@ -425,19 +428,11 @@ const DeckBuilder = () => {
               <div className="flex gap-4 flex-wrap">
                 <div className="flex items-center space-x-2">
                   <Checkbox
-                    id="units"
-                    checked={showUnits}
-                    onCheckedChange={(checked) => setShowUnits(checked === true)}
+                    id="minions"
+                    checked={showMinions}
+                    onCheckedChange={(checked) => setShowMinions(checked === true)}
                   />
-                  <Label htmlFor="units" className="text-sm">Units</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="legendary"
-                    checked={showLegendary}
-                    onCheckedChange={(checked) => setShowLegendary(checked === true)}
-                  />
-                  <Label htmlFor="legendary" className="text-sm">Legendary</Label>
+                  <Label htmlFor="minions" className="text-sm">Minions</Label>
                 </div>
                 <div className="flex items-center space-x-2">
                   <Checkbox
@@ -454,6 +449,14 @@ const DeckBuilder = () => {
                     onCheckedChange={(checked) => setShowItems(checked === true)}
                   />
                   <Label htmlFor="items" className="text-sm">Items</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="legendary"
+                    checked={showLegendary}
+                    onCheckedChange={(checked) => setShowLegendary(checked === true)}
+                  />
+                  <Label htmlFor="legendary" className="text-sm">Legendary</Label>
                 </div>
               </div>
             </div>

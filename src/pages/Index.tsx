@@ -277,7 +277,7 @@ const Index = () => {
 
         {/* Top - World of Origins Title with Logo */}
         <div className="relative z-10 h-[18vh] sm:h-[22vh] flex flex-col items-center justify-center px-4 py-4">
-          <div className={`flex items-center justify-center text-5xl sm:text-6xl md:text-8xl font-bold transition-colors duration-500 drop-shadow-2xl leading-[1.05] ${videosLoaded ? 'opacity-75' : ''}`}>
+          <div className={`flex items-center justify-center text-5xl sm:text-7xl md:text-[5.5rem] font-bold transition-colors duration-500 drop-shadow-2xl leading-[1.05] ${videosLoaded ? 'opacity-75' : ''}`}>
             <span 
               className="inline-block bg-gradient-to-r leading-none align-baseline pb-[0.18em]"
               style={{ 
@@ -294,7 +294,7 @@ const Index = () => {
             {/* Logo O with CSS masking */}
             <div 
               aria-label="Origins Logo"
-              className="inline-block w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 lg:w-24 lg:h-24 ml-3 sm:ml-4 md:ml-5 mr-0.5 sm:mr-1 md:mr-1"
+              className="inline-block w-14 h-14 sm:w-[4.5rem] sm:h-[4.5rem] md:w-[5.5rem] md:h-[5.5rem] lg:w-[6.5rem] lg:h-[6.5rem] ml-3 sm:ml-4 md:ml-5 mr-0.5 sm:mr-1 md:mr-1"
               style={{
                 background: 'var(--title-gradient)',
                 WebkitMaskImage: `url(${projectOLogo})`,

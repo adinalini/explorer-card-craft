@@ -374,7 +374,7 @@ const Index = () => {
           </div>
           {/* News & Articles widgets - right side on 2xl */}
           {isAuthenticated && !isLoading && (
-            <div className="absolute top-1/2 right-16 -translate-y-1/2 z-10 hidden 2xl:flex flex-col gap-4" style={{ width: "260px", height: "505px" }}>
+            <div className="absolute top-1/2 right-16 -translate-y-1/2 z-10 hidden 2xl:flex flex-col gap-4 w-[320px] 3xl:w-[400px] h-[505px]">
               <div className="flex-1">
                 <HomepageNewsWidget />
               </div>

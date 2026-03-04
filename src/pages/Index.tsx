@@ -151,7 +151,7 @@ const Index = () => {
     if (isValid) {
       toast({
         title: "Access granted",
-        description: "Welcome to Project O Zone!"
+        description: "Welcome to World of Origins!"
       })
       
       // Redirect to intended destination if it exists
@@ -189,8 +189,8 @@ const Index = () => {
   return (
     <>
       <SEOHead 
-        title="Project O Zone"
-        description="Master the cards, build decks, battle in drafts, and explore random strategies! Your complete Project O gaming hub."
+        title="World of Origins"
+        description="Master the cards, build decks, battle in drafts, and explore random strategies! Your complete Origins TCG gaming hub."
         image="/og-images/homepage.jpg"
         url="/"
       />
@@ -275,7 +275,7 @@ const Index = () => {
         {/* Abstract Blobs - Removed as requested */}
         
 
-        {/* Top - Project O Zone Title with Logo */}
+        {/* Top - World of Origins Title with Logo */}
         <div className="relative z-10 h-[18vh] sm:h-[22vh] flex flex-col items-center justify-center px-4 py-4">
           <div className={`flex items-center justify-center text-5xl sm:text-6xl md:text-8xl font-bold transition-colors duration-500 drop-shadow-2xl leading-[1.05] ${videosLoaded ? 'opacity-75' : ''}`}>
             <span 
@@ -289,11 +289,11 @@ const Index = () => {
                 backgroundPosition: '50% 0%'
               }}
             >
-              Project{" "}
+              World of{" "}
             </span>
             {/* Logo O with CSS masking */}
             <div 
-              aria-label="Project O Logo"
+              aria-label="Origins Logo"
               className="inline-block w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 lg:w-24 lg:h-24 mx-1 sm:mx-2 md:mx-3"
               style={{
                 background: 'var(--title-gradient)',
@@ -318,7 +318,7 @@ const Index = () => {
                 backgroundPosition: '50% 0%'
               }}
             >
-              Zone
+              rigins
             </span>
           </div>
         </div>
@@ -455,7 +455,7 @@ const Index = () => {
         <div className="absolute bottom-2 left-1/2 -translate-x-1/2 z-20 px-4 max-w-full pointer-events-none">
           <div className="bg-black/20 backdrop-blur-sm px-3 sm:px-6 py-2 rounded-md max-w-full">
             <p className="text-[10px] sm:text-xs text-slate-300 text-center leading-tight">
-              This is not an official Project O website. Project O Zone is a community initiative. All assets used with permission.
+              This is not an official Origins TCG website. World of Origins is a community initiative. All assets used with permission.
             </p>
           </div>
         </div>

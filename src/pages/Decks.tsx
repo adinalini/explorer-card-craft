@@ -279,8 +279,8 @@ const Decks = () => {
   return (
     <>
       <SEOHead 
-        title="Project O Zone"
-        description="Browse featured and community decks in Project O Zone. Discover winning strategies and explore deck builds for every playstyle."
+        title="World of Origins"
+        description="Browse featured and community decks in World of Origins. Discover winning strategies and explore deck builds for every playstyle."
         image="/og-images/decks.jpg"
         url="/decks"
       />

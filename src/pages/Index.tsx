@@ -289,12 +289,12 @@ const Index = () => {
                 backgroundPosition: '50% 0%'
               }}
             >
-              World of{" "}{" "}
+              World of
             </span>
             {/* Logo O with CSS masking */}
             <div 
               aria-label="Origins Logo"
-              className="inline-block w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 lg:w-24 lg:h-24 -mr-1 sm:-mr-2 md:-mr-3"
+              className="inline-block w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 lg:w-24 lg:h-24 ml-3 sm:ml-4 md:ml-5 mr-0.5 sm:mr-1 md:mr-1"
               style={{
                 background: 'var(--title-gradient)',
                 WebkitMaskImage: `url(${projectOLogo})`,

@@ -1,148 +1,139 @@
-import { useState, useMemo } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Slider } from "@/components/ui/slider"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { ThemeToggle } from "@/components/ui/theme-toggle"
-import { CardImage } from "@/components/CardImage"
-import { CardVersionSelector, cardsWithHistory, getOldCardImage } from "@/components/CardVersionSelector"
-import { WaveDivider } from "@/components/ui/wave-divider"
-import { useNavigate } from "react-router-dom"
-import { ArrowLeft, Download, Search } from "lucide-react"
-import { cardDatabase } from "@/utils/cardData"
-import { toast } from "@/hooks/use-toast"
-import { SEOHead } from "@/components/SEOHead"
-import { PATCHES, CURRENT_PATCH } from "@/utils/patches"
+import { useState, useMemo } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Slider } from "@/components/ui/slider";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
+import { CardImage } from "@/components/CardImage";
+import { CardVersionSelector, cardsWithHistory, getOldCardImage } from "@/components/CardVersionSelector";
+import { WaveDivider } from "@/components/ui/wave-divider";
+import { useNavigate } from "react-router-dom";
+import { ArrowLeft, Download, Search } from "lucide-react";
+import { cardDatabase } from "@/utils/cardData";
+import { toast } from "@/hooks/use-toast";
+import { SEOHead } from "@/components/SEOHead";
+import { PATCHES, CURRENT_PATCH } from "@/utils/patches";
 
 const Cards = () => {
-  const navigate = useNavigate()
-  const [searchQuery, setSearchQuery] = useState("")
-  const [costRange, setCostRange] = useState([0, 10])
-  const [showMinions, setShowMinions] = useState(true)
-  const [showLegendary, setShowLegendary] = useState(true)
-  const [showSpells, setShowSpells] = useState(true)
-  const [showItems, setShowItems] = useState(true)
-  const [viewMode, setViewMode] = useState("5")
-  const [globalPatch, setGlobalPatch] = useState(CURRENT_PATCH.id)
-  // Track selected version for each card (cardId -> version)
-  const [selectedVersions, setSelectedVersions] = useState<Record<string, string | null>>({})
+  const navigate = useNavigate();
+  const [searchQuery, setSearchQuery] = useState("");
+  const [costRange, setCostRange] = useState([0, 10]);
+  const [showMinions, setShowMinions] = useState(true);
+  const [showLegendary, setShowLegendary] = useState(true);
+  const [showSpells, setShowSpells] = useState(true);
+  const [showItems, setShowItems] = useState(true);
+  const [viewMode, setViewMode] = useState("5");
+  const [globalPatch, setGlobalPatch] = useState(CURRENT_PATCH.id);
+  const [selectedVersions, setSelectedVersions] = useState<Record<string, string | null>>({});
 
-  // When global patch changes, update all cards that have history
   const handleGlobalPatchChange = (patchId: string) => {
-    setGlobalPatch(patchId)
-    const isLatest = patchId === CURRENT_PATCH.id
-    const newVersions: Record<string, string | null> = {}
+    setGlobalPatch(patchId);
+    const isLatest = patchId === CURRENT_PATCH.id;
+    const newVersions: Record<string, string | null> = {};
     cardsWithHistory.forEach(cardId => {
-      newVersions[cardId] = isLatest ? null : patchId
-    })
-    setSelectedVersions(newVersions)
-  }
+      newVersions[cardId] = isLatest ? null : patchId;
+    });
+    setSelectedVersions(newVersions);
+  };
 
-  // Filter cards based on search and filters
   const filteredCards = useMemo(() => {
     const databaseCards = cardDatabase.filter(card => {
-      const matchesSearch = card.name.toLowerCase().includes(searchQuery.toLowerCase())
-      const matchesCost = card.cost >= costRange[0] && card.cost <= costRange[1]
-      
-      const isMinion = !card.isSpell && !card.isItem
-      const isSpell = card.isSpell && !card.isItem
-      const isItem = !!card.isItem
-      
-      const matchesType = (showMinions && isMinion) || (showSpells && isSpell) || (showItems && isItem)
-      const matchesLegendary = !card.isLegendary || showLegendary
-      
-      return matchesSearch && matchesCost && matchesType && matchesLegendary
-    })
+      const matchesSearch = card.name.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesCost = card.cost >= costRange[0] && card.cost <= costRange[1];
+
+      const isMinion = !card.isSpell && !card.isItem;
+      const isSpell = card.isSpell && !card.isItem;
+      const isItem = !!card.isItem;
+
+      const matchesType = (showMinions && isMinion) || (showSpells && isSpell) || (showItems && isItem);
+      const matchesLegendary = !card.isLegendary || showLegendary;
+
+      return matchesSearch && matchesCost && matchesType && matchesLegendary;
+    });
 
     return databaseCards.sort((a, b) => {
       if (a.cost !== b.cost) {
-        return a.cost - b.cost
+        return a.cost - b.cost;
       }
-      return a.name.localeCompare(b.name)
-    })
-  }, [searchQuery, costRange, showMinions, showLegendary, showSpells, showItems])
+      return a.name.localeCompare(b.name);
+    });
+  }, [searchQuery, costRange, showMinions, showLegendary, showSpells, showItems]);
 
   const downloadCardImage = async (card: any, selectedVersion: string | null) => {
     try {
-      let imageUrl: string
-      let fileName = card.name.replace(/\s+/g, '_').toLowerCase()
-      
+      let imageUrl: string;
+      let fileName = card.name.replace(/\s+/g, '_').toLowerCase();
+
       if (selectedVersion && selectedVersion !== "current") {
-        // Use old version image
-        const oldImage = getOldCardImage(card.id, selectedVersion)
+        const oldImage = getOldCardImage(card.id, selectedVersion);
         if (oldImage) {
-          imageUrl = oldImage
-          fileName = `${fileName}_${selectedVersion}`
+          imageUrl = oldImage;
+          fileName = `${fileName}_${selectedVersion}`;
         } else {
-          throw new Error('Old version image not found')
+          throw new Error('Old version image not found');
         }
       } else {
-        // Import the cardImages mapping from CardImage component
-        const { cardImages } = await import('@/components/CardImage')
-        imageUrl = cardImages[card.id]
+        const { cardImages } = await import('@/components/CardImage');
+        imageUrl = cardImages[card.id];
       }
-      
+
       if (!imageUrl) {
-        throw new Error('Image not found for card: ' + card.id)
+        throw new Error('Image not found for card: ' + card.id);
       }
-      
-      // Fetch the image as a blob to ensure it downloads properly
-      const response = await fetch(imageUrl)
+
+      const response = await fetch(imageUrl);
       if (!response.ok) {
-        throw new Error('Failed to fetch image')
+        throw new Error('Failed to fetch image');
       }
-      
-      const blob = await response.blob()
-      const url = URL.createObjectURL(blob)
-      
-      // Create a temporary link to download the image
-      const link = document.createElement('a')
-      link.href = url
-      link.download = `${fileName}.png`
-      
-      // Trigger download
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
-      
-      // Clean up the blob URL
-      URL.revokeObjectURL(url)
-      
+
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${fileName}.png`;
+
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      URL.revokeObjectURL(url);
+
       toast({
         title: "Download Started",
         description: `Downloading ${card.name}${selectedVersion ? ` (${selectedVersion})` : ''} image...`,
-      })
+      });
     } catch (error) {
-      console.error('Download error:', error)
+      console.error('Download error:', error);
       toast({
         title: "Download Failed",
         description: "Failed to download card image. Please try again.",
         variant: "destructive"
-      })
+      });
     }
-  }
+  };
 
   const handleVersionChange = (cardId: string, version: string | null) => {
     setSelectedVersions(prev => ({
       ...prev,
       [cardId]: version
-    }))
-  }
+    }));
+  };
 
   const getGridCols = () => {
     switch (viewMode) {
-      case "4": return "grid-cols-2 md:grid-cols-4"
-      case "5": return "grid-cols-2 md:grid-cols-3 lg:grid-cols-5"
-      case "6": return "grid-cols-2 md:grid-cols-3 lg:grid-cols-6"
-      default: return "grid-cols-2 md:grid-cols-3 lg:grid-cols-5"
+      case "4": return "grid-cols-2 md:grid-cols-4";
+      case "5": return "grid-cols-2 md:grid-cols-3 lg:grid-cols-5";
+      case "6": return "grid-cols-2 md:grid-cols-3 lg:grid-cols-6";
+      default: return "grid-cols-2 md:grid-cols-3 lg:grid-cols-5";
     }
-  }
+  };
 
   return (
-    <>
-      <SEOHead 
+    <div className="min-h-screen bg-background">
+      <SEOHead
         title="Card Explorer | Evolved"
         description="Browse and explore all cards in Evolved. Filter by cost, type, and search by name."
       />
@@ -208,9 +199,9 @@ const Cards = () => {
                     type="checkbox"
                     checked={showMinions}
                     onChange={(e) => {
-                      const newValue = e.target.checked
-                      if (!newValue && !showSpells && !showItems) return
-                      setShowMinions(newValue)
+                      const newValue = e.target.checked;
+                      if (!newValue && !showSpells && !showItems) return;
+                      setShowMinions(newValue);
                     }}
                     className="rounded border-border"
                   />
@@ -221,9 +212,9 @@ const Cards = () => {
                     type="checkbox"
                     checked={showSpells}
                     onChange={(e) => {
-                      const newValue = e.target.checked
-                      if (!newValue && !showMinions && !showItems) return
-                      setShowSpells(newValue)
+                      const newValue = e.target.checked;
+                      if (!newValue && !showMinions && !showItems) return;
+                      setShowSpells(newValue);
                     }}
                     className="rounded border-border"
                   />
@@ -234,9 +225,9 @@ const Cards = () => {
                     type="checkbox"
                     checked={showItems}
                     onChange={(e) => {
-                      const newValue = e.target.checked
-                      if (!newValue && !showMinions && !showSpells) return
-                      setShowItems(newValue)
+                      const newValue = e.target.checked;
+                      if (!newValue && !showMinions && !showSpells) return;
+                      setShowItems(newValue);
                     }}
                     className="rounded border-border"
                   />
@@ -247,7 +238,7 @@ const Cards = () => {
                     type="checkbox"
                     checked={showLegendary}
                     onChange={(e) => {
-                      setShowLegendary(e.target.checked)
+                      setShowLegendary(e.target.checked);
                     }}
                     className="rounded border-border"
                   />
@@ -292,7 +283,6 @@ const Cards = () => {
               </Select>
             </div>
           </div>
-          </div>
 
           {/* Results Summary */}
           <div className="mt-4 pt-4 border-t border-border">
@@ -305,9 +295,9 @@ const Cards = () => {
         {/* Cards Grid */}
         <div className={`grid ${getGridCols()} gap-4`}>
           {filteredCards.map((card: any) => {
-            const selectedVersion = selectedVersions[card.id] || null
-            const oldImage = selectedVersion ? getOldCardImage(card.id, selectedVersion) : null
-            
+            const selectedVersion = selectedVersions[card.id] || null;
+            const oldImage = selectedVersion ? getOldCardImage(card.id, selectedVersion) : null;
+
             return (
               <div key={card.id} className="group relative bg-card rounded-lg overflow-hidden border border-border hover:border-primary/50 transition-all duration-200">
                 <div className="aspect-[3/4] relative">
@@ -322,7 +312,7 @@ const Cards = () => {
                     </div>
                   )}
                 </div>
-                
+
                 <div className="p-3 space-y-2">
                   <div className="flex items-center justify-between gap-1">
                     <h3 className="font-semibold text-sm text-foreground truncate flex-1">
@@ -334,7 +324,7 @@ const Cards = () => {
                       onVersionChange={(version) => handleVersionChange(card.id, version)}
                     />
                   </div>
-                  
+
                   <div className="flex items-center justify-between text-xs text-muted-foreground">
                     <span>Cost: {card.cost}</span>
                     <div className="flex gap-1">
@@ -360,7 +350,7 @@ const Cards = () => {
                       )}
                     </div>
                   </div>
-                  
+
                   <Button
                     onClick={() => downloadCardImage(card, selectedVersion)}
                     size="sm"
@@ -372,7 +362,7 @@ const Cards = () => {
                   </Button>
                 </div>
               </div>
-            )
+            );
           })}
         </div>
 
@@ -387,8 +377,8 @@ const Cards = () => {
 
       {/* Wave Divider at bottom */}
       <WaveDivider />
-    </>
+    </div>
   );
 };
 
-export default Cards
+export default Cards;

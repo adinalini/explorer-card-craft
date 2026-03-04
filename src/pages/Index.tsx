@@ -278,7 +278,7 @@ const Index = () => {
         
 
         {/* Top - World of Origins Title with Logo */}
-        <div className="relative z-10 h-[18vh] sm:h-[22vh] flex flex-col items-center justify-center px-4 py-4">
+        <div className="relative z-10 h-[18vh] sm:h-[22vh] flex flex-col items-center justify-end px-4 py-4 pt-12 sm:pt-16">
           <div className={`flex items-center justify-center text-5xl sm:text-7xl md:text-[5.5rem] font-bold transition-colors duration-500 drop-shadow-2xl leading-[1.05] ${videosLoaded ? 'opacity-75' : ''}`}>
             <span 
               className="inline-block bg-gradient-to-r leading-none align-baseline pb-[0.18em]"

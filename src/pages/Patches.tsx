@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { ArrowLeft } from "lucide-react";
+import { getPatchDisplayName, getAllPatchesOrdered, CURRENT_PATCH } from "@/utils/patches";
 
 // Old card images (from v1.0.0.40 folder)
 import oldAxeThrow from "@/assets/cards/Old/v1.0.0.40/axe_throw.png";
@@ -124,7 +125,7 @@ const Patches = () => {
     { name: "Flying Monkey", old: oldFlyingMonkey, new: newFlyingMonkey },
     { name: "Tuck (formerly Friar Tuck)", old: oldFriarTuck, new: newTuck },
     { name: "Jack's Giant (formerly Giant)", old: oldGiant, new: newJacksGiant },
-    { name: "Goldi (formerly Goldilocks)", old: oldGoldilocks, new: newGoldi },
+    { name: "Goldilocks", old: oldGoldilocks, new: newGoldi },
     { name: "Jack in the Box", old: oldJackInTheBox, new: newJackInTheBox },
     { name: "Lady of the Lake", old: oldLadyOfTheLake, new: newLadyOfTheLake },
     { name: "Morgiana", old: oldMorgiana, new: newMorgiana },
@@ -217,12 +218,26 @@ const Patches = () => {
           {/* Patch selector buttons */}
           <div className="mb-8 flex items-center justify-center gap-4">
             <Button
+              variant={selectedPatch === "gdc-2026" ? "default" : "outline"}
+              onClick={() => setSelectedPatch("gdc-2026")}
+            >
+              GDC 2026 (latest)
+            </Button>
+            <Button
               variant={selectedPatch === "winter-2025" ? "default" : "outline"}
               onClick={() => setSelectedPatch("winter-2025")}
             >
-              Winter 2025 (latest)
+              Winter 2025
             </Button>
           </div>
+
+          {/* GDC 2026 Patch Content */}
+          {selectedPatch === "gdc-2026" && (
+            <div className="text-center py-16">
+              <h2 className="text-3xl font-bold mb-4 text-foreground">GDC 2026</h2>
+              <p className="text-muted-foreground text-lg">Patch notes coming soon...</p>
+            </div>
+          )}
 
           {/* Winter 2025 Patch Content */}
           {selectedPatch === "winter-2025" && (
@@ -415,11 +430,11 @@ const Patches = () => {
 
                       {/* Robinhood */}
                       <div>
-                        <h4 className="text-2xl font-semibold mb-4 text-foreground">5. Robinhood</h4>
+                        <h4 className="text-2xl font-semibold mb-4 text-foreground">5. Robin Hood</h4>
                         <div className="flex flex-col lg:flex-row gap-6 items-center">
                           <img
                             src="/patches/october/miscellaneous/robinhood.png"
-                            alt="Robinhood Legendary Power"
+                            alt="Robin Hood Legendary Power"
                             className="w-full lg:w-[21rem] rounded-lg border-2 border-primary"
                           />
                           <video

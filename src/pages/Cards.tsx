@@ -169,7 +169,7 @@ const Cards = () => {
       <div className="container mx-auto px-4 py-8">
         {/* Filters Section */}
         <div className="bg-card rounded-lg p-6 mb-8 border border-border">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
             {/* Search */}
             <div className="space-y-2">
               <Label className="text-foreground">Search by Name</Label>
@@ -273,24 +273,25 @@ const Cards = () => {
                   <Label htmlFor="view-6" className="text-foreground">6</Label>
                 </div>
               </RadioGroup>
-
-              {/* Global Patch Selector */}
-              <div className="mt-3">
-                <Label className="text-foreground text-xs mb-1 block">Patch</Label>
-                <Select value={globalPatch} onValueChange={handleGlobalPatchChange}>
-                  <SelectTrigger className="w-full h-8 text-xs">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {[...PATCHES].reverse().map(patch => (
-                      <SelectItem key={patch.id} value={patch.id} className="text-xs">
-                        {patch.displayName}{patch.id === CURRENT_PATCH.id ? ' (latest)' : ''}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
             </div>
+
+            {/* Patch Selector */}
+            <div className="space-y-2">
+              <Label className="text-foreground">Patch</Label>
+              <Select value={globalPatch} onValueChange={handleGlobalPatchChange}>
+                <SelectTrigger className="w-full h-9 text-sm">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {[...PATCHES].reverse().map(patch => (
+                    <SelectItem key={patch.id} value={patch.id} className="text-sm">
+                      {patch.displayName}{patch.id === CURRENT_PATCH.id ? ' (latest)' : ''}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
           </div>
 
           {/* Results Summary */}

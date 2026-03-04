@@ -83,8 +83,8 @@ All colors MUST be HSL.
     --gradient-fantasy: linear-gradient(135deg, hsl(240 10% 85%), hsl(260 15% 80%));
     --gradient-card: linear-gradient(135deg, hsl(0 0% 92%), hsl(210 40% 88%));
     
-    /* Title gradients to match logo - always dark mode colors for homepage (20% darker) */
-    --title-gradient: linear-gradient(135deg, hsl(350 100% 55%), hsl(320 100% 59%), hsl(10 95% 59%));
+    /* Title gradients to match logo - cyan/green for Origins branding */
+    --title-gradient: linear-gradient(135deg, hsl(160 100% 50%), hsl(170 100% 45%), hsl(155 90% 55%));
     
     /* Light Mode Shadows and Glows */
     --shadow-neon-pink: 0 0 20px hsl(320 100% 50% / 0.3);
@@ -176,8 +176,8 @@ All colors MUST be HSL.
     --gradient-fantasy: linear-gradient(135deg, hsl(260 90% 10%), hsl(290 95% 5%));
     --gradient-card: linear-gradient(135deg, hsl(260 30% 12%), hsl(280 35% 15%));
     
-    /* Title gradients to match logo - red/pink for dark mode (20% darker) */
-    --title-gradient: linear-gradient(135deg, hsl(350 100% 48%), hsl(320 100% 52%), hsl(10 95% 52%));
+    /* Title gradients to match logo - cyan/green for Origins branding (dark mode) */
+    --title-gradient: linear-gradient(135deg, hsl(160 100% 42%), hsl(170 100% 38%), hsl(155 90% 45%));
     
     /* Dark Mode Shadows and Glows */
     --shadow-neon-pink: 0 0 20px hsl(320 100% 75% / 0.5);

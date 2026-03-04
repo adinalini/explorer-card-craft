@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Slider } from "@/components/ui/slider"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { ThemeToggle } from "@/components/ui/theme-toggle"
 import { CardImage } from "@/components/CardImage"
 import { CardVersionSelector, cardsWithHistory, getOldCardImage } from "@/components/CardVersionSelector"
@@ -13,6 +14,7 @@ import { ArrowLeft, Download, Search } from "lucide-react"
 import { cardDatabase } from "@/utils/cardData"
 import { toast } from "@/hooks/use-toast"
 import { SEOHead } from "@/components/SEOHead"
+import { PATCHES, CURRENT_PATCH } from "@/utils/patches"
 
 const Cards = () => {
   const navigate = useNavigate()
@@ -21,9 +23,22 @@ const Cards = () => {
   const [showMinions, setShowMinions] = useState(true)
   const [showLegendary, setShowLegendary] = useState(true)
   const [showSpells, setShowSpells] = useState(true)
+  const [showItems, setShowItems] = useState(true)
   const [viewMode, setViewMode] = useState("5")
+  const [globalPatch, setGlobalPatch] = useState(CURRENT_PATCH.id)
   // Track selected version for each card (cardId -> version)
   const [selectedVersions, setSelectedVersions] = useState<Record<string, string | null>>({})
+
+  // When global patch changes, update all cards that have history
+  const handleGlobalPatchChange = (patchId: string) => {
+    setGlobalPatch(patchId)
+    const isLatest = patchId === CURRENT_PATCH.id
+    const newVersions: Record<string, string | null> = {}
+    cardsWithHistory.forEach(cardId => {
+      newVersions[cardId] = isLatest ? null : patchId
+    })
+    setSelectedVersions(newVersions)
+  }
 
   // Filter cards based on search and filters
   const filteredCards = useMemo(() => {
@@ -31,17 +46,11 @@ const Cards = () => {
       const matchesSearch = card.name.toLowerCase().includes(searchQuery.toLowerCase())
       const matchesCost = card.cost >= costRange[0] && card.cost <= costRange[1]
       
-      // Card type filtering
-      // Minions: non-spell, non-item cards (legendary minions included when showMinions is on)
-      // Spells: spell + item cards (legendary spells/items included when showSpells is on)
-      // Legendary: acts as a status filter - when off, hides all legendary cards
       const isMinion = !card.isSpell && !card.isItem
-      const isSpellOrItem = card.isSpell || card.isItem
+      const isSpell = card.isSpell && !card.isItem
+      const isItem = !!card.isItem
       
-      // First check type match
-      const matchesType = (showMinions && isMinion) || (showSpells && isSpellOrItem)
-      
-      // Then check legendary status filter
+      const matchesType = (showMinions && isMinion) || (showSpells && isSpell) || (showItems && isItem)
       const matchesLegendary = !card.isLegendary || showLegendary
       
       return matchesSearch && matchesCost && matchesType && matchesLegendary
@@ -53,7 +62,7 @@ const Cards = () => {
       }
       return a.name.localeCompare(b.name)
     })
-  }, [searchQuery, costRange, showMinions, showLegendary, showSpells])
+  }, [searchQuery, costRange, showMinions, showLegendary, showSpells, showItems])
 
   const downloadCardImage = async (card: any, selectedVersion: string | null) => {
     try {
@@ -200,7 +209,7 @@ const Cards = () => {
                     checked={showMinions}
                     onChange={(e) => {
                       const newValue = e.target.checked
-                      if (!newValue && !showSpells) return
+                      if (!newValue && !showSpells && !showItems) return
                       setShowMinions(newValue)
                     }}
                     className="rounded border-border"
@@ -213,12 +222,25 @@ const Cards = () => {
                     checked={showSpells}
                     onChange={(e) => {
                       const newValue = e.target.checked
-                      if (!newValue && !showMinions) return
+                      if (!newValue && !showMinions && !showItems) return
                       setShowSpells(newValue)
                     }}
                     className="rounded border-border"
                   />
                   Spells
+                </label>
+                <label className="flex items-center gap-2 text-sm text-foreground">
+                  <input
+                    type="checkbox"
+                    checked={showItems}
+                    onChange={(e) => {
+                      const newValue = e.target.checked
+                      if (!newValue && !showMinions && !showSpells) return
+                      setShowItems(newValue)
+                    }}
+                    className="rounded border-border"
+                  />
+                  Items
                 </label>
                 <label className="flex items-center gap-2 text-sm text-foreground">
                   <input
@@ -251,6 +273,23 @@ const Cards = () => {
                   <Label htmlFor="view-6" className="text-foreground">6</Label>
                 </div>
               </RadioGroup>
+
+              {/* Global Patch Selector */}
+              <div className="mt-3">
+                <Label className="text-foreground text-xs mb-1 block">Patch</Label>
+                <Select value={globalPatch} onValueChange={handleGlobalPatchChange}>
+                  <SelectTrigger className="w-full h-8 text-xs">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {[...PATCHES].reverse().map(patch => (
+                      <SelectItem key={patch.id} value={patch.id} className="text-xs">
+                        {patch.displayName}{patch.id === CURRENT_PATCH.id ? ' (latest)' : ''}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           </div>
 

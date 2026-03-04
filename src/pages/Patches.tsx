@@ -108,7 +108,7 @@ import yukiOnna from "@/assets/cards/Yuki_onna.png";
 import shahrazad from "@/assets/cards/shahrazad.png";
 
 const Patches = () => {
-  const [selectedPatch, setSelectedPatch] = useState("october-2025");
+  const [selectedPatch, setSelectedPatch] = useState("winter-2025");
   const navigate = useNavigate();
 
   const cardUpdates = [
@@ -217,15 +217,15 @@ const Patches = () => {
           {/* Patch selector buttons */}
           <div className="mb-8 flex items-center justify-center gap-4">
             <Button
-              variant={selectedPatch === "october-2025" ? "default" : "outline"}
-              onClick={() => setSelectedPatch("october-2025")}
+              variant={selectedPatch === "winter-2025" ? "default" : "outline"}
+              onClick={() => setSelectedPatch("winter-2025")}
             >
-              October 2025 (latest)
+              Winter 2025 (latest)
             </Button>
           </div>
 
-          {/* October 2025 Patch Content */}
-          {selectedPatch === "october-2025" && (
+          {/* Winter 2025 Patch Content */}
+          {selectedPatch === "winter-2025" && (
             <div className="space-y-12">
               {/* Card Updates Section */}
               <section>

@@ -16,6 +16,7 @@ import { toast } from "@/hooks/use-toast";
 import { encodeDeck } from "@/utils/deckCodeGenerator";
 import { getCardKey } from "@/utils/cardKeyMapping";
 import { SEOHead } from "@/components/SEOHead";
+import { CURRENT_PATCH, isLatestPatch } from "@/utils/patches";
 
 interface Deck {
   id: string;
@@ -113,11 +114,10 @@ const Decks = () => {
       // Patch filtering
       let matchesPatch = true;
       if (patchFilter === 'latest') {
-        // For featured decks with tournament winners enabled, show decks with notes regardless of patch
         if (activeTab === 'featured' && showTournamentWinners && deck.notes && deck.notes.trim() !== '') {
           matchesPatch = true;
         } else {
-          matchesPatch = deck.patch.includes('(latest)');
+          matchesPatch = isLatestPatch(deck.patch);
         }
       }
       

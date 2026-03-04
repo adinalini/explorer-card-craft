@@ -18,7 +18,7 @@ const Cards = () => {
   const navigate = useNavigate()
   const [searchQuery, setSearchQuery] = useState("")
   const [costRange, setCostRange] = useState([0, 10])
-  const [showUnits, setShowUnits] = useState(true)
+  const [showMinions, setShowMinions] = useState(true)
   const [showLegendary, setShowLegendary] = useState(true)
   const [showSpells, setShowSpells] = useState(true)
   const [viewMode, setViewMode] = useState("5")
@@ -31,24 +31,29 @@ const Cards = () => {
       const matchesSearch = card.name.toLowerCase().includes(searchQuery.toLowerCase())
       const matchesCost = card.cost >= costRange[0] && card.cost <= costRange[1]
       
-      // Card type filtering - must show at least one type
-      const isUnit = !card.isSpell && !card.isLegendary
-      const matchesType = (showUnits && isUnit) || 
-                         (showLegendary && card.isLegendary) || 
-                         (showSpells && card.isSpell)
+      // Card type filtering
+      // Minions: non-spell, non-item cards (legendary minions included when showMinions is on)
+      // Spells: spell + item cards (legendary spells/items included when showSpells is on)
+      // Legendary: acts as a status filter - when off, hides all legendary cards
+      const isMinion = !card.isSpell && !card.isItem
+      const isSpellOrItem = card.isSpell || card.isItem
       
-      return matchesSearch && matchesCost && matchesType
+      // First check type match
+      const matchesType = (showMinions && isMinion) || (showSpells && isSpellOrItem)
+      
+      // Then check legendary status filter
+      const matchesLegendary = !card.isLegendary || showLegendary
+      
+      return matchesSearch && matchesCost && matchesType && matchesLegendary
     })
 
-
     return databaseCards.sort((a, b) => {
-      // Sort by cost first, then by name
       if (a.cost !== b.cost) {
         return a.cost - b.cost
       }
       return a.name.localeCompare(b.name)
     })
-  }, [searchQuery, costRange, showUnits, showLegendary, showSpells])
+  }, [searchQuery, costRange, showMinions, showLegendary, showSpells])
 
   const downloadCardImage = async (card: any, selectedVersion: string | null) => {
     try {
@@ -192,30 +197,15 @@ const Cards = () => {
                 <label className="flex items-center gap-2 text-sm text-foreground">
                   <input
                     type="checkbox"
-                    checked={showUnits}
+                    checked={showMinions}
                     onChange={(e) => {
                       const newValue = e.target.checked
-                      // Ensure at least one type is selected
-                      if (!newValue && !showLegendary && !showSpells) return
-                      setShowUnits(newValue)
+                      if (!newValue && !showSpells) return
+                      setShowMinions(newValue)
                     }}
                     className="rounded border-border"
                   />
-                  Show Units
-                </label>
-                <label className="flex items-center gap-2 text-sm text-foreground">
-                  <input
-                    type="checkbox"
-                    checked={showLegendary}
-                    onChange={(e) => {
-                      const newValue = e.target.checked
-                      // Ensure at least one type is selected
-                      if (!newValue && !showUnits && !showSpells) return
-                      setShowLegendary(newValue)
-                    }}
-                    className="rounded border-border"
-                  />
-                  Show Legendary
+                  Minions
                 </label>
                 <label className="flex items-center gap-2 text-sm text-foreground">
                   <input
@@ -223,13 +213,23 @@ const Cards = () => {
                     checked={showSpells}
                     onChange={(e) => {
                       const newValue = e.target.checked
-                      // Ensure at least one type is selected
-                      if (!newValue && !showUnits && !showLegendary) return
+                      if (!newValue && !showMinions) return
                       setShowSpells(newValue)
                     }}
                     className="rounded border-border"
                   />
-                  Show Spells
+                  Spells
+                </label>
+                <label className="flex items-center gap-2 text-sm text-foreground">
+                  <input
+                    type="checkbox"
+                    checked={showLegendary}
+                    onChange={(e) => {
+                      setShowLegendary(e.target.checked)
+                    }}
+                    className="rounded border-border"
+                  />
+                  Legendary
                 </label>
               </div>
             </div>
@@ -306,6 +306,16 @@ const Cards = () => {
                       {card.isSpell && (
                         <span className="px-1.5 py-0.5 bg-blue-500/20 text-blue-600 dark:text-blue-400 rounded text-[10px]">
                           Spell
+                        </span>
+                      )}
+                      {card.isItem && (
+                        <span className="px-1.5 py-0.5 bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 rounded text-[10px]">
+                          Item
+                        </span>
+                      )}
+                      {!card.isSpell && !card.isItem && (
+                        <span className="px-1.5 py-0.5 bg-muted text-muted-foreground rounded text-[10px]">
+                          Minion
                         </span>
                       )}
                     </div>

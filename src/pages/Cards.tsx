@@ -308,7 +308,7 @@ const Cards = () => {
                   )}
                   {selectedVersion && (
                     <div className="absolute top-2 left-2 px-2 py-0.5 bg-black/70 text-white text-[10px] rounded">
-                      {selectedVersion}
+                      {PATCHES.find(p => p.id === selectedVersion)?.displayName ?? selectedVersion}
                     </div>
                   )}
                 </div>

@@ -359,7 +359,7 @@ const Index = () => {
           </div>
 
           {/* Center - Buttons or Password Gate (when both characters visible) */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10 hidden 2xl:flex items-start gap-6">
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10 hidden 2xl:flex">
             <div>
               {!isLoading && (
                 isAuthenticated ? (
@@ -369,17 +369,18 @@ const Index = () => {
                 )
               )}
             </div>
-            {isAuthenticated && !isLoading && (
-              <div className="flex flex-col gap-4" style={{ width: "260px", height: "505px" }}>
-                <div className="flex-1">
-                  <HomepageNewsWidget />
-                </div>
-                <div className="flex-1">
-                  <HomepageArticlesWidget />
-                </div>
-              </div>
-            )}
           </div>
+          {/* News & Articles widgets - right side on 2xl */}
+          {isAuthenticated && !isLoading && (
+            <div className="absolute top-1/2 right-16 -translate-y-1/2 z-10 hidden 2xl:flex flex-col gap-4" style={{ width: "260px", height: "505px" }}>
+              <div className="flex-1">
+                <HomepageNewsWidget />
+              </div>
+              <div className="flex-1">
+                <HomepageArticlesWidget />
+              </div>
+            </div>
+          )}
 
           {/* Right-aligned Buttons (when only rabbit visible) */}
           <div className="absolute top-1/2 right-0 -translate-y-1/2 transform translate-x-[-120px] z-10 hidden xl:flex 2xl:hidden items-start gap-6">

@@ -1,0 +1,1 @@
+UPDATE decks SET patch = 'gdc-2026' WHERE id = 'e26e9ab7-cbef-42fb-9eac-5155a2bc942d'

@@ -92,6 +92,23 @@ export const patchNotesData: Record<string, PatchNotesData> = {
       { cardId: 'phantom_coachman', cardName: 'Phantom Coachman', description: 'card has undergone significant changes', severity: 'significant' },
       { cardId: 'robinhood', cardName: 'Robin Hood', description: 'card has undergone significant changes', severity: 'significant' },
     ],
+    miscellaneous: {
+      bulletPoints: [
+        'Card Art updated for all cards, view the changes in card explorer.',
+        '3 new commanders and 1 new Queen of Hearts commander skin introduced.',
+      ],
+      sections: [
+        {
+          title: 'New Commanders & Skin',
+          images: [
+            { src: '/images/patches/gdc-2026/puss-in-boots.png', alt: 'Puss In Boots - New Commander' },
+            { src: '/images/patches/gdc-2026/red-riding-hood.png', alt: 'Red Riding Hood - New Commander' },
+            { src: '/images/patches/gdc-2026/winnie-the-pooh.png', alt: 'Winnie The Pooh - New Commander' },
+            { src: '/images/patches/gdc-2026/queen-of-hearts-skin.png', alt: 'Queen of Hearts - Commander Skin' },
+          ],
+        },
+      ],
+    },
   },
 }
 

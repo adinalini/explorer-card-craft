@@ -65,6 +65,7 @@ const ArticleView = () => {
               <h2 className="text-2xl md:text-3xl font-bold text-white mb-6">{article.title}</h2>
               <div className="prose prose-invert prose-sm max-w-none">
                 {article.content.split("\n\n").map((paragraph, i) => {
+                  // Heading
                   if (paragraph.startsWith("## ")) {
                     return (
                       <h3 key={i} className="text-lg font-bold text-white mt-6 mb-2">
@@ -72,20 +73,39 @@ const ArticleView = () => {
                       </h3>
                     );
                   }
+                  // Inline image
+                  const imgMatch = paragraph.match(/^!\[.*?\]\((.+?)\)$/);
+                  if (imgMatch) {
+                    return (
+                      <img key={i} src={imgMatch[1]} alt="" className="rounded-lg w-full my-4" />
+                    );
+                  }
+                  // Bullet point
+                  if (paragraph.startsWith("- ")) {
+                    const items = paragraph.split("\n").filter(l => l.startsWith("- "));
+                    return (
+                      <ul key={i} className="list-disc list-inside space-y-1 my-3">
+                        {items.map((item, j) => (
+                          <li key={j} className="text-slate-300 leading-relaxed">
+                            {item.replace(/^- /, "")}
+                          </li>
+                        ))}
+                      </ul>
+                    );
+                  }
+                  // Regular paragraph with link support
                   return (
-                    <p key={i} className="text-slate-300 mb-3 leading-relaxed">
-                      {paragraph}
-                    </p>
+                    <p key={i} className="text-slate-300 mb-3 leading-relaxed"
+                      dangerouslySetInnerHTML={{
+                        __html: paragraph.replace(
+                          /\[([^\]]+)\]\((https?:\/\/[^)]+)\)/g,
+                          '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-primary underline hover:text-primary/80">$1</a>'
+                        )
+                      }}
+                    />
                   );
                 })}
               </div>
-              {article.images && article.images.length > 0 && (
-                <div className="grid grid-cols-1 gap-3 mt-6">
-                  {article.images.map((img, i) => (
-                    <img key={i} src={img} alt="" className="rounded-lg object-cover w-full" />
-                  ))}
-                </div>
-              )}
             </div>
           </div>
         </div>

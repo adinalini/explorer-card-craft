@@ -47,7 +47,7 @@ export const NavigationButtons = ({ sizeVariant = "default" }: NavigationButtons
         >
           <div className={`${titleClass} font-bold text-white mb-2`}>Halloween</div>
           <div className={`${textClass} text-slate-300 text-center leading-tight`}>
-            Generate Halloween special Good vs Evil deck
+            Generate Halloween special Evil deck
           </div>
         </div>
 

@@ -146,7 +146,7 @@ const Cards = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background overflow-x-hidden">
       <SEOHead
         title="World of Origins"
         description="Browse and explore all cards in Evolved. Filter by cost, type, and search by name."

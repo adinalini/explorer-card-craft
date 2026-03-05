@@ -65,57 +65,58 @@ const Patches = () => {
 
           {patchData && (
             <div className="space-y-12">
-              {/* Card Updates */}
-              {patchData.cardUpdates.length > 0 && (
-                <section>
-                  <h2 className="text-3xl font-bold mb-6 text-foreground">Card Updates</h2>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {patchData.cardUpdates.map((card) => {
-                      const prevPatchId = PREV_PATCH[selectedPatch];
-                      // Get old image from previous patch
-                      const oldImage = prevPatchId
-                        ? getOldCardImage(card.cardId, selectedPatch) || getCardImageForPatch(card.cardId, prevPatchId)
-                        : undefined;
-                      const newImage = cardImages[card.cardId] || getCardImageForPatch(card.cardId, selectedPatch);
-                      
-                      if (!oldImage || !newImage) return null;
+              {/* Card Updates (including legendary changes) */}
+              {(() => {
+                const prevPatchId = PREV_PATCH[selectedPatch];
+                // Combine card updates + legendary changes into one list
+                const allUpdates = [
+                  ...patchData.cardUpdates.map(card => ({
+                    ...card,
+                    legendaryNote: undefined as string | undefined,
+                  })),
+                  ...patchData.legendaryChanges.map(card => ({
+                    cardId: card.cardId,
+                    name: card.name,
+                    changeType: 'modified' as const,
+                    legendaryNote: card.becameLegendary ? 'Now Legendary' : 'No longer Legendary',
+                  })),
+                ];
+                if (allUpdates.length === 0) return null;
+                return (
+                  <section>
+                    <h2 className="text-3xl font-bold mb-6 text-foreground">Card Updates</h2>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {allUpdates.map((card) => {
+                        const oldImage = prevPatchId
+                          ? getOldCardImage(card.cardId, selectedPatch) || getCardImageForPatch(card.cardId, prevPatchId)
+                          : undefined;
+                        const newImage = cardImages[card.cardId] || getCardImageForPatch(card.cardId, selectedPatch);
+                        
+                        if (!oldImage || !newImage) return null;
 
-                      const displayName = card.formerName
-                        ? `${card.name} (formerly ${card.formerName})`
-                        : card.name;
+                        const displayName = ('formerName' in card && card.formerName)
+                          ? `${card.name} (formerly ${card.formerName})`
+                          : card.name;
 
-                      return (
-                        <div key={card.cardId} className="bg-card rounded-lg p-4 border border-border">
-                          <h3 className="text-lg font-semibold mb-3 text-center text-card-foreground">{displayName}</h3>
-                          <div className="flex items-center justify-center gap-3">
-                            <img src={oldImage} alt={`Old ${card.name}`} className="w-40 sm:w-48 h-auto rounded-lg border-2 border-border" loading="lazy" />
-                            <div className="text-2xl text-primary">→</div>
-                            <img src={newImage} alt={`New ${card.name}`} className="w-40 sm:w-48 h-auto rounded-lg border-2 border-primary" loading="lazy" />
+                        return (
+                          <div key={card.cardId} className="bg-card rounded-lg p-4 border border-border">
+                            <h3 className="text-lg font-semibold mb-1 text-center text-card-foreground">{displayName}</h3>
+                            {card.legendaryNote && (
+                              <p className="text-sm text-primary text-center mb-2">{card.legendaryNote}</p>
+                            )}
+                            <div className="flex items-center justify-center gap-3">
+                              <img src={oldImage} alt={`Old ${card.name}`} className="w-40 sm:w-48 h-auto rounded-lg border-2 border-border" loading="lazy" />
+                              <div className="text-2xl text-primary">→</div>
+                              <img src={newImage} alt={`New ${card.name}`} className="w-40 sm:w-48 h-auto rounded-lg border-2 border-primary" loading="lazy" />
+                            </div>
                           </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </section>
-              )}
+                        );
+                      })}
+                    </div>
+                  </section>
+                );
+              })()}
 
-              {/* Legendary Changes */}
-              {patchData.legendaryChanges.length > 0 && (
-                <section>
-                  <h2 className="text-3xl font-bold mb-6 text-foreground">Legendary Status Changes</h2>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
-                    {patchData.legendaryChanges.map((card) => (
-                      <div key={card.cardId} className="bg-card rounded-lg p-4 border border-border text-center">
-                        <CardImage cardId={card.cardId} cardName={card.name} className="w-full h-auto rounded-lg border-2 border-primary mb-2" />
-                        <p className="text-sm font-medium text-card-foreground">{card.name}</p>
-                        <p className="text-xs text-muted-foreground mt-1">
-                          {card.becameLegendary ? 'Now Legendary' : 'No longer Legendary'}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                </section>
-              )}
 
               {/* Removed Cards */}
               {patchData.removedCards.length > 0 && (
@@ -170,9 +171,9 @@ const Patches = () => {
                           <p key={pi} className="text-foreground text-lg mb-6">{paragraph}</p>
                         ))}
                         {section.images && section.images.length > 0 && (
-                          <div className="space-y-4">
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                             {section.images.map((img, ii) => (
-                              <img key={ii} src={img.src} alt={img.alt} className="w-full max-w-4xl mx-auto rounded-lg border-2 border-primary" loading="lazy" />
+                              <img key={ii} src={img.src} alt={img.alt} className="w-full rounded-lg border-2 border-primary" loading="lazy" />
                             ))}
                           </div>
                         )}

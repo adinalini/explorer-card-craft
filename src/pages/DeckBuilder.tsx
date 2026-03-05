@@ -47,6 +47,7 @@ const DeckBuilder = () => {
   const [saving, setSaving] = useState(false);
   const [deckCodeInput, setDeckCodeInput] = useState("");
   const [importing, setImporting] = useState(false);
+  const [showImportUI, setShowImportUI] = useState(false);
 
   // Card filtering states
   const [searchQuery, setSearchQuery] = useState("");
@@ -304,6 +305,7 @@ const DeckBuilder = () => {
 
       setSelectedCards(sorted);
       setDeckCodeInput("");
+      setShowImportUI(false);
       toast({ title: "Deck Imported", description: `Imported ${sorted.length} cards from deck code.` });
     } catch {
       toast({ title: "Error", description: "Failed to import deck code.", variant: "destructive" });
@@ -393,9 +395,53 @@ const DeckBuilder = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
           {/* Deck Preview */}
           <div className="bg-card rounded-lg p-6">
-            <h2 className="text-xl font-semibold mb-4 text-card-foreground">
-              Your Deck ({selectedCards.length}/13)
-            </h2>
+            {/* Collapsible Import UI */}
+            {showImportUI && (
+              <div className="mb-4 p-3 border border-border rounded-lg bg-muted/30 space-y-2">
+                <Label className="text-sm font-medium text-muted-foreground">Import Deck Code</Label>
+                <Textarea
+                  placeholder="Paste deck code here..."
+                  value={deckCodeInput}
+                  onChange={(e) => setDeckCodeInput(e.target.value)}
+                  rows={2}
+                  className="text-xs"
+                />
+                <div className="flex gap-2">
+                  <Button
+                    onClick={handleImportDeckCode}
+                    disabled={importing || !deckCodeInput.trim()}
+                    variant="outline"
+                    size="sm"
+                    className="flex-1"
+                  >
+                    {importing ? "Importing..." : "Import Deck"}
+                  </Button>
+                  <Button
+                    onClick={() => { setShowImportUI(false); setDeckCodeInput(""); }}
+                    variant="ghost"
+                    size="sm"
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-semibold text-card-foreground">
+                Your Deck ({selectedCards.length}/13)
+              </h2>
+              {!showImportUI && (
+                <Button
+                  onClick={() => setShowImportUI(true)}
+                  variant="ghost"
+                  size="sm"
+                  className="text-xs text-muted-foreground"
+                >
+                  Import Code
+                </Button>
+              )}
+            </div>
             
             <div className="space-y-4 min-h-[400px]">
               {/* Deck Info and Legendary Card Combined */}
@@ -474,26 +520,6 @@ const DeckBuilder = () => {
               {saving ? "Saving..." : "Save Deck"}
             </Button>
 
-            {/* Deck Code Import */}
-            <div className="mt-4 space-y-2">
-              <Label className="text-sm font-medium text-muted-foreground">Import Deck Code</Label>
-              <Textarea
-                placeholder="Paste deck code here..."
-                value={deckCodeInput}
-                onChange={(e) => setDeckCodeInput(e.target.value)}
-                rows={2}
-                className="text-xs"
-              />
-              <Button
-                onClick={handleImportDeckCode}
-                disabled={importing || !deckCodeInput.trim()}
-                variant="outline"
-                size="sm"
-                className="w-full"
-              >
-                {importing ? "Importing..." : "Import Deck"}
-              </Button>
-            </div>
           </div>
 
           {/* Card Selection */}
@@ -596,7 +622,7 @@ const DeckBuilder = () => {
             </div>
             
             {/* Cards Grid */}
-            <div className="grid grid-cols-3 gap-3 overflow-y-auto flex-1" style={{ maxHeight: 'calc(100vh - 200px)' }}>
+            <div className="grid grid-cols-3 gap-3 max-h-[550px] overflow-y-auto">
               {filteredCards.map((card) => (
                 <div
                   key={card.id}

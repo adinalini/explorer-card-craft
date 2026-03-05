@@ -173,7 +173,7 @@ const Patches = () => {
                         {section.images && section.images.length > 0 && (
                           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                             {section.images.map((img, ii) => (
-                              <img key={ii} src={img.src} alt={img.alt} className={`w-full h-48 md:h-56 rounded-lg border-2 border-primary ${ii === section.images!.length - 1 ? 'object-contain' : 'object-cover object-bottom'}`} loading="lazy" />
+                              <img key={ii} src={img.src} alt={img.alt} className={`w-full h-56 md:h-72 rounded-lg border-2 border-primary ${ii === section.images!.length - 1 ? 'object-contain' : 'object-cover object-bottom'}`} loading="lazy" />
                             ))}
                           </div>
                         )}

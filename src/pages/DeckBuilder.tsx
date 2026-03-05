@@ -596,7 +596,7 @@ const DeckBuilder = () => {
             </div>
             
             {/* Cards Grid */}
-            <div className="grid grid-cols-4 sm:grid-cols-5 gap-2 max-h-[600px] overflow-y-auto">
+            <div className="grid grid-cols-3 gap-3 max-h-[800px] overflow-y-auto">
               {filteredCards.map((card) => (
                 <div
                   key={card.id}

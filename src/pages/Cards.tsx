@@ -175,8 +175,8 @@ const Cards = () => {
       <div className="container mx-auto px-4 py-8">
         {/* Filters Section */}
         <div className="bg-card rounded-lg p-6 mb-8 border border-border">
-          {/* Search + collapse toggle row */}
-          <div className="flex gap-2 items-end">
+          {/* Search + collapse toggle row (mobile) */}
+          <div className="flex gap-2 items-end md:hidden">
             <div className="space-y-2 flex-1">
               <Label className="text-foreground">Search by Name</Label>
               <div className="relative">
@@ -192,16 +192,30 @@ const Cards = () => {
             <Button
               variant="ghost"
               size="icon"
-              className="md:hidden h-10 w-10 shrink-0"
+              className="h-10 w-10 shrink-0"
               onClick={() => setFiltersCollapsed(!filtersCollapsed)}
             >
               {filtersCollapsed ? <ChevronDown className="w-5 h-5" /> : <ChevronUp className="w-5 h-5" />}
             </Button>
           </div>
 
-          {/* Collapsible filters */}
+          {/* All filters in grid (collapsible on mobile, always visible on desktop) */}
           <div className={`${filtersCollapsed ? 'hidden' : 'block'} md:block`}>
-            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-6 gap-6 mt-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-6 gap-6 mt-6 md:mt-0">
+              {/* Search (desktop only - mobile has its own above) */}
+              <div className="space-y-2 hidden md:block">
+                <Label className="text-foreground">Search by Name</Label>
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Search cards..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-10 border-muted-foreground/30"
+                  />
+                </div>
+              </div>
+
               {/* Cost Range */}
               <div className="space-y-2">
                 <Label className="text-foreground">

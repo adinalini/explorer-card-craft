@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button"
 import { History } from "lucide-react"
 import { useState } from "react"
-import { getOriginalCardImage } from "@/utils/cardChanges"
+import { hasImageChanged, buildOriginalImagesMap } from "@/utils/cardChanges"
 
 interface DeckVersionToggleProps {
   deckPatch: string
@@ -16,11 +16,8 @@ interface DeckVersionToggleProps {
 export function DeckVersionToggle({ deckPatch, cards, onToggle }: DeckVersionToggleProps) {
   const [showOriginal, setShowOriginal] = useState(false)
 
-  // Check if there are any cards with old versions
-  const hasOldVersions = cards.some(card => {
-    const originalImage = getOriginalCardImage(card.card_id, deckPatch, card.card_image)
-    return originalImage !== card.card_image
-  })
+  // Check if ANY card has a different image at the deck's patch vs current
+  const hasOldVersions = cards.some(card => hasImageChanged(card.card_id, deckPatch))
 
   if (!hasOldVersions) {
     return null
@@ -31,14 +28,8 @@ export function DeckVersionToggle({ deckPatch, cards, onToggle }: DeckVersionTog
     setShowOriginal(newShowOriginal)
 
     if (newShowOriginal) {
-      // Generate original images map
-      const originalImages: Record<string, string> = {}
-      cards.forEach(card => {
-        const originalImage = getOriginalCardImage(card.card_id, deckPatch, card.card_image)
-        if (originalImage !== card.card_image) {
-          originalImages[card.card_id] = originalImage
-        }
-      })
+      // Build original images for ALL cards with different images
+      const originalImages = buildOriginalImagesMap(cards, deckPatch)
       onToggle(true, originalImages)
     } else {
       onToggle(false, {})

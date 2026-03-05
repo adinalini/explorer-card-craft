@@ -66,7 +66,7 @@ export const NavigationButtons = ({ sizeVariant = "default" }: NavigationButtons
       <>
         {/* Deck Generator */}
         <div onClick={() => setMenu("deckgen")} className={cellClass} style={{ animationDelay: '0.3s' }}>
-          <div className={`${titleClass} font-bold text-white mb-2`}>Deck Generator</div>
+          <div className={`${isDefault ? 'text-lg sm:text-2xl md:text-[1.7rem]' : 'text-sm'} font-bold text-white mb-2 whitespace-nowrap`}>Deck Generator</div>
           <div className={`${textClass} text-slate-300 text-center leading-tight`}>
             Generate random/event decks
           </div>

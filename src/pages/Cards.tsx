@@ -295,7 +295,7 @@ const Cards = () => {
                   const selectedPatch = PATCHES.find(p => p.id === globalPatch);
                   const hasAlignment = selectedPatch && selectedPatch.order >= 3;
                   return hasAlignment ? (
-                    <div className="flex flex-wrap gap-4">
+                    <div className="flex flex-wrap gap-x-4 gap-y-1">
                       <label className="flex items-center gap-2 text-sm text-foreground">
                         <input
                           type="checkbox"
@@ -320,7 +320,7 @@ const Cards = () => {
                         />
                         Evil
                       </label>
-                      <label className="flex items-center gap-2 text-sm text-foreground">
+                      <label className="flex items-center gap-2 text-sm text-foreground 2xl:basis-full">
                         <input
                           type="checkbox"
                           checked={showNeutral}

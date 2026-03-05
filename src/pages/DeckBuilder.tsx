@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -48,6 +48,24 @@ const DeckBuilder = () => {
   const [deckCodeInput, setDeckCodeInput] = useState("");
   const [importing, setImporting] = useState(false);
   const [showImportUI, setShowImportUI] = useState(false);
+  const leftPanelRef = useRef<HTMLDivElement>(null);
+  const filterRef = useRef<HTMLDivElement>(null);
+  const [cardGridMaxH, setCardGridMaxH] = useState<number>(480);
+
+  useEffect(() => {
+    const updateHeight = () => {
+      if (leftPanelRef.current && filterRef.current) {
+        const leftH = leftPanelRef.current.offsetHeight;
+        const filterH = filterRef.current.offsetHeight;
+        // Right panel has p-6 (24px*2=48px) + header ~36px + filter + mb-6 (24px) + gap
+        const overhead = 48 + 36 + filterH + 24 + 16;
+        setCardGridMaxH(Math.max(200, leftH - overhead));
+      }
+    };
+    updateHeight();
+    window.addEventListener('resize', updateHeight);
+    return () => window.removeEventListener('resize', updateHeight);
+  }, [selectedCards, showImportUI]);
 
   // Card filtering states
   const [searchQuery, setSearchQuery] = useState("");
@@ -392,9 +410,9 @@ const DeckBuilder = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
           {/* Deck Preview */}
-          <div className="bg-card rounded-lg p-6">
+          <div ref={leftPanelRef} className="bg-card rounded-lg p-6">
             {/* Collapsible Import UI */}
             {showImportUI && (
               <div className="mb-4 p-3 border border-border rounded-lg bg-muted/30 space-y-2">
@@ -527,7 +545,7 @@ const DeckBuilder = () => {
             <h2 className="text-xl font-semibold mb-4 text-card-foreground">Select Cards</h2>
             
             {/* Filters */}
-            <div className="space-y-4 mb-6">
+            <div ref={filterRef} className="space-y-4 mb-6">
               <Input
                 placeholder="Search cards..."
                 value={searchQuery}
@@ -622,7 +640,7 @@ const DeckBuilder = () => {
             </div>
             
             {/* Cards Grid */}
-            <div className="grid grid-cols-3 gap-3 flex-1 overflow-y-auto">
+            <div className="grid grid-cols-3 gap-3 overflow-y-auto" style={{ maxHeight: `${cardGridMaxH}px` }}>
               {filteredCards.map((card) => (
                 <div
                   key={card.id}

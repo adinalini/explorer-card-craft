@@ -336,7 +336,7 @@ const DeckBuilder = () => {
     <div className="min-h-screen bg-gradient-to-br from-[hsl(var(--background-start))] to-[hsl(var(--background-end))]">
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8 gap-2">
+        <div className="flex items-center justify-between mb-8 gap-2 relative">
           <Button
             onClick={() => navigate('/')}
             variant="ghost"
@@ -348,9 +348,10 @@ const DeckBuilder = () => {
             <span className="sm:hidden">Back</span>
           </Button>
           
-          <div className="text-center flex-1">
+          <div className="absolute left-1/2 -translate-x-1/2">
             <h1 className="text-2xl sm:text-4xl font-bold text-foreground">Create New Deck</h1>
           </div>
+          <div className="flex-1" />
           
           <ThemeToggle className="text-foreground hover:bg-accent" />
         </div>

@@ -78,11 +78,14 @@ const Cards = () => {
       const matchesType = (showMinions && isMinion) || (showSpells && isSpell) || (showItems && isItem);
       const matchesLegendary = !card.isLegendary || showLegendary;
 
-      // Alignment filter: if card has alignment, check filters. Cards without alignment always pass.
-      const matchesAlignment = !card.alignment || 
-        (card.alignment === 'good' && showGood) || 
-        (card.alignment === 'evil' && showEvil) || 
-        (card.alignment === 'neutral' && showNeutral);
+      // Alignment filter: for patches with alignment (GDC 2026+), require matching filter.
+      const selectedPatchObj = PATCHES.find(p => p.id === globalPatch);
+      const patchHasAlignment = selectedPatchObj && selectedPatchObj.order >= 3;
+      const matchesAlignment = !patchHasAlignment || !card.alignment
+        ? true
+        : (card.alignment === 'good' && showGood) || 
+          (card.alignment === 'evil' && showEvil) || 
+          (card.alignment === 'neutral' && showNeutral);
 
       return matchesSearch && matchesCost && matchesType && matchesLegendary && matchesAlignment;
     }).sort((a, b) => {
@@ -198,7 +201,7 @@ const Cards = () => {
 
           {/* Collapsible filters */}
           <div className={`${filtersCollapsed ? 'hidden' : 'block'} md:block`}>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 mt-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-6 gap-6 mt-6">
               {/* Cost Range */}
               <div className="space-y-2">
                 <Label className="text-foreground">
@@ -403,7 +406,7 @@ const Cards = () => {
 
                   <div className="flex items-center justify-between text-xs text-muted-foreground">
                     <span>Cost: {card.cost}</span>
-                    <div className="flex gap-1">
+                    <div className="flex gap-1 items-center">
                       {card.isLegendary && (
                         <span className="px-1.5 py-0.5 bg-yellow-500/20 text-yellow-600 dark:text-yellow-400 rounded text-[10px]">
                           Legendary
@@ -424,6 +427,12 @@ const Cards = () => {
                           Minion
                         </span>
                       )}
+                      <button
+                        onClick={() => downloadCardImage(card, selectedVersion)}
+                        className="md:hidden p-1 rounded hover:bg-accent/20 text-muted-foreground hover:text-foreground transition-colors"
+                      >
+                        <Download className="w-3.5 h-3.5" />
+                      </button>
                     </div>
                   </div>
 
@@ -431,7 +440,7 @@ const Cards = () => {
                     onClick={() => downloadCardImage(card, selectedVersion)}
                     size="sm"
                     variant="outline"
-                    className="w-full flex items-center gap-2 text-xs hover:bg-accent/20"
+                    className="hidden md:flex w-full items-center gap-2 text-xs hover:bg-accent/20"
                   >
                     <Download className="w-3 h-3" />
                     Download Image

@@ -32,7 +32,7 @@ export const HomepageArticlesWidget = () => {
     <div
       className="relative bg-black/20 backdrop-blur-md border border-white/10 rounded-lg overflow-hidden cursor-pointer hover:bg-black/30 transition-all duration-300 group"
       style={{ width: "100%", height: "100%" }}
-      onClick={() => navigate(`/articles`)}
+      onClick={() => navigate(`/article/${item.slug}`)}
     >
       {/* Image */}
       <div className="absolute inset-0">

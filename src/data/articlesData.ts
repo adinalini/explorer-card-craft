@@ -43,7 +43,7 @@ export const articleItems: ArticleItem[] = [
 
 ![](/images/articles/ama-collector-packs.png)
 
-- Seasonal prestige packs (tradable) that drop from various paywalls (to control supply/botting) and can be opened via purchasable keys.
+- Seasonal prestige packs (tradable) that drop from various paywalls (to control supply/ botting) and can be opened via purchasable keys.
 
 ![](/images/articles/ama-prestige-packs.png)
 

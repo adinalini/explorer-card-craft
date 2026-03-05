@@ -51,6 +51,8 @@ const DeckBuilder = () => {
   const [showLegendary, setShowLegendary] = useState(true);
   const [showSpells, setShowSpells] = useState(true);
   const [showItems, setShowItems] = useState(true);
+  const [showGood, setShowGood] = useState(true);
+  const [showEvil, setShowEvil] = useState(true);
 
   const filteredCards = useMemo(() => {
     return cardDatabase.filter(card => {
@@ -68,13 +70,20 @@ const DeckBuilder = () => {
       
       // Legendary status filter
       const matchesLegendary = !card.isLegendary || showLegendary;
+
+      // Alignment filter
+      const alignment = card.alignment;
+      const matchesAlignment = !alignment || 
+        (alignment === 'good' && showGood) || 
+        (alignment === 'evil' && showEvil) || 
+        (alignment === 'neutral');
       
-      return matchesSearch && matchesCost && matchesType && matchesLegendary;
+      return matchesSearch && matchesCost && matchesType && matchesLegendary && matchesAlignment;
     }).sort((a, b) => {
       if (a.cost !== b.cost) return a.cost - b.cost;
       return a.name.localeCompare(b.name);
     });
-  }, [searchQuery, costRange, showMinions, showLegendary, showSpells, showItems]);
+  }, [searchQuery, costRange, showMinions, showLegendary, showSpells, showItems, showGood, showEvil]);
 
   const handleCardSelect = (card: any) => {
     // Check if card is already selected
@@ -457,6 +466,34 @@ const DeckBuilder = () => {
                     onCheckedChange={(checked) => setShowLegendary(checked === true)}
                   />
                   <Label htmlFor="legendary" className="text-sm">Legendary</Label>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Alignment</Label>
+                <div className="flex gap-4 flex-wrap">
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="good"
+                      checked={showGood}
+                      onCheckedChange={(checked) => {
+                        if (!checked && !showEvil) return;
+                        setShowGood(checked === true);
+                      }}
+                    />
+                    <Label htmlFor="good" className="text-sm">Good</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="evil"
+                      checked={showEvil}
+                      onCheckedChange={(checked) => {
+                        if (!checked && !showGood) return;
+                        setShowEvil(checked === true);
+                      }}
+                    />
+                    <Label htmlFor="evil" className="text-sm">Evil</Label>
+                  </div>
                 </div>
               </div>
             </div>

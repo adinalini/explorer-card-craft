@@ -6,9 +6,12 @@ import { getCardImageForPatch } from "@/components/CardImage"
 
 // Build reverse rename map: newId -> oldId
 const reverseRenames: Record<string, string> = {}
+// Build forward rename map: oldId -> newId
+const forwardRenames: Record<string, string> = {}
 for (const renames of Object.values(cardIdRenames)) {
   for (const [oldId, newId] of Object.entries(renames)) {
     reverseRenames[newId] = oldId
+    forwardRenames[oldId] = newId
   }
 }
 
@@ -26,20 +29,58 @@ function cardExistsInPatch(cardId: string, patchId: string): boolean {
 }
 
 /**
+ * Get all identity chain IDs for a card (past and future names).
+ * E.g., ali_baba -> the_firebird, or the_firebird -> ali_baba
+ */
+function getCardIdentityChain(cardId: string): string[] {
+  const ids = new Set<string>()
+  // Walk backwards
+  let current = cardId
+  while (current) {
+    ids.add(current)
+    const prev = reverseRenames[current]
+    if (prev && !ids.has(prev)) {
+      current = prev
+    } else break
+  }
+  // Walk forwards
+  current = cardId
+  while (current) {
+    ids.add(current)
+    const next = forwardRenames[current]
+    if (next && !ids.has(next)) {
+      current = next
+    } else break
+  }
+  return Array.from(ids)
+}
+
+/**
  * Get the list of patches where the card's art actually changed.
- * Only shows the patch where a new version of the art was introduced.
+ * Includes both past and future versions (renamed cards).
  */
 function getCardPatches(cardId: string): { patch: string; label: string }[] {
+  const identityChain = getCardIdentityChain(cardId)
   const result: { patch: string; label: string }[] = []
   let lastImageUrl: string | undefined = undefined
 
   for (const p of allPatches) {
-    if (!cardExistsInPatch(cardId, p.id)) continue
+    // Check if any identity in chain exists in this patch
+    const existsInPatch = identityChain.some(id => {
+      const stats = patchCardStats[p.id] || {}
+      return stats[id]?.status === 'active'
+    })
+    if (!existsInPatch) continue
 
-    // Get the direct image for this patch (not using fallback chain)
-    const imageUrl = getCardImageForPatch(cardId, p.id)
+    // Find which ID to use for image lookup
+    const activeId = identityChain.find(id => {
+      const stats = patchCardStats[p.id] || {}
+      return stats[id]?.status === 'active'
+    })
+    if (!activeId) continue
+
+    const imageUrl = getCardImageForPatch(activeId, p.id)
     
-    // Only add this patch if the art is different from the previous version
     if (imageUrl !== lastImageUrl) {
       result.push({ patch: p.id, label: p.displayName })
       lastImageUrl = imageUrl

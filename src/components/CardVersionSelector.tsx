@@ -1,18 +1,50 @@
 import { useState, useRef, useEffect } from "react"
 import { History } from "lucide-react"
-import { oldCardImages } from "@/utils/oldCardImages"
 import { getAllPatchesOrdered, CURRENT_PATCH } from "@/utils/patches"
+import { patchCardStats, cardIdRenames } from "@/utils/cardStats"
+import { getCardImageForPatch } from "@/components/CardImage"
 
 // Build version options from the patch registry
 const patchVersions = [
   ...getAllPatchesOrdered()
-    .filter(p => p.id !== CURRENT_PATCH.id) // exclude current (it's added as "Current")
+    .filter(p => p.id !== CURRENT_PATCH.id)
     .map(p => ({ patch: p.id, label: p.displayName })),
   { patch: "current", label: "Current" },
 ]
 
-// Cards that have old versions available
-export const cardsWithHistory = Object.keys(oldCardImages)
+// Build a set of card IDs that have history (existed in older patches under same or different ID)
+function buildCardsWithHistory(): string[] {
+  const patches = getAllPatchesOrdered()
+  const currentStats = patchCardStats[CURRENT_PATCH.id] || {}
+  const currentIds = new Set(Object.keys(currentStats).filter(id => currentStats[id].status === 'active'))
+
+  // Build reverse rename map: newId -> oldId for all patches
+  const reverseRenames: Record<string, string> = {}
+  for (const renames of Object.values(cardIdRenames)) {
+    for (const [oldId, newId] of Object.entries(renames)) {
+      reverseRenames[newId] = oldId
+    }
+  }
+
+  const withHistory = new Set<string>()
+
+  for (const cardId of currentIds) {
+    // Check if card existed in any older patch (same ID or old ID)
+    const oldId = reverseRenames[cardId]
+    for (const patch of patches) {
+      if (patch.id === CURRENT_PATCH.id) continue
+      const stats = patchCardStats[patch.id] || {}
+      if (stats[cardId]?.status === 'active' || (oldId && stats[oldId]?.status === 'active')) {
+        withHistory.add(cardId)
+        break
+      }
+    }
+  }
+
+  return Array.from(withHistory)
+}
+
+export const cardsWithHistory = buildCardsWithHistory()
 
 interface CardVersionSelectorProps {
   cardId: string
@@ -26,14 +58,12 @@ export function CardVersionSelector({ cardId, onVersionChange, selectedVersion }
   
   const hasHistory = cardsWithHistory.includes(cardId)
   
-  // Close menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
         setIsOpen(false)
       }
     }
-    
     document.addEventListener("mousedown", handleClickOutside)
     return () => document.removeEventListener("mousedown", handleClickOutside)
   }, [])
@@ -62,7 +92,7 @@ export function CardVersionSelector({ cardId, onVersionChange, selectedVersion }
       
       {isOpen && (
         <div className="absolute bottom-full right-0 mb-1 z-50 bg-popover border border-border rounded-md shadow-lg overflow-hidden min-w-[100px]">
-          {patchVersions.map((version, index) => (
+          {patchVersions.map((version) => (
             <button
               key={version.patch}
               onClick={() => {
@@ -88,8 +118,5 @@ export function CardVersionSelector({ cardId, onVersionChange, selectedVersion }
 }
 
 export function getOldCardImage(cardId: string, version: string): string | null {
-  if (version === "summer-2025" || version === "v1.0.0.40") {
-    return oldCardImages[cardId] || null
-  }
-  return null
+  return getCardImageForPatch(cardId, version) || null
 }

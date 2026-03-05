@@ -11,8 +11,8 @@ function extractCardId(path: string): string {
   return filename.toLowerCase().replace(/\s+/g, '_').replace(/'/g, '')
 }
 
-/** Build a cardId -> imageUrl map from glob results */
-function buildImageMap(modules: Record<string, { default: string }>): Record<string, string> {
+/** Build a raw filename-keyed map from glob results */
+function buildRawMap(modules: Record<string, { default: string }>): Record<string, string> {
   const map: Record<string, string> = {}
   for (const [path, mod] of Object.entries(modules)) {
     map[extractCardId(path)] = mod.default
@@ -20,17 +20,34 @@ function buildImageMap(modules: Record<string, { default: string }>): Record<str
   return map
 }
 
-export const gdcImages = buildImageMap(gdcModules)
-export const winterImages = buildImageMap(winterModules)
-export const summerImages = buildImageMap(summerModules)
+const rawGdc = buildRawMap(gdcModules)
+const rawWinter = buildRawMap(winterModules)
+const rawSummer = buildRawMap(summerModules)
 
-// Filename-to-cardId overrides (when derived filename doesn't match card ID)
-const filenameOverrides: Record<string, string> = {
+// Filename (normalized) -> cardStats ID overrides
+// These handle cases where the image filename doesn't match the card ID in cardStats
+const filenameToCardId: Record<string, string> = {
   christopher_robin: 'christopher',
   hansel_and_gretel: 'hansel_gretel',
   robin_hood: 'robinhood',
   white_queen: 'the_white_queen',
+  rai_of_arrows: 'rain_of_arrows',
 }
+
+/** Resolve a raw filename-keyed map to a cardId-keyed map */
+function resolveMap(rawMap: Record<string, string>): Record<string, string> {
+  const resolved: Record<string, string> = {}
+  for (const [fileId, url] of Object.entries(rawMap)) {
+    const cardId = filenameToCardId[fileId] || fileId
+    resolved[cardId] = url
+  }
+  return resolved
+}
+
+// Resolved per-patch image maps (cardId -> imageUrl)
+const resolvedGdc = resolveMap(rawGdc)
+const resolvedWinter = resolveMap(rawWinter)
+const resolvedSummer = resolveMap(rawSummer)
 
 // Old ID -> current ID aliases for backward compatibility
 const cardIdAliases: Record<string, string> = {
@@ -52,33 +69,28 @@ const cardIdAliases: Record<string, string> = {
   redcap: 'red_cap',
 }
 
-// Winter filename overrides
-const winterFilenameOverrides: Record<string, string> = {
-  rai_of_arrows: 'rain_of_arrows',
+// Reverse aliases: current ID -> old IDs for looking up old patch images
+const reverseAliases: Record<string, string[]> = {}
+for (const [oldId, newId] of Object.entries(cardIdAliases)) {
+  if (!reverseAliases[newId]) reverseAliases[newId] = []
+  reverseAliases[newId].push(oldId)
 }
 
-// Build the current card images map
+// Build the current (latest patch) card images map
 // Priority: GDC 2026 > Winter 2025 > Summer 2025
-const cardImages: Record<string, string> = {}
-
-// Apply GDC images with filename overrides
-for (const [fileId, url] of Object.entries(gdcImages)) {
-  const cardId = filenameOverrides[fileId] || fileId
-  cardImages[cardId] = url
-}
+const cardImages: Record<string, string> = { ...resolvedGdc }
 
 // Fill in Winter 2025 images for cards not in GDC (removed/historical)
-for (const [fileId, url] of Object.entries(winterImages)) {
-  const cardId = winterFilenameOverrides[fileId] || fileId
+for (const [cardId, url] of Object.entries(resolvedWinter)) {
   if (!cardImages[cardId]) {
     cardImages[cardId] = url
   }
 }
 
 // Fill in Summer 2025 images for cards only in Summer
-for (const [fileId, url] of Object.entries(summerImages)) {
-  if (!cardImages[fileId]) {
-    cardImages[fileId] = url
+for (const [cardId, url] of Object.entries(resolvedSummer)) {
+  if (!cardImages[cardId]) {
+    cardImages[cardId] = url
   }
 }
 
@@ -89,14 +101,48 @@ for (const [alias, canonical] of Object.entries(cardIdAliases)) {
   }
 }
 
+/** Patch-indexed resolved maps */
+const patchImageMaps: Record<string, Record<string, string>> = {
+  'gdc-2026': resolvedGdc,
+  'winter-2025': resolvedWinter,
+  'summer-2025': resolvedSummer,
+}
+
+/**
+ * Get the image URL for a card at a specific patch.
+ * Handles ID aliases and filename overrides.
+ */
+export function getCardImageForPatch(cardId: string, patchId: string): string | undefined {
+  const map = patchImageMaps[patchId]
+  if (!map) return cardImages[cardId]
+
+  // Direct lookup
+  if (map[cardId]) return map[cardId]
+
+  // Try reverse aliases (current ID -> old filename-based IDs)
+  const oldIds = reverseAliases[cardId]
+  if (oldIds) {
+    for (const oldId of oldIds) {
+      if (map[oldId]) return map[oldId]
+    }
+  }
+
+  // Try forward alias (old ID -> current ID)
+  const canonical = cardIdAliases[cardId]
+  if (canonical && map[canonical]) return map[canonical]
+
+  return undefined
+}
+
 interface CardImageProps {
   cardId: string;
   cardName: string;
   className?: string;
   onError?: () => void;
+  patchId?: string; // optional: render image from specific patch
 }
 
-export function CardImage({ cardId, cardName, className, onError }: CardImageProps) {
+export function CardImage({ cardId, cardName, className, onError, patchId }: CardImageProps) {
   const [imageError, setImageError] = useState(false);
 
   const handleImageError = () => {
@@ -104,13 +150,20 @@ export function CardImage({ cardId, cardName, className, onError }: CardImagePro
     onError?.();
   };
 
-  // Resolve card ID through aliases
-  let resolvedId = cardId;
-  if (!cardImages[resolvedId] && cardIdAliases[resolvedId]) {
-    resolvedId = cardIdAliases[resolvedId];
+  let imageSrc: string | undefined;
+
+  if (patchId) {
+    imageSrc = getCardImageForPatch(cardId, patchId);
   }
 
-  const imageSrc = cardImages[resolvedId] || "/placeholder.svg";
+  if (!imageSrc) {
+    // Resolve card ID through aliases for current/fallback
+    let resolvedId = cardId;
+    if (!cardImages[resolvedId] && cardIdAliases[resolvedId]) {
+      resolvedId = cardIdAliases[resolvedId];
+    }
+    imageSrc = cardImages[resolvedId] || "/placeholder.svg";
+  }
 
   return (
     <img
@@ -120,7 +173,6 @@ export function CardImage({ cardId, cardName, className, onError }: CardImagePro
       onError={handleImageError}
       loading="eager"
       decoding="async"
-      fetchPriority="high"
     />
   );
 }

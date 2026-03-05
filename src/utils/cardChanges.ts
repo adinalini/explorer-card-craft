@@ -9,6 +9,21 @@ import { computePatchDiff, cardIdRenames } from './cardStats'
 import { patchNotesData } from './patchNotes'
 import { getCardImageForPatch, cardImages } from '../components/CardImage'
 
+/**
+ * Maps variant/legacy card IDs (from database) to canonical stats IDs.
+ * Handles cases where decks were saved with different ID formats.
+ */
+const cardIdAliases: Record<string, string> = {
+  'redcap': 'red_cap',
+}
+
+/**
+ * Normalize a card ID to its canonical stats form.
+ */
+export function normalizeCardId(cardId: string): string {
+  return cardIdAliases[cardId] || cardId
+}
+
 export interface CardChange {
   cardId: string
   cardName: string
@@ -146,11 +161,14 @@ export function getDeckValidationIssues(deckPatch: string, cardIds: string[]): {
   const invalidIssues: CardChange[] = []
   const warningIssues: CardChange[] = []
 
+  // Normalize deck card IDs to canonical form for matching
+  const normalizedCardIds = cardIds.map(normalizeCardId)
+
   for (const change of cardChanges) {
     // Check if this change applies to any card in the deck
     // Either directly by cardId, or through a rename chain (deck has old ID, change uses new ID)
-    const isAffected = cardIds.includes(change.cardId) ||
-      (reverseRenameMap[change.cardId] && cardIds.includes(reverseRenameMap[change.cardId]))
+    const isAffected = normalizedCardIds.includes(change.cardId) ||
+      (reverseRenameMap[change.cardId] && normalizedCardIds.includes(reverseRenameMap[change.cardId]))
 
     if (!isAffected) continue
 
@@ -207,7 +225,8 @@ export function groupCardChanges(changes: CardChange[]): Array<{ cardNames: stri
  * Uses patch-based image resolution (handles renames, image-only changes).
  */
 export function getOriginalCardImage(cardId: string, deckPatch: string, currentImage: string): string {
-  const patchImage = getCardImageForPatch(cardId, deckPatch)
+  const normalized = normalizeCardId(cardId)
+  const patchImage = getCardImageForPatch(normalized, deckPatch)
   if (patchImage) return patchImage
   return currentImage
 }
@@ -217,8 +236,9 @@ export function getOriginalCardImage(cardId: string, deckPatch: string, currentI
  * Detects image-only changes (renames, new art) even without stat changes.
  */
 export function hasImageChanged(cardId: string, deckPatch: string): boolean {
-  const patchImage = getCardImageForPatch(cardId, deckPatch)
-  const currentImage = cardImages[cardId]
+  const normalized = normalizeCardId(cardId)
+  const patchImage = getCardImageForPatch(normalized, deckPatch)
+  const currentImage = cardImages[normalized]
   if (!patchImage || !currentImage) return false
   return patchImage !== currentImage
 }
@@ -233,8 +253,9 @@ export function buildOriginalImagesMap(
 ): Record<string, string> {
   const originalImages: Record<string, string> = {}
   for (const card of cards) {
-    const patchImage = getCardImageForPatch(card.card_id, deckPatch)
-    const currentImage = cardImages[card.card_id]
+    const normalized = normalizeCardId(card.card_id)
+    const patchImage = getCardImageForPatch(normalized, deckPatch)
+    const currentImage = cardImages[normalized]
     if (patchImage && currentImage && patchImage !== currentImage) {
       originalImages[card.card_id] = patchImage
     }

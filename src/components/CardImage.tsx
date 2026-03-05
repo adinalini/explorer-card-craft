@@ -173,21 +173,17 @@ export function CardImage({ cardId, cardName, className, onError, patchId }: Car
     onError?.();
   };
 
-  let imageSrc: string | undefined;
-
-  if (patchId) {
-    imageSrc = getCardImageForPatch(cardId, patchId);
-    // When a specific patch is requested, do NOT fall back to latest images.
-    // If image not found for this patch, show placeholder.
-    if (!imageSrc) imageSrc = "/placeholder.svg";
-  } else {
-    // No patch specified: use the current (latest) image map
-    let resolvedId = cardId;
-    if (!cardImages[resolvedId] && cardIdAliases[resolvedId]) {
-      resolvedId = cardIdAliases[resolvedId];
-    }
-    imageSrc = cardImages[resolvedId] || "/placeholder.svg";
+  // Cards are already filtered by patchCardStats, so an image should always exist.
+  // Try patch-specific lookup first, then fall back to the global (latest) map.
+  let resolvedId = cardId;
+  if (!cardImages[resolvedId] && cardIdAliases[resolvedId]) {
+    resolvedId = cardIdAliases[resolvedId];
   }
+
+  const imageSrc = (patchId ? getCardImageForPatch(cardId, patchId) : undefined)
+    || cardImages[resolvedId]
+    || cardImages[cardId]
+    || "/placeholder.svg";
 
   return (
     <img

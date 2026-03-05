@@ -12,7 +12,7 @@ import { ArrowLeft, Share, Copy, Check, Flame, Droplet, Cloud, Bomb, Plus, Credi
 import { toast } from "@/hooks/use-toast";
 import { SEOHead } from "@/components/SEOHead";
 import { getDeckValidationIssues, hasImageChanged } from "@/utils/cardChanges";
-import { getPatchDisplayName } from "@/utils/patches";
+import { getPatchDisplayName, isLatestPatch } from "@/utils/patches";
 
 interface Deck {
   id: string;
@@ -258,7 +258,7 @@ const DeckView = () => {
             <div>
               <h3 className="font-semibold text-card-foreground mb-2">Patch</h3>
               <p className="text-muted-foreground">
-                {getPatchDisplayName(deck.patch)}
+                {getPatchDisplayName(deck.patch)}{isLatestPatch(deck.patch) ? ' (latest)' : ''}
               </p>
             </div>
           </div>

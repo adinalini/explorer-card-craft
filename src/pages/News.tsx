@@ -103,7 +103,7 @@ const News = () => {
                   ))}
                 </div>
                 {selected.images && selected.images.length > 0 && (
-                  <div className="grid grid-cols-2 gap-3 mt-6">
+                  <div className="grid grid-cols-1 gap-3 mt-6">
                     {selected.images.map((img, i) => (
                       <img key={i} src={img} alt="" className="rounded-lg object-cover w-full" />
                     ))}

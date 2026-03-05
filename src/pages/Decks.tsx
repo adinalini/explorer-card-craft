@@ -142,6 +142,16 @@ const Decks = () => {
   const paginatedFeaturedDecks = getPaginatedDecks(featuredDecks);
   const paginatedCommunityDecks = getPaginatedDecks(communityDecks);
 
+  // Default to tournament winners if no featured decks exist for latest patch
+  useEffect(() => {
+    if (!loading && decks.length > 0) {
+      const hasFeaturedLatest = decks.some(d => d.is_featured && isLatestPatch(d.patch));
+      if (!hasFeaturedLatest) {
+        setShowTournamentWinners(true);
+      }
+    }
+  }, [loading, decks]);
+
   // Reset to page 1 when filters change
   useEffect(() => {
     setCurrentPage(1);

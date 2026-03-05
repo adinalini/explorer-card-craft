@@ -53,6 +53,7 @@ const DeckBuilder = () => {
   const [showItems, setShowItems] = useState(true);
   const [showGood, setShowGood] = useState(true);
   const [showEvil, setShowEvil] = useState(true);
+  const [showNeutral, setShowNeutral] = useState(true);
 
   const filteredCards = useMemo(() => {
     return cardDatabase.filter(card => {
@@ -76,14 +77,14 @@ const DeckBuilder = () => {
       const matchesAlignment = !alignment || 
         (alignment === 'good' && showGood) || 
         (alignment === 'evil' && showEvil) || 
-        (alignment === 'neutral');
+        (alignment === 'neutral' && showNeutral);
       
       return matchesSearch && matchesCost && matchesType && matchesLegendary && matchesAlignment;
     }).sort((a, b) => {
       if (a.cost !== b.cost) return a.cost - b.cost;
       return a.name.localeCompare(b.name);
     });
-  }, [searchQuery, costRange, showMinions, showLegendary, showSpells, showItems, showGood, showEvil]);
+  }, [searchQuery, costRange, showMinions, showLegendary, showSpells, showItems, showGood, showEvil, showNeutral]);
 
   const handleCardSelect = (card: any) => {
     // Check if card is already selected
@@ -477,7 +478,7 @@ const DeckBuilder = () => {
                       id="good"
                       checked={showGood}
                       onCheckedChange={(checked) => {
-                        if (!checked && !showEvil) return;
+                        if (!checked && !showEvil && !showNeutral) return;
                         setShowGood(checked === true);
                       }}
                     />
@@ -488,11 +489,22 @@ const DeckBuilder = () => {
                       id="evil"
                       checked={showEvil}
                       onCheckedChange={(checked) => {
-                        if (!checked && !showGood) return;
+                        if (!checked && !showGood && !showNeutral) return;
                         setShowEvil(checked === true);
                       }}
                     />
                     <Label htmlFor="evil" className="text-sm">Evil</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="neutral"
+                      checked={showNeutral}
+                      onCheckedChange={(checked) => {
+                        if (!checked && !showGood && !showEvil) return;
+                        setShowNeutral(checked === true);
+                      }}
+                    />
+                    <Label htmlFor="neutral" className="text-sm">Neutral</Label>
                   </div>
                 </div>
               </div>

@@ -10,7 +10,7 @@ import { CardImage, getCardImageForPatch } from "@/components/CardImage";
 import { CardVersionSelector } from "@/components/CardVersionSelector";
 import { WaveDivider } from "@/components/ui/wave-divider";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Download, Search } from "lucide-react";
+import { ArrowLeft, Download, Search, ChevronUp, ChevronDown } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { SEOHead } from "@/components/SEOHead";
 import { PATCHES, CURRENT_PATCH } from "@/utils/patches";
@@ -38,7 +38,9 @@ const Cards = () => {
   const [showItems, setShowItems] = useState(true);
   const [showGood, setShowGood] = useState(true);
   const [showEvil, setShowEvil] = useState(true);
+  const [showNeutral, setShowNeutral] = useState(true);
   const [viewMode, setViewMode] = useState("5");
+  const [filtersCollapsed, setFiltersCollapsed] = useState(false);
   const [globalPatch, setGlobalPatch] = useState(CURRENT_PATCH.id);
   const [selectedVersions, setSelectedVersions] = useState<Record<string, string | null>>({});
 
@@ -80,14 +82,14 @@ const Cards = () => {
       const matchesAlignment = !card.alignment || 
         (card.alignment === 'good' && showGood) || 
         (card.alignment === 'evil' && showEvil) || 
-        (card.alignment === 'neutral');
+        (card.alignment === 'neutral' && showNeutral);
 
       return matchesSearch && matchesCost && matchesType && matchesLegendary && matchesAlignment;
     }).sort((a, b) => {
       if (a.cost !== b.cost) return a.cost - b.cost;
       return a.name.localeCompare(b.name);
     });
-  }, [patchCards, searchQuery, costRange, showMinions, showLegendary, showSpells, showItems, showGood, showEvil]);
+  }, [patchCards, searchQuery, costRange, showMinions, showLegendary, showSpells, showItems, showGood, showEvil, showNeutral]);
 
   const downloadCardImage = async (card: ExplorerCard, selectedVersion: string | null) => {
     try {
@@ -170,9 +172,9 @@ const Cards = () => {
       <div className="container mx-auto px-4 py-8">
         {/* Filters Section */}
         <div className="bg-card rounded-lg p-6 mb-8 border border-border">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6">
-            {/* Search */}
-            <div className="space-y-2">
+          {/* Search + collapse toggle row */}
+          <div className="flex gap-2 items-end">
+            <div className="space-y-2 flex-1">
               <Label className="text-foreground">Search by Name</Label>
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -184,144 +186,175 @@ const Cards = () => {
                 />
               </div>
             </div>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="md:hidden h-10 w-10 shrink-0"
+              onClick={() => setFiltersCollapsed(!filtersCollapsed)}
+            >
+              {filtersCollapsed ? <ChevronDown className="w-5 h-5" /> : <ChevronUp className="w-5 h-5" />}
+            </Button>
+          </div>
 
-            {/* Cost Range */}
-            <div className="space-y-2">
-              <Label className="text-foreground">
-                Cost Range: {costRange[0]} - {costRange[1]}
-              </Label>
-              <Slider
-                value={costRange}
-                onValueChange={setCostRange}
-                min={0}
-                max={10}
-                step={1}
-                className="w-full"
-              />
-            </div>
-
-            {/* Card Type Toggles */}
-            <div className="space-y-2">
-              <Label className="text-foreground">Card Types</Label>
-              <div className="flex flex-wrap gap-4">
-                <label className="flex items-center gap-2 text-sm text-foreground">
-                  <input
-                    type="checkbox"
-                    checked={showMinions}
-                    onChange={(e) => {
-                      const newValue = e.target.checked;
-                      if (!newValue && !showSpells && !showItems) return;
-                      setShowMinions(newValue);
-                    }}
-                    className="rounded border-border"
-                  />
-                  Minions
-                </label>
-                <label className="flex items-center gap-2 text-sm text-foreground">
-                  <input
-                    type="checkbox"
-                    checked={showSpells}
-                    onChange={(e) => {
-                      const newValue = e.target.checked;
-                      if (!newValue && !showMinions && !showItems) return;
-                      setShowSpells(newValue);
-                    }}
-                    className="rounded border-border"
-                  />
-                  Spells
-                </label>
-                <label className="flex items-center gap-2 text-sm text-foreground">
-                  <input
-                    type="checkbox"
-                    checked={showItems}
-                    onChange={(e) => {
-                      const newValue = e.target.checked;
-                      if (!newValue && !showMinions && !showSpells) return;
-                      setShowItems(newValue);
-                    }}
-                    className="rounded border-border"
-                  />
-                  Items
-                </label>
-                <label className="flex items-center gap-2 text-sm text-foreground">
-                  <input
-                    type="checkbox"
-                    checked={showLegendary}
-                    onChange={(e) => {
-                      setShowLegendary(e.target.checked);
-                    }}
-                    className="rounded border-border"
-                  />
-                  Legendary
-                </label>
+          {/* Collapsible filters */}
+          <div className={`${filtersCollapsed ? 'hidden' : 'block'} md:block`}>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 mt-6">
+              {/* Cost Range */}
+              <div className="space-y-2">
+                <Label className="text-foreground">
+                  Cost Range: {costRange[0]} - {costRange[1]}
+                </Label>
+                <Slider
+                  value={costRange}
+                  onValueChange={setCostRange}
+                  min={0}
+                  max={10}
+                  step={1}
+                  className="w-full"
+                />
               </div>
-            </div>
 
-            {/* Alignment */}
-            <div className="space-y-2 lg:col-span-1">
-              <Label className="text-foreground">Alignment</Label>
-              <div className="flex flex-wrap gap-4">
-                <label className="flex items-center gap-2 text-sm text-foreground">
-                  <input
-                    type="checkbox"
-                    checked={showGood}
-                    onChange={(e) => {
-                      if (!e.target.checked && !showEvil) return;
-                      setShowGood(e.target.checked);
-                    }}
-                    className="rounded border-border"
-                  />
-                  Good
-                </label>
-                <label className="flex items-center gap-2 text-sm text-foreground">
-                  <input
-                    type="checkbox"
-                    checked={showEvil}
-                    onChange={(e) => {
-                      if (!e.target.checked && !showGood) return;
-                      setShowEvil(e.target.checked);
-                    }}
-                    className="rounded border-border"
-                  />
-                  Evil
-                </label>
+              {/* Card Type Toggles */}
+              <div className="space-y-2">
+                <Label className="text-foreground">Card Types</Label>
+                <div className="flex flex-wrap gap-4">
+                  <label className="flex items-center gap-2 text-sm text-foreground">
+                    <input
+                      type="checkbox"
+                      checked={showMinions}
+                      onChange={(e) => {
+                        const newValue = e.target.checked;
+                        if (!newValue && !showSpells && !showItems) return;
+                        setShowMinions(newValue);
+                      }}
+                      className="rounded border-border"
+                    />
+                    Minions
+                  </label>
+                  <label className="flex items-center gap-2 text-sm text-foreground">
+                    <input
+                      type="checkbox"
+                      checked={showSpells}
+                      onChange={(e) => {
+                        const newValue = e.target.checked;
+                        if (!newValue && !showMinions && !showItems) return;
+                        setShowSpells(newValue);
+                      }}
+                      className="rounded border-border"
+                    />
+                    Spells
+                  </label>
+                  <label className="flex items-center gap-2 text-sm text-foreground">
+                    <input
+                      type="checkbox"
+                      checked={showItems}
+                      onChange={(e) => {
+                        const newValue = e.target.checked;
+                        if (!newValue && !showMinions && !showSpells) return;
+                        setShowItems(newValue);
+                      }}
+                      className="rounded border-border"
+                    />
+                    Items
+                  </label>
+                  <label className="flex items-center gap-2 text-sm text-foreground">
+                    <input
+                      type="checkbox"
+                      checked={showLegendary}
+                      onChange={(e) => {
+                        setShowLegendary(e.target.checked);
+                      }}
+                      className="rounded border-border"
+                    />
+                    Legendary
+                  </label>
+                </div>
               </div>
-            </div>
 
-            {/* View Mode */}
-            <div className="space-y-2">
-              <Label className="text-foreground">Cards per Row</Label>
-              <RadioGroup value={viewMode} onValueChange={setViewMode} className="flex gap-4">
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="4" id="view-4" />
-                  <Label htmlFor="view-4" className="text-foreground">4</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="5" id="view-5" />
-                  <Label htmlFor="view-5" className="text-foreground">5</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="6" id="view-6" />
-                  <Label htmlFor="view-6" className="text-foreground">6</Label>
-                </div>
-              </RadioGroup>
-            </div>
+              {/* Alignment - only for GDC 2026+ */}
+              {(() => {
+                const selectedPatch = PATCHES.find(p => p.id === globalPatch);
+                const hasAlignment = selectedPatch && selectedPatch.order >= 3;
+                return hasAlignment ? (
+                  <div className="space-y-2 lg:col-span-1">
+                    <Label className="text-foreground">Alignment</Label>
+                    <div className="flex flex-wrap gap-4">
+                      <label className="flex items-center gap-2 text-sm text-foreground">
+                        <input
+                          type="checkbox"
+                          checked={showGood}
+                          onChange={(e) => {
+                            if (!e.target.checked && !showEvil && !showNeutral) return;
+                            setShowGood(e.target.checked);
+                          }}
+                          className="rounded border-border"
+                        />
+                        Good
+                      </label>
+                      <label className="flex items-center gap-2 text-sm text-foreground">
+                        <input
+                          type="checkbox"
+                          checked={showEvil}
+                          onChange={(e) => {
+                            if (!e.target.checked && !showGood && !showNeutral) return;
+                            setShowEvil(e.target.checked);
+                          }}
+                          className="rounded border-border"
+                        />
+                        Evil
+                      </label>
+                      <label className="flex items-center gap-2 text-sm text-foreground">
+                        <input
+                          type="checkbox"
+                          checked={showNeutral}
+                          onChange={(e) => {
+                            if (!e.target.checked && !showGood && !showEvil) return;
+                            setShowNeutral(e.target.checked);
+                          }}
+                          className="rounded border-border"
+                        />
+                        Neutral
+                      </label>
+                    </div>
+                  </div>
+                ) : null;
+              })()}
 
-            {/* Patch Selector */}
-            <div className="space-y-2">
-              <Label className="text-foreground">Patch</Label>
-              <Select value={globalPatch} onValueChange={handleGlobalPatchChange}>
-                <SelectTrigger className="w-full h-9 text-sm">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {[...PATCHES].reverse().map(patch => (
-                    <SelectItem key={patch.id} value={patch.id} className="text-sm">
-                      {patch.displayName}{patch.id === CURRENT_PATCH.id ? ' (latest)' : ''}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              {/* View Mode */}
+              <div className="space-y-2">
+                <Label className="text-foreground">Cards per Row</Label>
+                <RadioGroup value={viewMode} onValueChange={setViewMode} className="flex gap-4">
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="4" id="view-4" />
+                    <Label htmlFor="view-4" className="text-foreground">4</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="5" id="view-5" />
+                    <Label htmlFor="view-5" className="text-foreground">5</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="6" id="view-6" />
+                    <Label htmlFor="view-6" className="text-foreground">6</Label>
+                  </div>
+                </RadioGroup>
+              </div>
+
+              {/* Patch Selector */}
+              <div className="space-y-2">
+                <Label className="text-foreground">Patch</Label>
+                <Select value={globalPatch} onValueChange={handleGlobalPatchChange}>
+                  <SelectTrigger className="w-full h-9 text-sm">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {[...PATCHES].reverse().map(patch => (
+                      <SelectItem key={patch.id} value={patch.id} className="text-sm">
+                        {patch.displayName}{patch.id === CURRENT_PATCH.id ? ' (latest)' : ''}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           </div>
 

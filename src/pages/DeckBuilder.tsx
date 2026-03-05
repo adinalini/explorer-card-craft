@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,6 +15,8 @@ import { CardImage } from "@/components/CardImage";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Slider } from "@/components/ui/slider";
 import { Checkbox } from "@/components/ui/checkbox";
+import { decodeDeck } from "@/utils/deckCodeGenerator";
+import { cardKeyMapping } from "@/utils/cardKeyMapping";
 
 interface DeckCard {
   card_id: string;
@@ -43,6 +45,8 @@ const DeckBuilder = () => {
   const [authorName, setAuthorName] = useState("");
   const [selectedCards, setSelectedCards] = useState<DeckCard[]>([]);
   const [saving, setSaving] = useState(false);
+  const [deckCodeInput, setDeckCodeInput] = useState("");
+  const [importing, setImporting] = useState(false);
 
   // Card filtering states
   const [searchQuery, setSearchQuery] = useState("");
@@ -73,11 +77,11 @@ const DeckBuilder = () => {
       const matchesLegendary = !card.isLegendary || showLegendary;
 
       // Alignment filter
-      const alignment = card.alignment;
-      const matchesAlignment = !alignment || 
-        (alignment === 'good' && showGood) || 
-        (alignment === 'evil' && showEvil) || 
-        (alignment === 'neutral' && showNeutral);
+      const cardAlignment = card.alignment || 'neutral';
+      const matchesAlignment = 
+        (cardAlignment === 'good' && showGood) || 
+        (cardAlignment === 'evil' && showEvil) || 
+        (cardAlignment === 'neutral' && showNeutral);
       
       return matchesSearch && matchesCost && matchesType && matchesLegendary && matchesAlignment;
     }).sort((a, b) => {
@@ -248,6 +252,66 @@ const DeckBuilder = () => {
     }
   };
 
+  // Build reverse mapping: cardKey (without variant) -> cardId
+  const reverseKeyMap = useMemo(() => {
+    const map: Record<string, string> = {};
+    for (const [cardId, cardKey] of Object.entries(cardKeyMapping)) {
+      const baseKey = cardKey.replace(/_(MB|MC|SB|SC)$/, '');
+      map[baseKey] = cardId;
+    }
+    return map;
+  }, []);
+
+  const handleImportDeckCode = useCallback(async () => {
+    if (!deckCodeInput.trim()) return;
+    setImporting(true);
+    try {
+      const { cardKeys, errorMessage } = await decodeDeck(deckCodeInput.trim());
+      if (!cardKeys || cardKeys.length === 0) {
+        toast({ title: "Invalid Deck Code", description: errorMessage || "Could not decode the deck code.", variant: "destructive" });
+        return;
+      }
+
+      const importedCards: DeckCard[] = [];
+      for (const key of cardKeys) {
+        const baseKey = key.replace(/_V\d+$/, '');
+        const lookupKey = baseKey.replace(/_(MB|MC|SB|SC)$/, '');
+        const cardId = reverseKeyMap[lookupKey];
+        if (!cardId) continue;
+        const card = cardDatabase.find(c => c.id === cardId);
+        if (!card) continue;
+        if (importedCards.some(c => c.card_id === card.id)) continue;
+        importedCards.push({
+          card_id: card.id,
+          card_name: card.name,
+          card_image: card.image,
+          is_legendary: card.isLegendary,
+          position: 0,
+        });
+      }
+
+      if (importedCards.length === 0) {
+        toast({ title: "No Cards Found", description: "Could not match any cards from the deck code.", variant: "destructive" });
+        return;
+      }
+
+      const sorted = importedCards.sort((a, b) => {
+        const ca = cardDatabase.find(c => c.id === a.card_id)!;
+        const cb = cardDatabase.find(c => c.id === b.card_id)!;
+        if (ca.cost !== cb.cost) return ca.cost - cb.cost;
+        return ca.name.localeCompare(cb.name);
+      }).map((card, i) => ({ ...card, position: i + 1 }));
+
+      setSelectedCards(sorted);
+      setDeckCodeInput("");
+      toast({ title: "Deck Imported", description: `Imported ${sorted.length} cards from deck code.` });
+    } catch {
+      toast({ title: "Error", description: "Failed to import deck code.", variant: "destructive" });
+    } finally {
+      setImporting(false);
+    }
+  }, [deckCodeInput, reverseKeyMap]);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-[hsl(var(--background-start))] to-[hsl(var(--background-end))]">
       <div className="container mx-auto px-4 py-8">
@@ -409,6 +473,27 @@ const DeckBuilder = () => {
             >
               {saving ? "Saving..." : "Save Deck"}
             </Button>
+
+            {/* Deck Code Import */}
+            <div className="mt-4 space-y-2">
+              <Label className="text-sm font-medium text-muted-foreground">Import Deck Code</Label>
+              <Textarea
+                placeholder="Paste deck code here..."
+                value={deckCodeInput}
+                onChange={(e) => setDeckCodeInput(e.target.value)}
+                rows={2}
+                className="text-xs"
+              />
+              <Button
+                onClick={handleImportDeckCode}
+                disabled={importing || !deckCodeInput.trim()}
+                variant="outline"
+                size="sm"
+                className="w-full"
+              >
+                {importing ? "Importing..." : "Import Deck"}
+              </Button>
+            </div>
           </div>
 
           {/* Card Selection */}

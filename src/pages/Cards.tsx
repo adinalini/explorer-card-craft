@@ -6,15 +6,26 @@ import { Slider } from "@/components/ui/slider";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
-import { CardImage } from "@/components/CardImage";
-import { CardVersionSelector, cardsWithHistory, getOldCardImage } from "@/components/CardVersionSelector";
+import { CardImage, getCardImageForPatch } from "@/components/CardImage";
+import { CardVersionSelector } from "@/components/CardVersionSelector";
 import { WaveDivider } from "@/components/ui/wave-divider";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Download, Search } from "lucide-react";
-import { cardDatabase } from "@/utils/cardData";
 import { toast } from "@/hooks/use-toast";
 import { SEOHead } from "@/components/SEOHead";
 import { PATCHES, CURRENT_PATCH } from "@/utils/patches";
+import { patchCardStats } from "@/utils/cardStats";
+import { cardKeyMapping } from "@/utils/cardKeyMapping";
+
+interface ExplorerCard {
+  id: string;
+  name: string;
+  cost: number;
+  isLegendary: boolean;
+  isSpell: boolean;
+  isItem: boolean;
+  cardKey?: string;
+}
 
 const Cards = () => {
   const navigate = useNavigate();
@@ -30,75 +41,66 @@ const Cards = () => {
 
   const handleGlobalPatchChange = (patchId: string) => {
     setGlobalPatch(patchId);
-    const isLatest = patchId === CURRENT_PATCH.id;
-    const newVersions: Record<string, string | null> = {};
-    cardsWithHistory.forEach(cardId => {
-      newVersions[cardId] = isLatest ? null : patchId;
-    });
-    setSelectedVersions(newVersions);
+    setSelectedVersions({});
   };
 
+  // Build card list from the selected patch's stats
+  const patchCards = useMemo(() => {
+    const stats = patchCardStats[globalPatch] || {};
+    return Object.entries(stats)
+      .filter(([_, s]) => s.status === 'active')
+      .map(([id, s]): ExplorerCard => ({
+        id,
+        name: s.name,
+        cost: s.cost,
+        isLegendary: s.isLegendary,
+        isSpell: s.cardType === 'spell',
+        isItem: s.cardType === 'item',
+        cardKey: cardKeyMapping[id],
+      }));
+  }, [globalPatch]);
+
   const filteredCards = useMemo(() => {
-    const databaseCards = cardDatabase.filter(card => {
+    return patchCards.filter(card => {
       const matchesSearch = card.name.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesCost = card.cost >= costRange[0] && card.cost <= costRange[1];
 
       const isMinion = !card.isSpell && !card.isItem;
       const isSpell = card.isSpell && !card.isItem;
-      const isItem = !!card.isItem;
+      const isItem = card.isItem;
 
       const matchesType = (showMinions && isMinion) || (showSpells && isSpell) || (showItems && isItem);
       const matchesLegendary = !card.isLegendary || showLegendary;
 
       return matchesSearch && matchesCost && matchesType && matchesLegendary;
-    });
-
-    return databaseCards.sort((a, b) => {
-      if (a.cost !== b.cost) {
-        return a.cost - b.cost;
-      }
+    }).sort((a, b) => {
+      if (a.cost !== b.cost) return a.cost - b.cost;
       return a.name.localeCompare(b.name);
     });
-  }, [searchQuery, costRange, showMinions, showLegendary, showSpells, showItems]);
+  }, [patchCards, searchQuery, costRange, showMinions, showLegendary, showSpells, showItems]);
 
-  const downloadCardImage = async (card: any, selectedVersion: string | null) => {
+  const downloadCardImage = async (card: ExplorerCard, selectedVersion: string | null) => {
     try {
-      let imageUrl: string;
-      let fileName = card.name.replace(/\s+/g, '_').toLowerCase();
-
-      if (selectedVersion && selectedVersion !== "current") {
-        const oldImage = getOldCardImage(card.id, selectedVersion);
-        if (oldImage) {
-          imageUrl = oldImage;
-          fileName = `${fileName}_${selectedVersion}`;
-        } else {
-          throw new Error('Old version image not found');
-        }
-      } else {
-        const { cardImages } = await import('@/components/CardImage');
-        imageUrl = cardImages[card.id];
-      }
+      const patchForImage = selectedVersion || globalPatch;
+      const imageUrl = getCardImageForPatch(card.id, patchForImage);
 
       if (!imageUrl) {
         throw new Error('Image not found for card: ' + card.id);
       }
 
       const response = await fetch(imageUrl);
-      if (!response.ok) {
-        throw new Error('Failed to fetch image');
-      }
+      if (!response.ok) throw new Error('Failed to fetch image');
 
       const blob = await response.blob();
       const url = URL.createObjectURL(blob);
-
       const link = document.createElement('a');
       link.href = url;
+      let fileName = card.name.replace(/\s+/g, '_').toLowerCase();
+      if (selectedVersion) fileName = `${fileName}_${selectedVersion}`;
       link.download = `${fileName}.png`;
-
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-
       URL.revokeObjectURL(url);
 
       toast({
@@ -116,10 +118,7 @@ const Cards = () => {
   };
 
   const handleVersionChange = (cardId: string, version: string | null) => {
-    setSelectedVersions(prev => ({
-      ...prev,
-      [cardId]: version
-    }));
+    setSelectedVersions(prev => ({ ...prev, [cardId]: version }));
   };
 
   const getGridCols = () => {
@@ -287,25 +286,26 @@ const Cards = () => {
           {/* Results Summary */}
           <div className="mt-4 pt-4 border-t border-border">
             <p className="text-sm text-muted-foreground">
-              Showing {filteredCards.length} of {cardDatabase.length} cards
+              Showing {filteredCards.length} of {patchCards.length} cards
             </p>
           </div>
         </div>
 
         {/* Cards Grid */}
         <div className={`grid ${getGridCols()} gap-4`}>
-          {filteredCards.map((card: any) => {
+          {filteredCards.map((card) => {
             const selectedVersion = selectedVersions[card.id] || null;
-            const oldImage = selectedVersion ? getOldCardImage(card.id, selectedVersion) : null;
+            const displayPatch = selectedVersion || globalPatch;
 
             return (
               <div key={card.id} className="group relative bg-card rounded-lg overflow-hidden border border-border hover:border-primary/50 transition-all duration-200">
                 <div className="aspect-[3/4] relative">
-                  {oldImage ? (
-                    <img src={oldImage} alt={`${card.name} (${selectedVersion})`} className="w-full h-full object-cover" />
-                  ) : (
-                    <CardImage cardId={card.id} cardName={card.name} className="w-full h-full object-cover" />
-                  )}
+                  <CardImage
+                    cardId={card.id}
+                    cardName={card.name}
+                    patchId={displayPatch}
+                    className="w-full h-full object-cover"
+                  />
                   {selectedVersion && (
                     <div className="absolute top-2 left-2 px-2 py-0.5 bg-black/70 text-white text-[10px] rounded">
                       {PATCHES.find(p => p.id === selectedVersion)?.displayName ?? selectedVersion}

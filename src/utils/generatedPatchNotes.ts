@@ -193,7 +193,7 @@ export const generatedPatchNotes: Record<string, GeneratedPatchNote> = {
       { cardId: 'goldi', name: 'Goldilocks' },
       { cardId: 'headless_horseman', name: 'Headless Horseman' },
       { cardId: 'hercules', name: 'Hercules' },
-      { cardId: 'hyde', name: 'Hyde' },
+      
       { cardId: 'impundulu', name: 'Impundulu' },
       { cardId: 'jack', name: 'Jack' },
       { cardId: 'merlin', name: 'Merlin' },
@@ -208,7 +208,7 @@ export const generatedPatchNotes: Record<string, GeneratedPatchNote> = {
       { cardId: 'sinbad', name: 'Sinbad' },
       { cardId: 'siren', name: 'Siren' },
       { cardId: 'snow_white', name: 'Snow White' },
-      { cardId: 'soldier', name: 'Soldier' },
+      
       { cardId: 'the_kraken', name: 'The Kraken' },
       { cardId: 'tinker_bell', name: 'Tinker Bell' },
       { cardId: 'trojan_horse', name: 'Trojan Horse' },

@@ -204,13 +204,13 @@ All colors MUST be HSL.
 
   html {
     overflow-x: hidden;
+    overflow-y: scroll; /* Viewport scrollbar is always on html, immune to body overflow changes from Radix portals */
   }
 
-  /* Prevent Radix portals from shifting layout when locking scroll */
+  /* Prevent Radix portals from adding compensatory padding when locking scroll */
   body[data-scroll-locked] {
     padding-right: 0 !important;
     margin-right: 0 !important;
-    overflow-y: scroll !important;
   }
 
   body {

@@ -1,63 +1,73 @@
-// Old card images (from summer-2025 patch)
-import oldAxeThrow from "@/assets/cards/summer-2025/axe_throw.png";
-import oldBeast from "@/assets/cards/summer-2025/beast.png";
-import oldBeauty from "@/assets/cards/summer-2025/beauty.png";
-import oldBlowTheHouseDown from "@/assets/cards/summer-2025/blow_the_house_down.png";
-import oldBridgeTroll from "@/assets/cards/summer-2025/bridge_troll.png";
-import oldBullseye from "@/assets/cards/summer-2025/bullseye.png";
-import oldCheshire from "@/assets/cards/summer-2025/cheshire.png";
-import oldCowardlyLion from "@/assets/cards/summer-2025/cowardly_lion.png";
-import oldDarkOmen from "@/assets/cards/summer-2025/dark_omen.png";
-import oldFlyingMonkey from "@/assets/cards/summer-2025/flying_monkey.png";
-import oldFriarTuck from "@/assets/cards/summer-2025/friar_tuck.png";
-import oldGiant from "@/assets/cards/summer-2025/giant.png";
-import oldGoldilocks from "@/assets/cards/summer-2025/goldilocks.png";
-import oldJackInTheBox from "@/assets/cards/summer-2025/jack_in_the_box.png";
-import oldLadyOfTheLake from "@/assets/cards/summer-2025/lady_of_the_lake.png";
-import oldMorgiana from "@/assets/cards/summer-2025/morgiana.png";
-import oldMummy from "@/assets/cards/summer-2025/mummy.png";
-import oldPhantomCoachman from "@/assets/cards/summer-2025/phantom_coachman.png";
-import oldQuasimodo from "@/assets/cards/summer-2025/quasimodo.png";
-import oldRainOfArrows from "@/assets/cards/summer-2025/rain_of_arrows.png";
-import oldRed from "@/assets/cards/summer-2025/red.png";
-import oldRedcap from "@/assets/cards/summer-2025/redcap.png";
-import oldRobinHood from "@/assets/cards/summer-2025/robin_hood.png";
-import oldSheriffOfNottingham from "@/assets/cards/summer-2025/sheriff_of_nottingham.png";
-import oldTheKraken from "@/assets/cards/summer-2025/the_kraken.png";
-import oldThreeMusketeers from "@/assets/cards/summer-2025/three_musketeers.png";
-import oldTinWoodman from "@/assets/cards/summer-2025/tin_woodman.png";
+/**
+ * Old card images for version history and deck validation.
+ * Uses import.meta.glob to load patch-specific images.
+ */
 
+const winterModules = import.meta.glob<{ default: string }>('/src/assets/cards/winter-2025/*.png', { eager: true })
+const summerModules = import.meta.glob<{ default: string }>('/src/assets/cards/summer-2025/*.png', { eager: true })
+
+function extractId(path: string): string {
+  const filename = path.split('/').pop()?.replace('.png', '') || ''
+  return filename.toLowerCase().replace(/\s+/g, '_').replace(/'/g, '')
+}
+
+function buildMap(modules: Record<string, { default: string }>): Record<string, string> {
+  const map: Record<string, string> = {}
+  for (const [path, mod] of Object.entries(modules)) {
+    map[extractId(path)] = mod.default
+  }
+  return map
+}
+
+/** Winter 2025 card images */
+export const winterCardImages = buildMap(winterModules)
+
+/** Summer 2025 card images */
+export const summerCardImages = buildMap(summerModules)
+
+// Aliases for looking up old card IDs in old image maps
+const oldIdAliases: Record<string, Record<string, string>> = {
+  'winter-2025': {
+    rain_of_arrows: 'rai_of_arrows',
+    tuck: 'friar_tuck',
+    jacks_giant: 'giant',
+    goldi: 'goldilocks',
+    robinhood: 'robin_hood',
+  },
+  'gdc-2026': {
+    asanbosam: 'stryga',
+    babe: 'babe_the_blue_ox',
+    el_charro_negro: 'zorro',
+    mind_palace: 'concentrate',
+    sleeping_beauty: 'princess_aurora',
+    stormalong: 'popeye',
+    the_firebird: 'ali_baba',
+    // Also look up current IDs directly in winter images
+    rain_of_arrows: 'rai_of_arrows',
+    robinhood: 'robin_hood',
+  },
+}
+
+/**
+ * Get the old card image for a specific card before a specific patch changed it.
+ * Returns the image from the patch BEFORE the specified change patch.
+ */
+export function getOldCardImage(cardId: string, changePatch: string): string | undefined {
+  const aliases = oldIdAliases[changePatch] || {}
+  const lookupId = aliases[cardId] || cardId
+
+  if (changePatch === 'gdc-2026') {
+    return winterCardImages[lookupId] || winterCardImages[cardId]
+  }
+  if (changePatch === 'winter-2025') {
+    return summerCardImages[lookupId] || summerCardImages[cardId]
+  }
+  return undefined
+}
+
+// Backward-compatible flat map (earliest old image per card)
 export const oldCardImages: Record<string, string> = {
-  axe_throw: oldAxeThrow,
-  beast: oldBeast,
-  beauty: oldBeauty,
-  blow_the_house_down: oldBlowTheHouseDown,
-  bridge_troll: oldBridgeTroll,
-  bullseye: oldBullseye,
-  cheshire: oldCheshire,
-  cowardly_lion: oldCowardlyLion,
-  dark_omen: oldDarkOmen,
-  flying_monkey: oldFlyingMonkey,
-  tuck: oldFriarTuck,
-  friar_tuck: oldFriarTuck,
-  jacks_giant: oldGiant,
-  giant: oldGiant,
-  goldi: oldGoldilocks,
-  goldilocks: oldGoldilocks,
-  jack_in_the_box: oldJackInTheBox,
-  lady_of_the_lake: oldLadyOfTheLake,
-  morgiana: oldMorgiana,
-  mummy: oldMummy,
-  phantom_coachman: oldPhantomCoachman,
-  quasimodo: oldQuasimodo,
-  rain_of_arrows: oldRainOfArrows,
-  red: oldRed,
-  red_cap: oldRedcap,
-  redcap: oldRedcap,
-  robinhood: oldRobinHood,
-  robin_hood: oldRobinHood,
-  sheriff_of_nottingham: oldSheriffOfNottingham,
-  the_kraken: oldTheKraken,
-  three_musketeers: oldThreeMusketeers,
-  tin_woodman: oldTinWoodman,
-};
+  ...Object.fromEntries(
+    Object.entries(summerCardImages).map(([id, url]) => [id, url])
+  ),
+}

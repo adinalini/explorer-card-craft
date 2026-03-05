@@ -4,9 +4,9 @@
  * Supports manual overrides for non-stat changes (some/significant).
  */
 
-import { oldCardImages } from './oldCardImages'
-import { comparePatchOrder, resolvePatch, getAllPatchesOrdered } from './patches'
-import { computePatchDiff, patchCardStats, cardIdRenames } from './cardStats'
+import { getOldCardImage } from './oldCardImages'
+import { comparePatchOrder, getAllPatchesOrdered } from './patches'
+import { computePatchDiff, cardIdRenames } from './cardStats'
 import { patchNotesData } from './patchNotes'
 
 export interface CardChange {
@@ -73,17 +73,14 @@ function buildCardChanges(): CardChange[] {
         continue // handled below
       }
 
-      // Auto-generate warnings for stat changes
-      if (diff.changes.length > 0 || diff.changeType === 'renamed') {
+      // Auto-generate warnings for stat changes only (NOT for renames without stat changes)
+      if (diff.changes.length > 0) {
         const statFields = diff.changes.map(c => c.field)
         let description = ''
         if (statFields.includes('cost')) {
           description = "card's cost has been changed"
         } else if (statFields.length > 0) {
           description = 'card has undergone some changes'
-        }
-        if (diff.changeType === 'renamed' && !description) {
-          description = 'card has been renamed'
         }
         if (description) {
           changes.push({
@@ -127,6 +124,21 @@ function buildCardChanges(): CardChange[] {
 // Build once and cache
 export const cardChanges: CardChange[] = buildCardChanges()
 
+/**
+ * Build a complete reverse rename map: newId -> oldId across all patches
+ */
+function buildReverseRenames(): Record<string, string> {
+  const reverseRenames: Record<string, string> = {}
+  for (const [, renames] of Object.entries(cardIdRenames)) {
+    for (const [oldId, newId] of Object.entries(renames)) {
+      reverseRenames[newId] = oldId
+    }
+  }
+  return reverseRenames
+}
+
+const reverseRenameMap = buildReverseRenames()
+
 export function getDeckValidationIssues(deckPatch: string, cardIds: string[]): {
   invalidIssues: CardChange[]
   warningIssues: CardChange[]
@@ -134,16 +146,14 @@ export function getDeckValidationIssues(deckPatch: string, cardIds: string[]): {
   const invalidIssues: CardChange[] = []
   const warningIssues: CardChange[] = []
 
-  // Also check for renamed card IDs - if a deck uses an old ID that was renamed
-  const allRenames: Record<string, { newId: string, patch: string }> = {}
-  for (const [patchId, renames] of Object.entries(cardIdRenames)) {
-    for (const [oldId, newId] of Object.entries(renames)) {
-      allRenames[oldId] = { newId, patch: patchId }
-    }
-  }
-
   for (const change of cardChanges) {
-    if (!cardIds.includes(change.cardId)) continue
+    // Check if this change applies to any card in the deck
+    // Either directly by cardId, or through a rename chain (deck has old ID, change uses new ID)
+    const isAffected = cardIds.includes(change.cardId) ||
+      (reverseRenameMap[change.cardId] && cardIds.includes(reverseRenameMap[change.cardId]))
+
+    if (!isAffected) continue
+
     // If the change's patch is newer than the deck's patch, the deck is affected
     if (comparePatchOrder(change.patch, deckPatch) > 0) {
       if (change.changeType === 'invalid') {
@@ -173,14 +183,17 @@ export function groupCardChanges(changes: CardChange[]): Array<{ cardNames: stri
 }
 
 export function getOriginalCardImage(cardId: string, deckPatch: string, currentImage: string): string {
-  if (oldCardImages[cardId]) {
-    // Check if any change for this card happened after the deck's patch
-    const relevant = cardChanges.find(
-      c => c.cardId === cardId && comparePatchOrder(c.patch, deckPatch) > 0
-    )
-    if (relevant) {
-      return oldCardImages[cardId]
-    }
-  }
+  // Find the earliest change for this card that happened after the deck's patch
+  const relevantChanges = cardChanges.filter(
+    c => c.cardId === cardId && comparePatchOrder(c.patch, deckPatch) > 0
+  ).sort((a, b) => comparePatchOrder(a.patch, b.patch))
+
+  if (relevantChanges.length === 0) return currentImage
+
+  // Use the old image from the earliest change's patch
+  const earliestChangePatch = relevantChanges[0].patch
+  const oldImage = getOldCardImage(cardId, earliestChangePatch)
+  if (oldImage) return oldImage
+
   return currentImage
 }

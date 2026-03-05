@@ -166,7 +166,14 @@ export const cardKeyMapping: Record<string, string> = {
   'chimera': 'C00274_MB',
   'tinker_bell': 'C00053_MB',
   'yuki_onna': 'C00179_MB',
-  'animated_broomstick': 'C00209_MB'
+  'animated_broomstick': 'C00209_MB',
+  // GDC 2026 renamed card keys
+  'asanbosam': 'C00122_MB',
+  'babe': 'C00203_MB',
+  'el_charro_negro': 'C00035_MB',
+  'mind_palace': 'C00163_SB',
+  'sleeping_beauty': 'C00157_MB',
+  'the_firebird': 'C00143_MB',
 }
 
 export function getCardKey(cardId: string): string | undefined {

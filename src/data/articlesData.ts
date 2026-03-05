@@ -13,6 +13,49 @@ export interface ArticleItem {
 
 export const articleItems: ArticleItem[] = [
   {
+    id: "4",
+    slug: "collector-ama-recap-3-3-26",
+    title: "Collector AMA Recap 3/3/26",
+    summary: "A recap of the Origins TCG Collector AMA covering the game's vision, esports council, collector ecosystem, alpha sale, and more.",
+    content: `You can watch the full recording [here](https://www.youtube.com/watch?v=TEfOL6SWpGo).
+
+![](/images/articles/ama-players-collectors.png)
+
+- Brand new IP with reimagined versions of already existing beloved characters from Public Domain.
+
+![](/images/articles/ama-world-of-origins.png)
+
+- Lore is being worked on by award winning industry experts.
+
+![](/images/articles/ama-writers.png)
+
+- Early reviews are great (9.1/10), won "Best Card Game" and "Best Art Direction" in the GAM3 awards.
+- Game is made for esports with a big council supporting the vision.
+
+![](/images/articles/ama-esports.png)
+
+- The collector experience is inspired by the likes of Pokémon and Counter Strike with limited and sealed drops, chase cards, trade ups and more.
+
+![](/images/articles/ama-collector-ecosystem.png)
+
+- Alpha sale opened with a brief overview on the contents of the pack. Discount runs till Monday.
+- Rarity distribution for the alpha pack.
+
+![](/images/articles/ama-collector-packs.png)
+
+- Seasonal prestige packs (tradable) that drop from various paywalls (to control supply/botting) and can be opened via purchasable keys.
+
+![](/images/articles/ama-prestige-packs.png)
+
+- Trade ups for various dupes just like Counter Strike with the top most rarity protected.
+
+![](/images/articles/ama-trade-ups.png)`,
+    image: "/images/articles/ama-recap-hero.png",
+    date: "2026-03-03T00:00:00.000Z",
+    author: "Origins Team",
+    tags: ["recap", "collector", "AMA"],
+  },
+  {
     id: "1",
     slug: "beginners-guide-to-origins",
     title: "Beginner's Guide to Origins TCG",

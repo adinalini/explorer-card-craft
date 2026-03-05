@@ -86,9 +86,14 @@ const ArticleView = () => {
                     return (
                       <ul key={i} className="list-disc list-inside space-y-1 my-3">
                         {items.map((item, j) => (
-                          <li key={j} className="text-slate-300 leading-relaxed">
-                            {item.replace(/^- /, "")}
-                          </li>
+                          <li key={j} className="text-slate-300 leading-relaxed"
+                            dangerouslySetInnerHTML={{
+                              __html: item.replace(/^- /, "").replace(
+                                /\[([^\]]+)\]\((https?:\/\/[^)]+)\)/g,
+                                '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-primary underline hover:text-primary/80">$1</a>'
+                              )
+                            }}
+                          />
                         ))}
                       </ul>
                     );

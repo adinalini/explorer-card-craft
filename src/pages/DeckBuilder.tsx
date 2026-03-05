@@ -230,7 +230,7 @@ const DeckBuilder = () => {
           description: description.trim() || null,
           author_name: authorName.trim() || null,
           is_featured: false,
-          patch: 'winter-2025'
+          patch: 'gdc-2026'
         })
         .select()
         .single();

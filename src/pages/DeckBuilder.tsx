@@ -497,7 +497,7 @@ const DeckBuilder = () => {
           </div>
 
           {/* Card Selection */}
-          <div className="bg-card rounded-lg p-6 flex flex-col">
+          <div className="bg-card rounded-lg p-6">
             <h2 className="text-xl font-semibold mb-4 text-card-foreground">Select Cards</h2>
             
             {/* Filters */}
@@ -596,7 +596,7 @@ const DeckBuilder = () => {
             </div>
             
             {/* Cards Grid */}
-            <div className="grid grid-cols-3 gap-3 overflow-y-auto flex-1 min-h-0">
+            <div className="grid grid-cols-3 gap-3 max-h-[600px] overflow-y-auto">
               {filteredCards.map((card) => (
                 <div
                   key={card.id}

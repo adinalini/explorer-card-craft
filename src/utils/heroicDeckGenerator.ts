@@ -23,6 +23,8 @@ function getRandomCards(pool: Card[], count: number, usedCards: Set<string>): Ca
 }
 
 export function generateHeroicDeck(): Card[] {
+  const TARGET_SIZE = 13; // 1 legendary + 11 cost-rule + 1 random
+
   const goodCards = cardDatabase.filter(c => 
     c.inDraftPool !== false && 
     c.cost !== undefined && 
@@ -48,9 +50,20 @@ export function generateHeroicDeck(): Card[] {
   deck.push(...getRandomCards(cost6, 1, usedCards));
   deck.push(...getRandomCards(cost7to10, 2, usedCards));
 
+  // Random filler card
   const allAvailable = goodCards.filter(c => !usedCards.has(c.id) && !c.isLegendary);
   if (allAvailable.length > 0) {
     deck.push(...getRandomCards(allAvailable, 1, usedCards));
+  }
+
+  // Fallback: if cost rules left gaps, fill missing slots from highest-cost good cards
+  const missing = TARGET_SIZE - deck.length;
+  if (missing > 0) {
+    const fallbackPool = goodCards
+      .filter(c => !usedCards.has(c.id) && !c.isLegendary)
+      .sort((a, b) => (b.cost ?? 0) - (a.cost ?? 0))
+      .slice(0, missing + 4);
+    deck.push(...getRandomCards(fallbackPool, missing, usedCards));
   }
 
   return deck.sort((a, b) => (a.cost ?? 0) - (b.cost ?? 0));

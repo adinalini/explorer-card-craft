@@ -11,7 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { ArrowLeft, Share, Copy, Check, Flame, Droplet, Cloud, Bomb, Plus, CreditCard, Sparkles, TrendingUp } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { SEOHead } from "@/components/SEOHead";
-import { getOriginalCardImage, getDeckValidationIssues } from "@/utils/cardChanges";
+import { getDeckValidationIssues, hasImageChanged } from "@/utils/cardChanges";
 import { getPatchDisplayName } from "@/utils/patches";
 
 interface Deck {
@@ -200,10 +200,9 @@ const DeckView = () => {
             
             {/* Right sidebar with toggle and validation on desktop - only show if there's content */}
             {(() => {
-              const hasOldVersions = deck.cards.some(card => {
-                const originalImage = getOriginalCardImage(card.card_id, deck.patch, card.card_image);
-                return originalImage !== card.card_image;
-              });
+              const hasOldVersions = deck.cards.some(card =>
+                hasImageChanged(card.card_id, deck.patch)
+              );
               const validationIssues = getDeckValidationIssues(deck.patch, deck.cards.map(c => c.card_id));
               const hasValidationIssues = validationIssues.invalidIssues.length > 0 || validationIssues.warningIssues.length > 0;
               

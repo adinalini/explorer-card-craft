@@ -4,10 +4,10 @@
  * Supports manual overrides for non-stat changes (some/significant).
  */
 
-import { getOldCardImage } from './oldCardImages'
 import { comparePatchOrder, getAllPatchesOrdered } from './patches'
 import { computePatchDiff, cardIdRenames } from './cardStats'
 import { patchNotesData } from './patchNotes'
+import { getCardImageForPatch, cardImages } from '../components/CardImage'
 
 export interface CardChange {
   cardId: string
@@ -164,7 +164,27 @@ export function getDeckValidationIssues(deckPatch: string, cardIds: string[]): {
     }
   }
 
-  return { invalidIssues, warningIssues }
+  // Deduplicate: keep only the latest patch's issue per card
+  const latestWarningPerCard = new Map<string, CardChange>()
+  for (const warning of warningIssues) {
+    const existing = latestWarningPerCard.get(warning.cardId)
+    if (!existing || comparePatchOrder(warning.patch, existing.patch) > 0) {
+      latestWarningPerCard.set(warning.cardId, warning)
+    }
+  }
+
+  const latestInvalidPerCard = new Map<string, CardChange>()
+  for (const issue of invalidIssues) {
+    const existing = latestInvalidPerCard.get(issue.cardId)
+    if (!existing || comparePatchOrder(issue.patch, existing.patch) > 0) {
+      latestInvalidPerCard.set(issue.cardId, issue)
+    }
+  }
+
+  return {
+    invalidIssues: Array.from(latestInvalidPerCard.values()),
+    warningIssues: Array.from(latestWarningPerCard.values()),
+  }
 }
 
 export function groupCardChanges(changes: CardChange[]): Array<{ cardNames: string[], description: string }> {
@@ -182,18 +202,42 @@ export function groupCardChanges(changes: CardChange[]): Array<{ cardNames: stri
   }))
 }
 
+/**
+ * Get the image for a card as it appeared at a specific deck patch.
+ * Uses patch-based image resolution (handles renames, image-only changes).
+ */
 export function getOriginalCardImage(cardId: string, deckPatch: string, currentImage: string): string {
-  // Find the earliest change for this card that happened after the deck's patch
-  const relevantChanges = cardChanges.filter(
-    c => c.cardId === cardId && comparePatchOrder(c.patch, deckPatch) > 0
-  ).sort((a, b) => comparePatchOrder(a.patch, b.patch))
-
-  if (relevantChanges.length === 0) return currentImage
-
-  // Use the old image from the earliest change's patch
-  const earliestChangePatch = relevantChanges[0].patch
-  const oldImage = getOldCardImage(cardId, earliestChangePatch)
-  if (oldImage) return oldImage
-
+  const patchImage = getCardImageForPatch(cardId, deckPatch)
+  if (patchImage) return patchImage
   return currentImage
+}
+
+/**
+ * Check if a card's image differs between a deck's patch and the current version.
+ * Detects image-only changes (renames, new art) even without stat changes.
+ */
+export function hasImageChanged(cardId: string, deckPatch: string): boolean {
+  const patchImage = getCardImageForPatch(cardId, deckPatch)
+  const currentImage = cardImages[cardId]
+  if (!patchImage || !currentImage) return false
+  return patchImage !== currentImage
+}
+
+/**
+ * Build a map of original (patch-era) images for all cards in a deck.
+ * Includes ALL cards whose image differs from current, not just stat-changed ones.
+ */
+export function buildOriginalImagesMap(
+  cards: Array<{ card_id: string }>,
+  deckPatch: string
+): Record<string, string> {
+  const originalImages: Record<string, string> = {}
+  for (const card of cards) {
+    const patchImage = getCardImageForPatch(card.card_id, deckPatch)
+    const currentImage = cardImages[card.card_id]
+    if (patchImage && currentImage && patchImage !== currentImage) {
+      originalImages[card.card_id] = patchImage
+    }
+  }
+  return originalImages
 }

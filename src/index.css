@@ -204,6 +204,7 @@ All colors MUST be HSL.
 
   html {
     overflow-y: scroll;
+    overflow-x: hidden;
   }
 
   body {

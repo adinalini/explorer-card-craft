@@ -103,6 +103,7 @@ const News = () => {
                             /\[([^\]]+)\]\((https?:\/\/[^)]+)\)/g,
                             '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-primary underline hover:text-primary/80">$1</a>'
                           )
+                          .replace(/\n/g, '<br/>')
                       }}
                     />
                   ))}

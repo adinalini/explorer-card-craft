@@ -79,7 +79,7 @@ export const patchNotesData: Record<string, PatchNotesData> = {
       // Some changes
       { cardId: 'babe', cardName: 'Babe', description: 'card has undergone some changes', severity: 'some' },
       { cardId: 'billy', cardName: 'Billy', description: 'card has undergone some changes', severity: 'some' },
-      { cardId: 'marian', cardName: 'Maid Marian', description: 'card has undergone some changes', severity: 'some' },
+      { cardId: 'marian', cardName: 'Marian', description: 'card has undergone some changes', severity: 'some' },
       { cardId: 'mary', cardName: 'Mary', description: 'card has undergone some changes', severity: 'some' },
       { cardId: 'moriarty', cardName: 'Professor Moriarty', description: 'card has undergone some changes', severity: 'some' },
       { cardId: 'soul_surge', cardName: 'Soul Surge', description: 'card has undergone some changes', severity: 'some' },

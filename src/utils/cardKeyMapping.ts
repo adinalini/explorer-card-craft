@@ -124,7 +124,7 @@ export const cardKeyMapping: Record<string, string> = {
   'trash_for_treasure': 'C00169_SB',
   'beauty': 'C00173_MB',
   'rapunzel': 'C00174_MB',
-  'wicked_stepmother': 'C00175_MB',
+  'wicked_stepmother': 'C00175_MC',
   'gold_coin': 'C00177_SB',
   'tin_soldier': 'C00191_MB',
   'wendy': 'C00192_MB',

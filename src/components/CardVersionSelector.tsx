@@ -26,14 +26,23 @@ function cardExistsInPatch(cardId: string, patchId: string): boolean {
 }
 
 /**
- * Get the list of patches a card has versions in (for its version dropdown).
- * Always includes patches where the card existed, regardless of current global patch.
+ * Get the list of patches where the card's art actually changed.
+ * Only shows the patch where a new version of the art was introduced.
  */
 function getCardPatches(cardId: string): { patch: string; label: string }[] {
   const result: { patch: string; label: string }[] = []
+  let lastImageUrl: string | undefined = undefined
+
   for (const p of allPatches) {
-    if (cardExistsInPatch(cardId, p.id)) {
+    if (!cardExistsInPatch(cardId, p.id)) continue
+
+    // Get the direct image for this patch (not using fallback chain)
+    const imageUrl = getCardImageForPatch(cardId, p.id)
+    
+    // Only add this patch if the art is different from the previous version
+    if (imageUrl !== lastImageUrl) {
       result.push({ patch: p.id, label: p.displayName })
+      lastImageUrl = imageUrl
     }
   }
   return result

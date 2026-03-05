@@ -30,7 +30,7 @@ export const PATCHES: PatchDefinition[] = [
   {
     id: 'gdc-2026',
     order: 3,
-    displayName: 'GDC 2026',
+    displayName: 'GDC 2026 (latest)',
   },
 ]
 

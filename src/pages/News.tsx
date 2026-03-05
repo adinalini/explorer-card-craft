@@ -94,10 +94,15 @@ const News = () => {
                   {selected.content.split("\n\n").map((p, i) => (
                     <p key={i} className="text-slate-300 mb-3 leading-relaxed"
                       dangerouslySetInnerHTML={{
-                        __html: p.replace(
-                          /\[([^\]]+)\]\((https?:\/\/[^)]+)\)/g,
-                          '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-primary underline hover:text-primary/80">$1</a>'
-                        )
+                        __html: p
+                          .replace(
+                            /\*\*(.+?)\*\*/g,
+                            '<strong class="text-white font-semibold">$1</strong>'
+                          )
+                          .replace(
+                            /\[([^\]]+)\]\((https?:\/\/[^)]+)\)/g,
+                            '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-primary underline hover:text-primary/80">$1</a>'
+                          )
                       }}
                     />
                   ))}

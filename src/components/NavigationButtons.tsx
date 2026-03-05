@@ -114,11 +114,11 @@ export const NavigationButtons = ({ sizeVariant = "default" }: NavigationButtons
         </div>
       </div>
 
-      {/* Draft */}
-      <div onClick={() => navigate('/draft')} className={cellClass} style={{ animationDelay: '0.5s' }}>
+      {/* Draft - disabled */}
+      <div className={`${cellClass} opacity-50 cursor-not-allowed pointer-events-none`} style={{ animationDelay: '0.5s' }}>
         <div className={`${titleClass} font-bold text-white mb-2`}>Draft</div>
         <div className={`${textClass} text-slate-300 text-center leading-tight`}>
-          Play a Double/Triple Draft with someone.
+          Coming soon...
         </div>
       </div>
 

@@ -30,7 +30,7 @@ const ArticleView = () => {
       <div className="min-h-screen bg-gradient-to-br from-[hsl(260_90%_10%)] to-[hsl(290_95%_5%)]">
         {/* Header */}
         <div className="sticky top-0 z-50 bg-black/40 backdrop-blur-md border-b border-white/10 px-4 py-3">
-          <div className="max-w-3xl mx-auto flex items-center gap-3">
+          <div className="max-w-6xl mx-auto flex items-center gap-3">
             <Button variant="ghost" size="icon" onClick={() => navigate("/articles")}>
               <ArrowLeft className="w-5 h-5 text-white" />
             </Button>
@@ -38,14 +38,14 @@ const ArticleView = () => {
           </div>
         </div>
 
-        <div className="max-w-3xl mx-auto px-4 py-8">
+        <div className="max-w-6xl mx-auto px-4 py-8">
           <div className="bg-black/20 backdrop-blur-md border border-white/10 rounded-xl overflow-hidden">
             <img
               src={article.image}
               alt={article.title}
-              className="w-full h-48 md:h-80 object-cover"
+              className="w-full h-64 md:h-[28rem] object-cover"
             />
-            <div className="p-6 md:p-8">
+            <div className="p-8 md:p-12">
               <div className="flex items-center gap-3 mb-3">
                 {article.tags?.map((tag) => (
                   <span
@@ -62,13 +62,13 @@ const ArticleView = () => {
                   {new Date(article.date).toLocaleDateString()}
                 </span>
               </div>
-              <h2 className="text-2xl md:text-3xl font-bold text-white mb-6">{article.title}</h2>
-              <div className="prose prose-invert prose-sm max-w-none">
+              <h2 className="text-3xl md:text-4xl font-bold text-white mb-8">{article.title}</h2>
+              <div className="prose prose-invert prose-lg max-w-none">
                 {article.content.split("\n\n").map((paragraph, i) => {
                   // Heading
                   if (paragraph.startsWith("## ")) {
                     return (
-                      <h3 key={i} className="text-lg font-bold text-white mt-6 mb-2">
+                      <h3 key={i} className="text-xl font-bold text-white mt-8 mb-3">
                         {paragraph.replace("## ", "")}
                       </h3>
                     );
@@ -100,7 +100,7 @@ const ArticleView = () => {
                   }
                   // Regular paragraph with link support
                   return (
-                    <p key={i} className="text-slate-300 mb-3 leading-relaxed"
+                    <p key={i} className="text-slate-300 mb-4 leading-relaxed text-base"
                       dangerouslySetInnerHTML={{
                         __html: paragraph.replace(
                           /\[([^\]]+)\]\((https?:\/\/[^)]+)\)/g,

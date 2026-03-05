@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { getLatestArticles } from "@/data/articlesData";
@@ -7,23 +7,34 @@ export const HomepageArticlesWidget = () => {
   const navigate = useNavigate();
   const articles = getLatestArticles(3);
   const [index, setIndex] = useState(0);
+  const timerRef = useRef<ReturnType<typeof setInterval>>(null);
+
+  const resetTimer = useCallback(() => {
+    if (timerRef.current) clearInterval(timerRef.current);
+    if (articles.length > 1) {
+      timerRef.current = setInterval(() => {
+        setIndex((i) => (i + 1) % articles.length);
+      }, 15000);
+    }
+  }, [articles.length]);
 
   const next = useCallback(() => {
     if (articles.length === 0) return;
     setIndex((i) => (i + 1) % articles.length);
-  }, [articles.length]);
+    resetTimer();
+  }, [articles.length, resetTimer]);
 
   const prev = useCallback(() => {
     if (articles.length === 0) return;
     setIndex((i) => (i - 1 + articles.length) % articles.length);
-  }, [articles.length]);
+    resetTimer();
+  }, [articles.length, resetTimer]);
 
   // Auto-rotate every 15s
   useEffect(() => {
-    if (articles.length <= 1) return;
-    const timer = setInterval(next, 15000);
-    return () => clearInterval(timer);
-  }, [next, articles.length]);
+    resetTimer();
+    return () => { if (timerRef.current) clearInterval(timerRef.current); };
+  }, [resetTimer]);
 
   if (articles.length === 0) return null;
   const item = articles[index];

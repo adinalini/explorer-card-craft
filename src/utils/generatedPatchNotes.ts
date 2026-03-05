@@ -148,7 +148,7 @@ export const generatedPatchNotes: Record<string, GeneratedPatchNote> = {
       { cardId: 'guy_of_gisborne', name: 'Guy of Gisborne', changeType: 'modified', statChanges: [{ field: 'cost', oldValue: 2, newValue: 6 }, { field: 'power', oldValue: 2, newValue: 4 }, { field: 'defense', oldValue: 2, newValue: 5 }], severity: 'significant' },
       { cardId: 'jekyll', name: 'Dr. Jekyll', changeType: 'modified', statChanges: [{ field: 'defense', oldValue: 6, newValue: 5 }], severity: 'significant' },
       { cardId: 'king_arthur', name: 'King Arthur', changeType: 'modified', severity: 'significant' },
-      { cardId: 'marian', name: 'Maid Marian', changeType: 'modified', severity: 'some' },
+      { cardId: 'marian', name: 'Marian', formerName: 'Maid Marian', changeType: 'renamed', severity: 'some' },
       { cardId: 'mary', name: 'Mary', changeType: 'modified', severity: 'some' },
       { cardId: 'morgan_le_fay', name: 'Morgan le Fay', changeType: 'modified', statChanges: [{ field: 'cost', oldValue: 4, newValue: 2 }, { field: 'power', oldValue: 4, newValue: 1 }, { field: 'defense', oldValue: 4, newValue: 3 }], severity: 'significant' },
       { cardId: 'moriarty', name: 'Professor Moriarty', changeType: 'modified', severity: 'some' },

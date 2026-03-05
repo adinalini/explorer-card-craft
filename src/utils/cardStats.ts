@@ -369,7 +369,7 @@ export const patchCardStats: Record<string, PatchCardStats> = {
     lightning_strike: { name: 'Lightning Strike', cost: 3, cardType: 'spell', isLegendary: false, status: 'active' },
     little_john: { name: 'Little John', cost: 4, power: 4, defense: 4, cardType: 'minion', isLegendary: false, status: 'active', alignment: 'good' },
     mad_hatter: { name: 'Mad Hatter', cost: 2, power: 2, defense: 3, cardType: 'minion', isLegendary: false, status: 'active' },
-    marian: { name: 'Maid Marian', cost: 4, power: 3, defense: 4, cardType: 'minion', isLegendary: false, status: 'active', alignment: 'good' },
+    marian: { name: 'Marian', cost: 4, power: 3, defense: 4, cardType: 'minion', isLegendary: false, status: 'active', alignment: 'good', formerName: 'Maid Marian' },
     mary: { name: 'Mary', cost: 3, power: 1, defense: 1, cardType: 'minion', isLegendary: false, status: 'active' },
     mind_palace: { name: 'Mind Palace', cost: 2, cardType: 'spell', isLegendary: false, status: 'active', formerName: 'Concentrate' },
     moby: { name: 'Moby Dick', cost: 4, power: 4, defense: 4, cardType: 'minion', isLegendary: false, status: 'active' },

@@ -94,9 +94,9 @@ for (const [cardId, url] of Object.entries(resolvedSummer)) {
   }
 }
 
-// Add aliases so old IDs resolve to current images
+// Add aliases so old IDs always resolve to the latest canonical image
 for (const [alias, canonical] of Object.entries(cardIdAliases)) {
-  if (cardImages[canonical] && !cardImages[alias]) {
+  if (cardImages[canonical]) {
     cardImages[alias] = cardImages[canonical]
   }
 }

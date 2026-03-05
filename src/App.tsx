@@ -15,6 +15,7 @@ import DeckBuilder from "./pages/DeckBuilder";
 import DeckView from "./pages/DeckView";
 import Patches from "./pages/Patches";
 import Halloween from "./pages/Halloween";
+import Heroic from "./pages/Heroic";
 import News from "./pages/News";
 import Articles from "./pages/Articles";
 import ArticleView from "./pages/ArticleView";
@@ -48,6 +49,7 @@ const App = () => (
             <Route path="/deck/:id" element={<ProtectedRoute><DeckView /></ProtectedRoute>} />
             <Route path="/patches" element={<ProtectedRoute><Patches /></ProtectedRoute>} />
             <Route path="/halloween" element={<ProtectedRoute><Halloween /></ProtectedRoute>} />
+            <Route path="/heroic" element={<ProtectedRoute><Heroic /></ProtectedRoute>} />
             <Route path="/news" element={<ProtectedRoute><News /></ProtectedRoute>} />
             <Route path="/articles" element={<ProtectedRoute><Articles /></ProtectedRoute>} />
             <Route path="/article/:slug" element={<ProtectedRoute><ArticleView /></ProtectedRoute>} />

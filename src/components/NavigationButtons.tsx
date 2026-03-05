@@ -50,8 +50,13 @@ export const NavigationButtons = ({ sizeVariant = "default" }: NavigationButtons
           </div>
         </div>
 
-        {/* Empty slot */}
-        <div className={disabledCellClass} style={{ animationDelay: '0.5s' }} />
+        {/* Heroic Deck */}
+        <div onClick={() => navigate('/heroic')} className={cellClass} style={{ animationDelay: '0.5s' }}>
+          <div className={`${titleClass} font-bold text-white mb-2`}>Heroic Deck</div>
+          <div className={`${textClass} text-slate-300 text-center leading-tight`}>
+            Generate a good deck for justice
+          </div>
+        </div>
 
         {/* Back */}
         <div onClick={() => setMenu("tools")} className={cellClass} style={{ animationDelay: '0.6s' }}>

@@ -16,6 +16,7 @@ export interface Card {
   isItem?: boolean;
   cardKey?: string;
   inDraftPool?: boolean;
+  alignment?: 'good' | 'evil' | 'neutral';
 }
 
 /**
@@ -41,6 +42,7 @@ function buildCardDatabase(): Card[] {
       isItem: stats.cardType === 'item',
       cardKey: cardKeyMapping[id],
       inDraftPool: true,
+      alignment: stats.alignment,
     })
   }
 
@@ -62,6 +64,7 @@ function buildCardDatabase(): Card[] {
         isItem: stats.cardType === 'item',
         cardKey: cardKeyMapping[id],
         inDraftPool: false,
+        alignment: stats.alignment,
       })
     }
   }

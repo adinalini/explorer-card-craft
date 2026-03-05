@@ -25,6 +25,7 @@ interface ExplorerCard {
   isSpell: boolean;
   isItem: boolean;
   cardKey?: string;
+  alignment?: 'good' | 'evil' | 'neutral';
 }
 
 const Cards = () => {
@@ -35,6 +36,8 @@ const Cards = () => {
   const [showLegendary, setShowLegendary] = useState(true);
   const [showSpells, setShowSpells] = useState(true);
   const [showItems, setShowItems] = useState(true);
+  const [showGood, setShowGood] = useState(true);
+  const [showEvil, setShowEvil] = useState(true);
   const [viewMode, setViewMode] = useState("5");
   const [globalPatch, setGlobalPatch] = useState(CURRENT_PATCH.id);
   const [selectedVersions, setSelectedVersions] = useState<Record<string, string | null>>({});
@@ -57,6 +60,7 @@ const Cards = () => {
         isSpell: s.cardType === 'spell',
         isItem: s.cardType === 'item',
         cardKey: cardKeyMapping[id],
+        alignment: s.alignment,
       }));
   }, [globalPatch]);
 
@@ -72,12 +76,18 @@ const Cards = () => {
       const matchesType = (showMinions && isMinion) || (showSpells && isSpell) || (showItems && isItem);
       const matchesLegendary = !card.isLegendary || showLegendary;
 
-      return matchesSearch && matchesCost && matchesType && matchesLegendary;
+      // Alignment filter: if card has alignment, check filters. Cards without alignment always pass.
+      const matchesAlignment = !card.alignment || 
+        (card.alignment === 'good' && showGood) || 
+        (card.alignment === 'evil' && showEvil) || 
+        (card.alignment === 'neutral');
+
+      return matchesSearch && matchesCost && matchesType && matchesLegendary && matchesAlignment;
     }).sort((a, b) => {
       if (a.cost !== b.cost) return a.cost - b.cost;
       return a.name.localeCompare(b.name);
     });
-  }, [patchCards, searchQuery, costRange, showMinions, showLegendary, showSpells, showItems]);
+  }, [patchCards, searchQuery, costRange, showMinions, showLegendary, showSpells, showItems, showGood, showEvil]);
 
   const downloadCardImage = async (card: ExplorerCard, selectedVersion: string | null) => {
     try {
@@ -148,7 +158,8 @@ const Cards = () => {
               className="flex items-center gap-2 text-foreground hover:bg-accent/20"
             >
               <ArrowLeft className="w-4 h-4" />
-              Back to Home
+              <span className="hidden sm:inline">Back to Home</span>
+              <span className="sm:hidden">Back</span>
             </Button>
             <h1 className="text-2xl font-bold text-foreground absolute left-1/2 -translate-x-1/2">Card Explorer</h1>
             <ThemeToggle />
@@ -159,7 +170,7 @@ const Cards = () => {
       <div className="container mx-auto px-4 py-8">
         {/* Filters Section */}
         <div className="bg-card rounded-lg p-6 mb-8 border border-border">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6">
             {/* Search */}
             <div className="space-y-2">
               <Label className="text-foreground">Search by Name</Label>
@@ -246,6 +257,37 @@ const Cards = () => {
               </div>
             </div>
 
+            {/* Alignment */}
+            <div className="space-y-2 lg:col-span-1">
+              <Label className="text-foreground">Alignment</Label>
+              <div className="flex flex-wrap gap-4">
+                <label className="flex items-center gap-2 text-sm text-foreground">
+                  <input
+                    type="checkbox"
+                    checked={showGood}
+                    onChange={(e) => {
+                      if (!e.target.checked && !showEvil) return;
+                      setShowGood(e.target.checked);
+                    }}
+                    className="rounded border-border"
+                  />
+                  Good
+                </label>
+                <label className="flex items-center gap-2 text-sm text-foreground">
+                  <input
+                    type="checkbox"
+                    checked={showEvil}
+                    onChange={(e) => {
+                      if (!e.target.checked && !showGood) return;
+                      setShowEvil(e.target.checked);
+                    }}
+                    className="rounded border-border"
+                  />
+                  Evil
+                </label>
+              </div>
+            </div>
+
             {/* View Mode */}
             <div className="space-y-2">
               <Label className="text-foreground">Cards per Row</Label>
@@ -307,7 +349,7 @@ const Cards = () => {
                     className="w-full h-full object-cover"
                   />
                   {selectedVersion && (
-                    <div className="absolute top-2 left-2 px-2 py-0.5 bg-black/70 text-white text-[10px] rounded">
+                    <div className="absolute top-2 right-2 px-2 py-0.5 bg-black/70 text-white text-[10px] rounded">
                       {PATCHES.find(p => p.id === selectedVersion)?.displayName ?? selectedVersion}
                     </div>
                   )}

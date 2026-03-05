@@ -81,11 +81,13 @@ const Cards = () => {
       // Alignment filter: for patches with alignment (GDC 2026+), require matching filter.
       const selectedPatchObj = PATCHES.find(p => p.id === globalPatch);
       const patchHasAlignment = selectedPatchObj && selectedPatchObj.order >= 3;
-      const matchesAlignment = !patchHasAlignment || !card.alignment
-        ? true
-        : (card.alignment === 'good' && showGood) || 
-          (card.alignment === 'evil' && showEvil) || 
-          (card.alignment === 'neutral' && showNeutral);
+      let matchesAlignment = true;
+      if (patchHasAlignment) {
+        const cardAlignment = card.alignment || 'neutral';
+        matchesAlignment = (cardAlignment === 'good' && showGood) || 
+          (cardAlignment === 'evil' && showEvil) || 
+          (cardAlignment === 'neutral' && showNeutral);
+      }
 
       return matchesSearch && matchesCost && matchesType && matchesLegendary && matchesAlignment;
     }).sort((a, b) => {

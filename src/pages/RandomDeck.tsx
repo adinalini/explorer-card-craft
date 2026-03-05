@@ -5,7 +5,7 @@ import { DeckDisplay } from "@/components/DeckDisplay"
 import { DeckCodeDisplay } from "@/components/DeckCodeDisplay"
 import { CardImage } from "@/components/CardImage"
 import { ThemeToggle } from "@/components/ui/theme-toggle"
-import { getRandomCards, getCardById } from "@/utils/cardData"
+import { cardDatabase, Card, getCardById } from "@/utils/cardData"
 import { ArrowLeft } from "lucide-react"
 import { useIsMobile } from "@/hooks/use-mobile"
 
@@ -25,157 +25,63 @@ const RandomDeck = () => {
 
   const generateRandomDeck = async () => {
     setIsGenerating(true)
-    console.log('Starting random deck generation using backend rules...')
     
     try {
-      // Use the exact same round structures as the backend
-      const roundStructures = [
-        { type: 'cost', cost: 2, description: 'Cost 2' },
-        { type: 'legendary', description: 'Legendary Choice' },
-        { type: 'spell', description: 'Spell Choice' },
-        { type: 'cost', cost: 1, description: 'Cost 1' },
-        { type: 'cost', cost: 3, description: 'Cost 3' },
-        { type: 'cost', cost: 4, description: 'Cost 4' },
-        { type: 'cost', cost: 5, description: 'Cost 5' },
-        { type: 'pool', description: 'Cost Pool (2,2,2,3,3,3,4,4)' },
-        { type: 'pool', description: 'Cost Pool (2,2,2,3,3,3,4,4)' },
-        { type: 'pool', description: 'Cost Pool (2,2,2,3,3,3,4,4)' },
-        { type: 'pool', description: 'Cost Pool (2,2,2,3,3,3,4,4)' },
-        { type: 'range', range: [5, 6], description: 'Range (5-6)' },
-        { type: 'range', range: [6, 10], description: 'Range (6-10)' }
-      ]
-
-      // Randomize the order just like the backend does for 'all' rounds
-      const shuffledRoundStructures = [...roundStructures]
-      for (let i = shuffledRoundStructures.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [shuffledRoundStructures[i], shuffledRoundStructures[j]] = [shuffledRoundStructures[j], shuffledRoundStructures[i]]
+      // Use only cards from the latest patch (inDraftPool === true)
+      const latestPatchCards = cardDatabase.filter(c => c.inDraftPool !== false && c.cost !== undefined)
+      
+      const shuffleArray = <T,>(arr: T[]): T[] => {
+        const s = [...arr]
+        for (let i = s.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [s[i], s[j]] = [s[j], s[i]]
+        }
+        return s
+      }
+      
+      const getFromPool = (filter: (c: Card) => boolean, count: number, used: Set<string>): Card[] => {
+        const available = shuffleArray(latestPatchCards.filter(c => !used.has(c.id) && filter(c)))
+        return available.slice(0, count)
       }
 
-      // Assign costs to pool rounds like the backend
-      const costPool = [2, 2, 2, 3, 3, 3, 4, 4]
-      const shuffledCostPool = [...costPool].sort(() => Math.random() - 0.5)
-      let poolCostIndex = 0
-
-      // Update pool rounds with assigned costs
-      shuffledRoundStructures.forEach(structure => {
-        if (structure.type === 'pool') {
-          structure.type = 'cost'
-          structure.cost = shuffledCostPool[poolCostIndex]
-          poolCostIndex++
-        }
-      })
-
-      const usedCardIds: string[] = []
+      const usedIds = new Set<string>()
       const deck: RandomCard[] = []
 
-      // Generate cards for each round using the shuffled structure like backend
-      for (let round = 1; round <= 13; round++) {
-        const structure = shuffledRoundStructures[round - 1]
-        let roundCards: any[] = []
+      // 1. 1 random legendary
+      const legendaries = getFromPool(c => c.isLegendary, 1, usedIds)
+      legendaries.forEach(c => { usedIds.add(c.id); deck.push({ card_id: c.id, card_name: c.name, card_image: c.image, is_legendary: true, selection_order: deck.length + 1 }) })
 
-        if (structure.type === 'legendary') {
-          // Get legendary cards (not legendaries are excluded from other types)
-          const allCards = getRandomCards(1000, usedCardIds)
-          roundCards = allCards.filter(card => card.isLegendary).slice(0, 4)
-        } else if (structure.type === 'spell') {
-          // Get spell cards (including items, excluding legendaries)
-          const allCards = getRandomCards(1000, usedCardIds)
-          roundCards = allCards.filter(card => (card.isSpell || card.isItem) && !card.isLegendary).slice(0, 4)
-        } else if (structure.type === 'cost') {
-          // Get cards of exact cost (excluding legendaries like backend)
-          const allCards = getRandomCards(1000, usedCardIds)
-          roundCards = allCards.filter(card => 
-            !card.isLegendary && card.cost === structure.cost
-          ).slice(0, 4)
-        } else if (structure.type === 'range') {
-          // Get cards within cost range (excluding legendaries)
-          const allCards = getRandomCards(1000, usedCardIds)
-          const [minCost, maxCost] = structure.range
-          roundCards = allCards.filter(card => 
-            !card.isLegendary && card.cost >= minCost && card.cost <= maxCost
-          ).slice(0, 4)
-        }
+      // 2. 1 spell/item (non-legendary)
+      const spells = getFromPool(c => (c.isSpell || c.isItem) && !c.isLegendary, 1, usedIds)
+      spells.forEach(c => { usedIds.add(c.id); deck.push({ card_id: c.id, card_name: c.name, card_image: c.image, is_legendary: false, selection_order: deck.length + 1 }) })
 
-        // If we don't have enough cards, use progressive fallback strategy
-        if (roundCards.length < 4) {
-          console.log(`Round ${round} only found ${roundCards.length} cards, using fallback`)
-          
-          // First fallback: cost 3-5 range (excluding legendaries for non-legendary rounds)
-          const allCards = getRandomCards(1000, [...usedCardIds, ...roundCards.map(c => c.id)])
-          const isLegendaryRound = structure.type === 'legendary'
-          const fallbackCards = allCards.filter(card => 
-            (isLegendaryRound || !card.isLegendary) && card.cost >= 3 && card.cost <= 5
-          )
-          
-          while (roundCards.length < 4 && fallbackCards.length > 0) {
-            const randomIndex = Math.floor(Math.random() * fallbackCards.length)
-            const selected = fallbackCards.splice(randomIndex, 1)[0]
-            roundCards.push(selected)
-          }
-          
-          // Second fallback: any available card (excluding legendaries for non-legendary rounds)
-          if (roundCards.length < 4) {
-            console.log(`Round ${round} still needs more cards, using any available`)
-            const anyCards = getRandomCards(1000, [...usedCardIds, ...roundCards.map(c => c.id)])
-            const anyFallback = anyCards.filter(card => isLegendaryRound || !card.isLegendary)
-            
-            while (roundCards.length < 4 && anyFallback.length > 0) {
-              const randomIndex = Math.floor(Math.random() * anyFallback.length)
-              const selected = anyFallback.splice(randomIndex, 1)[0]
-              roundCards.push(selected)
-            }
-          }
-        }
-
-        // CRITICAL: Always ensure we have at least 1 card for this round
-        if (roundCards.length === 0) {
-          console.error(`CRITICAL: No cards available for round ${round}, using emergency fallback`)
-          // Emergency fallback: get ANY card that hasn't been used
-          const emergencyCards = getRandomCards(1000, usedCardIds)
-          if (emergencyCards.length > 0) {
-            roundCards.push(emergencyCards[0])
-          }
-        }
-
-        // Randomly select 1 card from the generated cards for this round
-        if (roundCards.length > 0) {
-          const selectedCard = roundCards[Math.floor(Math.random() * roundCards.length)]
-          
-          deck.push({
-            card_id: selectedCard.id,
-            card_name: selectedCard.name,
-            card_image: selectedCard.image,
-            is_legendary: selectedCard.isLegendary,
-            selection_order: round
-          })
-
-          // Only mark the selected card as used
-          usedCardIds.push(selectedCard.id)
-        } else {
-          console.error(`FATAL: Could not generate card for round ${round}`)
-        }
+      // 3. Cost-based picks: 1 each from cost 1,2,3,4,5
+      for (const cost of [1, 2, 3, 4, 5]) {
+        const picks = getFromPool(c => c.cost === cost && !c.isLegendary, 1, usedIds)
+        picks.forEach(c => { usedIds.add(c.id); deck.push({ card_id: c.id, card_name: c.name, card_image: c.image, is_legendary: false, selection_order: deck.length + 1 }) })
       }
 
-      console.log('Generated deck with', deck.length, 'cards')
-      
-      // Validation: Ensure exactly 13 cards
-      if (deck.length !== 13) {
-        console.error(`ERROR: Deck has ${deck.length} cards instead of 13!`)
+      // 4. 1 from cost 5-6 range
+      const midRange = getFromPool(c => c.cost! >= 5 && c.cost! <= 6 && !c.isLegendary, 1, usedIds)
+      midRange.forEach(c => { usedIds.add(c.id); deck.push({ card_id: c.id, card_name: c.name, card_image: c.image, is_legendary: false, selection_order: deck.length + 1 }) })
+
+      // 5. 1 from cost 7-10 range
+      const highRange = getFromPool(c => c.cost! >= 7 && c.cost! <= 10 && !c.isLegendary, 1, usedIds)
+      highRange.forEach(c => { usedIds.add(c.id); deck.push({ card_id: c.id, card_name: c.name, card_image: c.image, is_legendary: false, selection_order: deck.length + 1 }) })
+
+      // 6. Fill remaining slots (up to 13) from cost pool [2,2,2,3,3,3,4,4] randomly
+      const costPool = shuffleArray([2, 2, 2, 3, 3, 3, 4, 4])
+      for (const cost of costPool) {
+        if (deck.length >= 13) break
+        const picks = getFromPool(c => c.cost === cost && !c.isLegendary, 1, usedIds)
+        picks.forEach(c => { usedIds.add(c.id); deck.push({ card_id: c.id, card_name: c.name, card_image: c.image, is_legendary: false, selection_order: deck.length + 1 }) })
       }
-      
-      // Validation: Check for duplicate legendaries
-      const legendaryCards = deck.filter(card => card.is_legendary)
-      if (legendaryCards.length > 1) {
-        console.error(`ERROR: Deck has ${legendaryCards.length} legendary cards:`, 
-          legendaryCards.map(c => c.card_name))
-      }
-      
-      // Validation: Check for duplicate cards
-      const cardIds = deck.map(card => card.card_id)
-      const uniqueIds = new Set(cardIds)
-      if (cardIds.length !== uniqueIds.size) {
-        console.error('ERROR: Deck has duplicate cards!')
+
+      // Emergency fill if still < 13
+      while (deck.length < 13) {
+        const picks = getFromPool(c => !c.isLegendary, 1, usedIds)
+        if (picks.length === 0) break
+        picks.forEach(c => { usedIds.add(c.id); deck.push({ card_id: c.id, card_name: c.name, card_image: c.image, is_legendary: false, selection_order: deck.length + 1 }) })
       }
       
       setRandomDeck(deck)

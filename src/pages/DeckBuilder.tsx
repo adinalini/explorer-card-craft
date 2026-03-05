@@ -392,7 +392,7 @@ const DeckBuilder = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch">
           {/* Deck Preview */}
           <div className="bg-card rounded-lg p-6">
             {/* Collapsible Import UI */}
@@ -622,7 +622,7 @@ const DeckBuilder = () => {
             </div>
             
             {/* Cards Grid */}
-            <div className="grid grid-cols-3 gap-3 max-h-[480px] overflow-y-auto">
+            <div className="grid grid-cols-3 gap-3 flex-1 overflow-y-auto">
               {filteredCards.map((card) => (
                 <div
                   key={card.id}

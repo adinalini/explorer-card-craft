@@ -22,6 +22,7 @@ export const cardKeyMapping: Record<string, string> = {
   'big_bad_wolf': 'C00021_MB',
   'glinda': 'C00022_MB',
   'fairy_godmother': 'C00023_MB',
+  'franks_monster': 'C00024_MB',
   'searing_light': 'C00026_SB',
   'its_alive': 'C00027_SB',
   'dark_omen': 'C00028_SB',
@@ -173,7 +174,20 @@ export const cardKeyMapping: Record<string, string> = {
   'el_charro_negro': 'C00035_MB',
   'mind_palace': 'C00163_SB',
   'sleeping_beauty': 'C00157_MB',
-  'the_firebird': 'C00143_MB',
+  'the_firebird': 'C00278_MB',
+  'stormalong': 'C00166_MB',
+  // GDC 2026 missing key mappings
+  'aladdin': 'C00064_MB',
+  'boogeyman': 'C00267_MB',
+  'cockatrice': 'C00274_MB',
+  'humpty': 'C00093_MB',
+  'hyde': 'C00071_MB',
+  'musketeer': 'C00073_MB',
+  'poison_apple': 'C00236_SB',
+  'queen_of_hearts': 'C00176_MC',
+  'queen_of_the_night': 'C00270_MB',
+  'stroke_of_midnight': 'C00205_SB',
+  'toto': 'C00066_MB',
 }
 
 export function getCardKey(cardId: string): string | undefined {

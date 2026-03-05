@@ -12,6 +12,16 @@ export interface NewsItem {
 
 export const newsItems: NewsItem[] = [
   {
+    id: "2",
+    slug: "alpha-tournament-waitlist",
+    title: "Signup for Alpha Tournament Waitlist",
+    summary: "The first ever Origins TCG Alpha tournament is happening next Tuesday. Sign up for the waitlist now!",
+    content: `The first ever Origins TCG Alpha tournament is happening next Tuesday, 10th March. Limited spots are being raffled to waitlist players, sign up using this [form](https://forms.gle/8Mip4s8PqLGmm5uq7).\n\nDeadline to fill the form is Friday, 6th March.\n\nPrizes include cases and booster boxes from the alpha set and exclusive tournament promos (top positions might get serialized versions).`,
+    image: "/images/news/alpha-tournament.png",
+    date: "2026-03-05T00:00:00.000Z",
+    author: "Origins Team",
+  },
+  {
     id: "1",
     slug: "alpha-sale-live",
     title: "Alpha Sale Live!",

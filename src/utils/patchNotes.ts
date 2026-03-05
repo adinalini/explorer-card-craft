@@ -75,7 +75,23 @@ export const patchNotesData: Record<string, PatchNotesData> = {
   },
   'gdc-2026': {
     patchId: 'gdc-2026',
-    manualCardNotes: [],
+    manualCardNotes: [
+      // Some changes
+      { cardId: 'babe', cardName: 'Babe', description: 'card has undergone some changes', severity: 'some' },
+      { cardId: 'billy', cardName: 'Billy', description: 'card has undergone some changes', severity: 'some' },
+      { cardId: 'marian', cardName: 'Maid Marian', description: 'card has undergone some changes', severity: 'some' },
+      { cardId: 'mary', cardName: 'Mary', description: 'card has undergone some changes', severity: 'some' },
+      { cardId: 'moriarty', cardName: 'Professor Moriarty', description: 'card has undergone some changes', severity: 'some' },
+      { cardId: 'soul_surge', cardName: 'Soul Surge', description: 'card has undergone some changes', severity: 'some' },
+      // Significant changes
+      { cardId: 'glinda', cardName: 'Glinda', description: 'card has undergone significant changes', severity: 'significant' },
+      { cardId: 'guy_of_gisborne', cardName: 'Guy of Gisborne', description: 'card has undergone significant changes', severity: 'significant' },
+      { cardId: 'jekyll', cardName: 'Dr. Jekyll', description: 'card has undergone significant changes', severity: 'significant' },
+      { cardId: 'king_arthur', cardName: 'King Arthur', description: 'card has undergone significant changes', severity: 'significant' },
+      { cardId: 'morgan_le_fay', cardName: 'Morgan le Fay', description: 'card has undergone significant changes', severity: 'significant' },
+      { cardId: 'phantom_coachman', cardName: 'Phantom Coachman', description: 'card has undergone significant changes', severity: 'significant' },
+      { cardId: 'robinhood', cardName: 'Robin Hood', description: 'card has undergone significant changes', severity: 'significant' },
+    ],
   },
 }
 

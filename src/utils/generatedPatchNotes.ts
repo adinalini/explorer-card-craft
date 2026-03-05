@@ -9,7 +9,7 @@
  * 
  * DO NOT EDIT MANUALLY — this is auto-generated from cardStats.ts diffs + patchNotes.ts overrides.
  * 
- * Last generated: 2026-03-04
+ * Last generated: 2026-03-05
  */
 
 export interface PatchNoteCardUpdate {
@@ -48,7 +48,7 @@ export interface GeneratedPatchNote {
 }
 
 /**
- * Pre-computed patch notes for Winter 2025 (diff from Summer 2025 → Winter 2025)
+ * Pre-computed patch notes for all patches
  */
 export const generatedPatchNotes: Record<string, GeneratedPatchNote> = {
   'winter-2025': {
@@ -137,9 +137,88 @@ export const generatedPatchNotes: Record<string, GeneratedPatchNote> = {
   'gdc-2026': {
     patchId: 'gdc-2026',
     displayName: 'GDC 2026',
-    cardUpdates: [],
-    newCards: [],
-    removedCards: [],
-    legendaryChanges: [],
+    cardUpdates: [
+      // Stat changes and manual overrides (alphabetical, before renames)
+      { cardId: 'babe', newCardId: 'babe', name: 'Babe', formerName: 'Babe the Blue Ox', changeType: 'renamed', severity: 'some' },
+      { cardId: 'bigfoot', name: 'Bigfoot', changeType: 'modified', statChanges: [{ field: 'power', oldValue: 5, newValue: 6 }] },
+      { cardId: 'billy', name: 'Billy', changeType: 'modified', severity: 'some' },
+      { cardId: 'card_soldier', name: 'Card Soldier', changeType: 'modified', statChanges: [{ field: 'defense', oldValue: 2, newValue: 1 }] },
+      { cardId: 'franks_monster', name: "Frank's Monster", changeType: 'modified', statChanges: [{ field: 'cost', oldValue: 2, newValue: 6 }, { field: 'power', oldValue: 4, newValue: 5 }] },
+      { cardId: 'glinda', name: 'Glinda', changeType: 'modified', severity: 'significant' },
+      { cardId: 'guy_of_gisborne', name: 'Guy of Gisborne', changeType: 'modified', statChanges: [{ field: 'cost', oldValue: 2, newValue: 6 }, { field: 'power', oldValue: 2, newValue: 4 }, { field: 'defense', oldValue: 2, newValue: 5 }], severity: 'significant' },
+      { cardId: 'jekyll', name: 'Dr. Jekyll', changeType: 'modified', statChanges: [{ field: 'defense', oldValue: 6, newValue: 5 }], severity: 'significant' },
+      { cardId: 'king_arthur', name: 'King Arthur', changeType: 'modified', severity: 'significant' },
+      { cardId: 'marian', name: 'Maid Marian', changeType: 'modified', severity: 'some' },
+      { cardId: 'mary', name: 'Mary', changeType: 'modified', severity: 'some' },
+      { cardId: 'morgan_le_fay', name: 'Morgan le Fay', changeType: 'modified', statChanges: [{ field: 'cost', oldValue: 4, newValue: 2 }, { field: 'power', oldValue: 4, newValue: 1 }, { field: 'defense', oldValue: 4, newValue: 3 }], severity: 'significant' },
+      { cardId: 'moriarty', name: 'Professor Moriarty', changeType: 'modified', severity: 'some' },
+      { cardId: 'mowgli', name: 'Mowgli', changeType: 'modified', statChanges: [{ field: 'cost', oldValue: 6, newValue: 5 }] },
+      { cardId: 'pegasus', name: 'Pegasus', changeType: 'modified', statChanges: [{ field: 'cost', oldValue: 2, newValue: 5 }, { field: 'power', oldValue: 1, newValue: 2 }, { field: 'defense', oldValue: 3, newValue: 5 }] },
+      { cardId: 'phantom_coachman', name: 'Phantom Coachman', changeType: 'modified', statChanges: [{ field: 'power', oldValue: 5, newValue: 8 }, { field: 'defense', oldValue: 5, newValue: 8 }], severity: 'significant' },
+      { cardId: 'quasimodo', name: 'Quasimodo', changeType: 'modified', statChanges: [{ field: 'defense', oldValue: 4, newValue: 3 }] },
+      { cardId: 'robinhood', name: 'Robin Hood', changeType: 'modified', statChanges: [{ field: 'cost', oldValue: 7, newValue: 8 }], severity: 'significant' },
+      { cardId: 'soul_surge', name: 'Soul Surge', changeType: 'modified', severity: 'some' },
+      { cardId: 'the_white_queen', name: 'White Queen', changeType: 'modified', statChanges: [{ field: 'cost', oldValue: 2, newValue: 4 }] },
+      // Renames without stat changes (at the end)
+      { cardId: 'asanbosam', newCardId: 'asanbosam', name: 'Asanbosam', formerName: 'Stryga', changeType: 'renamed' },
+      { cardId: 'el_charro_negro', newCardId: 'el_charro_negro', name: 'El Charro Negro', formerName: 'Zorro', changeType: 'renamed' },
+      { cardId: 'mind_palace', newCardId: 'mind_palace', name: 'Mind Palace', formerName: 'Concentrate', changeType: 'renamed' },
+      { cardId: 'sleeping_beauty', newCardId: 'sleeping_beauty', name: 'Sleeping Beauty', formerName: 'Princess Aurora', changeType: 'renamed' },
+      { cardId: 'stormalong', newCardId: 'stormalong', name: 'Stormalong', formerName: 'Popeye', changeType: 'renamed' },
+      { cardId: 'the_firebird', newCardId: 'the_firebird', name: 'The Firebird', formerName: 'Ali Baba', changeType: 'renamed' },
+    ],
+    newCards: [
+      { cardId: 'aladdin', name: 'Aladdin' },
+      { cardId: 'beowulf', name: 'Beowulf' },
+      { cardId: 'boogeyman', name: 'Boogeyman' },
+      { cardId: 'cockatrice', name: 'Cockatrice' },
+      { cardId: 'humpty', name: 'Humpty' },
+      { cardId: 'poison_apple', name: 'Poison Apple' },
+      { cardId: 'queen_of_hearts', name: 'Queen of Hearts' },
+      { cardId: 'queen_of_the_night', name: 'Queen of the Night' },
+      { cardId: 'stroke_of_midnight', name: 'Stroke of Midnight' },
+      { cardId: 'toto', name: 'Toto' },
+    ],
+    removedCards: [
+      { cardId: 'animated_broomstick', name: 'Animated Broomstick' },
+      { cardId: 'baker', name: 'Baker' },
+      { cardId: 'blow_the_house_down', name: 'Blow the House Down' },
+      { cardId: 'brandy', name: 'Brandy' },
+      { cardId: 'cake', name: 'Cake' },
+      { cardId: 'cerberus', name: 'Cerberus' },
+      { cardId: 'chimera', name: 'Chimera' },
+      { cardId: 'dr_frank', name: 'Dr. Frankenstein' },
+      { cardId: 'drop_bear', name: 'Drop Bear' },
+      { cardId: 'flying_dutchman', name: 'The Flying Dutchman' },
+      { cardId: 'goldi', name: 'Goldilocks' },
+      { cardId: 'headless_horseman', name: 'Headless Horseman' },
+      { cardId: 'hercules', name: 'Hercules' },
+      { cardId: 'hyde', name: 'Hyde' },
+      { cardId: 'impundulu', name: 'Impundulu' },
+      { cardId: 'jack', name: 'Jack' },
+      { cardId: 'merlin', name: 'Merlin' },
+      { cardId: 'momotaro', name: 'Momotaro' },
+      { cardId: 'mortal_coil', name: 'Mortal Coil' },
+      { cardId: 'morgiana', name: 'Morgiana' },
+      { cardId: 'musketeer', name: 'Musketeer' },
+      { cardId: 'red_cap', name: 'Redcap' },
+      { cardId: 'scorpion', name: 'Scorpion' },
+      { cardId: 'sea_witch', name: 'Sea Witch' },
+      { cardId: 'sherlock', name: 'Sherlock Holmes' },
+      { cardId: 'sinbad', name: 'Sinbad' },
+      { cardId: 'siren', name: 'Siren' },
+      { cardId: 'snow_white', name: 'Snow White' },
+      { cardId: 'soldier', name: 'Soldier' },
+      { cardId: 'the_kraken', name: 'The Kraken' },
+      { cardId: 'tinker_bell', name: 'Tinker Bell' },
+      { cardId: 'trojan_horse', name: 'Trojan Horse' },
+      { cardId: 'underworld_flare', name: 'Underworld Flare' },
+      { cardId: 'watson', name: 'Watson' },
+      { cardId: 'wukong', name: 'Sun Wukong' },
+      { cardId: 'yuki_onna', name: 'Yuki-onna' },
+    ],
+    legendaryChanges: [
+      { cardId: 'wicked_stepmother', name: 'Wicked Stepmother', becameLegendary: true },
+    ],
   },
 }

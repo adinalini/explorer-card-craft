@@ -288,13 +288,13 @@ const Cards = () => {
                 </div>
               </div>
 
-              {/* Alignment - only for GDC 2026+ */}
-              {(() => {
-                const selectedPatch = PATCHES.find(p => p.id === globalPatch);
-                const hasAlignment = selectedPatch && selectedPatch.order >= 3;
-                return hasAlignment ? (
-                  <div className="space-y-2 lg:col-span-1">
-                    <Label className="text-foreground">Alignment</Label>
+              {/* Alignment */}
+              <div className="space-y-2 lg:col-span-1">
+                <Label className={`text-foreground ${!(PATCHES.find(p => p.id === globalPatch)?.order ?? 0 >= 3) ? '' : ''}`}>Alignment</Label>
+                {(() => {
+                  const selectedPatch = PATCHES.find(p => p.id === globalPatch);
+                  const hasAlignment = selectedPatch && selectedPatch.order >= 3;
+                  return hasAlignment ? (
                     <div className="flex flex-wrap gap-4">
                       <label className="flex items-center gap-2 text-sm text-foreground">
                         <input
@@ -333,9 +333,11 @@ const Cards = () => {
                         Neutral
                       </label>
                     </div>
-                  </div>
-                ) : null;
-              })()}
+                  ) : (
+                    <p className="text-sm text-muted-foreground italic">N/A for this patch</p>
+                  );
+                })()}
+              </div>
 
               {/* View Mode */}
               <div className="space-y-2">

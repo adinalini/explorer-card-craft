@@ -65,7 +65,7 @@ const Halloween = () => {
   return (
     <>
       <SEOHead 
-        title="Halloween Event - World of Origins"
+        title="World of Origins"
         description="Special Halloween deck generator with spooky themed cards!"
         image="/og-images/deck-default.jpg"
         url="/halloween"

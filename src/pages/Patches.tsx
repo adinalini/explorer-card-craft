@@ -24,7 +24,7 @@ const Patches = () => {
   return (
     <>
       <SEOHead
-        title="Patch Notes - World of Origins"
+        title="World of Origins"
         description="View all patch notes and updates for Origins TCG card game"
       />
       <div className="min-h-screen bg-gradient-to-b from-background via-background to-primary/5">

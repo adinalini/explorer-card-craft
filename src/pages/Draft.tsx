@@ -227,7 +227,7 @@ const Draft = () => {
   return (
     <>
       <SEOHead 
-        title="Draft - World of Origins"
+        title="World of Origins"
         description="Create or join draft battles! Start multiplayer drafting sessions in this epic gaming experience."
         image="/og-images/homepage.jpg"
         url="/draft"

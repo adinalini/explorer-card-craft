@@ -6,16 +6,22 @@ import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { ArrowLeft } from "lucide-react";
 import { generatedPatchNotes } from "@/utils/generatedPatchNotes";
 import { patchNotesData } from "@/utils/patchNotes";
-import { CardImage, cardImages } from "@/components/CardImage";
-import { oldCardImages } from "@/utils/oldCardImages";
+import { CardImage, cardImages, getCardImageForPatch } from "@/components/CardImage";
+import { getOldCardImage } from "@/utils/oldCardImages";
 
 const PATCH_TABS = [
   { id: 'gdc-2026', label: 'GDC 2026 (latest)' },
   { id: 'winter-2025', label: 'Winter 2025' },
 ];
 
+/** Get the previous patch ID for old image lookups */
+const PREV_PATCH: Record<string, string> = {
+  'gdc-2026': 'winter-2025',
+  'winter-2025': 'summer-2025',
+};
+
 const Patches = () => {
-  const [selectedPatch, setSelectedPatch] = useState("winter-2025");
+  const [selectedPatch, setSelectedPatch] = useState("gdc-2026");
   const navigate = useNavigate();
 
   const patchData = generatedPatchNotes[selectedPatch];
@@ -57,16 +63,7 @@ const Patches = () => {
             ))}
           </div>
 
-          {/* GDC 2026 - placeholder */}
-          {selectedPatch === "gdc-2026" && (
-            <div className="text-center py-16">
-              <h2 className="text-3xl font-bold mb-4 text-foreground">GDC 2026</h2>
-              <p className="text-muted-foreground text-lg">Patch notes coming soon...</p>
-            </div>
-          )}
-
-          {/* Winter 2025 (or any patch with data) */}
-          {selectedPatch !== "gdc-2026" && patchData && (
+          {patchData && (
             <div className="space-y-12">
               {/* Card Updates */}
               {patchData.cardUpdates.length > 0 && (
@@ -74,12 +71,12 @@ const Patches = () => {
                   <h2 className="text-3xl font-bold mb-6 text-foreground">Card Updates</h2>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {patchData.cardUpdates.map((card) => {
-                      // For renamed cards, use the old card ID's old image
-                      const oldImageCardId = card.changeType === 'renamed' && card.formerName
-                        ? card.cardId  // the new ID maps to old image in oldCardImages
-                        : card.cardId;
-                      const oldImage = oldCardImages[oldImageCardId];
-                      const newImage = cardImages[card.cardId];
+                      const prevPatchId = PREV_PATCH[selectedPatch];
+                      // Get old image from previous patch
+                      const oldImage = prevPatchId
+                        ? getOldCardImage(card.cardId, selectedPatch) || getCardImageForPatch(card.cardId, prevPatchId)
+                        : undefined;
+                      const newImage = cardImages[card.cardId] || getCardImageForPatch(card.cardId, selectedPatch);
                       
                       if (!oldImage || !newImage) return null;
 
@@ -102,18 +99,38 @@ const Patches = () => {
                 </section>
               )}
 
+              {/* Legendary Changes */}
+              {patchData.legendaryChanges.length > 0 && (
+                <section>
+                  <h2 className="text-3xl font-bold mb-6 text-foreground">Legendary Status Changes</h2>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
+                    {patchData.legendaryChanges.map((card) => (
+                      <div key={card.cardId} className="bg-card rounded-lg p-4 border border-border text-center">
+                        <CardImage cardId={card.cardId} cardName={card.name} className="w-full h-auto rounded-lg border-2 border-primary mb-2" />
+                        <p className="text-sm font-medium text-card-foreground">{card.name}</p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          {card.becameLegendary ? 'Now Legendary' : 'No longer Legendary'}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </section>
+              )}
 
               {/* Removed Cards */}
               {patchData.removedCards.length > 0 && (
                 <section>
                   <h2 className="text-3xl font-bold mb-6 text-foreground">Removed Cards</h2>
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
-                    {patchData.removedCards.map((card) => (
-                      <div key={card.cardId} className="bg-card rounded-lg p-4 border border-border text-center">
-                        <CardImage cardId={card.cardId} cardName={card.name} className="w-full h-auto rounded-lg border-2 border-destructive mb-2" />
-                        <p className="text-sm font-medium text-card-foreground">{card.name}</p>
-                      </div>
-                    ))}
+                    {patchData.removedCards.map((card) => {
+                      const prevPatchId = PREV_PATCH[selectedPatch];
+                      return (
+                        <div key={card.cardId} className="bg-card rounded-lg p-4 border border-border text-center">
+                          <CardImage cardId={card.cardId} cardName={card.name} patchId={prevPatchId} className="w-full h-auto rounded-lg border-2 border-destructive mb-2" />
+                          <p className="text-sm font-medium text-card-foreground">{card.name}</p>
+                        </div>
+                      );
+                    })}
                   </div>
                 </section>
               )}
@@ -125,7 +142,7 @@ const Patches = () => {
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
                     {patchData.newCards.map((card) => (
                       <div key={card.cardId} className="bg-card rounded-lg p-4 border border-border text-center">
-                        <CardImage cardId={card.cardId} cardName={card.name} className="w-full h-auto rounded-lg border-2 border-primary mb-2" />
+                        <CardImage cardId={card.cardId} cardName={card.name} patchId={selectedPatch} className="w-full h-auto rounded-lg border-2 border-primary mb-2" />
                         <p className="text-sm font-medium text-card-foreground">{card.name}</p>
                       </div>
                     ))}
@@ -133,7 +150,7 @@ const Patches = () => {
                 </section>
               )}
 
-              {/* Miscellaneous Updates (manual content from patchNotes.ts) */}
+              {/* Miscellaneous Updates */}
               {miscData && (
                 <section>
                   <h2 className="text-3xl font-bold mb-6 text-foreground">Miscellaneous Updates</h2>

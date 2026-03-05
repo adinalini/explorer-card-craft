@@ -1,62 +1,59 @@
 import { useState, useRef, useEffect } from "react"
 import { History } from "lucide-react"
-import { getAllPatchesOrdered, CURRENT_PATCH } from "@/utils/patches"
+import { getAllPatchesOrdered } from "@/utils/patches"
 import { patchCardStats, cardIdRenames } from "@/utils/cardStats"
 import { getCardImageForPatch } from "@/components/CardImage"
 
-// Build version options from the patch registry
-const patchVersions = [
-  ...getAllPatchesOrdered()
-    .filter(p => p.id !== CURRENT_PATCH.id)
-    .map(p => ({ patch: p.id, label: p.displayName })),
-  { patch: "current", label: "Current" },
-]
-
-// Build a set of card IDs that have history (existed in older patches under same or different ID)
-function buildCardsWithHistory(): string[] {
-  const patches = getAllPatchesOrdered()
-  const currentStats = patchCardStats[CURRENT_PATCH.id] || {}
-  const currentIds = new Set(Object.keys(currentStats).filter(id => currentStats[id].status === 'active'))
-
-  // Build reverse rename map: newId -> oldId for all patches
-  const reverseRenames: Record<string, string> = {}
-  for (const renames of Object.values(cardIdRenames)) {
-    for (const [oldId, newId] of Object.entries(renames)) {
-      reverseRenames[newId] = oldId
-    }
+// Build reverse rename map: newId -> oldId
+const reverseRenames: Record<string, string> = {}
+for (const renames of Object.values(cardIdRenames)) {
+  for (const [oldId, newId] of Object.entries(renames)) {
+    reverseRenames[newId] = oldId
   }
-
-  const withHistory = new Set<string>()
-
-  for (const cardId of currentIds) {
-    // Check if card existed in any older patch (same ID or old ID)
-    const oldId = reverseRenames[cardId]
-    for (const patch of patches) {
-      if (patch.id === CURRENT_PATCH.id) continue
-      const stats = patchCardStats[patch.id] || {}
-      if (stats[cardId]?.status === 'active' || (oldId && stats[oldId]?.status === 'active')) {
-        withHistory.add(cardId)
-        break
-      }
-    }
-  }
-
-  return Array.from(withHistory)
 }
 
-export const cardsWithHistory = buildCardsWithHistory()
+const allPatches = getAllPatchesOrdered()
+
+/**
+ * Check if a card existed in a given patch (by current ID or old renamed ID).
+ */
+function cardExistsInPatch(cardId: string, patchId: string): boolean {
+  const stats = patchCardStats[patchId] || {}
+  if (stats[cardId]?.status === 'active') return true
+  const oldId = reverseRenames[cardId]
+  if (oldId && stats[oldId]?.status === 'active') return true
+  return false
+}
+
+/**
+ * Get the list of patches a card has versions in (for its version dropdown).
+ * Always includes patches where the card existed, regardless of current global patch.
+ */
+function getCardPatches(cardId: string): { patch: string; label: string }[] {
+  const result: { patch: string; label: string }[] = []
+  for (const p of allPatches) {
+    if (cardExistsInPatch(cardId, p.id)) {
+      result.push({ patch: p.id, label: p.displayName })
+    }
+  }
+  return result
+}
 
 interface CardVersionSelectorProps {
   cardId: string
   onVersionChange: (version: string | null) => void
   selectedVersion: string | null
+  /** The current global patch selected on the page */
+  globalPatch?: string
 }
 
-export function CardVersionSelector({ cardId, onVersionChange, selectedVersion }: CardVersionSelectorProps) {
+export function CardVersionSelector({ cardId, onVersionChange, selectedVersion, globalPatch }: CardVersionSelectorProps) {
   const [isOpen, setIsOpen] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
   
-  const hasHistory = cardsWithHistory.includes(cardId)
+  const cardPatches = getCardPatches(cardId)
+  // Has history if card exists in more than one patch
+  const hasHistory = cardPatches.length > 1
   
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -80,6 +77,11 @@ export function CardVersionSelector({ cardId, onVersionChange, selectedVersion }
     )
   }
 
+  // The "base" patch is the global patch or current patch context
+  const basePatch = globalPatch || cardPatches[cardPatches.length - 1]?.patch
+  // Effective selected patch
+  const effectivePatch = selectedVersion || basePatch
+
   return (
     <div className="relative" ref={menuRef}>
       <button
@@ -92,25 +94,29 @@ export function CardVersionSelector({ cardId, onVersionChange, selectedVersion }
       
       {isOpen && (
         <div className="absolute bottom-full right-0 mb-1 z-50 bg-popover border border-border rounded-md shadow-lg overflow-hidden min-w-[100px]">
-          {patchVersions.map((version) => (
-            <button
-              key={version.patch}
-              onClick={() => {
-                onVersionChange(version.patch === "current" ? null : version.patch)
-                setIsOpen(false)
-              }}
-              className={`w-full px-3 py-1.5 text-xs text-left hover:bg-accent/50 transition-colors flex items-center justify-between gap-2 ${
-                (version.patch === "current" && !selectedVersion) || version.patch === selectedVersion
-                  ? "bg-accent/30 text-primary font-medium"
-                  : "text-foreground"
-              }`}
-            >
-              <span>{version.label}</span>
-              {((version.patch === "current" && !selectedVersion) || version.patch === selectedVersion) && (
-                <span className="w-1.5 h-1.5 rounded-full bg-primary" />
-              )}
-            </button>
-          ))}
+          {cardPatches.map((version) => {
+            const isSelected = version.patch === effectivePatch
+            return (
+              <button
+                key={version.patch}
+                onClick={() => {
+                  // If selecting the global patch, reset to null (default)
+                  onVersionChange(version.patch === basePatch ? null : version.patch)
+                  setIsOpen(false)
+                }}
+                className={`w-full px-3 py-1.5 text-xs text-left hover:bg-accent/50 transition-colors flex items-center justify-between gap-2 ${
+                  isSelected
+                    ? "bg-accent/30 text-primary font-medium"
+                    : "text-foreground"
+                }`}
+              >
+                <span>{version.label}</span>
+                {isSelected && (
+                  <span className="w-1.5 h-1.5 rounded-full bg-primary" />
+                )}
+              </button>
+            )
+          })}
         </div>
       )}
     </div>

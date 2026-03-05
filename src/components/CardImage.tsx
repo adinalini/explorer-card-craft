@@ -109,14 +109,19 @@ const patchImageMaps: Record<string, Record<string, string>> = {
 }
 
 /**
- * Get the image URL for a card at a specific patch.
- * Handles ID aliases and filename overrides.
+ * Fallback chain per patch: which image folders to try in order.
+ * summer-2025: summer → winter (no gdc!)
+ * winter-2025: winter → summer
+ * gdc-2026: gdc → winter → summer
  */
-export function getCardImageForPatch(cardId: string, patchId: string): string | undefined {
-  const map = patchImageMaps[patchId]
-  if (!map) return cardImages[cardId]
+const patchFallbackChain: Record<string, string[]> = {
+  'summer-2025': ['summer-2025', 'winter-2025'],
+  'winter-2025': ['winter-2025', 'summer-2025'],
+  'gdc-2026': ['gdc-2026', 'winter-2025', 'summer-2025'],
+}
 
-  // Direct lookup
+/** Try to find an image in a specific resolved map, handling aliases */
+function lookupInMap(cardId: string, map: Record<string, string>): string | undefined {
   if (map[cardId]) return map[cardId]
 
   // Try reverse aliases (current ID -> old filename-based IDs)
@@ -130,6 +135,24 @@ export function getCardImageForPatch(cardId: string, patchId: string): string | 
   // Try forward alias (old ID -> current ID)
   const canonical = cardIdAliases[cardId]
   if (canonical && map[canonical]) return map[canonical]
+
+  return undefined
+}
+
+/**
+ * Get the image URL for a card at a specific patch.
+ * Uses the patch fallback chain so summer-2025 never loads gdc-2026 images.
+ */
+export function getCardImageForPatch(cardId: string, patchId: string): string | undefined {
+  const chain = patchFallbackChain[patchId]
+  if (!chain) return cardImages[cardId]
+
+  for (const fallbackPatch of chain) {
+    const map = patchImageMaps[fallbackPatch]
+    if (!map) continue
+    const result = lookupInMap(cardId, map)
+    if (result) return result
+  }
 
   return undefined
 }
@@ -154,10 +177,11 @@ export function CardImage({ cardId, cardName, className, onError, patchId }: Car
 
   if (patchId) {
     imageSrc = getCardImageForPatch(cardId, patchId);
-  }
-
-  if (!imageSrc) {
-    // Resolve card ID through aliases for current/fallback
+    // When a specific patch is requested, do NOT fall back to latest images.
+    // If image not found for this patch, show placeholder.
+    if (!imageSrc) imageSrc = "/placeholder.svg";
+  } else {
+    // No patch specified: use the current (latest) image map
     let resolvedId = cardId;
     if (!cardImages[resolvedId] && cardIdAliases[resolvedId]) {
       resolvedId = cardIdAliases[resolvedId];

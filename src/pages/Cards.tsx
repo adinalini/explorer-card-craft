@@ -148,7 +148,7 @@ const Cards = () => {
   return (
     <div className="min-h-screen bg-background">
       <SEOHead
-        title="Card Explorer | Evolved"
+        title="World of Origins"
         description="Browse and explore all cards in Evolved. Filter by cost, type, and search by name."
       />
 

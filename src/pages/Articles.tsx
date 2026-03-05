@@ -10,7 +10,7 @@ const Articles = () => {
   return (
     <>
       <SEOHead
-        title="Articles — World of Origins"
+        title="World of Origins"
         description="Browse guides, strategy breakdowns, and more."
         url="/articles"
       />

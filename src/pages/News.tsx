@@ -31,7 +31,7 @@ const News = () => {
 
   return (
     <>
-      <SEOHead title={`${selected.title} — News`} description={selected.summary} url="/news" />
+      <SEOHead title="World of Origins" description={selected.summary} url="/news" />
       <div className="min-h-screen bg-gradient-to-br from-[hsl(260_90%_10%)] to-[hsl(290_95%_5%)]">
         {/* Header */}
         <div className="sticky top-0 z-50 bg-black/40 backdrop-blur-md border-b border-white/10 px-4 py-3">

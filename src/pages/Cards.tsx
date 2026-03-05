@@ -322,6 +322,7 @@ const Cards = () => {
                       cardId={card.id}
                       selectedVersion={selectedVersion}
                       onVersionChange={(version) => handleVersionChange(card.id, version)}
+                      globalPatch={globalPatch}
                     />
                   </div>
 

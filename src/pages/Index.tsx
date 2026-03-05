@@ -13,7 +13,7 @@ import { usePasswordProtection } from "@/hooks/usePasswordProtection"
 import { useToast } from "@/hooks/use-toast"
 import { PasswordGate } from "@/components/PasswordGate"
 import { NavigationButtons } from "@/components/NavigationButtons"
-import whiteRabbit from "@/assets/white_rabbit.webp"
+import whiteRabbit from "@/assets/images/white_rabbit.webp"
 import projectOLogo from "/lovable-uploads/219c067b-3ac3-4955-96d1-76dc64562ea1.png"
 
 const Index = () => {

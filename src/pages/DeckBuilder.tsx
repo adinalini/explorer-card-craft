@@ -8,7 +8,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { WaveDivider } from "@/components/ui/wave-divider";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowLeft, Flame, Droplet, Cloud, Bomb, Plus, CreditCard, Sparkles, TrendingUp } from "lucide-react";
+import { ArrowLeft, Flame, Droplet, Cloud, Bomb, Plus, CreditCard, Sparkles, TrendingUp, Info } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { toast } from "@/hooks/use-toast";
 import { cardDatabase } from "@/utils/cardData";
 import { CardImage } from "@/components/CardImage";

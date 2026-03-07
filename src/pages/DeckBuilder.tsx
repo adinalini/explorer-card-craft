@@ -262,7 +262,7 @@ const DeckBuilder = () => {
         description: "Your deck has been saved successfully!",
       });
 
-      navigate('/decks');
+      navigate(`/deck/${deckData.id}`);
     } catch (error) {
       console.error('Error saving deck:', error);
       toast({

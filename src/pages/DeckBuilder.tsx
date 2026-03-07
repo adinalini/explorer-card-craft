@@ -8,7 +8,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { WaveDivider } from "@/components/ui/wave-divider";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowLeft, Flame, Droplet, Cloud, Bomb, Plus, CreditCard, Sparkles, TrendingUp } from "lucide-react";
+import { ArrowLeft, Flame, Droplet, Cloud, Bomb, Plus, CreditCard, Sparkles, TrendingUp, Info } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { toast } from "@/hooks/use-toast";
 import { cardDatabase } from "@/utils/cardData";
 import { CardImage } from "@/components/CardImage";
@@ -543,6 +544,14 @@ const DeckBuilder = () => {
                 />
                 <span className="text-sm text-muted-foreground">Private</span>
               </label>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Info className="h-3.5 w-3.5 text-muted-foreground cursor-help" />
+                </TooltipTrigger>
+                <TooltipContent side="top" className="max-w-[250px] text-xs">
+                  Sets your deck to private, it won't appear on the decks page. Can only be accessed/shared via link. Contact @adinalini to make it public.
+                </TooltipContent>
+              </Tooltip>
             </div>
 
             <Button

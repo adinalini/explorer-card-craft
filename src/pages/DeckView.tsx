@@ -21,6 +21,7 @@ interface Deck {
   description?: string;
   author_name?: string;
   is_featured: boolean;
+  is_private: boolean;
   notes?: string;
   patch: string;
   created_at: string;

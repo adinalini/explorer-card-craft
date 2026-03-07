@@ -233,6 +233,7 @@ const DeckBuilder = () => {
           description: description.trim() || null,
           author_name: authorName.trim() || null,
           is_featured: false,
+          is_private: isPrivate,
           patch: 'gdc-2026'
         })
         .select()

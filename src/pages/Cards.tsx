@@ -253,7 +253,7 @@ const Cards = () => {
                       checked={showMinions}
                       onChange={(e) => {
                         const newValue = e.target.checked;
-                        if (!newValue && !showSpells && !showItems) return;
+                        if (!newValue && !showSpells && !showItems && !showLegendary) return;
                         setShowMinions(newValue);
                       }}
                       className="rounded border-border"
@@ -266,32 +266,36 @@ const Cards = () => {
                       checked={showSpells}
                       onChange={(e) => {
                         const newValue = e.target.checked;
-                        if (!newValue && !showMinions && !showItems) return;
+                        if (!newValue && !showMinions && !showItems && !showLegendary) return;
                         setShowSpells(newValue);
                       }}
                       className="rounded border-border"
                     />
                     Spells
                   </label>
+                  {patchHasItems && (
                   <label className="flex items-center gap-2 text-sm text-foreground">
                     <input
                       type="checkbox"
                       checked={showItems}
                       onChange={(e) => {
                         const newValue = e.target.checked;
-                        if (!newValue && !showMinions && !showSpells) return;
+                        if (!newValue && !showMinions && !showSpells && !showLegendary) return;
                         setShowItems(newValue);
                       }}
                       className="rounded border-border"
                     />
                     Items
                   </label>
+                  )}
                   <label className="flex items-center gap-2 text-sm text-foreground">
                     <input
                       type="checkbox"
                       checked={showLegendary}
                       onChange={(e) => {
-                        setShowLegendary(e.target.checked);
+                        const newValue = e.target.checked;
+                        if (!newValue && !showMinions && !showSpells && !showItems) return;
+                        setShowLegendary(newValue);
                       }}
                       className="rounded border-border"
                     />

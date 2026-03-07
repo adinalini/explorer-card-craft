@@ -90,7 +90,7 @@ const Patches = () => {
                         const oldImage = prevPatchId
                           ? getOldCardImage(card.cardId, selectedPatch) || getCardImageForPatch(card.cardId, prevPatchId)
                           : undefined;
-                        const newImage = cardImages[card.cardId] || getCardImageForPatch(card.cardId, selectedPatch);
+                        const newImage = getCardImageForPatch(card.cardId, selectedPatch) || cardImages[card.cardId];
                         
                         if (!oldImage || !newImage) return null;
 

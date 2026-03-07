@@ -75,8 +75,18 @@ const Cards = () => {
       const isSpell = card.isSpell && !card.isItem;
       const isItem = card.isItem;
 
-      const matchesType = (showMinions && isMinion) || (showSpells && isSpell) || (showItems && isItem);
-      const matchesLegendary = !card.isLegendary || showLegendary;
+      const anyTypeSelected = showMinions || showSpells || showItems;
+      let matchesTypeAndLegendary: boolean;
+      if (!anyTypeSelected) {
+        // Only legendary filter active
+        matchesTypeAndLegendary = showLegendary && card.isLegendary;
+      } else if (showLegendary) {
+        // Types + legendary: show cards matching types (legendary or not)
+        matchesTypeAndLegendary = (showMinions && isMinion) || (showSpells && isSpell) || (showItems && isItem);
+      } else {
+        // Types only, no legendary: exclude legendary cards
+        matchesTypeAndLegendary = ((showMinions && isMinion) || (showSpells && isSpell) || (showItems && isItem)) && !card.isLegendary;
+      }
 
       // Alignment filter: for patches with alignment (GDC 2026+), require matching filter.
       const selectedPatchObj = PATCHES.find(p => p.id === globalPatch);

@@ -86,15 +86,15 @@ const DeckBuilder = () => {
       const matchesCost = card.cost >= costRange[0] && card.cost <= costRange[1];
       
       // Type filtering combined with legendary
-      const isMinion = !card.isSpell && !card.isItem;
+      const isCharacter = !card.isSpell && !card.isItem;
       const anyTypeSelected = showMinions || showSpells || showItems;
       let matchesTypeAndLegendary: boolean;
       if (!anyTypeSelected) {
         matchesTypeAndLegendary = showLegendary && card.isLegendary;
       } else if (showLegendary) {
-        matchesTypeAndLegendary = (isMinion && showMinions) || (card.isSpell && showSpells) || (card.isItem && showItems);
+        matchesTypeAndLegendary = (isCharacter && showMinions) || (card.isSpell && showSpells) || (card.isItem && showItems) || card.isLegendary;
       } else {
-        matchesTypeAndLegendary = ((isMinion && showMinions) || (card.isSpell && showSpells) || (card.isItem && showItems)) && !card.isLegendary;
+        matchesTypeAndLegendary = ((isCharacter && showMinions) || (card.isSpell && showSpells) || (card.isItem && showItems)) && !card.isLegendary;
       }
 
       // Alignment filter
@@ -577,7 +577,7 @@ const DeckBuilder = () => {
                       setShowMinions(checked === true);
                     }}
                   />
-                  <Label htmlFor="minions" className="text-sm">Minions</Label>
+                  <Label htmlFor="minions" className="text-sm">Characters</Label>
                 </div>
                 <div className="flex items-center space-x-2">
                   <Checkbox

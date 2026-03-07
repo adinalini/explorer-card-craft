@@ -66,26 +66,31 @@ const Cards = () => {
       }));
   }, [globalPatch]);
 
+  const hasItems = useMemo(() => patchCards.some(c => c.isItem), [patchCards]);
+
   const filteredCards = useMemo(() => {
+    // Only count showItems if items actually exist in this patch
+    const effectiveShowItems = hasItems && showItems;
+
     return patchCards.filter(card => {
       const matchesSearch = card.name.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesCost = card.cost >= costRange[0] && card.cost <= costRange[1];
 
-      const isMinion = !card.isSpell && !card.isItem;
+      const isCharacter = !card.isSpell && !card.isItem;
       const isSpell = card.isSpell && !card.isItem;
       const isItem = card.isItem;
 
-      const anyTypeSelected = showMinions || showSpells || showItems;
+      const anyTypeSelected = showMinions || showSpells || effectiveShowItems;
       let matchesTypeAndLegendary: boolean;
       if (!anyTypeSelected) {
         // Only legendary filter active
         matchesTypeAndLegendary = showLegendary && card.isLegendary;
       } else if (showLegendary) {
-        // Types + legendary: show cards matching types (legendary or not)
-        matchesTypeAndLegendary = (showMinions && isMinion) || (showSpells && isSpell) || (showItems && isItem);
+        // Types + legendary: show cards matching types OR legendary cards
+        matchesTypeAndLegendary = (showMinions && isCharacter) || (showSpells && isSpell) || (effectiveShowItems && isItem) || card.isLegendary;
       } else {
         // Types only, no legendary: exclude legendary cards
-        matchesTypeAndLegendary = ((showMinions && isMinion) || (showSpells && isSpell) || (showItems && isItem)) && !card.isLegendary;
+        matchesTypeAndLegendary = ((showMinions && isCharacter) || (showSpells && isSpell) || (effectiveShowItems && isItem)) && !card.isLegendary;
       }
 
       // Alignment filter: for patches with alignment (GDC 2026+), require matching filter.
@@ -104,7 +109,7 @@ const Cards = () => {
       if (a.cost !== b.cost) return a.cost - b.cost;
       return a.name.localeCompare(b.name);
     });
-  }, [patchCards, searchQuery, costRange, showMinions, showLegendary, showSpells, showItems, showGood, showEvil, showNeutral]);
+  }, [patchCards, hasItems, searchQuery, costRange, showMinions, showLegendary, showSpells, showItems, showGood, showEvil, showNeutral]);
 
   const downloadCardImage = async (card: ExplorerCard, selectedVersion: string | null) => {
     try {
@@ -247,7 +252,6 @@ const Cards = () => {
               <div className="space-y-2">
                 <Label className="text-foreground">Card Types</Label>
                 {(() => {
-                  const hasItems = patchCards.some(c => c.isItem);
                   return (
                 <div className="flex flex-wrap gap-4">
                   <label className="flex items-center gap-2 text-sm text-foreground">
@@ -261,7 +265,7 @@ const Cards = () => {
                       }}
                       className="rounded border-border"
                     />
-                    Minions
+                    Characters
                   </label>
                   <label className="flex items-center gap-2 text-sm text-foreground">
                     <input
@@ -461,7 +465,7 @@ const Cards = () => {
                       )}
                       {!card.isSpell && !card.isItem && (
                         <span className="px-1.5 py-0.5 bg-muted text-muted-foreground rounded text-[10px]">
-                          Minion
+                          Character
                         </span>
                       )}
                       <button

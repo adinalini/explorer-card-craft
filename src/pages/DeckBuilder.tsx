@@ -535,10 +535,20 @@ const DeckBuilder = () => {
                 </div>
             </div>
             
+            <div className="flex items-center gap-3 mt-6">
+              <label className="flex items-center gap-2 cursor-pointer select-none">
+                <Checkbox
+                  checked={isPrivate}
+                  onCheckedChange={(checked) => setIsPrivate(checked === true)}
+                />
+                <span className="text-sm text-muted-foreground">Private</span>
+              </label>
+            </div>
+
             <Button
               onClick={handleSaveDeck}
               disabled={saving || selectedCards.length !== 13 || !deckName || !deckType}
-              className="w-full mt-6 bg-green-600 hover:bg-green-700 text-white"
+              className="w-full mt-3 bg-green-600 hover:bg-green-700 text-white"
             >
               {saving ? "Saving..." : "Save Deck"}
             </Button>

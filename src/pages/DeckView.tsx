@@ -183,6 +183,11 @@ const DeckView = () => {
                 <span className="bg-secondary text-secondary-foreground px-3 py-1 rounded-full text-sm capitalize">
                   {deck.type}
                 </span>
+                {deck.is_private && (
+                  <span className="bg-red-500/20 text-red-400 border border-red-500/30 px-4 py-1.5 rounded-full text-sm font-bold uppercase tracking-wider">
+                    Private
+                  </span>
+                )}
                 {deck.is_featured && (
                   <span className="bg-yellow-500 text-yellow-900 px-3 py-1 rounded-full text-sm font-semibold">
                     Featured

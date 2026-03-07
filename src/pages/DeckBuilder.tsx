@@ -86,6 +86,7 @@ const DeckBuilder = () => {
       const matchesCost = card.cost >= costRange[0] && card.cost <= costRange[1];
       
       // Type filtering combined with legendary
+      const isMinion = !card.isSpell && !card.isItem;
       const anyTypeSelected = showMinions || showSpells || showItems;
       let matchesTypeAndLegendary: boolean;
       if (!anyTypeSelected) {

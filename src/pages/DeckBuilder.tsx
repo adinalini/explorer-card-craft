@@ -572,7 +572,10 @@ const DeckBuilder = () => {
                   <Checkbox
                     id="minions"
                     checked={showMinions}
-                    onCheckedChange={(checked) => setShowMinions(checked === true)}
+                    onCheckedChange={(checked) => {
+                      if (!checked && !showSpells && !showItems && !showLegendary) return;
+                      setShowMinions(checked === true);
+                    }}
                   />
                   <Label htmlFor="minions" className="text-sm">Minions</Label>
                 </div>
@@ -580,7 +583,10 @@ const DeckBuilder = () => {
                   <Checkbox
                     id="spells"
                     checked={showSpells}
-                    onCheckedChange={(checked) => setShowSpells(checked === true)}
+                    onCheckedChange={(checked) => {
+                      if (!checked && !showMinions && !showItems && !showLegendary) return;
+                      setShowSpells(checked === true);
+                    }}
                   />
                   <Label htmlFor="spells" className="text-sm">Spells</Label>
                 </div>
@@ -588,7 +594,10 @@ const DeckBuilder = () => {
                   <Checkbox
                     id="items"
                     checked={showItems}
-                    onCheckedChange={(checked) => setShowItems(checked === true)}
+                    onCheckedChange={(checked) => {
+                      if (!checked && !showMinions && !showSpells && !showLegendary) return;
+                      setShowItems(checked === true);
+                    }}
                   />
                   <Label htmlFor="items" className="text-sm">Items</Label>
                 </div>
@@ -596,7 +605,10 @@ const DeckBuilder = () => {
                   <Checkbox
                     id="legendary"
                     checked={showLegendary}
-                    onCheckedChange={(checked) => setShowLegendary(checked === true)}
+                    onCheckedChange={(checked) => {
+                      if (!checked && !showMinions && !showSpells && !showItems) return;
+                      setShowLegendary(checked === true);
+                    }}
                   />
                   <Label htmlFor="legendary" className="text-sm">Legendary</Label>
                 </div>

@@ -1,0 +1,1 @@
+UPDATE public.decks SET is_private = true WHERE id = '699be253-63f0-470e-9b39-63363b084cb7';

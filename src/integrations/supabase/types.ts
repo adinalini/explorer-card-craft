@@ -62,6 +62,7 @@ export type Database = {
           description: string | null
           id: string
           is_featured: boolean
+          is_private: boolean
           name: string
           notes: string | null
           patch: string
@@ -74,6 +75,7 @@ export type Database = {
           description?: string | null
           id?: string
           is_featured?: boolean
+          is_private?: boolean
           name: string
           notes?: string | null
           patch?: string
@@ -86,6 +88,7 @@ export type Database = {
           description?: string | null
           id?: string
           is_featured?: boolean
+          is_private?: boolean
           name?: string
           notes?: string | null
           patch?: string

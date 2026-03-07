@@ -45,6 +45,7 @@ const DeckBuilder = () => {
   const [authorName, setAuthorName] = useState("");
   const [selectedCards, setSelectedCards] = useState<DeckCard[]>([]);
   const [saving, setSaving] = useState(false);
+  const [isPrivate, setIsPrivate] = useState(false);
   const [deckCodeInput, setDeckCodeInput] = useState("");
   const [importing, setImporting] = useState(false);
   const [showImportUI, setShowImportUI] = useState(false);
@@ -232,6 +233,7 @@ const DeckBuilder = () => {
           description: description.trim() || null,
           author_name: authorName.trim() || null,
           is_featured: false,
+          is_private: isPrivate,
           patch: 'gdc-2026'
         })
         .select()
@@ -260,7 +262,7 @@ const DeckBuilder = () => {
         description: "Your deck has been saved successfully!",
       });
 
-      navigate('/decks');
+      navigate(`/deck/${deckData.id}`);
     } catch (error) {
       console.error('Error saving deck:', error);
       toast({
@@ -533,10 +535,20 @@ const DeckBuilder = () => {
                 </div>
             </div>
             
+            <div className="flex items-center gap-3 mt-6">
+              <label className="flex items-center gap-2 cursor-pointer select-none">
+                <Checkbox
+                  checked={isPrivate}
+                  onCheckedChange={(checked) => setIsPrivate(checked === true)}
+                />
+                <span className="text-sm text-muted-foreground">Private</span>
+              </label>
+            </div>
+
             <Button
               onClick={handleSaveDeck}
               disabled={saving || selectedCards.length !== 13 || !deckName || !deckType}
-              className="w-full mt-6 bg-green-600 hover:bg-green-700 text-white"
+              className="w-full mt-3 bg-green-600 hover:bg-green-700 text-white"
             >
               {saving ? "Saving..." : "Save Deck"}
             </Button>

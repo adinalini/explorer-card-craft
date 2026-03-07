@@ -78,6 +78,7 @@ const Decks = () => {
             position
           )
         `)
+        .eq('is_private', false)
         .order('created_at', { ascending: false });
 
       if (decksError) throw decksError;

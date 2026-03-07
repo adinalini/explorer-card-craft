@@ -99,7 +99,7 @@ const Cards = () => {
           (cardAlignment === 'neutral' && showNeutral);
       }
 
-      return matchesSearch && matchesCost && matchesType && matchesLegendary && matchesAlignment;
+      return matchesSearch && matchesCost && matchesTypeAndLegendary && matchesAlignment;
     }).sort((a, b) => {
       if (a.cost !== b.cost) return a.cost - b.cost;
       return a.name.localeCompare(b.name);

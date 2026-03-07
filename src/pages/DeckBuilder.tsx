@@ -544,6 +544,14 @@ const DeckBuilder = () => {
                 />
                 <span className="text-sm text-muted-foreground">Private</span>
               </label>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Info className="h-3.5 w-3.5 text-muted-foreground cursor-help" />
+                </TooltipTrigger>
+                <TooltipContent side="top" className="max-w-[250px] text-xs">
+                  Sets your deck to private, it won't appear on the decks page. Can only be accessed/shared via link. Contact @adinalini to make it public.
+                </TooltipContent>
+              </Tooltip>
             </div>
 
             <Button

@@ -465,7 +465,7 @@ const Cards = () => {
                       )}
                       {!card.isSpell && !card.isItem && (
                         <span className="px-1.5 py-0.5 bg-muted text-muted-foreground rounded text-[10px]">
-                          Minion
+                          Character
                         </span>
                       )}
                       <button

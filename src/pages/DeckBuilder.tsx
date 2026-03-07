@@ -577,7 +577,7 @@ const DeckBuilder = () => {
                       setShowMinions(checked === true);
                     }}
                   />
-                  <Label htmlFor="minions" className="text-sm">Minions</Label>
+                  <Label htmlFor="minions" className="text-sm">Characters</Label>
                 </div>
                 <div className="flex items-center space-x-2">
                   <Checkbox

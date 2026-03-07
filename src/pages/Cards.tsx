@@ -75,8 +75,18 @@ const Cards = () => {
       const isSpell = card.isSpell && !card.isItem;
       const isItem = card.isItem;
 
-      const matchesType = (showMinions && isMinion) || (showSpells && isSpell) || (showItems && isItem);
-      const matchesLegendary = !card.isLegendary || showLegendary;
+      const anyTypeSelected = showMinions || showSpells || showItems;
+      let matchesTypeAndLegendary: boolean;
+      if (!anyTypeSelected) {
+        // Only legendary filter active
+        matchesTypeAndLegendary = showLegendary && card.isLegendary;
+      } else if (showLegendary) {
+        // Types + legendary: show cards matching types (legendary or not)
+        matchesTypeAndLegendary = (showMinions && isMinion) || (showSpells && isSpell) || (showItems && isItem);
+      } else {
+        // Types only, no legendary: exclude legendary cards
+        matchesTypeAndLegendary = ((showMinions && isMinion) || (showSpells && isSpell) || (showItems && isItem)) && !card.isLegendary;
+      }
 
       // Alignment filter: for patches with alignment (GDC 2026+), require matching filter.
       const selectedPatchObj = PATCHES.find(p => p.id === globalPatch);
@@ -89,7 +99,7 @@ const Cards = () => {
           (cardAlignment === 'neutral' && showNeutral);
       }
 
-      return matchesSearch && matchesCost && matchesType && matchesLegendary && matchesAlignment;
+      return matchesSearch && matchesCost && matchesTypeAndLegendary && matchesAlignment;
     }).sort((a, b) => {
       if (a.cost !== b.cost) return a.cost - b.cost;
       return a.name.localeCompare(b.name);
@@ -236,6 +246,9 @@ const Cards = () => {
               {/* Card Type Toggles */}
               <div className="space-y-2">
                 <Label className="text-foreground">Card Types</Label>
+                {(() => {
+                  const hasItems = patchCards.some(c => c.isItem);
+                  return (
                 <div className="flex flex-wrap gap-4">
                   <label className="flex items-center gap-2 text-sm text-foreground">
                     <input
@@ -243,7 +256,7 @@ const Cards = () => {
                       checked={showMinions}
                       onChange={(e) => {
                         const newValue = e.target.checked;
-                        if (!newValue && !showSpells && !showItems) return;
+                        if (!newValue && !showSpells && !showItems && !showLegendary) return;
                         setShowMinions(newValue);
                       }}
                       className="rounded border-border"
@@ -256,38 +269,44 @@ const Cards = () => {
                       checked={showSpells}
                       onChange={(e) => {
                         const newValue = e.target.checked;
-                        if (!newValue && !showMinions && !showItems) return;
+                        if (!newValue && !showMinions && !showItems && !showLegendary) return;
                         setShowSpells(newValue);
                       }}
                       className="rounded border-border"
                     />
                     Spells
                   </label>
+                  {hasItems && (
                   <label className="flex items-center gap-2 text-sm text-foreground">
                     <input
                       type="checkbox"
                       checked={showItems}
                       onChange={(e) => {
                         const newValue = e.target.checked;
-                        if (!newValue && !showMinions && !showSpells) return;
+                        if (!newValue && !showMinions && !showSpells && !showLegendary) return;
                         setShowItems(newValue);
                       }}
                       className="rounded border-border"
                     />
                     Items
                   </label>
+                  )}
                   <label className="flex items-center gap-2 text-sm text-foreground">
                     <input
                       type="checkbox"
                       checked={showLegendary}
                       onChange={(e) => {
-                        setShowLegendary(e.target.checked);
+                        const newValue = e.target.checked;
+                        if (!newValue && !showMinions && !showSpells && !showItems) return;
+                        setShowLegendary(newValue);
                       }}
                       className="rounded border-border"
                     />
                     Legendary
                   </label>
                 </div>
+                  );
+                })()}
               </div>
 
               {/* Alignment */}

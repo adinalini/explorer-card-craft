@@ -85,15 +85,17 @@ const DeckBuilder = () => {
       const matchesSearch = card.name.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesCost = card.cost >= costRange[0] && card.cost <= costRange[1];
       
-      // Type filtering: minions, spells, items are types; legendary is a status
+      // Type filtering combined with legendary
       const isMinion = !card.isSpell && !card.isItem;
-      const matchesType = 
-        (isMinion && showMinions) ||
-        (card.isSpell && showSpells) ||
-        (card.isItem && showItems);
-      
-      // Legendary status filter
-      const matchesLegendary = !card.isLegendary || showLegendary;
+      const anyTypeSelected = showMinions || showSpells || showItems;
+      let matchesTypeAndLegendary: boolean;
+      if (!anyTypeSelected) {
+        matchesTypeAndLegendary = showLegendary && card.isLegendary;
+      } else if (showLegendary) {
+        matchesTypeAndLegendary = (isMinion && showMinions) || (card.isSpell && showSpells) || (card.isItem && showItems);
+      } else {
+        matchesTypeAndLegendary = ((isMinion && showMinions) || (card.isSpell && showSpells) || (card.isItem && showItems)) && !card.isLegendary;
+      }
 
       // Alignment filter
       const cardAlignment = card.alignment || 'neutral';
@@ -102,7 +104,7 @@ const DeckBuilder = () => {
         (cardAlignment === 'evil' && showEvil) || 
         (cardAlignment === 'neutral' && showNeutral);
       
-      return matchesSearch && matchesCost && matchesType && matchesLegendary && matchesAlignment;
+      return matchesSearch && matchesCost && matchesTypeAndLegendary && matchesAlignment;
     }).sort((a, b) => {
       if (a.cost !== b.cost) return a.cost - b.cost;
       return a.name.localeCompare(b.name);
@@ -570,7 +572,10 @@ const DeckBuilder = () => {
                   <Checkbox
                     id="minions"
                     checked={showMinions}
-                    onCheckedChange={(checked) => setShowMinions(checked === true)}
+                    onCheckedChange={(checked) => {
+                      if (!checked && !showSpells && !showItems && !showLegendary) return;
+                      setShowMinions(checked === true);
+                    }}
                   />
                   <Label htmlFor="minions" className="text-sm">Minions</Label>
                 </div>
@@ -578,7 +583,10 @@ const DeckBuilder = () => {
                   <Checkbox
                     id="spells"
                     checked={showSpells}
-                    onCheckedChange={(checked) => setShowSpells(checked === true)}
+                    onCheckedChange={(checked) => {
+                      if (!checked && !showMinions && !showItems && !showLegendary) return;
+                      setShowSpells(checked === true);
+                    }}
                   />
                   <Label htmlFor="spells" className="text-sm">Spells</Label>
                 </div>
@@ -586,7 +594,10 @@ const DeckBuilder = () => {
                   <Checkbox
                     id="items"
                     checked={showItems}
-                    onCheckedChange={(checked) => setShowItems(checked === true)}
+                    onCheckedChange={(checked) => {
+                      if (!checked && !showMinions && !showSpells && !showLegendary) return;
+                      setShowItems(checked === true);
+                    }}
                   />
                   <Label htmlFor="items" className="text-sm">Items</Label>
                 </div>
@@ -594,7 +605,10 @@ const DeckBuilder = () => {
                   <Checkbox
                     id="legendary"
                     checked={showLegendary}
-                    onCheckedChange={(checked) => setShowLegendary(checked === true)}
+                    onCheckedChange={(checked) => {
+                      if (!checked && !showMinions && !showSpells && !showItems) return;
+                      setShowLegendary(checked === true);
+                    }}
                   />
                   <Label htmlFor="legendary" className="text-sm">Legendary</Label>
                 </div>

@@ -45,6 +45,7 @@ const DeckBuilder = () => {
   const [authorName, setAuthorName] = useState("");
   const [selectedCards, setSelectedCards] = useState<DeckCard[]>([]);
   const [saving, setSaving] = useState(false);
+  const [isPrivate, setIsPrivate] = useState(false);
   const [deckCodeInput, setDeckCodeInput] = useState("");
   const [importing, setImporting] = useState(false);
   const [showImportUI, setShowImportUI] = useState(false);

@@ -155,7 +155,7 @@ export const cardKeyMapping: Record<string, string> = {
   'tuck': 'C00001_MB',
   'jacks_giant': 'C00007_MB',
   'goldi': 'C00067_MC',
-  'rai_of_arrows': 'C00096_SB',
+  
   'red_cap': 'C00165_MB',
   'robinhood': 'C00065_MC',
   'baby_bear': 'C00147_MB',

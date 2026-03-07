@@ -85,15 +85,16 @@ const DeckBuilder = () => {
       const matchesSearch = card.name.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesCost = card.cost >= costRange[0] && card.cost <= costRange[1];
       
-      // Type filtering: minions, spells, items are types; legendary is a status
-      const isMinion = !card.isSpell && !card.isItem;
-      const matchesType = 
-        (isMinion && showMinions) ||
-        (card.isSpell && showSpells) ||
-        (card.isItem && showItems);
-      
-      // Legendary status filter
-      const matchesLegendary = !card.isLegendary || showLegendary;
+      // Type filtering combined with legendary
+      const anyTypeSelected = showMinions || showSpells || showItems;
+      let matchesTypeAndLegendary: boolean;
+      if (!anyTypeSelected) {
+        matchesTypeAndLegendary = showLegendary && card.isLegendary;
+      } else if (showLegendary) {
+        matchesTypeAndLegendary = (isMinion && showMinions) || (card.isSpell && showSpells) || (card.isItem && showItems);
+      } else {
+        matchesTypeAndLegendary = ((isMinion && showMinions) || (card.isSpell && showSpells) || (card.isItem && showItems)) && !card.isLegendary;
+      }
 
       // Alignment filter
       const cardAlignment = card.alignment || 'neutral';

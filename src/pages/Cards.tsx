@@ -305,6 +305,8 @@ const Cards = () => {
                     Legendary
                   </label>
                 </div>
+                  );
+                })()}
               </div>
 
               {/* Alignment */}

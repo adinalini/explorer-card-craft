@@ -265,7 +265,7 @@ const Cards = () => {
                       }}
                       className="rounded border-border"
                     />
-                    Minions
+                    Characters
                   </label>
                   <label className="flex items-center gap-2 text-sm text-foreground">
                     <input

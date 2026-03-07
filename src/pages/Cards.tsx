@@ -252,7 +252,6 @@ const Cards = () => {
               <div className="space-y-2">
                 <Label className="text-foreground">Card Types</Label>
                 {(() => {
-                  const hasItems = patchCards.some(c => c.isItem);
                   return (
                 <div className="flex flex-wrap gap-4">
                   <label className="flex items-center gap-2 text-sm text-foreground">
